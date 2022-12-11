@@ -2,9 +2,24 @@
 #include <memory>
 #include <boost/asio.hpp>
 #include <boost/asio/signal_set.hpp>
-#include "./CommandService/CommandService.h"
+#include "CommandService/CommandService.h"
+
+#include "ImageService/protobuf_test.h"
+
+#include <google/protobuf/stubs/common.h>
 
 int main() {
+    // Verify that the version of the library that we linked against is
+    // compatible with the version of the headers we compiled against.
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+    OwlImageService::ProtobufTest::createImageRequest();
+
+    // Optional:  Delete all global objects allocated by libprotobuf.
+    google::protobuf::ShutdownProtobufLibrary();
+
+    return 0;
+
     boost::asio::io_context ioc;
     boost::asio::executor ex = boost::asio::make_strand(ioc);
     std::cout << "Hello, World!" << std::endl;

@@ -11,7 +11,6 @@ build with # libprotoc 3.21.11
 
 
 
-
 protoc -I=src/ImageService/ImageProtobufDefine --cpp_out=src/ImageService/ImageProtobufDefine/ImageProtocol src/ImageService/ImageProtobufDefine/ImageProtocol.proto
 
 ```

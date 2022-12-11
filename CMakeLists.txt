@@ -72,8 +72,9 @@ add_executable(${ProjectMainName}
         src/WebControlService/EmbedWebServer/EmbedWebServerTools.cpp
         src/ImageService/ImageProtobufDefine/ImageProtocol/ImageProtocol.pb.h
         src/ImageService/ImageProtobufDefine/ImageProtocol/ImageProtocol.pb.cc
-        src/main.cpp
-        )
+        src/ImageService/protobuf_test.h
+        src/ImageService/protobuf_test.cpp
+        src/main.cpp)
 
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})
