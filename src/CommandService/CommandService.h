@@ -63,7 +63,7 @@ namespace OwlCommandService {
     };
 
     template<typename T>
-    T get_from_json_object(boost::json::object &v, boost::string_view key, bool &good) {
+    T getFromJsonObject(const boost::json::object &v, boost::string_view key, bool &good) {
         try {
             T r = boost::json::value_to<T>(v.at(key));
             return r;

@@ -83,14 +83,14 @@ namespace OwlCommandService {
                 return;
             }
             bool good = true;
-            auto cmdId = get_from_json_object<int32_t>(json_o, "cmdId", good);
-            auto packageId = get_from_json_object<int32_t>(json_o, "packageId", good);
+            auto cmdId = getFromJsonObject<int32_t>(json_o, "cmdId", good);
+            auto packageId = getFromJsonObject<int32_t>(json_o, "packageId", good);
             if (!good) {
-                BOOST_LOG_TRIVIAL(warning) << "get_from_json_object fail " << jsv;
+                BOOST_LOG_TRIVIAL(warning) << "getFromJsonObject fail " << jsv;
                 send_back_json(
                         boost::json::value{
                                 {"msg",    "error"},
-                                {"error",  "(cmdId||packageId) get_from_json_object fail"},
+                                {"error",  "(cmdId||packageId) getFromJsonObject fail"},
                                 {"result", false},
                         }
                 );
@@ -163,14 +163,14 @@ namespace OwlCommandService {
                             return;
                         }
                         bool good = true;
-                        auto moveStepForward = get_from_json_object<int32_t>(json_o, "forward", good);
-                        auto moveStepDistance = get_from_json_object<int32_t>(json_o, "distance", good);
+                        auto moveStepForward = getFromJsonObject<int32_t>(json_o, "forward", good);
+                        auto moveStepDistance = getFromJsonObject<int32_t>(json_o, "distance", good);
                         if (!good) {
-                            BOOST_LOG_TRIVIAL(warning) << "move step get_from_json_object fail" << jsv;
+                            BOOST_LOG_TRIVIAL(warning) << "move step getFromJsonObject fail" << jsv;
                             send_back_json(
                                     boost::json::value{
                                             {"msg",    "error"},
-                                            {"error",  "(forward||distance) get_from_json_object fail"},
+                                            {"error",  "(forward||distance) getFromJsonObject fail"},
                                             {"result", false},
                                     }
                             );
@@ -282,14 +282,14 @@ namespace OwlCommandService {
                             return;
                         }
                         bool good = true;
-                        auto rotate = get_from_json_object<int32_t>(json_o, "rotate", good);
-                        auto rote = get_from_json_object<int32_t>(json_o, "rote", good);
+                        auto rotate = getFromJsonObject<int32_t>(json_o, "rotate", good);
+                        auto rote = getFromJsonObject<int32_t>(json_o, "rote", good);
                         if (!good) {
-                            BOOST_LOG_TRIVIAL(warning) << "rotate get_from_json_object fail" << jsv;
+                            BOOST_LOG_TRIVIAL(warning) << "rotate getFromJsonObject fail" << jsv;
                             send_back_json(
                                     boost::json::value{
                                             {"msg",    "error"},
-                                            {"error",  "(rotate||rote) get_from_json_object fail"},
+                                            {"error",  "(rotate||rote) getFromJsonObject fail"},
                                             {"result", false},
                                     }
                             );
