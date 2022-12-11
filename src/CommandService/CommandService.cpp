@@ -1,6 +1,7 @@
 // jeremie
 
 #include "CommandService.h"
+#include <boost/log/trivial.hpp>
 
 namespace OwlCommandService {
 
@@ -15,10 +16,12 @@ namespace OwlCommandService {
                 ) {
                     if (ec) {
                         // ignore it
+                        std::cerr << ec.what() << "\n";
+                        BOOST_LOG_TRIVIAL(error) << ec.what();
                     } else {
                         process_message(bytes_transferred);
-                        next_receive();
                     }
+                    next_receive();
                 }
         );
     }
@@ -36,50 +39,327 @@ namespace OwlCommandService {
                     boost::ignore_unused(ec);
                     boost::ignore_unused(bytes_transferred);
                     // ignore
+                    if (ec) {
+                        std::cerr << ec.what() << "\n";
+                        BOOST_LOG_TRIVIAL(error) << ec.what();
+                    }
                 }
         );
+    }
+
+    void CommandService::send_back_json(const boost::json::value &json_value) {
+        send_back(boost::json::serialize(json_value));
     }
 
 
     void CommandService::process_message(std::size_t bytes_transferred) {
         try {
             boost::system::error_code ec;
+            auto jsv = boost::string_view{receive_buffer_.data(), bytes_transferred};
             boost::json::value json_v = boost::json::parse(
-                    boost::string_view{receive_buffer_.data(), bytes_transferred},
+                    jsv,
                     ec,
                     &json_storage_resource,
                     json_parse_options
             );
             if (ec) {
                 // ignore
-                std::cerr << ec.what() << "\n";
+//                std::cerr << ec.what() << "\n";
+                BOOST_LOG_TRIVIAL(error) << ec.what();
                 return;
             }
-            std::cout << boost::json::serialize(json_v) << "\n";
+//            std::cout << boost::json::serialize(json_v) << "\n";
+            BOOST_LOG_TRIVIAL(info) << boost::json::serialize(json_v);
             auto json_o = json_v.as_object();
-            auto cmdId = boost::json::value_to<int32_t>(json_o.at("cmdId"));
-            auto packageId = boost::json::value_to<int32_t>(json_o.at("packageId"));
+            if (!json_o.contains("cmdId") && !json_o.contains("packageId")) {
+                BOOST_LOG_TRIVIAL(warning) << "contains fail " << jsv;
+                send_back_json(
+                        boost::json::value{
+                                {"msg",    "error"},
+                                {"error",  "(cmdId||packageId) not find"},
+                                {"result", false},
+                        }
+                );
+                return;
+            }
+            bool good = true;
+            auto cmdId = get_from_json_object<int32_t>(json_o, "cmdId", good);
+            auto packageId = get_from_json_object<int32_t>(json_o, "packageId", good);
+            if (!good) {
+                BOOST_LOG_TRIVIAL(warning) << "get_from_json_object fail " << jsv;
+                send_back_json(
+                        boost::json::value{
+                                {"msg",    "error"},
+                                {"error",  "(cmdId||packageId) get_from_json_object fail"},
+                                {"result", false},
+                        }
+                );
+                return;
+            }
             switch (cmdId) {
                 case 0:
                     // ping-pong
-                    send_back(
-                            boost::json::serialize(
+                    BOOST_LOG_TRIVIAL(info) << "ping-pong";
+                    send_back_json(
+                            boost::json::value{
+                                    {"cmdId",     cmdId},
+                                    {"packageId", packageId},
+                                    {"msg",       "pong"},
+                                    {"result",    true},
+                            }
+                    );
+                    break;
+                case 10:
+                    // break
+                    BOOST_LOG_TRIVIAL(info) << "break";
+                    send_back_json(
+                            boost::json::value{
+                                    {"cmdId",     cmdId},
+                                    {"packageId", packageId},
+                                    {"msg",       "break"},
+                                    {"result",    true},
+                            }
+                    );
+                    break;
+                case 11:
+                    // takeoff
+                    BOOST_LOG_TRIVIAL(info) << "takeoff";
+                    send_back_json(
+                            boost::json::value{
+                                    {"cmdId",     cmdId},
+                                    {"packageId", packageId},
+                                    {"msg",       "takeoff"},
+                                    {"result",    true},
+                            }
+                    );
+                    break;
+                case 12:
+                    // land
+                    BOOST_LOG_TRIVIAL(info) << "land";
+                    send_back_json(
+                            boost::json::value{
+                                    {"cmdId",     cmdId},
+                                    {"packageId", packageId},
+                                    {"msg",       "land"},
+                                    {"result",    true},
+                            }
+                    );
+                    break;
+                case 13:
+                    // move step
+                    BOOST_LOG_TRIVIAL(info) << "move step";
+                    {
+                        if (!json_o.contains("forward") && !json_o.contains("distance")) {
+                            BOOST_LOG_TRIVIAL(warning) << "move step contains fail " << jsv;
+                            send_back_json(
                                     boost::json::value{
                                             {"cmdId",     cmdId},
                                             {"packageId", packageId},
-                                            {"msg",       "pong"},
+                                            {"msg",       "error"},
+                                            {"error",     "move step (forward||distance) not find"},
+                                            {"result",    false},
                                     }
-                            )
-                    );
+                            );
+                            return;
+                        }
+                        bool good = true;
+                        auto moveStepForward = get_from_json_object<int32_t>(json_o, "forward", good);
+                        auto moveStepDistance = get_from_json_object<int32_t>(json_o, "distance", good);
+                        if (!good) {
+                            BOOST_LOG_TRIVIAL(warning) << "move step get_from_json_object fail" << jsv;
+                            send_back_json(
+                                    boost::json::value{
+                                            {"msg",    "error"},
+                                            {"error",  "(forward||distance) get_from_json_object fail"},
+                                            {"result", false},
+                                    }
+                            );
+                            return;
+                        }
+                        switch (moveStepForward) {
+                            case 1:
+                                // up
+                                BOOST_LOG_TRIVIAL(info) << "move up " << moveStepDistance;
+                                send_back_json(
+                                        boost::json::value{
+                                                {"cmdId",     cmdId},
+                                                {"packageId", packageId},
+                                                {"msg",       "up"},
+                                                {"result",    true},
+                                        }
+                                );
+                                break;
+                            case 2:
+                                // down
+                                BOOST_LOG_TRIVIAL(info) << "move down " << moveStepDistance;
+                                send_back_json(
+                                        boost::json::value{
+                                                {"cmdId",     cmdId},
+                                                {"packageId", packageId},
+                                                {"msg",       "down"},
+                                                {"result",    true},
+                                        }
+                                );
+                                break;
+                            case 3:
+                                // left
+                                BOOST_LOG_TRIVIAL(info) << "move left " << moveStepDistance;
+                                send_back_json(
+                                        boost::json::value{
+                                                {"cmdId",     cmdId},
+                                                {"packageId", packageId},
+                                                {"msg",       "left"},
+                                                {"result",    true},
+                                        }
+                                );
+                                break;
+                            case 4:
+                                // right
+                                BOOST_LOG_TRIVIAL(info) << "move right " << moveStepDistance;
+                                send_back_json(
+                                        boost::json::value{
+                                                {"cmdId",     cmdId},
+                                                {"packageId", packageId},
+                                                {"msg",       "right"},
+                                                {"result",    true},
+                                        }
+                                );
+                                break;
+                            case 5:
+                                // forward
+                                BOOST_LOG_TRIVIAL(info) << "move forward " << moveStepDistance;
+                                send_back_json(
+                                        boost::json::value{
+                                                {"cmdId",     cmdId},
+                                                {"packageId", packageId},
+                                                {"msg",       "forward"},
+                                                {"result",    true},
+                                        }
+                                );
+                                break;
+                            case 6:
+                                // back
+                                BOOST_LOG_TRIVIAL(info) << "move back " << moveStepDistance;
+                                send_back_json(
+                                        boost::json::value{
+                                                {"cmdId",     cmdId},
+                                                {"packageId", packageId},
+                                                {"msg",       "back"},
+                                                {"result",    true},
+                                        }
+                                );
+                                break;
+                            default:
+                                // ignore
+                                BOOST_LOG_TRIVIAL(warning) << "move ignore " << jsv;
+                                send_back_json(
+                                        boost::json::value{
+                                                {"cmdId",     cmdId},
+                                                {"packageId", packageId},
+                                                {"msg",       "move ignore"},
+                                                {"result",    false},
+                                        }
+                                );
+                                break;
+                        }
+                    }
+                    break;
+                case 14:
+                    // rotate
+                    BOOST_LOG_TRIVIAL(info) << "rotate ";
+                    {
+                        if (!json_o.contains("rotate") && !json_o.contains("rote")) {
+                            BOOST_LOG_TRIVIAL(warning) << "rotate contains fail " << jsv;
+                            send_back_json(
+                                    boost::json::value{
+                                            {"cmdId",     cmdId},
+                                            {"packageId", packageId},
+                                            {"msg",       "error"},
+                                            {"error",     "rotate (rotate||rote) not find"},
+                                            {"result",    false},
+                                    }
+                            );
+                            return;
+                        }
+                        bool good = true;
+                        auto rotate = get_from_json_object<int32_t>(json_o, "rotate", good);
+                        auto rote = get_from_json_object<int32_t>(json_o, "rote", good);
+                        if (!good) {
+                            BOOST_LOG_TRIVIAL(warning) << "rotate get_from_json_object fail" << jsv;
+                            send_back_json(
+                                    boost::json::value{
+                                            {"msg",    "error"},
+                                            {"error",  "(rotate||rote) get_from_json_object fail"},
+                                            {"result", false},
+                                    }
+                            );
+                            return;
+                        }
+                        switch (rotate) {
+                            case 1:
+                                // cw
+                                BOOST_LOG_TRIVIAL(info) << "rotate cw " << rote;
+                                send_back_json(
+                                        boost::json::value{
+                                                {"cmdId",     cmdId},
+                                                {"packageId", packageId},
+                                                {"msg",       "land"},
+                                                {"result",    true},
+                                        }
+                                );
+                                break;
+                            case 2:
+                                // ccw
+                                BOOST_LOG_TRIVIAL(info) << "rotate ccw " << rote;
+                                send_back_json(
+                                        boost::json::value{
+                                                {"cmdId",     cmdId},
+                                                {"packageId", packageId},
+                                                {"msg",       "land"},
+                                                {"result",    true},
+                                        }
+                                );
+                                break;
+                            default:
+                                // ignore
+                                BOOST_LOG_TRIVIAL(info) << "rotate ignore " << jsv;
+                                send_back_json(
+                                        boost::json::value{
+                                                {"cmdId",     cmdId},
+                                                {"packageId", packageId},
+                                                {"msg",       "rotate ignore"},
+                                                {"result",    false},
+                                        }
+                                );
+                                break;
+                        }
+                    }
                     break;
                 default:
                     // ignore
+                    BOOST_LOG_TRIVIAL(warning) << "ignore " << jsv;
+                    send_back_json(
+                            boost::json::value{
+                                    {"cmdId",     cmdId},
+                                    {"packageId", packageId},
+                                    {"msg",       "ignore"},
+                                    {"result",    false},
+                            }
+                    );
                     break;
             }
             return;
         } catch (std::exception &e) {
-            std::cerr << e.what() << "\n";
+            std::cerr << "CommandService::process_message \n" << e.what();
+            BOOST_LOG_TRIVIAL(error) << "CommandService::process_message \n" << e.what();
             // ignore
+            send_back_json(
+                    boost::json::value{
+                            {"msg",    "exception"},
+                            {"error",  e.what()},
+                            {"result", false},
+                    }
+            );
             return;
         } catch (...) {
             // ignore

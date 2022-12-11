@@ -42,7 +42,7 @@ endif ()
 
 set(Boost_USE_MULTITHREADED ON)
 #find_package(Boost REQUIRED COMPONENTS  REQUIRED)
-find_package(Boost 1.74.0 REQUIRED COMPONENTS system filesystem program_options json ${BOOST_THEAD_MODULE} REQUIRED)
+find_package(Boost 1.74.0 REQUIRED COMPONENTS system filesystem program_options json log ${BOOST_THEAD_MODULE} REQUIRED)
 
 
 message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")

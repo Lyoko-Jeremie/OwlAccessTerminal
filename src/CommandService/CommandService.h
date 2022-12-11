@@ -6,10 +6,10 @@
 #include <memory>
 #include <iostream>
 #include <boost/asio.hpp>
-#include <boost/bind/bind.hpp>
 #include <boost/array.hpp>
-#include <boost/utility/string_view.hpp>
 #include <boost/json.hpp>
+#include <boost/system/error_code.hpp>
+#include <boost/utility/string_view.hpp>
 
 
 namespace OwlCommandService {
@@ -57,8 +57,21 @@ namespace OwlCommandService {
 
         void send_back(std::string &&json_string);
 
+        void send_back_json(const boost::json::value &json_value);
+
 
     };
+
+    template<typename T>
+    T get_from_json_object(boost::json::object &v, boost::string_view key, bool &good) {
+        try {
+            T r = boost::json::value_to<T>(v.at(key));
+            return r;
+        } catch (std::exception &e) {
+            good = false;
+            return T{};
+        }
+    }
 
 } // OwlCommandService
 

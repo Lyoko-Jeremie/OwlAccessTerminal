@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include <boost/asio.hpp>
+#include <boost/asio/signal_set.hpp>
 #include "./CommandService/CommandService.h"
 
 int main() {
@@ -15,6 +16,26 @@ int main() {
             )
     );
     p->start();
+
+
+    boost::asio::signal_set sig(ioc);
+    sig.add(SIGINT);
+    sig.add(SIGTERM);
+    sig.async_wait([&](const boost::system::error_code error, int signum) {
+        if (error) {
+            return;
+        }
+        std::cerr << "got signal: " << signum << std::endl;
+        switch (signum) {
+            case SIGINT:
+            case SIGTERM: {
+                // TODO stop all service on there
+                ioc.stop();
+            }
+                break;
+        }
+    });
+
     ioc.run();
     return 0;
 }
