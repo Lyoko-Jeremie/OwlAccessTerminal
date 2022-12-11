@@ -8,14 +8,14 @@ set(CMAKE_CXX_STANDARD 20)
 set(BOOST_ROOT d:/CodeLib/boost_1_80_0_install_x64_v11p3/)
 #set(Boost_INCLUDE_DIR d:/CodeLib/boost_1_74_0_install_x64_v11p3/include/boost-1_74)
 #set(Boost_LIBRARY_DIR d:/CodeLib/boost_1_74_0_install_x64_v11p3/lib)
-
-
-set(BOOST_DEBUG ON)
+#set(USE_DYNAMIC_BOOST true)
+#set(BOOST_DEBUG ON)
 
 
 option(USE_DYNAMIC_BOOST "Config USE_DYNAMIC_BOOST")
 
-add_definitions(-Wall -Wextra)
+# -O1 to resolve "string table overflow at offset" error on mingw
+add_definitions(-Wall -Wextra -O1 -g)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -55,6 +55,12 @@ include_directories(CommandService/CMakeLists.txt)
 add_executable(${ProjectMainName}
         src/CommandService/CommandService.cpp
         src/CommandService/CommandService.h
+        src/WebControlService/EmbedWebServer/EmbedWebServer.h
+        src/WebControlService/EmbedWebServer/EmbedWebServer.cpp
+        src/WebControlService/EmbedWebServer/EmbedWebServerSession.h
+        src/WebControlService/EmbedWebServer/EmbedWebServerSession.cpp
+        src/WebControlService/EmbedWebServer/EmbedWebServerTools.h
+        src/WebControlService/EmbedWebServer/EmbedWebServerTools.cpp
         src/main.cpp
         )
 
