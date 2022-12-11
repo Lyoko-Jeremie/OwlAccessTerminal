@@ -10,7 +10,16 @@ set(BOOST_ROOT d:/CodeLib/boost_1_80_0_install_x64_v11p3/)
 #set(Boost_LIBRARY_DIR d:/CodeLib/boost_1_74_0_install_x64_v11p3/lib)
 #set(USE_DYNAMIC_BOOST true)
 #set(BOOST_DEBUG ON)
+set(PROTOBUFF_INCLUDE_DIRS d:/CodeLib/protobuf-cpp-3.21.11-build-install/include/)
+set(PROTOBUFF_LIBS d:/CodeLib/protobuf-cpp-3.21.11-build-install/lib/libprotobuf.a)
 
+
+
+option(PROTOBUFF_INCLUDE_DIRS "")
+option(PROTOBUFF_LIBS "")
+
+message(STATUS "PROTOBUFF_INCLUDE_DIRS: ${PROTOBUFF_INCLUDE_DIRS}")
+message(STATUS "PROTOBUFF_LIBS: ${PROTOBUFF_LIBS}")
 
 option(USE_DYNAMIC_BOOST "Config USE_DYNAMIC_BOOST")
 
@@ -61,14 +70,16 @@ add_executable(${ProjectMainName}
         src/WebControlService/EmbedWebServer/EmbedWebServerSession.cpp
         src/WebControlService/EmbedWebServer/EmbedWebServerTools.h
         src/WebControlService/EmbedWebServer/EmbedWebServerTools.cpp
+        src/ImageService/ImageProtobufDefine/ImageProtocol/ImageProtocol.pb.h
+        src/ImageService/ImageProtobufDefine/ImageProtocol/ImageProtocol.pb.cc
         src/main.cpp
         )
 
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})
 
-include_directories(${Boost_INCLUDE_DIRS})
-target_link_libraries(${ProjectMainName} ${Boost_LIBRARIES})
+include_directories(${Boost_INCLUDE_DIRS} ${PROTOBUFF_INCLUDE_DIRS})
+target_link_libraries(${ProjectMainName} ${Boost_LIBRARIES} ${PROTOBUFF_LIBS})
 link_directories(${Boost_LIBRARY_DIRS})
 
 

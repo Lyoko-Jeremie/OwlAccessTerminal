@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+message ImageRequest {
+    int32 cmd_id = 1;
+    optional int32 package_id = 2;
+    optional int32 camera_id = 3;
+    optional int32 image_width = 11;
+    optional int32 image_height = 12;
+}
+
+enum ImageFormat {
+    IMAGE_FORMAT_NONE = 0;
+    IMAGE_FORMAT_JPG = 1;
+    IMAGE_FORMAT_BMP = 2;
+    IMAGE_FORMAT_PNG = 3;
+    IMAGE_FORMAT_GIF = 4;
+    IMAGE_FORMAT_BYTE_MAT = 5;
+}
+
+message ImageResponse {
+    int32 cmd_id = 1;
+    optional int32 package_id = 2;
+    optional int32 camera_id = 3;
+
+    optional int32 image_width = 11;
+    optional int32 image_height = 12;
+
+    optional uint64 image_data_size = 50;
+    optional int32 image_pixel_channel = 51;
+    optional ImageFormat image_format = 52;
+    optional bytes image_data = 60;
+}
