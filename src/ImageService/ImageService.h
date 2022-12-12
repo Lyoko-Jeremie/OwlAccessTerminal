@@ -405,7 +405,7 @@ namespace OwlImageService {
 
         void
         on_accept(boost::asio::ip::tcp::socket &&socket) {
-            std::make_shared<ImageServiceSession>(std::move(socket))->start();
+            std::make_shared<ImageServiceSession>(ioc_, std::move(socket))->start();
         }
 
     };
