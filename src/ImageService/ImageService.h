@@ -13,13 +13,19 @@
 #include <boost/asio/streambuf.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/read_until.hpp>
+#include <boost/asio/write.hpp>
 #include <boost/array.hpp>
 #include <boost/log/trivial.hpp>
+#include "ImageProtobufDefine/ImageProtocol/ImageProtocol.pb.h"
 
 namespace OwlImageService {
 
+    enum {
+        TCP_Receive_Package_Max_Size = (1024 * 1024 * 6)
+    }; // 6M
+
     struct CommonTcpPackage {
-        uint32_t size = 0;
+        uint32_t size_ = 0;
         boost::asio::streambuf data_{};
 
 // https://stackoverflow.com/questions/7556327/int-char-conversion-in-network-frames-with-c-boostasio
@@ -52,51 +58,272 @@ namespace OwlImageService {
     class ImageServiceSession : public std::enable_shared_from_this<ImageServiceSession> {
     public:
         explicit ImageServiceSession(
+                boost::asio::io_context &ioc,
                 boost::asio::ip::tcp::socket &&socket
-        ) : socket_(std::move(socket)) {}
+        ) : ioc_(ioc), socket_(std::move(socket)) {}
 
-        static void fail(boost::system::error_code ec, const char *what) {
-            BOOST_LOG_TRIVIAL(error) << what << ": " << ec.message();
-        }
+//        static void fail(boost::system::error_code ec, const char *what) {
+//            BOOST_LOG_TRIVIAL(error) << what << ": " << ec.message();
+//        }
 
     private:
+        boost::asio::io_context &ioc_;
         boost::asio::ip::tcp::socket socket_;
-        CommonTcpPackage package_r_{};
 
     public:
         void
         start() {
-            do_receive();
+            do_receive_size();
         }
 
     private:
         void
-        do_receive() {
+        close_connect() {
+
+            if (socket_.is_open()) {
+                boost::system::error_code ec;
+                socket_.shutdown(socket_.shutdown_both, ec);
+                ec.clear();
+                socket_.cancel(ec);
+                ec.clear();
+                socket_.close(ec);
+            }
+
+        }
+
+    public:
+        void
+        force_close() {
+            boost::asio::post(ioc_, [this, self = shared_from_this()]() {
+                close_connect();
+            });
+        }
+
+    private:
+        void
+        do_receive_size() {
+
+            if (!socket_.is_open()) {
+                // is closed by other function, stop!
+                BOOST_LOG_TRIVIAL(info) << "Connection closed by other function, stop!";
+                return;
+            }
+
+            auto package_r_ = std::make_shared<CommonTcpPackage>();
             boost::asio::async_read(
                     socket_,
                     boost::asio::buffer(
-                            reinterpret_cast<char *>(&package_r_.size), 4
+                            reinterpret_cast<char *>(&package_r_->size_), 4
                     ),
-                    [this, self = shared_from_this()](
+                    [this, self = shared_from_this(), package_r_](
                             const boost::system::error_code &ec,
                             std::size_t bytes_transferred) {
 
                         if (ec == boost::asio::error::eof) {
                             // Connection closed cleanly by peer.
+                            BOOST_LOG_TRIVIAL(info) << "Connection closed cleanly by peer.";
                             return;
                         }
                         if (ec) {
                             // Connection error
+                            BOOST_LOG_TRIVIAL(error) << "Connection error " << ec.what();
+                            return;
+                        }
+                        if (bytes_transferred != 4) {
+                            // bytes_transferred
+                            BOOST_LOG_TRIVIAL(error) << "do_receive_size bytes_transferred : " << bytes_transferred;
                             return;
                         }
 
-                        package_r_.size = ntohl(package_r_.size);
+                        package_r_->size_ = ntohl(package_r_->size_);
 
+                        if (package_r_->size_ > TCP_Receive_Package_Max_Size) {
+                            // size_ too big, maybe a wrong size_ byte
+                            BOOST_LOG_TRIVIAL(warning)
+                                << "(package_r_.size_ > TCP_Receive_Package_Max_Size), size_: " << package_r_->size_;
+                            // TODO close the connect
+                            return;
+                        }
+
+                        do_receive_data(package_r_);
 
 
                         return;
                     }
             );
+        }
+
+        void
+        do_receive_data(std::shared_ptr<CommonTcpPackage> package_r_) {
+
+            if (!socket_.is_open()) {
+                // is closed by other function, stop!
+                BOOST_LOG_TRIVIAL(info) << "Connection closed by other function, stop!";
+                return;
+            }
+
+            boost::asio::async_read(
+                    socket_,
+                    package_r_->data_,
+                    boost::asio::transfer_exactly(package_r_->size_),
+                    [this, self = shared_from_this(), package_r_](
+                            const boost::system::error_code &ec,
+                            std::size_t bytes_transferred) {
+
+                        if (ec == boost::asio::error::eof) {
+                            // Connection closed cleanly by peer.
+                            BOOST_LOG_TRIVIAL(info) << "Connection closed cleanly by peer.";
+                            return;
+                        }
+                        if (ec) {
+                            // Connection error
+                            BOOST_LOG_TRIVIAL(error) << "Connection error " << ec.what();
+                            return;
+                        }
+                        if (bytes_transferred != package_r_->size_) {
+                            // bytes_transferred
+                            BOOST_LOG_TRIVIAL(error) << "do_receive_data bytes_transferred : " << bytes_transferred;
+                            return;
+                        }
+
+                        // https://stackoverflow.com/questions/44904295/convert-stdstring-to-boostasiostreambuf
+                        std::string s((std::istreambuf_iterator<char>(&package_r_->data_)),
+                                      std::istreambuf_iterator<char>());
+
+                        do_process_request(std::move(s));
+
+                        // next read
+
+                        do_receive_size();
+
+                        return;
+                    }
+            );
+
+        }
+
+    private:
+        void
+        do_send_size(std::shared_ptr<CommonTcpPackage> package_s_) {
+
+            if (!socket_.is_open()) {
+                // is closed by other function, stop!
+                BOOST_LOG_TRIVIAL(info) << "Connection closed by other function, stop!";
+                return;
+            }
+
+            boost::asio::async_write(
+                    socket_,
+                    boost::asio::buffer(
+                            (reinterpret_cast<uint32_t *>( &package_s_->size_ )), 4
+                    ),
+                    [this, self = shared_from_this(), package_s_](
+                            const boost::system::error_code &ec,
+                            std::size_t bytes_transferred) {
+
+                        if (ec == boost::asio::error::eof) {
+                            // Connection closed cleanly by peer.
+                            BOOST_LOG_TRIVIAL(info) << "Connection closed cleanly by peer.";
+                            return;
+                        }
+                        if (ec) {
+                            // Connection error
+                            BOOST_LOG_TRIVIAL(error) << "Connection error " << ec.what();
+                            return;
+                        }
+                        if (bytes_transferred != 4) {
+                            // bytes_transferred
+                            BOOST_LOG_TRIVIAL(error) << "do_send_size bytes_transferred : " << bytes_transferred;
+                            return;
+                        }
+
+                        do_send_data(package_s_);
+
+                    }
+            );
+        }
+
+        void
+        do_send_data(std::shared_ptr<CommonTcpPackage> package_s_) {
+
+            if (!socket_.is_open()) {
+                // is closed by other function, stop!
+                BOOST_LOG_TRIVIAL(info) << "Connection closed by other function, stop!";
+                return;
+            }
+
+            boost::asio::async_write(
+                    socket_,
+                    package_s_->data_,
+                    boost::asio::transfer_exactly(package_s_->size_),
+                    [this, self = shared_from_this(), package_s_](
+                            const boost::system::error_code &ec,
+                            std::size_t bytes_transferred) {
+
+                        if (ec == boost::asio::error::eof) {
+                            // Connection closed cleanly by peer.
+                            BOOST_LOG_TRIVIAL(info) << "Connection closed cleanly by peer.";
+                            return;
+                        }
+                        if (ec) {
+                            // Connection error
+                            BOOST_LOG_TRIVIAL(error) << "Connection error " << ec.what();
+                            return;
+                        }
+                        if (bytes_transferred != package_s_->size_) {
+                            // bytes_transferred
+                            BOOST_LOG_TRIVIAL(error) << "do_send_size bytes_transferred : " << bytes_transferred;
+                            return;
+                        }
+
+                        // all ok
+                        BOOST_LOG_TRIVIAL(info) << "do_send_data complete." << ec.what();
+
+                        return;
+                    }
+            );
+        }
+
+    private:
+        void
+        do_process_request(std::string &&s) {
+
+            ImageRequest ir;
+            ir.ParseFromString(s);
+
+            BOOST_LOG_TRIVIAL(info) << "do_process_request ImageRequest: " << ir.DebugString();
+
+            try {
+                switch (ir.cmd_id()) {
+                    case 1: {
+                        // this is a read camera request
+                        if (ir.has_package_id() && ir.has_camera_id()) {
+                            // TODO get camera image data on here
+
+                            // TODO now create ImageResponse package
+                            ImageResponse is;
+
+                            // now create send package and send it
+                            auto package_s_ = std::make_shared<CommonTcpPackage>();
+                            // https://stackoverflow.com/questions/44904295/convert-stdstring-to-boostasiostreambuf
+                            std::iostream{&package_s_->data_} << is.SerializeAsString();
+                            package_s_->size_ = is.GetCachedSize();
+                            do_send_size(package_s_);
+                        }
+                    }
+                        return;
+                    default:
+                        BOOST_LOG_TRIVIAL(warning) << "do_process_request switch default: " << ir.DebugString();
+                        return;
+                }
+            } catch (const std::exception &e) {
+                BOOST_LOG_TRIVIAL(error) << "do_process_request catch exception on " << ir.DebugString()
+                                         << " e: " << e.what();
+                return;
+            } catch (...) {
+                BOOST_LOG_TRIVIAL(error) << "do_process_request catch unknown exception on " << ir.DebugString();
+                return;
+            }
         }
 
     };
