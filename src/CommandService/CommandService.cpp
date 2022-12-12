@@ -7,7 +7,7 @@ namespace OwlCommandService {
 
 
     void CommandService::next_receive() {
-        udp_socket.async_receive_from(
+        udp_socket_.async_receive_from(
                 boost::asio::buffer(receive_buffer_, UDP_Package_Max_Size),
                 remote_endpoint_,
                 [this, self = shared_from_this()](
@@ -29,7 +29,7 @@ namespace OwlCommandService {
 
     void CommandService::send_back(std::string &&json_string) {
         auto send_string_ptr = std::make_shared<std::string>(std::move(json_string));
-        udp_socket.async_send_to(
+        udp_socket_.async_send_to(
                 boost::asio::buffer(*send_string_ptr),
                 remote_endpoint_,
                 [this, self = shared_from_this(), send_string_ptr](
@@ -59,8 +59,8 @@ namespace OwlCommandService {
             boost::json::value json_v = boost::json::parse(
                     jsv,
                     ec,
-                    &json_storage_resource,
-                    json_parse_options
+                    &json_storage_resource_,
+                    json_parse_options_
             );
             if (ec) {
                 // ignore

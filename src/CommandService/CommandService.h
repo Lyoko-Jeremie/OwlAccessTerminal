@@ -22,30 +22,30 @@ namespace OwlCommandService {
     public:
         CommandService(boost::asio::io_context &_ioc,
                        const boost::asio::ip::udp::endpoint &endpoint)
-                : executor(boost::asio::make_strand(_ioc)),
-                  udp_socket(_ioc, endpoint),
+                : executor_(boost::asio::make_strand(_ioc)),
+                  udp_socket_(_ioc, endpoint),
                   receive_buffer_(),
                   json_storage_(),
-                  json_storage_resource(json_storage_.data(), UDP_Package_Max_Size) {
+                  json_storage_resource_(json_storage_.data(), UDP_Package_Max_Size) {
 
-            json_parse_options.allow_comments = true;
-            json_parse_options.allow_trailing_commas = true;
-            json_parse_options.max_depth = 5;
+            json_parse_options_.allow_comments = true;
+            json_parse_options_.allow_trailing_commas = true;
+            json_parse_options_.max_depth = 5;
             //  boost::asio::ip::udp::endpoint _endpoint(boost::asio::ip::udp::v4(), 2333);
         }
 
     private:
-        boost::asio::executor executor;
-        boost::asio::ip::udp::socket udp_socket;
+        boost::asio::executor executor_;
+        boost::asio::ip::udp::socket udp_socket_;
 
         // the max udp receive buffer, it used to receive package from remove client
         boost::array<char, UDP_Package_Max_Size> receive_buffer_;
         // the remote client endpoint , it used to record where the package come from
         boost::asio::ip::udp::endpoint remote_endpoint_;
 
-        boost::json::parse_options json_parse_options;
+        boost::json::parse_options json_parse_options_;
         boost::array<unsigned char, UDP_Package_Max_Size> json_storage_;
-        boost::json::static_resource json_storage_resource;
+        boost::json::static_resource json_storage_resource_;
 
     public:
         void start() {
