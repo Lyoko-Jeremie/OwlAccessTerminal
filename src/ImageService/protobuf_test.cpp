@@ -64,6 +64,9 @@ namespace OwlImageService::ProtobufTest {
         ir.set_package_id(1);
         ir.set_camera_id(1);
         std::cout << ir.SerializeAsString() << "\n";
+//        std::cout << ir.DebugString() << "\n";
+        std::cout << ir.ShortDebugString() << "\n";
+        std::cout << ir.ByteSizeLong() << "\n";
 
         std::cout << boost::json::serialize(ImageRequest2Json(ir)) << "\n";
 
@@ -71,10 +74,15 @@ namespace OwlImageService::ProtobufTest {
 
         ImageRequest ir2;
         std::cout << ir2.ParseFromString(data) << "\n";
+//        std::cout << ir2.DebugString() << "\n";
+        std::cout << ir2.ShortDebugString() << "\n";
+        std::cout << ir2.ByteSizeLong() << "\n";
         std::cout << boost::json::serialize(ImageRequest2Json(ir2)) << "\n";
 
         std::cout << Json2ImageRequest(ImageRequest2Json(ir)).SerializeAsString() << "\n";
 
+        ImageRequest ir3;
+        ir3;
 
     }
 }
