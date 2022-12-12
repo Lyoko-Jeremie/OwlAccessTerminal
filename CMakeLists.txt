@@ -14,7 +14,6 @@ set(PROTOBUFF_INCLUDE_DIRS d:/CodeLib/protobuf-cpp-3.21.11-build-install/include
 set(PROTOBUFF_LIBS d:/CodeLib/protobuf-cpp-3.21.11-build-install/lib/libprotobuf.a)
 
 
-
 option(PROTOBUFF_INCLUDE_DIRS "")
 option(PROTOBUFF_LIBS "")
 
@@ -74,6 +73,8 @@ add_executable(${ProjectMainName}
         src/ImageService/ImageProtobufDefine/ImageProtocol/ImageProtocol.pb.cc
         src/ImageService/protobuf_test.h
         src/ImageService/protobuf_test.cpp
+        src/ImageService/ImageService.h
+        src/ImageService/ImageService.cpp
         src/main.cpp)
 
 
