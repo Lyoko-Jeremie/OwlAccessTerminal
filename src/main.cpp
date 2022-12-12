@@ -18,6 +18,8 @@ int main() {
     // Optional:  Delete all global objects allocated by libprotobuf.
     google::protobuf::ShutdownProtobufLibrary();
 
+
+    std::cout << sizeof(int) << std::endl;
     return 0;
 
     boost::asio::io_context ioc;
