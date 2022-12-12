@@ -5,6 +5,7 @@ project(${ProjectMainName})
 set(CMAKE_CXX_STANDARD 20)
 
 
+set(OpenCV_DIR d:/CodeLib/opencv-4.5.5-build/)
 set(BOOST_ROOT d:/CodeLib/boost_1_80_0_install_x64_v11p3/)
 #set(Boost_INCLUDE_DIR d:/CodeLib/boost_1_74_0_install_x64_v11p3/include/boost-1_74)
 #set(Boost_LIBRARY_DIR d:/CodeLib/boost_1_74_0_install_x64_v11p3/lib)
@@ -13,6 +14,8 @@ set(BOOST_ROOT d:/CodeLib/boost_1_80_0_install_x64_v11p3/)
 set(PROTOBUFF_INCLUDE_DIRS d:/CodeLib/protobuf-cpp-3.21.11-build-install/include/)
 set(PROTOBUFF_LIBS d:/CodeLib/protobuf-cpp-3.21.11-build-install/lib/libprotobuf.a)
 
+
+option(OpenCV_DIR "")
 
 option(PROTOBUFF_INCLUDE_DIRS "")
 option(PROTOBUFF_LIBS "")
@@ -52,6 +55,14 @@ set(Boost_USE_MULTITHREADED ON)
 #find_package(Boost REQUIRED COMPONENTS  REQUIRED)
 find_package(Boost 1.74.0 REQUIRED COMPONENTS system filesystem program_options json log ${BOOST_THEAD_MODULE} REQUIRED)
 
+
+find_package(OpenCV REQUIRED)
+
+
+message(STATUS "OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
+message(STATUS "OpenCV_LIBRARY_DIRS: ${OpenCV_LIBRARY_DIRS}")
+message(STATUS "OpenCV_LIBRARIES: ${OpenCV_LIBRARIES}")
+message(STATUS "OpenCV_VERSION: ${OpenCV_VERSION}")
 
 message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
