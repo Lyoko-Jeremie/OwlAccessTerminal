@@ -14,7 +14,9 @@
 
 namespace OwlCommandService {
 
-#define UDP_Package_Max_Size (1024*1024*6)
+    enum {
+        UDP_Package_Max_Size = (1024 * 1024 * 6)
+    }; // 6M
 
     class CommandService : public std::enable_shared_from_this<CommandService> {
     public:
