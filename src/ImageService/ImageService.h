@@ -302,6 +302,7 @@ namespace OwlImageService {
 
                             // TODO now create ImageResponse package
                             ImageResponse is;
+                            is.set_cmd_id(1);
 
                             // now create send package and send it
                             auto package_s_ = std::make_shared<CommonTcpPackage>();
