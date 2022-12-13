@@ -11,7 +11,7 @@
 #include "ImageService/protobuf_test.h"
 
 #include <google/protobuf/stubs/common.h>
-
+#include <opencv2/imgcodecs.hpp>
 
 struct ThreadCallee {
     boost::asio::io_context &ioc;
@@ -42,6 +42,8 @@ int main() {
     // Verify that the version of the library that we linked against is
     // compatible with the version of the headers we compiled against.
     GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+    BOOST_LOG_TRIVIAL(info) << "cv::haveImageWriter(jpg):" << cv::haveImageWriter("jpg");
 
 //    // test
 //    OwlImageService::ProtobufTest::createImageRequest();
