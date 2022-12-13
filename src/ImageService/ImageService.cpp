@@ -206,7 +206,11 @@ namespace OwlImageService {
     void ImageServiceSession::do_process_request(std::string &&s) {
 
         ImageRequest ir;
-        ir.ParseFromString(s);
+        if (!ir.ParseFromString(s)) {
+            BOOST_LOG_TRIVIAL(info) << "do_process_request ParseFromString failed.";
+            // ignore
+            return;
+        }
 
         BOOST_LOG_TRIVIAL(info) << "do_process_request ImageRequest: " << ir.DebugString();
 
@@ -244,8 +248,16 @@ namespace OwlImageService {
                         // now create send package and send it
                         auto package_s_ = std::make_shared<CommonTcpPackage>();
                         // https://stackoverflow.com/questions/44904295/convert-stdstring-to-boostasiostreambuf
-                        std::iostream{&package_s_->data_} << is.SerializeAsString();
-                        package_s_->size_ = is.GetCachedSize();
+                        std::string is_string;
+                        if (!is.SerializeToString(&is_string)) {
+                            is.clear_image_data();
+                            BOOST_LOG_TRIVIAL(error) << "do_process_request SerializeToString failed : "
+                                                     << is.DebugString();
+                            // ignore
+                            return;
+                        }
+                        std::iostream{&package_s_->data_} << is_string;
+                        package_s_->size_ = is_string.size();
                         do_send_size(package_s_);
                     }
                 }
