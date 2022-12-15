@@ -99,7 +99,7 @@ int main(int argc, const char *argv[]) {
         return 0;
     }
 
-    std::cout << "config_file: " << config_file << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "config_file: " << config_file << std::endl;
 
 
 
@@ -113,7 +113,7 @@ int main(int argc, const char *argv[]) {
             ioc_cmd,
             boost::asio::ip::udp::endpoint(
                     boost::asio::ip::udp::v4(),
-                    23333
+                    config->config.CommandServiceUdpPort
             )
     );
     cmdService->start();
@@ -127,7 +127,7 @@ int main(int argc, const char *argv[]) {
             ioc_image,
             boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
-                    23332
+                    config->config.ImageServiceTcpPort
             )
     );
     imageService->start();
@@ -138,12 +138,12 @@ int main(int argc, const char *argv[]) {
             ioc_web_static,
             boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
-                    81
+                    config->config.EmbedWebServerHttpPort
             ),
-            std::make_shared<std::string>("./html"),
-            std::make_shared<std::string>("index.html"),
-            std::make_shared<std::string>("{}"),
-            std::make_shared<std::string>("htm html js json jpg jpeg png bmp gif ico svg css")
+            std::make_shared<std::string>(config->config.embedWebServer.doc_root),
+            std::make_shared<std::string>(config->config.embedWebServer.index_file_of_root),
+            std::make_shared<std::string>(config->config.embedWebServer.backend_json_string),
+            std::make_shared<std::string>(config->config.embedWebServer.allowFileExtList)
     );
     webService->start();
 
