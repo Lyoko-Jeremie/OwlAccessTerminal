@@ -4,15 +4,22 @@
 #include <boost/asio/signal_set.hpp>
 #include <boost/thread.hpp>
 #include <boost/log/trivial.hpp>
+#include <boost/program_options.hpp>
 #include "CommandService/CommandService.h"
 #include "WebControlService/CmdExecute.h"
 #include "WebControlService/EmbedWebServer/EmbedWebServer.h"
 #include "ImageService/ImageService.h"
+#include "ConfigLoader/ConfigLoader.h"
 
 #include "ImageService/protobuf_test.h"
 
 #include <google/protobuf/stubs/common.h>
 #include <opencv2/imgcodecs.hpp>
+
+
+#ifndef DEFAULT_CONFIG
+#define DEFAULT_CONFIG R"(config.json)"
+#endif // DEFAULT_CONFIG
 
 struct ThreadCallee {
     boost::asio::io_context &ioc;
@@ -39,7 +46,7 @@ struct ThreadCallee {
 };
 
 
-int main() {
+int main(int argc, const char *argv[]) {
     // Verify that the version of the library that we linked against is
     // compatible with the version of the headers we compiled against.
     GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -52,6 +59,53 @@ int main() {
 //    google::protobuf::ShutdownProtobufLibrary();
 //    std::cout << sizeof(int) << std::endl;
 //    return 0;
+
+    // parse start params
+    std::string config_file;
+    boost::program_options::options_description desc("options");
+    desc.add_options()
+            ("config,c", boost::program_options::value<std::string>(&config_file)->
+                    default_value(DEFAULT_CONFIG)->
+                    value_name("CONFIG"), "specify config file")
+            ("help,h", "print help message")
+            ("version,v", "print version and build info");
+    boost::program_options::positional_options_description pd;
+    pd.add("config", 1);
+    boost::program_options::variables_map vMap;
+    boost::program_options::store(
+            boost::program_options::command_line_parser(argc, argv)
+                    .options(desc)
+                    .positional(pd)
+                    .run(), vMap);
+    boost::program_options::notify(vMap);
+    if (vMap.count("help")) {
+        std::cout << "usage: " << argv[0] << " [[-c] CONFIG]" << "\n" << std::endl;
+
+        std::cout << "    OwlAccessTerminal  Copyright (C) 2023 \n"
+                  // << "    This program comes with ABSOLUTELY NO WARRANTY; \n"
+                  // << "    This is free software, and you are welcome to redistribute it\n"
+                  // << "    under certain conditions; \n"
+                  // << "         GNU GENERAL PUBLIC LICENSE , Version 3 "
+                  << "\n" << std::endl;
+
+        std::cout << desc << std::endl;
+        return 0;
+    }
+    if (vMap.count("version")) {
+        std::cout << "Boost " << BOOST_LIB_VERSION <<
+                  ", ProtoBuf " << GOOGLE_PROTOBUF_VERSION <<
+                  ", OpenCV " << CV_VERSION
+                  << std::endl;
+        return 0;
+    }
+
+    std::cout << "config_file: " << config_file << std::endl;
+
+
+
+    // load config
+    auto config = std::make_shared<OwlConfigLoader::ConfigLoader>();
+    config->init(config_file);
 
     boost::asio::io_context ioc_cmd;
     std::cout << "Hello, World!" << std::endl;
