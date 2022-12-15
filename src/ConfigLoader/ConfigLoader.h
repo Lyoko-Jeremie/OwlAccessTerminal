@@ -13,10 +13,10 @@
 namespace OwlConfigLoader {
 
     struct ConfigEmbedWebServer {
-        std::string doc_root;
-        std::string index_file_of_root;
-        std::string backend_json_string;
-        std::string allowFileExtList;
+        std::string doc_root{"./html"};
+        std::string index_file_of_root{"index.html"};
+        std::string backend_json_string{"{}"};
+        std::string allowFileExtList{"htm html js json jpg jpeg png bmp gif ico svg css"};
     };
 
     struct Config {
@@ -37,10 +37,14 @@ namespace OwlConfigLoader {
 
         Config config;
 
-        void print() {}
+        void print() {
+            // TODO
+        }
 
         void init(const std::string &filePath) {
-            config = parse_json(load_json_file(filePath));
+            auto j = load_json_file(filePath);
+            if (j.is_object())
+                config = parse_json(j.as_object());
         }
 
         static boost::json::value load_json_file(const std::string &filePath);
