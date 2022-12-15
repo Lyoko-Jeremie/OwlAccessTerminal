@@ -85,6 +85,7 @@ message(STATUS "Boost_VERSION: ${Boost_VERSION}")
 include_directories(CommandService/CMakeLists.txt)
 
 add_executable(${ProjectMainName}
+        src/main.cpp
         src/CommandService/CommandService.cpp
         src/CommandService/CommandService.h
         src/WebControlService/EmbedWebServer/EmbedWebServer.h
@@ -99,7 +100,9 @@ add_executable(${ProjectMainName}
         src/ImageService/protobuf_test.cpp
         src/ImageService/ImageService.h
         src/ImageService/ImageService.cpp
-        src/main.cpp)
+        src/CommandService/CmdExecute.cpp
+        src/CommandService/CmdExecute.h
+        )
 
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})

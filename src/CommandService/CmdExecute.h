@@ -1,0 +1,111 @@
+// jeremie
+
+#ifndef OWLACCESSTERMINAL_CMDEXECUTE_H
+#define OWLACCESSTERMINAL_CMDEXECUTE_H
+
+#include <memory>
+#include <utility>
+#include <thread>
+#include <unordered_map>
+#include <boost/asio.hpp>
+#include <boost/process.hpp>
+#include <boost/atomic.hpp>
+
+namespace OwlCmdExecute {
+//  https://www.boost.org/doc/libs/1_81_0/doc/html/boost_process/tutorial.html
+
+    class CmdExecute;
+
+    struct CmdExecuteItem : public std::enable_shared_from_this<CmdExecuteItem> {
+        size_t ceiId;
+        std::string pName;
+        std::string params;
+        boost::filesystem::path pFullName;
+        boost::asio::streambuf buf_out;
+        boost::asio::streambuf buf_err;
+        boost::process::async_pipe ap_out;
+        boost::process::async_pipe ap_err;
+        boost::process::child c;
+        int result = 0;
+
+        bool isValid = false;
+        bool isRunning = false;
+        bool isEnd = false;
+        bool isErr = false;
+
+        std::weak_ptr<CmdExecute> parentRef;
+
+        std::function<void()> callbackEnd;
+
+        explicit CmdExecuteItem(
+                size_t ceiId,
+                boost::asio::io_context &ioc,
+                std::string pName,
+                std::string params,
+                std::weak_ptr<CmdExecute> parentRef
+        ) : ceiId(ceiId),
+            pName(std::move(pName)),
+            params(std::move(params)),
+            ap_out(ioc), ap_err(ioc),
+            parentRef(std::move(parentRef)) {
+        }
+
+        bool start(std::function<void()> &&callbackEnd);
+
+        void destroy() const;
+
+        ~CmdExecuteItem() {
+            destroy();
+        }
+    };
+
+
+    class CmdExecute : public std::enable_shared_from_this<CmdExecute> {
+    public:
+        explicit CmdExecute(
+                boost::asio::io_context &ioc
+        ) : ioc_(ioc) {
+        }
+
+    private:
+        boost::asio::io_context &ioc_;
+
+        std::atomic_size_t ceiIdGenerator_{1};
+        std::mutex ceiMtx_;
+        std::unordered_map<size_t, std::weak_ptr<CmdExecuteItem>> ceiPool_;
+
+    public:
+        auto test_(const std::string &pName, const std::string &params) {
+
+            auto p = createCEI(pName, params);
+
+            p->start([p]() {
+
+            });
+
+            return p;
+        }
+
+    private:
+        friend void CmdExecuteItem::destroy() const;
+
+        void removeCEI(size_t CmdExecuteItemId);
+
+        void triggerCleanCeiPool(
+                // we force caller pass the lg ref to make sure ceiMtx_ be locked in caller side,
+                // so we don't need to lock it again , use this way to avoid double-lock issue
+                [[maybe_unused]] const std::lock_guard<typeof(ceiMtx_)> &lg
+        );
+
+    private:
+
+        std::shared_ptr<CmdExecuteItem> createCEI(
+                const std::string &pName, const std::string &params
+        );
+
+
+    };
+
+} // OwlCmdExecute
+
+#endif //OWLACCESSTERMINAL_CMDEXECUTE_H

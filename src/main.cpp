@@ -5,6 +5,7 @@
 #include <boost/thread.hpp>
 #include <boost/log/trivial.hpp>
 #include "CommandService/CommandService.h"
+#include "CommandService/CmdExecute.h"
 #include "WebControlService/EmbedWebServer/EmbedWebServer.h"
 #include "ImageService/ImageService.h"
 
@@ -62,6 +63,9 @@ int main() {
             )
     );
     cmdService->start();
+    auto cmdExecuteService = std::make_shared<OwlCmdExecute::CmdExecute>(
+            ioc_cmd
+    );
 
 
     boost::asio::io_context ioc_image;
