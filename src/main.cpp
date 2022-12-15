@@ -6,6 +6,7 @@
 #include <boost/log/trivial.hpp>
 #include <boost/program_options.hpp>
 #include "CommandService/CommandService.h"
+#include "CommandService/SerialController.h"
 #include "WebControlService/CmdExecute.h"
 #include "WebControlService/EmbedWebServer/EmbedWebServer.h"
 #include "ImageService/ImageService.h"
@@ -108,7 +109,7 @@ int main(int argc, const char *argv[]) {
     config->init(config_file);
 
     boost::asio::io_context ioc_cmd;
-    std::cout << "Hello, World!" << std::endl;
+
     auto cmdService = std::make_shared<OwlCommandService::CommandService>(
             ioc_cmd,
             boost::asio::ip::udp::endpoint(
@@ -117,9 +118,15 @@ int main(int argc, const char *argv[]) {
             )
     );
     cmdService->start();
-    auto cmdExecuteService = std::make_shared<OwlCmdExecute::CmdExecute>(
+    auto serialControllerService = std::make_shared<OwlSerialController::SerialController>(
             ioc_cmd
     );
+    BOOST_LOG_TRIVIAL(info)
+        << "serialControllerService start: "
+        << serialControllerService->start(
+                config->config.airplane_fly_serial_addr,
+                config->config.airplane_fly_serial_baud_rate
+        );
 
 
     boost::asio::io_context ioc_image;
@@ -146,6 +153,9 @@ int main(int argc, const char *argv[]) {
             std::make_shared<std::string>(config->config.embedWebServer.allowFileExtList)
     );
     webService->start();
+    auto cmdExecuteService = std::make_shared<OwlCmdExecute::CmdExecute>(
+            ioc_web_static
+    );
 
 
     boost::asio::io_context ioc_keyboard;

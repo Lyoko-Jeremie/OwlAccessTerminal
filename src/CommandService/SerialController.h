@@ -87,7 +87,15 @@ namespace OwlSerialController {
         std::shared_ptr<PortController> airplanePortController;
 
     public:
-        void start() {
+        bool start(
+                const std::string &airplanePort,
+                const int bandRate
+        ) {
+            // TODO set and open the airplanePortController
+            return airplanePortController->set_option(
+                    boost::asio::serial_port::baud_rate(bandRate)
+            ) &&
+                   airplanePortController->open(airplanePort);
         }
 
     private:
