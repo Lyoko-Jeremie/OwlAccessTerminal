@@ -23,6 +23,8 @@ set(PROTOBUFF_LIBS d:/CodeLib/protobuf-cpp-3.21.11-build-install/lib/libprotobuf
 # ===================== ^^^^^^ config segment ^^^^^^ =================================
 
 
+option(BOOST_ROOT "")
+
 option(OpenCV_DIR "")
 
 option(PROTOBUFF_INCLUDE_DIRS "")
@@ -105,7 +107,8 @@ add_executable(${ProjectMainName}
         src/CommandService/SerialController.cpp
         src/CommandService/SerialController.h
         src/ConfigLoader/ConfigLoader.cpp
-        src/ConfigLoader/ConfigLoader.h)
+        src/ConfigLoader/ConfigLoader.h
+        src/AsyncCallbackMailbox/AsyncCallbackMailbox.h)
 
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})
