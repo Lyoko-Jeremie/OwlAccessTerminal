@@ -100,8 +100,8 @@ add_executable(${ProjectMainName}
         src/ImageService/protobuf_test.cpp
         src/ImageService/ImageService.h
         src/ImageService/ImageService.cpp
-        src/CommandService/CmdExecute.cpp
-        src/CommandService/CmdExecute.h
+        src/WebControlService/CmdExecute.cpp
+        src/WebControlService/CmdExecute.h
         )
 
 

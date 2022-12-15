@@ -5,7 +5,7 @@
 #include <boost/thread.hpp>
 #include <boost/log/trivial.hpp>
 #include "CommandService/CommandService.h"
-#include "CommandService/CmdExecute.h"
+#include "WebControlService/CmdExecute.h"
 #include "WebControlService/EmbedWebServer/EmbedWebServer.h"
 #include "ImageService/ImageService.h"
 
