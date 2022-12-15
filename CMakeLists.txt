@@ -11,7 +11,8 @@ set(OpenCV_DIR d:/CodeLib/opencv-4.5.5-build-install/)
 set(OpenCV_STATIC ON)
 set(OpenCV_WORLD ON)
 
-set(BOOST_ROOT d:/CodeLib/boost_1_80_0_install_x64_v11p3/)
+set(BOOST_ROOT d:/CodeLib/boost_1_81_0_install_x64_v11p3/)
+#set(BOOST_ROOT d:/CodeLib/boost_1_80_0_install_x64_v11p3/)
 #set(Boost_INCLUDE_DIR d:/CodeLib/boost_1_74_0_install_x64_v11p3/include/boost-1_74)
 #set(Boost_LIBRARY_DIR d:/CodeLib/boost_1_74_0_install_x64_v11p3/lib)
 #set(USE_DYNAMIC_BOOST true)
@@ -60,7 +61,7 @@ endif ()
 
 set(Boost_USE_MULTITHREADED ON)
 #find_package(Boost REQUIRED COMPONENTS  REQUIRED)
-find_package(Boost 1.74.0 REQUIRED COMPONENTS system filesystem program_options json log ${BOOST_THEAD_MODULE} REQUIRED)
+find_package(Boost 1.81.0 REQUIRED COMPONENTS system filesystem program_options json log ${BOOST_THEAD_MODULE} REQUIRED)
 
 if (OpenCV_WORLD)
     find_package(OpenCV REQUIRED world)
@@ -102,7 +103,9 @@ add_executable(${ProjectMainName}
         src/WebControlService/CmdExecute.cpp
         src/WebControlService/CmdExecute.h
         src/CommandService/SerialController.cpp
-        src/CommandService/SerialController.h)
+        src/CommandService/SerialController.h
+        src/ConfigLoader/ConfigLoader.cpp
+        src/ConfigLoader/ConfigLoader.h)
 
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})
