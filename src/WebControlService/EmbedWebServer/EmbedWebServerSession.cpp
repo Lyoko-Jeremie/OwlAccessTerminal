@@ -75,7 +75,7 @@ namespace OwlEmbedWebServer {
         std::cout << "req_.target():" << req_.target() << std::endl;
         if (req_.method() == boost::beast::http::verb::get) {
             // answer backend json
-            if (boost::beast::string_view{req_.target()}.to_string() == std::string{"/backend"}) {
+            if (std::string{req_.target()} == std::string{"/backend"}) {
                 boost::beast::http::response<boost::beast::http::string_body> res{
                         boost::beast::http::status::ok,
                         req_.version()};

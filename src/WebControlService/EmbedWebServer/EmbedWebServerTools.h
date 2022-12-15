@@ -104,7 +104,7 @@ namespace OwlEmbedWebServer {
 
         // ------------------------ path check --------------------
 
-        std::string reqString = req.target().to_string();
+        std::string reqString{req.target()};
         if (reqString.find("?") != std::string::npos) {
             reqString = reqString.substr(0, reqString.find("?"));
         }
@@ -115,7 +115,7 @@ namespace OwlEmbedWebServer {
 
         // ------------------------ path check --------------------
         try {
-            std::filesystem::path root_path{doc_root.to_string()};
+            std::filesystem::path root_path{std::string{doc_root}};
             std::error_code errorCode;
             root_path = std::filesystem::canonical(root_path, errorCode);
             if (errorCode) {
