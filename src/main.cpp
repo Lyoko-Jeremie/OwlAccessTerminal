@@ -100,7 +100,7 @@ int main(int argc, const char *argv[]) {
         return 0;
     }
 
-    BOOST_LOG_TRIVIAL(info) << "config_file: " << config_file << std::endl;
+    BOOST_LOG_TRIVIAL(info) << "config_file: " << config_file;
 
 
 
