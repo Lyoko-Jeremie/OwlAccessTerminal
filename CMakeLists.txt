@@ -22,7 +22,6 @@ set(PROTOBUFF_LIBS d:/CodeLib/protobuf-cpp-3.21.11-build-install/lib/libprotobuf
 # ===================== ^^^^^^ config segment ^^^^^^ =================================
 
 
-
 option(OpenCV_DIR "")
 
 option(PROTOBUFF_INCLUDE_DIRS "")
@@ -102,7 +101,8 @@ add_executable(${ProjectMainName}
         src/ImageService/ImageService.cpp
         src/WebControlService/CmdExecute.cpp
         src/WebControlService/CmdExecute.h
-        )
+        src/CommandService/SerialController.cpp
+        src/CommandService/SerialController.h)
 
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})
