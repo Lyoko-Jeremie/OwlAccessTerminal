@@ -81,8 +81,8 @@ namespace OwlImageService::ProtobufTest {
 
         std::cout << Json2ImageRequest(ImageRequest2Json(ir)).SerializeAsString() << "\n";
 
-        ImageRequest ir3;
-        ir3;
+//        ImageRequest ir3;
+//        ir3;
 
     }
 }
