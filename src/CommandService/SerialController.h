@@ -88,7 +88,6 @@ namespace OwlSerialController {
 
     public:
         void start() {
-     
         }
 
     private:
