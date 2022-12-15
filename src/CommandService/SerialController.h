@@ -92,10 +92,10 @@ namespace OwlSerialController {
                 const int bandRate
         ) {
             // TODO set and open the airplanePortController
-            return airplanePortController->set_option(
+            return airplanePortController->open(airplanePort)
+                   && airplanePortController->set_option(
                     boost::asio::serial_port::baud_rate(bandRate)
-            ) &&
-                   airplanePortController->open(airplanePort);
+            );
         }
 
     private:
