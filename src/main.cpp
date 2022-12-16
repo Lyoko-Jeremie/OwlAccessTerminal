@@ -110,7 +110,9 @@ int main(int argc, const char *argv[]) {
     config->init(config_file);
 
     boost::asio::io_context ioc_cmd;
-    OwlMailDefine::CmdSerialMailbox mailbox_cmd;
+    auto mailbox_cmd = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
+            ioc_cmd, ioc_cmd
+    );
     auto cmdService = std::make_shared<OwlCommandService::CommandService>(
             ioc_cmd,
             mailbox_cmd->shared_from_this(),
@@ -145,7 +147,9 @@ int main(int argc, const char *argv[]) {
 
 
     boost::asio::io_context ioc_web_static;
-    OwlMailDefine::WebCmdMailbox mailbox_web;
+    auto mailbox_web = std::make_shared<OwlMailDefine::WebCmdMailbox::element_type>(
+            ioc_web_static, ioc_web_static
+    );
     auto webService = std::make_shared<OwlEmbedWebServer::EmbedWebServer>(
             ioc_web_static,
             mailbox_web->shared_from_this(),

@@ -13,6 +13,8 @@ namespace OwlAsyncCallbackMailbox {
     class AsyncCallbackMailbox :
             public std::enable_shared_from_this<AsyncCallbackMailbox<A2B, B2A>> {
     public:
+        AsyncCallbackMailbox() = delete;
+
         AsyncCallbackMailbox(
                 boost::asio::io_context &ioc_a,
                 boost::asio::io_context &ioc_b
