@@ -10,12 +10,12 @@
 namespace OwlMailDefine {
     struct Cmd2Serial {
 
-
         // Serial2Cmd.runner = Cmd2Serial.callbackRunner
         std::function<void()> callbackRunner;
     };
     struct Serial2Cmd {
         std::function<void()> runner;
+        bool ok = false;
     };
     using CmdSerialMailbox =
             std::shared_ptr<

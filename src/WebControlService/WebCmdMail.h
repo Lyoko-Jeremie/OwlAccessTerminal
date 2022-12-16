@@ -9,8 +9,13 @@
 namespace OwlMailDefine {
 
     struct Web2Cmd {
+
+        // Cmd2Web.runner = Web2Cmd.callbackRunner
+        std::function<void()> callbackRunner;
     };
     struct Cmd2Web {
+        std::function<void()> runner;
+        bool ok = false;
     };
 
     using WebCmdMailbox =
