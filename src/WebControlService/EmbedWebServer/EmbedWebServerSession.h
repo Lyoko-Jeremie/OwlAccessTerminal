@@ -14,6 +14,8 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 
+#include "../WebCmdMail.h"
+
 namespace OwlEmbedWebServer {
 
     // Handles an HTTP server connection
@@ -33,6 +35,7 @@ namespace OwlEmbedWebServer {
             operator()(boost::beast::http::message<isRequest, Body, Fields> &&msg) const;
         };
 
+        OwlMailDefine::WebCmdMailbox mailbox_;
         boost::beast::tcp_stream stream_;
         boost::beast::flat_buffer buffer_;
         std::shared_ptr<std::string const> doc_root_;
@@ -46,12 +49,14 @@ namespace OwlEmbedWebServer {
     public:
         // Take ownership of the stream
         EmbedWebServerSession(
+                OwlMailDefine::WebCmdMailbox &&mailbox,
                 boost::asio::ip::tcp::socket &&socket,
                 std::shared_ptr<std::string const> const &doc_root,
                 std::shared_ptr<std::string const> const &index_file_of_root,
                 std::shared_ptr<std::string const> const &backend_json_string,
                 std::vector<std::string> const &allowFileExtList)
-                : stream_(std::move(socket)),
+                : mailbox_(std::move(mailbox)),
+                  stream_(std::move(socket)),
                   doc_root_(doc_root),
                   index_file_of_root(index_file_of_root),
                   backend_json_string(backend_json_string),

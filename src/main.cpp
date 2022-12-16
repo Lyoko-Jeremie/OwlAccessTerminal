@@ -11,6 +11,7 @@
 #include "WebControlService/EmbedWebServer/EmbedWebServer.h"
 #include "ImageService/ImageService.h"
 #include "ConfigLoader/ConfigLoader.h"
+#include "AsyncCallbackMailbox/AsyncCallbackMailbox.h"
 
 #include "ImageService/protobuf_test.h"
 
@@ -109,9 +110,10 @@ int main(int argc, const char *argv[]) {
     config->init(config_file);
 
     boost::asio::io_context ioc_cmd;
-
+    OwlMailDefine::CmdSerialMailbox mailbox_cmd;
     auto cmdService = std::make_shared<OwlCommandService::CommandService>(
             ioc_cmd,
+            mailbox_cmd->shared_from_this(),
             boost::asio::ip::udp::endpoint(
                     boost::asio::ip::udp::v4(),
                     config->config.CommandServiceUdpPort
@@ -119,14 +121,16 @@ int main(int argc, const char *argv[]) {
     );
     cmdService->start();
     auto serialControllerService = std::make_shared<OwlSerialController::SerialController>(
-            ioc_cmd
+            ioc_cmd,
+            mailbox_cmd->shared_from_this()
+    );
+    bool serialControllerServiceStartOk = serialControllerService->start(
+            config->config.airplane_fly_serial_addr,
+            config->config.airplane_fly_serial_baud_rate
     );
     BOOST_LOG_TRIVIAL(info)
         << "serialControllerService start: "
-        << serialControllerService->start(
-                config->config.airplane_fly_serial_addr,
-                config->config.airplane_fly_serial_baud_rate
-        );
+        << serialControllerServiceStartOk;
 
 
     boost::asio::io_context ioc_image;
@@ -141,8 +145,10 @@ int main(int argc, const char *argv[]) {
 
 
     boost::asio::io_context ioc_web_static;
+    OwlMailDefine::WebCmdMailbox mailbox_web;
     auto webService = std::make_shared<OwlEmbedWebServer::EmbedWebServer>(
             ioc_web_static,
+            mailbox_web->shared_from_this(),
             boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
                     config->config.EmbedWebServerHttpPort
@@ -154,7 +160,8 @@ int main(int argc, const char *argv[]) {
     );
     webService->start();
     auto cmdExecuteService = std::make_shared<OwlCmdExecute::CmdExecute>(
-            ioc_web_static
+            ioc_web_static,
+            mailbox_web->shared_from_this()
     );
 
 

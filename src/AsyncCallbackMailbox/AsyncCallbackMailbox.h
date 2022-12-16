@@ -18,18 +18,21 @@ namespace OwlAsyncCallbackMailbox {
                 boost::asio::io_context &ioc_b
         ) : ioc_a_(ioc_a), ioc_b_(ioc_b) {}
 
+        using A2B_t = std::shared_ptr<A2B>;
+        using B2A_t = std::shared_ptr<B2A>;
+
     private:
         boost::asio::io_context &ioc_a_;
         boost::asio::io_context &ioc_b_;
 
     public:
         // B register the callback to receive mail from A
-        std::function<void(std::shared_ptr<A2B> &&)> receiveA2B;
+        std::function<void(A2B_t)> receiveA2B;
         // A register the callback to receive mail from B
-        std::function<void(std::shared_ptr<B2A> &&)> receiveB2A;
+        std::function<void(B2A_t)> receiveB2A;
 
         // A call this function to send data to B
-        void sendA2B(std::shared_ptr<A2B> data) {
+        void sendA2B(A2B_t &&data) {
             boost::asio::post(ioc_b_, [this, self = this->shared_from_this(), data]() {
                 // avoid racing
                 auto &c = receiveA2B;
@@ -39,7 +42,7 @@ namespace OwlAsyncCallbackMailbox {
         }
 
         // B call this function to send data to A
-        void sendB2A(std::shared_ptr<B2A> data) {
+        void sendB2A(B2A_t &&data) {
             boost::asio::post(ioc_a_, [this, self = this->shared_from_this(), data]() {
                 // avoid racing
                 auto &c = receiveB2A;

@@ -10,7 +10,7 @@
 #include <boost/json.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/utility/string_view.hpp>
-
+#include "CmdSerialMail.h"
 
 namespace OwlCommandService {
 
@@ -21,8 +21,10 @@ namespace OwlCommandService {
     class CommandService : public std::enable_shared_from_this<CommandService> {
     public:
         CommandService(boost::asio::io_context &_ioc,
+                       OwlMailDefine::CmdSerialMailbox &&mailbox,
                        const boost::asio::ip::udp::endpoint &endpoint)
                 : executor_(boost::asio::make_strand(_ioc)),
+                  mailbox_(std::move(mailbox)),
                   udp_socket_(_ioc, endpoint),
                   receive_buffer_(),
                   json_storage_(),
@@ -32,10 +34,19 @@ namespace OwlCommandService {
             json_parse_options_.allow_trailing_commas = true;
             json_parse_options_.max_depth = 5;
             //  boost::asio::ip::udp::endpoint _endpoint(boost::asio::ip::udp::v4(), 2333);
+
+            mailbox_->receiveB2A = [this](OwlMailDefine::MailSerial2Cmd &&data) {
+                receiveMail(std::move(data));
+            };
+        }
+
+        ~CommandService() {
+            mailbox_->receiveB2A = nullptr;
         }
 
     private:
         boost::asio::executor executor_;
+        OwlMailDefine::CmdSerialMailbox mailbox_;
         boost::asio::ip::udp::socket udp_socket_;
 
         // the max udp receive buffer, it used to receive package from remove client
@@ -61,6 +72,14 @@ namespace OwlCommandService {
 
         void send_back_json(const boost::json::value &json_value);
 
+        void receiveMail(OwlMailDefine::MailSerial2Cmd &&data) {
+            // TODO get callback from data and call it to send back html result
+        }
+
+        void sendMail(OwlMailDefine::MailCmd2Serial &&data) {
+            // TODO send cmd to serial
+            mailbox_->sendA2B(std::move(data));
+        }
 
     };
 

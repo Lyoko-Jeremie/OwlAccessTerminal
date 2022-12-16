@@ -13,12 +13,15 @@ namespace OwlEmbedWebServer {
 
 //------------------------------------------------------------------------------
 
-    EmbedWebServer::EmbedWebServer(boost::asio::io_context &ioc, boost::asio::ip::tcp::endpoint endpoint,
+    EmbedWebServer::EmbedWebServer(boost::asio::io_context &ioc,
+                                   OwlMailDefine::WebCmdMailbox &&mailbox,
+                                   const boost::asio::ip::tcp::endpoint &endpoint,
                                    const std::shared_ptr<const std::string> &doc_root,
                                    std::shared_ptr<std::string const> const &index_file_of_root,
                                    std::shared_ptr<std::string const> const &backend_json_string,
                                    std::shared_ptr<std::string const> const &_allowFileExtList)
             : ioc_(ioc),
+              mailbox_(std::move(mailbox)),
               acceptor_(boost::asio::make_strand(ioc)),
               doc_root_(doc_root),
               index_file_of_root(index_file_of_root),
@@ -77,6 +80,7 @@ namespace OwlEmbedWebServer {
         } else {
             // Create the session and run it
             std::make_shared<EmbedWebServerSession>(
+                    mailbox_->shared_from_this(),
                     std::move(socket),
                     doc_root_,
                     index_file_of_root,

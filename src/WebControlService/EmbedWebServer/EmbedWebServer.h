@@ -14,6 +14,8 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 
+#include "../WebCmdMail.h"
+
 namespace OwlEmbedWebServer {
 
     //------------------------------------------------------------------------------
@@ -21,6 +23,7 @@ namespace OwlEmbedWebServer {
     // Accepts incoming connections and launches the sessions
     class EmbedWebServer : public std::enable_shared_from_this<EmbedWebServer> {
         boost::asio::io_context &ioc_;
+        OwlMailDefine::WebCmdMailbox mailbox_;
         boost::asio::ip::tcp::acceptor acceptor_;
         std::shared_ptr<std::string const> doc_root_;
         std::shared_ptr<std::string const> index_file_of_root;
@@ -30,7 +33,8 @@ namespace OwlEmbedWebServer {
     public:
         EmbedWebServer(
                 boost::asio::io_context &ioc,
-                boost::asio::ip::tcp::endpoint endpoint,
+                OwlMailDefine::WebCmdMailbox &&mailbox,
+                const boost::asio::ip::tcp::endpoint& endpoint,
                 std::shared_ptr<std::string const> const &doc_root,
                 std::shared_ptr<std::string const> const &index_file_of_root,
                 std::shared_ptr<std::string const> const &backend_json_string,

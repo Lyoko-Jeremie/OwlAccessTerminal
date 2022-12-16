@@ -108,7 +108,9 @@ add_executable(${ProjectMainName}
         src/CommandService/SerialController.h
         src/ConfigLoader/ConfigLoader.cpp
         src/ConfigLoader/ConfigLoader.h
-        src/AsyncCallbackMailbox/AsyncCallbackMailbox.h)
+        src/AsyncCallbackMailbox/AsyncCallbackMailbox.h
+        src/CommandService/CmdSerialMail.h
+        src/WebControlService/WebCmdMail.h)
 
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})

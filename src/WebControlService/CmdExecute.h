@@ -11,6 +11,8 @@
 #include <boost/process.hpp>
 #include <boost/atomic.hpp>
 
+#include "WebCmdMail.h"
+
 namespace OwlCmdExecute {
 //  https://www.boost.org/doc/libs/1_81_0/doc/html/boost_process/tutorial.html
 
@@ -63,12 +65,21 @@ namespace OwlCmdExecute {
     class CmdExecute : public std::enable_shared_from_this<CmdExecute> {
     public:
         explicit CmdExecute(
-                boost::asio::io_context &ioc
-        ) : ioc_(ioc) {
+                boost::asio::io_context &ioc,
+                OwlMailDefine::WebCmdMailbox &&mailbox
+        ) : ioc_(ioc), mailbox_(std::move(mailbox)) {
+            mailbox_->receiveA2B = [this](OwlMailDefine::MailWeb2Cmd &&data) {
+                receiveMail(std::move(data));
+            };
+        }
+
+        ~CmdExecute() {
+            mailbox_->receiveA2B = nullptr;
         }
 
     private:
         boost::asio::io_context &ioc_;
+        OwlMailDefine::WebCmdMailbox mailbox_;
 
         std::atomic_size_t ceiIdGenerator_{1};
         std::mutex ceiMtx_;
@@ -96,6 +107,15 @@ namespace OwlCmdExecute {
                 // so we don't need to lock it again , use this way to avoid double-lock issue
                 [[maybe_unused]] const std::lock_guard<typeof(ceiMtx_)> &lg
         );
+
+        void receiveMail(OwlMailDefine::MailWeb2Cmd &&data) {
+            // TODO
+//            createCEI();
+        }
+
+        void sendMail(OwlMailDefine::MailCmd2Web &&data) {
+            mailbox_->sendB2A(std::move(data));
+        }
 
     private:
 
