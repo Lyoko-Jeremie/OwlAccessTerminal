@@ -20,6 +20,8 @@ set(BOOST_ROOT d:/CodeLib/boost_1_81_0_install_x64_v11p3/)
 set(PROTOBUFF_INCLUDE_DIRS d:/CodeLib/protobuf-cpp-3.21.11-build-install/include/)
 set(PROTOBUFF_LIBS d:/CodeLib/protobuf-cpp-3.21.11-build-install/lib/libprotobuf.a)
 
+#add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
+
 # ===================== ^^^^^^ config segment ^^^^^^ =================================
 
 
