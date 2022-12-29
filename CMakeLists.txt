@@ -110,7 +110,12 @@ add_executable(${ProjectMainName}
         src/ConfigLoader/ConfigLoader.h
         src/AsyncCallbackMailbox/AsyncCallbackMailbox.h
         src/CommandService/CmdSerialMail.h
-        src/WebControlService/WebCmdMail.h)
+        src/WebControlService/WebCmdMail.h
+        src/ImageService/ImageServiceHttp.cpp
+        src/ImageService/ImageServiceHttp.h
+        src/ImageService/CameraReader.cpp
+        src/ImageService/CameraReader.h
+        src/ImageService/ImageServiceMail.h)
 
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})

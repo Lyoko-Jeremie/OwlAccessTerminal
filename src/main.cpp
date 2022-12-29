@@ -1,5 +1,9 @@
+// jeremie
+
 #include <iostream>
 #include <memory>
+#include <vector>
+#include <utility>
 #include <boost/asio.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/thread.hpp>
@@ -10,6 +14,8 @@
 #include "WebControlService/CmdExecute.h"
 #include "WebControlService/EmbedWebServer/EmbedWebServer.h"
 #include "ImageService/ImageService.h"
+#include "ImageService/ImageServiceHttp.h"
+#include "ImageService/CameraReader.h"
 #include "ConfigLoader/ConfigLoader.h"
 #include "AsyncCallbackMailbox/AsyncCallbackMailbox.h"
 
@@ -136,14 +142,40 @@ int main(int argc, const char *argv[]) {
 
 
     boost::asio::io_context ioc_image;
-    auto imageService = std::make_shared<OwlImageService::ImageService>(
+    auto mailbox_image_protobuf = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
+            ioc_image, ioc_image
+    );
+    auto imageServiceProtobuf = std::make_shared<OwlImageService::ImageService>(
             ioc_image,
             boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
                     config->config.ImageServiceTcpPort
-            )
+            ),
+            mailbox_image_protobuf->shared_from_this()
     );
-    imageService->start();
+    imageServiceProtobuf->start();
+    auto mailbox_image_http = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
+            ioc_image, ioc_image
+    );
+    auto imageServiceHttp = std::make_shared<OwlImageServiceHttp::ImageServiceHttp>(
+            ioc_image,
+            boost::asio::ip::tcp::endpoint(
+                    boost::asio::ip::tcp::v4(),
+                    config->config.ImageServiceHttpPort
+            ),
+            mailbox_image_http->shared_from_this()
+    );
+    imageServiceHttp->start();
+    auto cameraReader = std::make_shared<OwlCameraReader::CameraReader>(
+            ioc_image,
+            std::vector<std::pair<int, int>>{
+                    {1, config->config.camera_addr_1},
+                    {2, config->config.camera_addr_2},
+            },
+            mailbox_image_protobuf->shared_from_this(),
+            mailbox_image_http->shared_from_this()
+    );
+    cameraReader->start();
 
 
     boost::asio::io_context ioc_web_static;
@@ -200,6 +232,18 @@ int main(int argc, const char *argv[]) {
     tg.create_thread(ThreadCallee{ioc_image, tg});
     tg.create_thread(ThreadCallee{ioc_web_static, tg});
     tg.create_thread(ThreadCallee{ioc_keyboard, tg});
+
+
+    auto io_running_in_notice = [](boost::asio::io_context &io, std::string notice) {
+        boost::asio::post(io, [notice]() {
+            BOOST_LOG_TRIVIAL(info) << ">>>" << notice << "<<< running thread <<< <<<";
+        });
+    };
+    io_running_in_notice(ioc_cmd, "ioc_cmd");
+    io_running_in_notice(ioc_image, "ioc_image");
+    io_running_in_notice(ioc_web_static, "ioc_web_static");
+    io_running_in_notice(ioc_keyboard, "ioc_keyboard");
+
 
     BOOST_LOG_TRIVIAL(info) << "boost::thread_group running";
     BOOST_LOG_TRIVIAL(info) << "boost::thread_group size : " << tg.size();

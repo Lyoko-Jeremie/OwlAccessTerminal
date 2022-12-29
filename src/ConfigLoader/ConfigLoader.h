@@ -22,12 +22,13 @@ namespace OwlConfigLoader {
     struct Config {
         int CommandServiceUdpPort = 23333;
         int ImageServiceTcpPort = 23332;
+        int ImageServiceHttpPort = 23331;
         int EmbedWebServerHttpPort = 81;
 
         int airplane_fly_serial_baud_rate = 0;
         std::string airplane_fly_serial_addr;
-        std::string camera_addr_1;
-        std::string camera_addr_2;
+        int camera_addr_1 = 0;
+        int camera_addr_2 = 1;
 
         ConfigEmbedWebServer embedWebServer;
     };

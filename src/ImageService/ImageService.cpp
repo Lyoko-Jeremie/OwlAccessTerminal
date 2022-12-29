@@ -221,44 +221,76 @@ namespace OwlImageService {
                     if (ir.has_package_id() && ir.has_camera_id()) {
                         // TODO get camera image data on here
 
-                        cv::Mat img{6, 6, CV_8UC3, cv::Scalar{0, 0, 0}};
+                        auto p = parents_.lock();
+                        if (!p) {
+                            // TODO inner error
+                        } else {
 
-                        // now create ImageResponse package
-                        ImageResponse is;
-                        is.set_cmd_id(1);
-                        {
-                            std::vector<uchar> imageBuffer;
-                            cv::imencode("jpg", img, imageBuffer,
-                                         {cv::ImwriteFlags::IMWRITE_JPEG_QUALITY, 70});
+                            OwlMailDefine::MailService2Camera cmd_data{};
+                            cmd_data->camera_id = ir.camera_id();
 
-                            is.set_image_height(img.rows);
-                            is.set_image_width(img.cols);
-                            is.set_image_pixel_channel(img.channels());
-                            is.set_image_format(ImageFormat::IMAGE_FORMAT_JPG);
+                            cmd_data->callbackRunner = [this, self = shared_from_this()](
+                                    OwlMailDefine::MailCamera2Service camera_data
+                            ) {
 
-                            img.release();
+                                // now, send back
+                                if (!camera_data->ok) {
+                                    return;
+                                }
 
-                            std::string imageString{imageBuffer.begin(), imageBuffer.end()};
-                            imageBuffer.clear();
+                                // try to run immediately if now on this ioc, or run it later
+                                boost::asio::dispatch(ioc_, [this, self = shared_from_this(), camera_data]() {
 
-                            is.set_image_data(imageString);
-                            is.set_image_data_size(imageString.size());
+//                                cv::Mat img{6, 6, CV_8UC3, cv::Scalar{0, 0, 0}};
+                                    cv::Mat img = camera_data->image;
+                                    camera_data->image.release();
+
+                                    // now create ImageResponse package
+                                    ImageResponse is;
+                                    is.set_cmd_id(1);
+                                    {
+                                        std::vector<uchar> imageBuffer;
+                                        cv::imencode("jpg", img, imageBuffer,
+                                                     {cv::ImwriteFlags::IMWRITE_JPEG_QUALITY, 70});
+
+                                        is.set_image_height(img.rows);
+                                        is.set_image_width(img.cols);
+                                        is.set_image_pixel_channel(img.channels());
+                                        is.set_image_format(ImageFormat::IMAGE_FORMAT_JPG);
+
+                                        img.release();
+
+                                        std::string imageString{imageBuffer.begin(), imageBuffer.end()};
+                                        imageBuffer.clear();
+
+                                        is.set_image_data(imageString);
+                                        is.set_image_data_size(imageString.size());
+                                    }
+
+                                    // now create send package and send it
+                                    auto package_s_ = std::make_shared<CommonTcpPackage>();
+                                    // https://stackoverflow.com/questions/44904295/convert-stdstring-to-boostasiostreambuf
+                                    std::string is_string;
+                                    if (!is.SerializeToString(&is_string)) {
+                                        is.clear_image_data();
+                                        BOOST_LOG_TRIVIAL(error) << "do_process_request SerializeToString failed : "
+                                                                 << is.DebugString();
+                                        // ignore
+                                        return;
+                                    }
+                                    std::iostream{&package_s_->data_} << is_string;
+                                    package_s_->size_ = is_string.size();
+                                    do_send_size(package_s_);
+
+                                    return;
+                                });
+                                return;
+                            };
+
+                            p->sendMail(std::move(cmd_data));
+
                         }
 
-                        // now create send package and send it
-                        auto package_s_ = std::make_shared<CommonTcpPackage>();
-                        // https://stackoverflow.com/questions/44904295/convert-stdstring-to-boostasiostreambuf
-                        std::string is_string;
-                        if (!is.SerializeToString(&is_string)) {
-                            is.clear_image_data();
-                            BOOST_LOG_TRIVIAL(error) << "do_process_request SerializeToString failed : "
-                                                     << is.DebugString();
-                            // ignore
-                            return;
-                        }
-                        std::iostream{&package_s_->data_} << is_string;
-                        package_s_->size_ = is_string.size();
-                        do_send_size(package_s_);
                     }
                 }
                     return;
@@ -286,10 +318,16 @@ namespace OwlImageService {
 
     ImageService::ImageService(
             boost::asio::io_context &ioc,
-            const boost::asio::ip::tcp::endpoint &endpoint)
+            const boost::asio::ip::tcp::endpoint &endpoint,
+            OwlMailDefine::ServiceCameraMailbox &&mailbox)
             : ioc_(ioc),
               acceptor_strand_(boost::asio::make_strand(ioc)),
-              acceptor_(acceptor_strand_) {
+              acceptor_(acceptor_strand_),
+              mailbox_(std::move(mailbox)) {
+
+        mailbox_->receiveB2A = [this](OwlMailDefine::MailCamera2Service &&data) {
+            receiveMail(std::move(data));
+        };
 
         boost::system::error_code ec;
 
@@ -340,6 +378,6 @@ namespace OwlImageService {
     }
 
     void ImageService::on_accept(boost::asio::ip::tcp::socket &&socket) {
-        std::make_shared<ImageServiceSession>(ioc_, std::move(socket))->start();
+        std::make_shared<ImageServiceSession>(ioc_, std::move(socket), weak_from_this())->start();
     }
 } // OwlImageService

@@ -17,6 +17,7 @@
 #include <boost/array.hpp>
 #include <boost/log/trivial.hpp>
 #include "ImageProtobufDefine/ImageProtocol/ImageProtocol.pb.h"
+#include "ImageServiceMail.h"
 
 namespace OwlImageService {
 
@@ -55,12 +56,15 @@ namespace OwlImageService {
         CommonTcpPackage() = default;
     };
 
+    class ImageService;
+
     class ImageServiceSession : public std::enable_shared_from_this<ImageServiceSession> {
     public:
         explicit ImageServiceSession(
                 boost::asio::io_context &ioc,
-                boost::asio::ip::tcp::socket &&socket
-        ) : ioc_(ioc), socket_(std::move(socket)) {}
+                boost::asio::ip::tcp::socket &&socket,
+                std::weak_ptr<ImageService> &&parents
+        ) : ioc_(ioc), socket_(std::move(socket)), parents_(std::move(parents)) {}
 
 //        static void fail(boost::system::error_code ec, const char *what) {
 //            BOOST_LOG_TRIVIAL(error) << what << ": " << ec.message();
@@ -69,6 +73,7 @@ namespace OwlImageService {
     private:
         boost::asio::io_context &ioc_;
         boost::asio::ip::tcp::socket socket_;
+        std::weak_ptr<ImageService> parents_;
 
     public:
         void
@@ -108,8 +113,13 @@ namespace OwlImageService {
     public:
         ImageService(
                 boost::asio::io_context &ioc,
-                const boost::asio::ip::tcp::endpoint &endpoint
+                const boost::asio::ip::tcp::endpoint &endpoint,
+                OwlMailDefine::ServiceCameraMailbox &&mailbox
         );
+
+        ~ImageService() {
+            mailbox_->receiveB2A = nullptr;
+        }
 
         static void fail(boost::system::error_code ec, const char *what) {
             BOOST_LOG_TRIVIAL(error) << what << ": " << ec.message();
@@ -119,12 +129,26 @@ namespace OwlImageService {
         boost::asio::io_context &ioc_;
         boost::asio::strand<boost::asio::io_context::executor_type> acceptor_strand_;
         boost::asio::ip::tcp::acceptor acceptor_;
+        OwlMailDefine::ServiceCameraMailbox mailbox_;
 
     public:
         // Start accepting incoming connections
         void
         start() {
             do_accept();
+        }
+
+    private:
+        friend ImageServiceSession;
+
+        void receiveMail(OwlMailDefine::MailCamera2Service &&data) {
+            // get callback from data and call it to send back image result
+            data->runner(data);
+        }
+
+        void sendMail(OwlMailDefine::MailService2Camera &&data) {
+            // send cmd to camera
+            mailbox_->sendA2B(std::move(data));
         }
 
     private:
