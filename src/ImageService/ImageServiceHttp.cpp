@@ -90,4 +90,122 @@ namespace OwlImageServiceHttp {
         p->sendMail(std::move(cmd_data));
 
     }
+
+    void ImageServiceHttpConnect::create_get_response() {
+
+        if (request_.target() == "/1") {
+            create_get_response_image(1);
+            return;
+        }
+        if (request_.target() == "/2") {
+            create_get_response_image(2);
+            return;
+        }
+        if (request_.target() == "/3") {
+            create_get_response_image(3);
+            return;
+        }
+
+        auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+        response->version(request_.version());
+        response->keep_alive(false);
+
+        response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+
+        if (request_.target() == "/") {
+            response->result(boost::beast::http::status::ok);
+            response->set(boost::beast::http::field::content_type, "text/html");
+            boost::beast::ostream(response->body())
+                    << "<html>\n"
+                    << "<head><title>Current time</title></head>\n"
+                    << "<body>\n"
+                    << "<h1>Current time</h1>\n"
+                    << "<p>The current time is "
+                    << std::time(nullptr)
+                    << " seconds since the epoch.</p>\n"
+                    << "</body>\n"
+                    << "</html>\n";
+            response->content_length(response->body().size());
+            write_response(response);
+            return;
+        } else {
+            response->result(boost::beast::http::status::not_found);
+            response->set(boost::beast::http::field::content_type, "text/plain");
+            boost::beast::ostream(response->body()) << "File not found\r\n";
+            response->content_length(response->body().size());
+            write_response(response);
+            return;
+        }
+    }
+
+    void ImageServiceHttpConnect::process_request() {
+
+        switch (request_.method()) {
+            case boost::beast::http::verb::get:
+                create_get_response();
+                break;
+
+            default: {
+                auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+                response->version(request_.version());
+                response->keep_alive(false);
+                // We return responses indicating an error if
+                // we do not recognize the request method.
+                response->result(boost::beast::http::status::bad_request);
+                response->set(boost::beast::http::field::content_type, "text/plain");
+                boost::beast::ostream(response->body())
+                        << "Invalid request-method '"
+                        << std::string(request_.method_string())
+                        << "'";
+                response->content_length(response->body().size());
+                write_response(response);
+            }
+                break;
+        }
+
+    }
+
+    ImageServiceHttp::ImageServiceHttp(
+            boost::asio::io_context &ioc,
+            const boost::asio::ip::tcp::endpoint &endpoint,
+            OwlMailDefine::ServiceCameraMailbox &&mailbox
+    ) : ioc_(ioc),
+        acceptor_(boost::asio::make_strand(ioc)),
+        mailbox_(std::move(mailbox)) {
+
+        mailbox_->receiveB2A = [this](OwlMailDefine::MailCamera2Service &&data) {
+            receiveMail(std::move(data));
+        };
+
+        boost::beast::error_code ec;
+
+        // Open the acceptor
+        acceptor_.open(endpoint.protocol(), ec);
+        if (ec) {
+            BOOST_LOG_TRIVIAL(error) << "open" << " : " << ec.message();
+            return;
+        }
+
+        // Allow address reuse
+        acceptor_.set_option(boost::asio::socket_base::reuse_address(true), ec);
+        if (ec) {
+            BOOST_LOG_TRIVIAL(error) << "set_option" << " : " << ec.message();
+            return;
+        }
+
+        // Bind to the server address
+        acceptor_.bind(endpoint, ec);
+        if (ec) {
+            BOOST_LOG_TRIVIAL(error) << "bind" << " : " << ec.message();
+            return;
+        }
+
+        // Start listening for connections
+        acceptor_.listen(
+                boost::asio::socket_base::max_listen_connections, ec);
+        if (ec) {
+            BOOST_LOG_TRIVIAL(error) << "listen" << " : " << ec.message();
+            return;
+        }
+    }
 } // OwlImageServiceHttp
