@@ -26,7 +26,7 @@ namespace OwlImageServiceHttp {
         cmd_data->camera_id = camera_id;
 
         cmd_data->callbackRunner = [this, self = shared_from_this()](
-                OwlMailDefine::MailCamera2Service camera_data
+                const OwlMailDefine::MailCamera2Service& camera_data
         ) {
 
             // now, send back
