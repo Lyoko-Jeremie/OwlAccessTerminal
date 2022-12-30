@@ -59,7 +59,7 @@ int main(int argc, const char *argv[]) {
     // compatible with the version of the headers we compiled against.
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-    BOOST_LOG_TRIVIAL(info) << "cv::haveImageWriter(jpg):" << cv::haveImageWriter("jpg");
+    BOOST_LOG_TRIVIAL(info) << "cv::haveImageWriter(.jpg):" << cv::haveImageWriter(".jpg");
 
 //    // test
 //    OwlImageService::ProtobufTest::createImageRequest();

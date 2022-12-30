@@ -226,7 +226,7 @@ namespace OwlImageService {
                             // TODO inner error
                         } else {
 
-                            OwlMailDefine::MailService2Camera cmd_data{};
+                            OwlMailDefine::MailService2Camera cmd_data = std::make_shared<OwlMailDefine::Service2Camera>();
                             cmd_data->camera_id = ir.camera_id();
 
                             cmd_data->callbackRunner = [this, self = shared_from_this()](
@@ -250,7 +250,7 @@ namespace OwlImageService {
                                     is.set_cmd_id(1);
                                     {
                                         std::vector<uchar> imageBuffer;
-                                        cv::imencode("jpg", img, imageBuffer,
+                                        cv::imencode(".jpg", img, imageBuffer,
                                                      {cv::ImwriteFlags::IMWRITE_JPEG_QUALITY, 70});
 
                                         is.set_image_height(img.rows);

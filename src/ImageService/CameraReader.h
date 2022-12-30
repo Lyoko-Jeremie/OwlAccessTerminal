@@ -86,7 +86,7 @@ namespace OwlCameraReader {
         void getImage(OwlMailDefine::MailService2Camera &&data, OwlMailDefine::ServiceCameraMailbox &mailbox) {
             boost::asio::dispatch(ioc_, [this, self = shared_from_this(), data, &mailbox]() {
                 // make sure all the call to self and to CameraItem run in self ioc
-                OwlMailDefine::MailCamera2Service data_r;
+                OwlMailDefine::MailCamera2Service data_r = std::make_shared<OwlMailDefine::Camera2Service>();
                 data_r->runner = data->callbackRunner;
                 data_r->camera_id = data->camera_id;
                 for (auto &c: camera_item_list_) {
