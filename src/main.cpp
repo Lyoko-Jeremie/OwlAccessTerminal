@@ -207,6 +207,7 @@ int main(int argc, const char *argv[]) {
     sig.add(SIGTERM);
     sig.async_wait([&](const boost::system::error_code error, int signum) {
         if (error) {
+            BOOST_LOG_TRIVIAL(error) << "got signal error: " << error.what() << " signum " << signum;
             return;
         }
         BOOST_LOG_TRIVIAL(error) << "got signal: " << signum;
