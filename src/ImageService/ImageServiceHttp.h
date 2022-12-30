@@ -10,21 +10,29 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/asio.hpp>
+#include <boost/log/trivial.hpp>
 #include <chrono>
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
 #include <memory>
 #include <string>
+#include <utility>
 
 
 namespace OwlImageServiceHttp {
 
+    class ImageServiceHttp;
 
     class ImageServiceHttpConnect : public std::enable_shared_from_this<ImageServiceHttpConnect> {
     public:
-        ImageServiceHttpConnect(boost::asio::ip::tcp::socket socket)
-                : socket_(std::move(socket)) {
+        ImageServiceHttpConnect(
+                boost::asio::io_context &ioc,
+                boost::asio::ip::tcp::socket &&socket,
+                std::weak_ptr<ImageServiceHttp> &&parents
+        ) : ioc_(ioc),
+            socket_(std::move(socket)),
+            parents_(std::move(parents)) {
         }
 
         // Initiate the asynchronous operations associated with the connection.
@@ -35,17 +43,18 @@ namespace OwlImageServiceHttp {
         }
 
     private:
+        boost::asio::io_context &ioc_;
+
         // The socket for the currently connected client.
         boost::asio::ip::tcp::socket socket_;
+
+        std::weak_ptr<ImageServiceHttp> parents_;
 
         // The buffer for performing reads.
         boost::beast::flat_buffer buffer_{8192};
 
         // The request message.
         boost::beast::http::request<boost::beast::http::dynamic_body> request_;
-
-        // The response message.
-        boost::beast::http::response<boost::beast::http::dynamic_body> response_;
 
         // The timer for putting a deadline on connection processing.
         boost::asio::steady_timer deadline_{
@@ -71,78 +80,94 @@ namespace OwlImageServiceHttp {
         // Determine what needs to be done with the request message.
         void
         process_request() {
-            response_.version(request_.version());
-            response_.keep_alive(false);
 
             switch (request_.method()) {
                 case boost::beast::http::verb::get:
-                    response_.result(boost::beast::http::status::ok);
-                    response_.set(boost::beast::http::field::server, "Beast");
-                    create_response();
+                    create_get_response();
                     break;
 
-                default:
+                default: {
+                    auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+                    response->version(request_.version());
+                    response->keep_alive(false);
                     // We return responses indicating an error if
                     // we do not recognize the request method.
-                    response_.result(boost::beast::http::status::bad_request);
-                    response_.set(boost::beast::http::field::content_type, "text/plain");
-                    boost::beast::ostream(response_.body())
+                    response->result(boost::beast::http::status::bad_request);
+                    response->set(boost::beast::http::field::content_type, "text/plain");
+                    boost::beast::ostream(response->body())
                             << "Invalid request-method '"
                             << std::string(request_.method_string())
                             << "'";
+                    response->content_length(response->body().size());
+                    write_response(response);
+                }
                     break;
             }
 
-            write_response();
         }
+
+        void create_get_response_image(int camera_id);
 
         // Construct a response message based on the program state.
         void
-        create_response() {
-            if (request_.target() == "/count") {
-//                response_.set(boost::beast::http::field::content_type, "text/html");
-//                boost::beast::ostream(response_.body())
-//                        << "<html>\n"
-//                        <<  "<head><title>Request count</title></head>\n"
-//                        <<  "<body>\n"
-//                        <<  "<h1>Request count</h1>\n"
-//                        <<  "<p>There have been "
-//                        <<  my_program_state::request_count()
-//                        <<  " requests so far.</p>\n"
-//                        <<  "</body>\n"
-//                        <<  "</html>\n";
-//            }
-//            else if(request_.target() == "/time")
-//            {
-//                response_.set(boost::beast::http::field::content_type, "text/html");
-//                boost::beast::ostream(response_.body())
-//                        <<  "<html>\n"
-//                        <<  "<head><title>Current time</title></head>\n"
-//                        <<  "<body>\n"
-//                        <<  "<h1>Current time</h1>\n"
-//                        <<  "<p>The current time is "
-//                        <<  my_program_state::now()
-//                        <<  " seconds since the epoch.</p>\n"
-//                        <<  "</body>\n"
-//                        <<  "</html>\n";
+        create_get_response() {
+
+            if (request_.target() == "/1") {
+                create_get_response_image(1);
+                return;
+            }
+            if (request_.target() == "/2") {
+                create_get_response_image(2);
+                return;
+            }
+            if (request_.target() == "/3") {
+                create_get_response_image(3);
+                return;
+            }
+
+            auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+            response->version(request_.version());
+            response->keep_alive(false);
+
+            response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+
+            if (request_.target() == "/") {
+                response->result(boost::beast::http::status::ok);
+                response->set(boost::beast::http::field::content_type, "text/html");
+                boost::beast::ostream(response->body())
+                        << "<html>\n"
+                        << "<head><title>Current time</title></head>\n"
+                        << "<body>\n"
+                        << "<h1>Current time</h1>\n"
+                        << "<p>The current time is "
+                        << std::time(nullptr)
+                        << " seconds since the epoch.</p>\n"
+                        << "</body>\n"
+                        << "</html>\n";
+                response->content_length(response->body().size());
+                write_response(response);
+                return;
             } else {
-                response_.result(boost::beast::http::status::not_found);
-                response_.set(boost::beast::http::field::content_type, "text/plain");
-                boost::beast::ostream(response_.body()) << "File not found\r\n";
+                response->result(boost::beast::http::status::not_found);
+                response->set(boost::beast::http::field::content_type, "text/plain");
+                boost::beast::ostream(response->body()) << "File not found\r\n";
+                response->content_length(response->body().size());
+                write_response(response);
+                return;
             }
         }
 
         // Asynchronously transmit the response message.
-        void
-        write_response() {
+        template<typename BodyType =boost::beast::http::dynamic_body>
+        void write_response(
+                std::shared_ptr<boost::beast::http::response<BodyType>> response
+        ) {
             auto self = shared_from_this();
-
-            response_.content_length(response_.body().size());
 
             boost::beast::http::async_write(
                     socket_,
-                    response_,
-                    [self](boost::beast::error_code ec, std::size_t) {
+                    *response,
+                    [self, response](boost::beast::error_code ec, std::size_t) {
                         self->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
                         self->deadline_.cancel();
                     });
@@ -176,6 +201,37 @@ namespace OwlImageServiceHttp {
             mailbox_->receiveB2A = [this](OwlMailDefine::MailCamera2Service &&data) {
                 receiveMail(std::move(data));
             };
+
+            boost::beast::error_code ec;
+
+            // Open the acceptor
+            acceptor_.open(endpoint.protocol(), ec);
+            if (ec) {
+                BOOST_LOG_TRIVIAL(error) << "open" << " : " << ec.message();
+                return;
+            }
+
+            // Allow address reuse
+            acceptor_.set_option(boost::asio::socket_base::reuse_address(true), ec);
+            if (ec) {
+                BOOST_LOG_TRIVIAL(error) << "set_option" << " : " << ec.message();
+                return;
+            }
+
+            // Bind to the server address
+            acceptor_.bind(endpoint, ec);
+            if (ec) {
+                BOOST_LOG_TRIVIAL(error) << "bind" << " : " << ec.message();
+                return;
+            }
+
+            // Start listening for connections
+            acceptor_.listen(
+                    boost::asio::socket_base::max_listen_connections, ec);
+            if (ec) {
+                BOOST_LOG_TRIVIAL(error) << "listen" << " : " << ec.message();
+                return;
+            }
         }
 
         ~ImageServiceHttp() {
@@ -209,9 +265,30 @@ namespace OwlImageServiceHttp {
     private:
         void
         do_accept() {
-            // TODO
+            // The new connection gets its own strand
+            acceptor_.async_accept(
+                    boost::asio::make_strand(ioc_),
+                    boost::beast::bind_front_handler(
+                            &ImageServiceHttp::on_accept,
+                            shared_from_this()));
         }
 
+        void
+        on_accept(boost::beast::error_code ec, boost::asio::ip::tcp::socket socket) {
+            if (ec) {
+                BOOST_LOG_TRIVIAL(error) << "accept" << " : " << ec.message();
+            } else {
+                // Create the session and run it
+                std::make_shared<ImageServiceHttpConnect>(
+                        ioc_,
+                        std::move(socket),
+                        weak_from_this()
+                )->start();
+            }
+
+            // Accept another connection
+            do_accept();
+        }
     };
 
 } // OwlImageServiceHttp
