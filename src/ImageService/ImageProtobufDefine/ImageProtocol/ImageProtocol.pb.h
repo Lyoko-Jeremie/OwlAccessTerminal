@@ -213,6 +213,7 @@ class ImageRequest final :
     kCameraIdFieldNumber = 3,
     kImageWidthFieldNumber = 11,
     kImageHeightFieldNumber = 12,
+    kNeedResizeFieldNumber = 101,
   };
   // int32 cmd_id = 1;
   void clear_cmd_id();
@@ -275,6 +276,19 @@ class ImageRequest final :
   void _internal_set_image_height(int32_t value);
   public:
 
+  // optional bool need_resize = 101;
+  bool has_need_resize() const;
+  private:
+  bool _internal_has_need_resize() const;
+  public:
+  void clear_need_resize();
+  bool need_resize() const;
+  void set_need_resize(bool value);
+  private:
+  bool _internal_need_resize() const;
+  void _internal_set_need_resize(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:ImageRequest)
  private:
   class _Internal;
@@ -290,6 +304,7 @@ class ImageRequest final :
     int32_t camera_id_;
     int32_t image_width_;
     int32_t image_height_;
+    bool need_resize_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_ImageProtocol_2eproto;
@@ -426,6 +441,7 @@ class ImageResponse final :
     kImagePixelChannelFieldNumber = 51,
     kImageDataSizeFieldNumber = 50,
     kImageFormatFieldNumber = 52,
+    kIsOkFieldNumber = 101,
   };
   // optional bytes image_data = 60;
   bool has_image_data() const;
@@ -545,6 +561,19 @@ class ImageResponse final :
   void _internal_set_image_format(::ImageFormat value);
   public:
 
+  // optional bool is_ok = 101;
+  bool has_is_ok() const;
+  private:
+  bool _internal_has_is_ok() const;
+  public:
+  void clear_is_ok();
+  bool is_ok() const;
+  void set_is_ok(bool value);
+  private:
+  bool _internal_is_ok() const;
+  void _internal_set_is_ok(bool value);
+  public:
+
   // @@protoc_insertion_point(class_scope:ImageResponse)
  private:
   class _Internal;
@@ -564,6 +593,7 @@ class ImageResponse final :
     int32_t image_pixel_channel_;
     uint64_t image_data_size_;
     int image_format_;
+    bool is_ok_;
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_ImageProtocol_2eproto;
@@ -709,6 +739,34 @@ inline void ImageRequest::_internal_set_image_height(int32_t value) {
 inline void ImageRequest::set_image_height(int32_t value) {
   _internal_set_image_height(value);
   // @@protoc_insertion_point(field_set:ImageRequest.image_height)
+}
+
+// optional bool need_resize = 101;
+inline bool ImageRequest::_internal_has_need_resize() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool ImageRequest::has_need_resize() const {
+  return _internal_has_need_resize();
+}
+inline void ImageRequest::clear_need_resize() {
+  _impl_.need_resize_ = false;
+  _impl_._has_bits_[0] &= ~0x00000010u;
+}
+inline bool ImageRequest::_internal_need_resize() const {
+  return _impl_.need_resize_;
+}
+inline bool ImageRequest::need_resize() const {
+  // @@protoc_insertion_point(field_get:ImageRequest.need_resize)
+  return _internal_need_resize();
+}
+inline void ImageRequest::_internal_set_need_resize(bool value) {
+  _impl_._has_bits_[0] |= 0x00000010u;
+  _impl_.need_resize_ = value;
+}
+inline void ImageRequest::set_need_resize(bool value) {
+  _internal_set_need_resize(value);
+  // @@protoc_insertion_point(field_set:ImageRequest.need_resize)
 }
 
 // -------------------------------------------------------------------
@@ -997,6 +1055,34 @@ inline void ImageResponse::set_allocated_image_data(std::string* image_data) {
   }
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:ImageResponse.image_data)
+}
+
+// optional bool is_ok = 101;
+inline bool ImageResponse::_internal_has_is_ok() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000100u) != 0;
+  return value;
+}
+inline bool ImageResponse::has_is_ok() const {
+  return _internal_has_is_ok();
+}
+inline void ImageResponse::clear_is_ok() {
+  _impl_.is_ok_ = false;
+  _impl_._has_bits_[0] &= ~0x00000100u;
+}
+inline bool ImageResponse::_internal_is_ok() const {
+  return _impl_.is_ok_;
+}
+inline bool ImageResponse::is_ok() const {
+  // @@protoc_insertion_point(field_get:ImageResponse.is_ok)
+  return _internal_is_ok();
+}
+inline void ImageResponse::_internal_set_is_ok(bool value) {
+  _impl_._has_bits_[0] |= 0x00000100u;
+  _impl_.is_ok_ = value;
+}
+inline void ImageResponse::set_is_ok(bool value) {
+  _internal_set_is_ok(value);
+  // @@protoc_insertion_point(field_set:ImageResponse.is_ok)
 }
 
 #ifdef __GNUC__

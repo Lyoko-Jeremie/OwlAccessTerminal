@@ -28,7 +28,8 @@ PROTOBUF_CONSTEXPR ImageRequest::ImageRequest(
   , /*decltype(_impl_.package_id_)*/0
   , /*decltype(_impl_.camera_id_)*/0
   , /*decltype(_impl_.image_width_)*/0
-  , /*decltype(_impl_.image_height_)*/0} {}
+  , /*decltype(_impl_.image_height_)*/0
+  , /*decltype(_impl_.need_resize_)*/false} {}
 struct ImageRequestDefaultTypeInternal {
   PROTOBUF_CONSTEXPR ImageRequestDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -50,7 +51,8 @@ PROTOBUF_CONSTEXPR ImageResponse::ImageResponse(
   , /*decltype(_impl_.image_height_)*/0
   , /*decltype(_impl_.image_pixel_channel_)*/0
   , /*decltype(_impl_.image_data_size_)*/uint64_t{0u}
-  , /*decltype(_impl_.image_format_)*/0} {}
+  , /*decltype(_impl_.image_format_)*/0
+  , /*decltype(_impl_.is_ok_)*/false} {}
 struct ImageResponseDefaultTypeInternal {
   PROTOBUF_CONSTEXPR ImageResponseDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -76,11 +78,13 @@ const uint32_t TableStruct_ImageProtocol_2eproto::offsets[] PROTOBUF_SECTION_VAR
   PROTOBUF_FIELD_OFFSET(::ImageRequest, _impl_.camera_id_),
   PROTOBUF_FIELD_OFFSET(::ImageRequest, _impl_.image_width_),
   PROTOBUF_FIELD_OFFSET(::ImageRequest, _impl_.image_height_),
+  PROTOBUF_FIELD_OFFSET(::ImageRequest, _impl_.need_resize_),
   ~0u,
   0,
   1,
   2,
   3,
+  4,
   PROTOBUF_FIELD_OFFSET(::ImageResponse, _impl_._has_bits_),
   PROTOBUF_FIELD_OFFSET(::ImageResponse, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -96,6 +100,7 @@ const uint32_t TableStruct_ImageProtocol_2eproto::offsets[] PROTOBUF_SECTION_VAR
   PROTOBUF_FIELD_OFFSET(::ImageResponse, _impl_.image_pixel_channel_),
   PROTOBUF_FIELD_OFFSET(::ImageResponse, _impl_.image_format_),
   PROTOBUF_FIELD_OFFSET(::ImageResponse, _impl_.image_data_),
+  PROTOBUF_FIELD_OFFSET(::ImageResponse, _impl_.is_ok_),
   ~0u,
   1,
   2,
@@ -105,10 +110,11 @@ const uint32_t TableStruct_ImageProtocol_2eproto::offsets[] PROTOBUF_SECTION_VAR
   5,
   7,
   0,
+  8,
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, 11, -1, sizeof(::ImageRequest)},
-  { 16, 31, -1, sizeof(::ImageResponse)},
+  { 0, 12, -1, sizeof(::ImageRequest)},
+  { 18, 34, -1, sizeof(::ImageResponse)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
@@ -117,30 +123,32 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 
 const char descriptor_table_protodef_ImageProtocol_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\023ImageProtocol.proto\"\302\001\n\014ImageRequest\022\016"
+  "\n\023ImageProtocol.proto\"\354\001\n\014ImageRequest\022\016"
   "\n\006cmd_id\030\001 \001(\005\022\027\n\npackage_id\030\002 \001(\005H\000\210\001\001\022"
   "\026\n\tcamera_id\030\003 \001(\005H\001\210\001\001\022\030\n\013image_width\030\013"
-  " \001(\005H\002\210\001\001\022\031\n\014image_height\030\014 \001(\005H\003\210\001\001B\r\n\013"
-  "_package_idB\014\n\n_camera_idB\016\n\014_image_widt"
-  "hB\017\n\r_image_height\"\221\003\n\rImageResponse\022\016\n\006"
-  "cmd_id\030\001 \001(\005\022\027\n\npackage_id\030\002 \001(\005H\000\210\001\001\022\026\n"
-  "\tcamera_id\030\003 \001(\005H\001\210\001\001\022\030\n\013image_width\030\013 \001"
-  "(\005H\002\210\001\001\022\031\n\014image_height\030\014 \001(\005H\003\210\001\001\022\034\n\017im"
-  "age_data_size\0302 \001(\004H\004\210\001\001\022 \n\023image_pixel_"
-  "channel\0303 \001(\005H\005\210\001\001\022\'\n\014image_format\0304 \001(\016"
-  "2\014.ImageFormatH\006\210\001\001\022\027\n\nimage_data\030< \001(\014H"
-  "\007\210\001\001B\r\n\013_package_idB\014\n\n_camera_idB\016\n\014_im"
-  "age_widthB\017\n\r_image_heightB\022\n\020_image_dat"
-  "a_sizeB\026\n\024_image_pixel_channelB\017\n\r_image"
-  "_formatB\r\n\013_image_data*\227\001\n\013ImageFormat\022\025"
-  "\n\021IMAGE_FORMAT_NONE\020\000\022\024\n\020IMAGE_FORMAT_JP"
-  "G\020\001\022\024\n\020IMAGE_FORMAT_BMP\020\002\022\024\n\020IMAGE_FORMA"
-  "T_PNG\020\003\022\024\n\020IMAGE_FORMAT_GIF\020\004\022\031\n\025IMAGE_F"
-  "ORMAT_BYTE_MAT\020\005b\006proto3"
+  " \001(\005H\002\210\001\001\022\031\n\014image_height\030\014 \001(\005H\003\210\001\001\022\030\n\013"
+  "need_resize\030e \001(\010H\004\210\001\001B\r\n\013_package_idB\014\n"
+  "\n_camera_idB\016\n\014_image_widthB\017\n\r_image_he"
+  "ightB\016\n\014_need_resize\"\257\003\n\rImageResponse\022\016"
+  "\n\006cmd_id\030\001 \001(\005\022\027\n\npackage_id\030\002 \001(\005H\000\210\001\001\022"
+  "\026\n\tcamera_id\030\003 \001(\005H\001\210\001\001\022\030\n\013image_width\030\013"
+  " \001(\005H\002\210\001\001\022\031\n\014image_height\030\014 \001(\005H\003\210\001\001\022\034\n\017"
+  "image_data_size\0302 \001(\004H\004\210\001\001\022 \n\023image_pixe"
+  "l_channel\0303 \001(\005H\005\210\001\001\022\'\n\014image_format\0304 \001"
+  "(\0162\014.ImageFormatH\006\210\001\001\022\027\n\nimage_data\030< \001("
+  "\014H\007\210\001\001\022\022\n\005is_ok\030e \001(\010H\010\210\001\001B\r\n\013_package_i"
+  "dB\014\n\n_camera_idB\016\n\014_image_widthB\017\n\r_imag"
+  "e_heightB\022\n\020_image_data_sizeB\026\n\024_image_p"
+  "ixel_channelB\017\n\r_image_formatB\r\n\013_image_"
+  "dataB\010\n\006_is_ok*\227\001\n\013ImageFormat\022\025\n\021IMAGE_"
+  "FORMAT_NONE\020\000\022\024\n\020IMAGE_FORMAT_JPG\020\001\022\024\n\020I"
+  "MAGE_FORMAT_BMP\020\002\022\024\n\020IMAGE_FORMAT_PNG\020\003\022"
+  "\024\n\020IMAGE_FORMAT_GIF\020\004\022\031\n\025IMAGE_FORMAT_BY"
+  "TE_MAT\020\005b\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_ImageProtocol_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_ImageProtocol_2eproto = {
-    false, false, 784, descriptor_table_protodef_ImageProtocol_2eproto,
+    false, false, 856, descriptor_table_protodef_ImageProtocol_2eproto,
     "ImageProtocol.proto",
     &descriptor_table_ImageProtocol_2eproto_once, nullptr, 0, 2,
     schemas, file_default_instances, TableStruct_ImageProtocol_2eproto::offsets,
@@ -189,6 +197,9 @@ class ImageRequest::_Internal {
   static void set_has_image_height(HasBits* has_bits) {
     (*has_bits)[0] |= 8u;
   }
+  static void set_has_need_resize(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
+  }
 };
 
 ImageRequest::ImageRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -207,12 +218,13 @@ ImageRequest::ImageRequest(const ImageRequest& from)
     , decltype(_impl_.package_id_){}
     , decltype(_impl_.camera_id_){}
     , decltype(_impl_.image_width_){}
-    , decltype(_impl_.image_height_){}};
+    , decltype(_impl_.image_height_){}
+    , decltype(_impl_.need_resize_){}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::memcpy(&_impl_.cmd_id_, &from._impl_.cmd_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.image_height_) -
-    reinterpret_cast<char*>(&_impl_.cmd_id_)) + sizeof(_impl_.image_height_));
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.need_resize_) -
+    reinterpret_cast<char*>(&_impl_.cmd_id_)) + sizeof(_impl_.need_resize_));
   // @@protoc_insertion_point(copy_constructor:ImageRequest)
 }
 
@@ -228,6 +240,7 @@ inline void ImageRequest::SharedCtor(
     , decltype(_impl_.camera_id_){0}
     , decltype(_impl_.image_width_){0}
     , decltype(_impl_.image_height_){0}
+    , decltype(_impl_.need_resize_){false}
   };
 }
 
@@ -256,10 +269,10 @@ void ImageRequest::Clear() {
 
   _impl_.cmd_id_ = 0;
   cached_has_bits = _impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
+  if (cached_has_bits & 0x0000001fu) {
     ::memset(&_impl_.package_id_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&_impl_.image_height_) -
-        reinterpret_cast<char*>(&_impl_.package_id_)) + sizeof(_impl_.image_height_));
+        reinterpret_cast<char*>(&_impl_.need_resize_) -
+        reinterpret_cast<char*>(&_impl_.package_id_)) + sizeof(_impl_.need_resize_));
   }
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -312,6 +325,15 @@ const char* ImageRequest::_InternalParse(const char* ptr, ::_pbi::ParseContext* 
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 96)) {
           _Internal::set_has_image_height(&has_bits);
           _impl_.image_height_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // optional bool need_resize = 101;
+      case 101:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
+          _Internal::set_has_need_resize(&has_bits);
+          _impl_.need_resize_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -376,6 +398,12 @@ uint8_t* ImageRequest::_InternalSerialize(
     target = ::_pbi::WireFormatLite::WriteInt32ToArray(12, this->_internal_image_height(), target);
   }
 
+  // optional bool need_resize = 101;
+  if (_internal_has_need_resize()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(101, this->_internal_need_resize(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -398,7 +426,7 @@ size_t ImageRequest::ByteSizeLong() const {
   }
 
   cached_has_bits = _impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
+  if (cached_has_bits & 0x0000001fu) {
     // optional int32 package_id = 2;
     if (cached_has_bits & 0x00000001u) {
       total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_package_id());
@@ -417,6 +445,11 @@ size_t ImageRequest::ByteSizeLong() const {
     // optional int32 image_height = 12;
     if (cached_has_bits & 0x00000008u) {
       total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_image_height());
+    }
+
+    // optional bool need_resize = 101;
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 2 + 1;
     }
 
   }
@@ -442,7 +475,7 @@ void ImageRequest::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::P
     _this->_internal_set_cmd_id(from._internal_cmd_id());
   }
   cached_has_bits = from._impl_._has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
+  if (cached_has_bits & 0x0000001fu) {
     if (cached_has_bits & 0x00000001u) {
       _this->_impl_.package_id_ = from._impl_.package_id_;
     }
@@ -454,6 +487,9 @@ void ImageRequest::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::P
     }
     if (cached_has_bits & 0x00000008u) {
       _this->_impl_.image_height_ = from._impl_.image_height_;
+    }
+    if (cached_has_bits & 0x00000010u) {
+      _this->_impl_.need_resize_ = from._impl_.need_resize_;
     }
     _this->_impl_._has_bits_[0] |= cached_has_bits;
   }
@@ -476,8 +512,8 @@ void ImageRequest::InternalSwap(ImageRequest* other) {
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(ImageRequest, _impl_.image_height_)
-      + sizeof(ImageRequest::_impl_.image_height_)
+      PROTOBUF_FIELD_OFFSET(ImageRequest, _impl_.need_resize_)
+      + sizeof(ImageRequest::_impl_.need_resize_)
       - PROTOBUF_FIELD_OFFSET(ImageRequest, _impl_.cmd_id_)>(
           reinterpret_cast<char*>(&_impl_.cmd_id_),
           reinterpret_cast<char*>(&other->_impl_.cmd_id_));
@@ -518,6 +554,9 @@ class ImageResponse::_Internal {
   static void set_has_image_data(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
+  static void set_has_is_ok(HasBits* has_bits) {
+    (*has_bits)[0] |= 256u;
+  }
 };
 
 ImageResponse::ImageResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -540,7 +579,8 @@ ImageResponse::ImageResponse(const ImageResponse& from)
     , decltype(_impl_.image_height_){}
     , decltype(_impl_.image_pixel_channel_){}
     , decltype(_impl_.image_data_size_){}
-    , decltype(_impl_.image_format_){}};
+    , decltype(_impl_.image_format_){}
+    , decltype(_impl_.is_ok_){}};
 
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   _impl_.image_data_.InitDefault();
@@ -552,8 +592,8 @@ ImageResponse::ImageResponse(const ImageResponse& from)
       _this->GetArenaForAllocation());
   }
   ::memcpy(&_impl_.cmd_id_, &from._impl_.cmd_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.image_format_) -
-    reinterpret_cast<char*>(&_impl_.cmd_id_)) + sizeof(_impl_.image_format_));
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.is_ok_) -
+    reinterpret_cast<char*>(&_impl_.cmd_id_)) + sizeof(_impl_.is_ok_));
   // @@protoc_insertion_point(copy_constructor:ImageResponse)
 }
 
@@ -573,6 +613,7 @@ inline void ImageResponse::SharedCtor(
     , decltype(_impl_.image_pixel_channel_){0}
     , decltype(_impl_.image_data_size_){uint64_t{0u}}
     , decltype(_impl_.image_format_){0}
+    , decltype(_impl_.is_ok_){false}
   };
   _impl_.image_data_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -614,6 +655,7 @@ void ImageResponse::Clear() {
         reinterpret_cast<char*>(&_impl_.image_format_) -
         reinterpret_cast<char*>(&_impl_.package_id_)) + sizeof(_impl_.image_format_));
   }
+  _impl_.is_ok_ = false;
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -705,6 +747,15 @@ const char* ImageResponse::_InternalParse(const char* ptr, ::_pbi::ParseContext*
         } else
           goto handle_unusual;
         continue;
+      // optional bool is_ok = 101;
+      case 101:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
+          _Internal::set_has_is_ok(&has_bits);
+          _impl_.is_ok_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
       default:
         goto handle_unusual;
     }  // switch
@@ -790,6 +841,12 @@ uint8_t* ImageResponse::_InternalSerialize(
         60, this->_internal_image_data(), target);
   }
 
+  // optional bool is_ok = 101;
+  if (_internal_has_is_ok()) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(101, this->_internal_is_ok(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -861,6 +918,11 @@ size_t ImageResponse::ByteSizeLong() const {
     }
 
   }
+  // optional bool is_ok = 101;
+  if (cached_has_bits & 0x00000100u) {
+    total_size += 2 + 1;
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
@@ -910,6 +972,9 @@ void ImageResponse::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::
     }
     _this->_impl_._has_bits_[0] |= cached_has_bits;
   }
+  if (cached_has_bits & 0x00000100u) {
+    _this->_internal_set_is_ok(from._internal_is_ok());
+  }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -935,8 +1000,8 @@ void ImageResponse::InternalSwap(ImageResponse* other) {
       &other->_impl_.image_data_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(ImageResponse, _impl_.image_format_)
-      + sizeof(ImageResponse::_impl_.image_format_)
+      PROTOBUF_FIELD_OFFSET(ImageResponse, _impl_.is_ok_)
+      + sizeof(ImageResponse::_impl_.is_ok_)
       - PROTOBUF_FIELD_OFFSET(ImageResponse, _impl_.cmd_id_)>(
           reinterpret_cast<char*>(&_impl_.cmd_id_),
           reinterpret_cast<char*>(&other->_impl_.cmd_id_));
