@@ -205,21 +205,21 @@ namespace OwlImageService {
 
     void ImageServiceSession::do_process_request(std::string &&s) {
 
-        ImageRequest ir;
-        if (!ir.ParseFromString(s)) {
+        std::shared_ptr<ImageRequest> ir = std::make_shared<ImageRequest>();
+        if (!ir->ParseFromString(s)) {
             BOOST_LOG_TRIVIAL(info) << "do_process_request ParseFromString failed.";
             // ignore
             return;
         }
 
-        BOOST_LOG_TRIVIAL(info) << "do_process_request ImageRequest: " << ir.DebugString();
+        BOOST_LOG_TRIVIAL(info) << "do_process_request ImageRequest: " << ir->DebugString();
 
         try {
-            switch (ir.cmd_id()) {
+            switch (ir->cmd_id()) {
                 case 1: {
                     // this is a read camera request
-                    if (ir.has_package_id() && ir.has_camera_id()) {
-                        // TODO get camera image data on here
+                    if (ir->has_package_id() && ir->has_camera_id()) {
+                        // get camera image data on here
 
                         auto p = parents_.lock();
                         if (!p) {
@@ -227,9 +227,9 @@ namespace OwlImageService {
                         } else {
 
                             OwlMailDefine::MailService2Camera cmd_data = std::make_shared<OwlMailDefine::Service2Camera>();
-                            cmd_data->camera_id = ir.camera_id();
+                            cmd_data->camera_id = ir->camera_id();
 
-                            cmd_data->callbackRunner = [this, self = shared_from_this()](
+                            cmd_data->callbackRunner = [this, self = shared_from_this(), ir](
                                     OwlMailDefine::MailCamera2Service camera_data
                             ) {
 
@@ -239,11 +239,22 @@ namespace OwlImageService {
                                 }
 
                                 // try to run immediately if now on this ioc, or run it later
-                                boost::asio::dispatch(ioc_, [this, self = shared_from_this(), camera_data]() {
+                                boost::asio::dispatch(ioc_, [this, self = shared_from_this(), camera_data, ir]() {
 
 //                                cv::Mat img{6, 6, CV_8UC3, cv::Scalar{0, 0, 0}};
                                     cv::Mat img = camera_data->image;
                                     camera_data->image.release();
+
+                                    // resize
+                                    if (ir->need_resize() &&
+                                        ir->image_width() > 0 && ir->image_height() > 0 &&
+                                        ir->image_width() < img.cols && ir->image_height() < img.rows
+                                            ) {
+                                        cv::resize(img, img,
+                                                   {ir->image_width(), ir->image_height()},
+                                                   0, 0,
+                                                   cv::InterpolationFlags::INTER_NEAREST);
+                                    }
 
                                     // now create ImageResponse package
                                     ImageResponse is;
@@ -266,6 +277,7 @@ namespace OwlImageService {
                                         is.set_image_data(imageString);
                                         is.set_image_data_size(imageString.size());
                                     }
+                                    is.set_is_ok(true);
 
                                     // now create send package and send it
                                     auto package_s_ = std::make_shared<CommonTcpPackage>();
@@ -295,15 +307,15 @@ namespace OwlImageService {
                 }
                     return;
                 default:
-                    BOOST_LOG_TRIVIAL(warning) << "do_process_request switch default: " << ir.DebugString();
+                    BOOST_LOG_TRIVIAL(warning) << "do_process_request switch default: " << ir->DebugString();
                     return;
             }
         } catch (const std::exception &e) {
-            BOOST_LOG_TRIVIAL(error) << "do_process_request catch exception on " << ir.DebugString()
+            BOOST_LOG_TRIVIAL(error) << "do_process_request catch exception on " << ir->DebugString()
                                      << " e: " << e.what();
             return;
         } catch (...) {
-            BOOST_LOG_TRIVIAL(error) << "do_process_request catch unknown exception on " << ir.DebugString();
+            BOOST_LOG_TRIVIAL(error) << "do_process_request catch unknown exception on " << ir->DebugString();
             return;
         }
     }
