@@ -1,6 +1,7 @@
 // jeremie
 
 #include "ImageServiceHttp.h"
+#include <boost/lexical_cast.hpp>
 
 namespace OwlImageServiceHttp {
     void ImageServiceHttpConnect::create_get_response_image(int camera_id) {
@@ -26,7 +27,7 @@ namespace OwlImageServiceHttp {
         cmd_data->camera_id = camera_id;
 
         cmd_data->callbackRunner = [this, self = shared_from_this()](
-                const OwlMailDefine::MailCamera2Service& camera_data
+                const OwlMailDefine::MailCamera2Service &camera_data
         ) {
 
             // now, send back
@@ -57,7 +58,7 @@ namespace OwlImageServiceHttp {
                 auto imageBuffer = std::make_shared<std::vector<uchar>>();
                 cv::imencode(".jpg", img, *imageBuffer,
                              {cv::ImwriteFlags::IMWRITE_JPEG_QUALITY, 70});
-                img.release();
+
 
                 // https://www.boost.org/doc/libs/develop/libs/beast/example/doc/http_examples.hpp
                 //      `send_cgi_response()`
@@ -66,10 +67,20 @@ namespace OwlImageServiceHttp {
                 response->keep_alive(false);
 
                 response->result(boost::beast::http::status::ok);
+                response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+
                 response->set(boost::beast::http::field::content_type, "image/jpeg");
+
+                response->set("X-image-height", boost::lexical_cast<std::string>(img.rows));
+                response->set("X-image-width", boost::lexical_cast<std::string>(img.cols));
+                response->set("X-image-pixel-channel", boost::lexical_cast<std::string>(img.channels()));
+                response->set("X-image-format", "jpg");
+
+                img.release();
 
                 response->body().data = imageBuffer->data();
                 response->body().size = imageBuffer->size();
+
 
                 boost::beast::http::async_write(
                         socket_,
