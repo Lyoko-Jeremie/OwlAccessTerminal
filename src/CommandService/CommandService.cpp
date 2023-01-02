@@ -303,7 +303,7 @@ namespace OwlCommandService {
                                         boost::json::value{
                                                 {"cmdId",     cmdId},
                                                 {"packageId", packageId},
-                                                {"msg",       "land"},
+                                                {"msg",       "rotate cw"},
                                                 {"result",    true},
                                         }
                                 );
@@ -315,7 +315,7 @@ namespace OwlCommandService {
                                         boost::json::value{
                                                 {"cmdId",     cmdId},
                                                 {"packageId", packageId},
-                                                {"msg",       "land"},
+                                                {"msg",       "rotate ccw"},
                                                 {"result",    true},
                                         }
                                 );
