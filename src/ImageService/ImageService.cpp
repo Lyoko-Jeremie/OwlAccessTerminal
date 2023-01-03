@@ -235,6 +235,13 @@ namespace OwlImageService {
 
                                 // now, send back
                                 if (!camera_data->ok) {
+
+                                    // now create empty package and send it
+                                    auto package_s_ = std::make_shared<CommonTcpPackage>();
+
+                                    package_s_->size_ = 0;
+                                    do_send_size(package_s_);
+
                                     return;
                                 }
 
@@ -279,7 +286,7 @@ namespace OwlImageService {
                                     }
                                     is.set_is_ok(true);
 
-                                    // now create send package and send it
+                                    // now create package and send it
                                     auto package_s_ = std::make_shared<CommonTcpPackage>();
                                     // https://stackoverflow.com/questions/44904295/convert-stdstring-to-boostasiostreambuf
                                     std::string is_string;
