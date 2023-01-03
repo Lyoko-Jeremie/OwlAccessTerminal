@@ -4,25 +4,28 @@ project(${ProjectMainName})
 
 set(CMAKE_CXX_STANDARD 20)
 
-# ===================== vvvvvv config segment vvvvvv =================================
 
-#set(OpenCV_DIR d:/CodeLib/opencv-4.5.5-build/)
-set(OpenCV_DIR d:/CodeLib/opencv-4.5.5-build-install/)
-set(OpenCV_STATIC ON)
-set(OpenCV_WORLD ON)
+if (DEFAULT_CONFIG)
+    # ===================== vvvvvv config segment vvvvvv =================================
 
-set(BOOST_ROOT d:/CodeLib/boost_1_81_0_install_x64_v11p3/)
-#set(BOOST_ROOT d:/CodeLib/boost_1_80_0_install_x64_v11p3/)
-#set(Boost_INCLUDE_DIR d:/CodeLib/boost_1_74_0_install_x64_v11p3/include/boost-1_74)
-#set(Boost_LIBRARY_DIR d:/CodeLib/boost_1_74_0_install_x64_v11p3/lib)
-#set(USE_DYNAMIC_BOOST true)
-#set(BOOST_DEBUG ON)
-set(PROTOBUFF_INCLUDE_DIRS d:/CodeLib/protobuf-cpp-3.21.11-build-install/include/)
-set(PROTOBUFF_LIBS d:/CodeLib/protobuf-cpp-3.21.11-build-install/lib/libprotobuf.a)
+    #set(OpenCV_DIR d:/CodeLib/opencv-4.5.5-build/)
+    set(OpenCV_DIR d:/CodeLib/opencv-4.5.5-build-install/)
+    set(OpenCV_STATIC ON)
+    set(OpenCV_WORLD ON)
 
-#add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
+    set(BOOST_ROOT d:/CodeLib/boost_1_81_0_install_x64_v11p3/)
+    #set(BOOST_ROOT d:/CodeLib/boost_1_80_0_install_x64_v11p3/)
+    #set(Boost_INCLUDE_DIR d:/CodeLib/boost_1_74_0_install_x64_v11p3/include/boost-1_74)
+    #set(Boost_LIBRARY_DIR d:/CodeLib/boost_1_74_0_install_x64_v11p3/lib)
+    #set(USE_DYNAMIC_BOOST true)
+    #set(BOOST_DEBUG ON)
+    set(PROTOBUFF_INCLUDE_DIRS d:/CodeLib/protobuf-cpp-3.21.11-build-install/include/)
+    set(PROTOBUFF_LIBS d:/CodeLib/protobuf-cpp-3.21.11-build-install/lib/libprotobuf.a)
 
-# ===================== ^^^^^^ config segment ^^^^^^ =================================
+    #add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
+
+    # ===================== ^^^^^^ config segment ^^^^^^ =================================
+endif ()
 
 
 option(BOOST_ROOT "")
