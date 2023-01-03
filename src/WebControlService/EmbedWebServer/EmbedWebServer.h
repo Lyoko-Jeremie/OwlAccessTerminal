@@ -34,12 +34,16 @@ namespace OwlEmbedWebServer {
         EmbedWebServer(
                 boost::asio::io_context &ioc,
                 OwlMailDefine::WebCmdMailbox &&mailbox,
-                const boost::asio::ip::tcp::endpoint& endpoint,
+                const boost::asio::ip::tcp::endpoint &endpoint,
                 std::shared_ptr<std::string const> const &doc_root,
                 std::shared_ptr<std::string const> const &index_file_of_root,
                 std::shared_ptr<std::string const> const &backend_json_string,
                 std::shared_ptr<std::string const> const &allowFileExtList
         );
+
+        ~EmbedWebServer() {
+            mailbox_->receiveB2A = nullptr;
+        }
 
         // Start accepting incoming connections
         void
@@ -53,6 +57,18 @@ namespace OwlEmbedWebServer {
 
         void
         on_accept(boost::beast::error_code ec, boost::asio::ip::tcp::socket socket);
+
+
+    public:
+        void receiveMail(OwlMailDefine::MailCmd2Web &&data) {
+            data->runner(data);
+        }
+
+        void sendMail(OwlMailDefine::MailWeb2Cmd &&data) {
+            // send cmd
+            mailbox_->sendA2B(std::move(data));
+        }
+
     };
 
 }

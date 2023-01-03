@@ -33,6 +33,10 @@ namespace OwlEmbedWebServer {
             allowFileExtList = extList;
         }
 
+        mailbox_->receiveB2A = [this](OwlMailDefine::MailCmd2Web &&data) {
+            receiveMail(std::move(data));
+        };
+
         boost::beast::error_code ec;
 
         // Open the acceptor
@@ -80,7 +84,7 @@ namespace OwlEmbedWebServer {
         } else {
             // Create the session and run it
             std::make_shared<EmbedWebServerSession>(
-                    mailbox_->shared_from_this(),
+                    weak_from_this(),
                     std::move(socket),
                     doc_root_,
                     index_file_of_root,

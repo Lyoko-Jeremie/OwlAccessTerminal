@@ -13,8 +13,11 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
+#include <boost/json.hpp>
+#include <utility>
 
 #include "../WebCmdMail.h"
+#include "EmbedWebServer.h"
 
 namespace OwlEmbedWebServer {
 
@@ -35,7 +38,7 @@ namespace OwlEmbedWebServer {
             operator()(boost::beast::http::message<isRequest, Body, Fields> &&msg) const;
         };
 
-        OwlMailDefine::WebCmdMailbox mailbox_;
+        std::weak_ptr<EmbedWebServer> parentRef_;
         boost::beast::tcp_stream stream_;
         boost::beast::flat_buffer buffer_;
         std::shared_ptr<std::string const> doc_root_;
@@ -49,13 +52,13 @@ namespace OwlEmbedWebServer {
     public:
         // Take ownership of the stream
         EmbedWebServerSession(
-                OwlMailDefine::WebCmdMailbox &&mailbox,
+                std::weak_ptr<EmbedWebServer> parentRef,
                 boost::asio::ip::tcp::socket &&socket,
                 std::shared_ptr<std::string const> const &doc_root,
                 std::shared_ptr<std::string const> const &index_file_of_root,
                 std::shared_ptr<std::string const> const &backend_json_string,
                 std::vector<std::string> const &allowFileExtList)
-                : mailbox_(std::move(mailbox)),
+                : parentRef_(std::move(parentRef)),
                   stream_(std::move(socket)),
                   doc_root_(doc_root),
                   index_file_of_root(index_file_of_root),
@@ -84,6 +87,16 @@ namespace OwlEmbedWebServer {
 
         void
         do_close();
+
+
+        void
+        on_cmd();
+
+        void server_error(std::string what);
+
+        void bad_request(std::string what);
+
+        void send_json(boost::json::value &&o);
     };
 
 

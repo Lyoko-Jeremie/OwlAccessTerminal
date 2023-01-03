@@ -2,11 +2,13 @@
 
 #include "EmbedWebServerSession.h"
 #include "EmbedWebServerTools.h"
+#include "QueryPairsAnalyser.h"
 
 #include <filesystem>
 #include <boost/algorithm/string.hpp>
 #include <boost/asio/dispatch.hpp>
 #include <boost/beast/version.hpp>
+#include <utility>
 
 namespace OwlEmbedWebServer {
 
@@ -86,6 +88,15 @@ namespace OwlEmbedWebServer {
                 res.prepare_payload();
                 return lambda_(std::move(res));
             }
+
+        }
+
+        if (req_.method() == boost::beast::http::verb::get ||
+            req_.method() == boost::beast::http::verb::post) {
+            //
+            if (std::string{req_.target()}.starts_with(R"(/cmd/)")) {
+                return on_cmd();
+            }
         }
 
         // Send the response
@@ -117,6 +128,169 @@ namespace OwlEmbedWebServer {
         stream_.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
 
         // At this point the connection is closed gracefully
+    }
+
+    void EmbedWebServerSession::on_cmd() {
+
+        auto p = parentRef_.lock();
+        if (!p) {
+            return server_error("(!parentRef_.lock())");
+        }
+
+        if (std::string{req_.target()} == std::string{R"(/cmd/scan)"}) {
+            OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
+            data->cmd = OwlMailDefine::WifiCmd::scan;
+            data->callbackRunner = [this, self = shared_from_this()](
+                    const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
+            ) {
+                if (!data_r->ok) {
+                    return send_json(
+                            boost::json::value{
+                                    {"msg",    "error"},
+                                    {"error",  "(!data_r->ok)"},
+                                    {"result", false},
+                            }
+                    );
+                }
+                return send_json(
+                        boost::json::value{
+                                // TODO wifi list
+                                {"result", true},
+                        }
+                );
+            };
+            p->sendMail(std::move(data));
+        }
+
+        if (std::string{req_.target()} == std::string{R"(/cmd/getInfo)"}) {
+            OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
+            data->cmd = OwlMailDefine::WifiCmd::scan;
+            data->callbackRunner = [this, self = shared_from_this()](
+                    const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
+            ) {
+                if (!data_r->ok) {
+                    return send_json(
+                            boost::json::value{
+                                    {"msg",    "error"},
+                                    {"error",  "(!data_r->ok)"},
+                                    {"result", false},
+                            }
+                    );
+                }
+                return send_json(
+                        boost::json::value{
+                                // TODO info
+                                {"result", true},
+                        }
+                );
+            };
+            p->sendMail(std::move(data));
+        }
+
+        auto queryPairs = std::move(OwlQueryPairsAnalyser::QueryPairsAnalyser{req_}.queryPairs);
+        if (queryPairs.empty()) {
+            boost::beast::http::response<boost::beast::http::string_body> res{
+                    boost::beast::http::status::not_found,
+                    req_.version()};
+            res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+            res.set(boost::beast::http::field::content_type, "text/html");
+            res.keep_alive(req_.keep_alive());
+            res.body() = "The cmd queryPairs empty.";
+            res.prepare_payload();
+
+            return lambda_(std::move(res));
+        }
+
+        if (std::string{req_.target()} == std::string{R"(/cmd/ap)"}) {
+            if (queryPairs.count("apEnable") == 0) {
+                return bad_request(R"((queryPairs.count("apEnable") == 0))");
+            }
+            OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
+            data->cmd = OwlMailDefine::WifiCmd::ap;
+            data->enableAp = queryPairs.find("apEnable")->second == "1";
+            data->callbackRunner = [this, self = shared_from_this()](
+                    const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
+            ) {
+                if (!data_r->ok) {
+                    return send_json(
+                            boost::json::value{
+                                    {"msg",    "error"},
+                                    {"error",  "(!data_r->ok)"},
+                                    {"result", false},
+                            }
+                    );
+                }
+                return send_json(
+                        boost::json::value{
+                                {"result", true},
+                        }
+                );
+            };
+            p->sendMail(std::move(data));
+        }
+        if (std::string{req_.target()} == std::string{R"(/cmd/connect)"}) {
+            if (queryPairs.count("SSID") == 0) {
+                return bad_request(R"((queryPairs.count("SSID") == 0))");
+            }
+            OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
+            data->cmd = OwlMailDefine::WifiCmd::connect;
+            data->connect2SSID = queryPairs.find("SSID")->second;
+            data->callbackRunner = [this, self = shared_from_this()](
+                    const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
+            ) {
+                if (!data_r->ok) {
+                    return send_json(
+                            boost::json::value{
+                                    {"msg",    "error"},
+                                    {"error",  "(!data_r->ok)"},
+                                    {"result", false},
+                            }
+                    );
+                }
+                return send_json(
+                        boost::json::value{
+                                {"result", true},
+                        }
+                );
+            };
+            p->sendMail(std::move(data));
+        }
+    }
+
+    void EmbedWebServerSession::server_error(std::string what) {
+        boost::beast::http::response<boost::beast::http::string_body> res{
+                boost::beast::http::status::internal_server_error,
+                req_.version()};
+        res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(boost::beast::http::field::content_type, "text/html");
+        res.keep_alive(req_.keep_alive());
+        res.body() = std::move(what);
+        res.prepare_payload();
+        return lambda_(std::move(res));
+    }
+
+    void EmbedWebServerSession::bad_request(std::string what) {
+        boost::beast::http::response<boost::beast::http::string_body> res{
+                boost::beast::http::status::bad_request,
+                req_.version()};
+        res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(boost::beast::http::field::content_type, "text/html");
+        res.keep_alive(req_.keep_alive());
+        res.body() = std::move(what);
+        res.prepare_payload();
+        return lambda_(std::move(res));
+    }
+
+    void EmbedWebServerSession::send_json(boost::json::value &&o) {
+        boost::beast::http::response<boost::beast::http::string_body> res{
+                boost::beast::http::status::ok,
+                req_.version()};
+        res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(boost::beast::http::field::content_type, "text/json");
+        res.keep_alive(req_.keep_alive());
+        res.body() = boost::json::serialize(o);
+        res.prepare_payload();
+        return lambda_(std::move(res));
     }
 
 
