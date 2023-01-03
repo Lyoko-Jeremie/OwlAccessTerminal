@@ -25,6 +25,8 @@ namespace OwlCameraReader {
             // TODO test this
             if (vc->open(path)) {
                 BOOST_LOG_TRIVIAL(info) << "CameraItem open ok : id " << id << " path " << path;
+                vc->set(cv::VideoCaptureProperties::CAP_PROP_FRAME_WIDTH, 1080);
+                vc->set(cv::VideoCaptureProperties::CAP_PROP_FRAME_HEIGHT, 1920);
             } else {
                 BOOST_LOG_TRIVIAL(error) << "CameraItem open error : id " << id << " path " << path;
             }
