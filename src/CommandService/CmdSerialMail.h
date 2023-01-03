@@ -21,7 +21,7 @@ namespace OwlMailDefine {
     struct Serial2Cmd;
     struct Cmd2Serial {
 
-        // ignore(0),takeoff(1),land(2),stop(3)
+        // AdditionCmd
         AdditionCmd additionCmd = AdditionCmd::ignore;
         // +forward,-back
         int16_t x = 0;
