@@ -26,8 +26,8 @@ namespace OwlConfigLoader {
         int ImageServiceHttpPort = 23331;
         int EmbedWebServerHttpPort = 81;
 
-        int airplane_fly_serial_baud_rate = 0;
-        std::string airplane_fly_serial_addr;
+        int airplane_fly_serial_baud_rate = 115200;
+        std::string airplane_fly_serial_addr = "/dev/ttys1";
         int camera_addr_1 = 0;
         int camera_addr_2 = 1;
 
