@@ -72,14 +72,18 @@ namespace OwlCommandService {
 
         void send_back_json(const boost::json::value &json_value);
 
+    private:
         void receiveMail(OwlMailDefine::MailSerial2Cmd &&data) {
-            // TODO get callback from data and call it to send back html result
+            // get callback from data and call it to send back html result
+            data->runner(data);
         }
 
         void sendMail(OwlMailDefine::MailCmd2Serial &&data) {
-            // TODO send cmd to serial
+            // send cmd to serial
             mailbox_->sendA2B(std::move(data));
         }
+
+    private:
 
     };
 

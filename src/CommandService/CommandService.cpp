@@ -109,42 +109,69 @@ namespace OwlCommandService {
                             }
                     );
                     break;
-                case 10:
+                case 10: {
                     // break
                     BOOST_LOG_TRIVIAL(info) << "break";
-                    send_back_json(
-                            boost::json::value{
-                                    {"cmdId",     cmdId},
-                                    {"packageId", packageId},
-                                    {"msg",       "break"},
-                                    {"result",    true},
-                            }
-                    );
+                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    m->additionCmd = OwlMailDefine::AdditionCmd::stop;
+                    m->callbackRunner = [this, self = shared_from_this(), cmdId, packageId](
+                            const OwlMailDefine::MailSerial2Cmd &data
+                    ) {
+                        send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "break"},
+                                        // {"result",    true},
+                                        {"result",    data->ok},
+                                }
+                        );
+                    };
+                    sendMail(std::move(m));
                     break;
-                case 11:
+                }
+                case 11: {
                     // takeoff
                     BOOST_LOG_TRIVIAL(info) << "takeoff";
-                    send_back_json(
-                            boost::json::value{
-                                    {"cmdId",     cmdId},
-                                    {"packageId", packageId},
-                                    {"msg",       "takeoff"},
-                                    {"result",    true},
-                            }
-                    );
+                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    m->additionCmd = OwlMailDefine::AdditionCmd::takeoff;
+                    m->callbackRunner = [this, self = shared_from_this(), cmdId, packageId](
+                            const OwlMailDefine::MailSerial2Cmd &data
+                    ) {
+                        send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "takeoff"},
+                                        // {"result",    true},
+                                        {"result",    data->ok},
+                                }
+                        );
+                    };
+                    sendMail(std::move(m));
                     break;
-                case 12:
+                }
+                case 12: {
                     // land
                     BOOST_LOG_TRIVIAL(info) << "land";
-                    send_back_json(
-                            boost::json::value{
-                                    {"cmdId",     cmdId},
-                                    {"packageId", packageId},
-                                    {"msg",       "land"},
-                                    {"result",    true},
-                            }
-                    );
+                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    m->additionCmd = OwlMailDefine::AdditionCmd::land;
+                    m->callbackRunner = [this, self = shared_from_this(), cmdId, packageId](
+                            const OwlMailDefine::MailSerial2Cmd &data
+                    ) {
+                        send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "land"},
+                                        // {"result",    true},
+                                        {"result",    data->ok},
+                                }
+                        );
+                    };
+                    sendMail(std::move(m));
                     break;
+                }
                 case 13:
                     // move step
                     BOOST_LOG_TRIVIAL(info) << "move step";
@@ -176,79 +203,150 @@ namespace OwlCommandService {
                             );
                             return;
                         }
+                        if (moveStepDistance > 32767 || moveStepDistance < 0) {
+                            BOOST_LOG_TRIVIAL(warning) << "(moveStepDistance > 32767 || moveStepDistance < 0)" << jsv;
+                            send_back_json(
+                                    boost::json::value{
+                                            {"msg",    "error"},
+                                            {"error",  "(moveStepDistance > 32767 || moveStepDistance < 0)"},
+                                            {"result", false},
+                                    }
+                            );
+                            return;
+                        }
                         switch (moveStepForward) {
-                            case 1:
+                            case 1: {
                                 // up
                                 BOOST_LOG_TRIVIAL(info) << "move up " << moveStepDistance;
-                                send_back_json(
-                                        boost::json::value{
-                                                {"cmdId",     cmdId},
-                                                {"packageId", packageId},
-                                                {"msg",       "up"},
-                                                {"result",    true},
-                                        }
-                                );
+                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                m->additionCmd = OwlMailDefine::AdditionCmd::move;
+                                m->y = int16_t(moveStepDistance);
+                                m->callbackRunner = [this, self = shared_from_this(), cmdId, packageId](
+                                        const OwlMailDefine::MailSerial2Cmd &data
+                                ) {
+                                    send_back_json(
+                                            boost::json::value{
+                                                    {"cmdId",     cmdId},
+                                                    {"packageId", packageId},
+                                                    {"msg",       "up"},
+                                                    // {"result",    true},
+                                                    {"result",    data->ok},
+                                            }
+                                    );
+                                };
+                                sendMail(std::move(m));
                                 break;
-                            case 2:
+                            }
+                            case 2: {
                                 // down
                                 BOOST_LOG_TRIVIAL(info) << "move down " << moveStepDistance;
-                                send_back_json(
-                                        boost::json::value{
-                                                {"cmdId",     cmdId},
-                                                {"packageId", packageId},
-                                                {"msg",       "down"},
-                                                {"result",    true},
-                                        }
-                                );
+                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                m->additionCmd = OwlMailDefine::AdditionCmd::move;
+                                m->y = int16_t(-moveStepDistance);
+                                m->callbackRunner = [this, self = shared_from_this(), cmdId, packageId](
+                                        const OwlMailDefine::MailSerial2Cmd &data
+                                ) {
+                                    send_back_json(
+                                            boost::json::value{
+                                                    {"cmdId",     cmdId},
+                                                    {"packageId", packageId},
+                                                    {"msg",       "down"},
+                                                    // {"result",    true},
+                                                    {"result",    data->ok},
+                                            }
+                                    );
+                                };
+                                sendMail(std::move(m));
                                 break;
-                            case 3:
+                            }
+                            case 3: {
                                 // left
                                 BOOST_LOG_TRIVIAL(info) << "move left " << moveStepDistance;
-                                send_back_json(
-                                        boost::json::value{
-                                                {"cmdId",     cmdId},
-                                                {"packageId", packageId},
-                                                {"msg",       "left"},
-                                                {"result",    true},
-                                        }
-                                );
+                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                m->additionCmd = OwlMailDefine::AdditionCmd::move;
+                                m->z = int16_t(-moveStepDistance);
+                                m->callbackRunner = [this, self = shared_from_this(), cmdId, packageId](
+                                        const OwlMailDefine::MailSerial2Cmd &data
+                                ) {
+                                    send_back_json(
+                                            boost::json::value{
+                                                    {"cmdId",     cmdId},
+                                                    {"packageId", packageId},
+                                                    {"msg",       "left"},
+                                                    // {"result",    true},
+                                                    {"result",    data->ok},
+                                            }
+                                    );
+                                };
+                                sendMail(std::move(m));
                                 break;
-                            case 4:
+                            }
+                            case 4: {
                                 // right
                                 BOOST_LOG_TRIVIAL(info) << "move right " << moveStepDistance;
-                                send_back_json(
-                                        boost::json::value{
-                                                {"cmdId",     cmdId},
-                                                {"packageId", packageId},
-                                                {"msg",       "right"},
-                                                {"result",    true},
-                                        }
-                                );
+                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                m->additionCmd = OwlMailDefine::AdditionCmd::move;
+                                m->z = int16_t(moveStepDistance);
+                                m->callbackRunner = [this, self = shared_from_this(), cmdId, packageId](
+                                        const OwlMailDefine::MailSerial2Cmd &data
+                                ) {
+                                    send_back_json(
+                                            boost::json::value{
+                                                    {"cmdId",     cmdId},
+                                                    {"packageId", packageId},
+                                                    {"msg",       "right"},
+                                                    // {"result",    true},
+                                                    {"result",    data->ok},
+                                            }
+                                    );
+                                };
+                                sendMail(std::move(m));
                                 break;
-                            case 5:
+                            }
+                            case 5: {
                                 // forward
                                 BOOST_LOG_TRIVIAL(info) << "move forward " << moveStepDistance;
-                                send_back_json(
-                                        boost::json::value{
-                                                {"cmdId",     cmdId},
-                                                {"packageId", packageId},
-                                                {"msg",       "forward"},
-                                                {"result",    true},
-                                        }
-                                );
+                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                m->additionCmd = OwlMailDefine::AdditionCmd::move;
+                                m->x = int16_t(moveStepDistance);
+                                m->callbackRunner = [this, self = shared_from_this(), cmdId, packageId](
+                                        const OwlMailDefine::MailSerial2Cmd &data
+                                ) {
+                                    send_back_json(
+                                            boost::json::value{
+                                                    {"cmdId",     cmdId},
+                                                    {"packageId", packageId},
+                                                    {"msg",       "forward"},
+                                                    // {"result",    true},
+                                                    {"result",    data->ok},
+                                            }
+                                    );
+                                };
+                                sendMail(std::move(m));
                                 break;
-                            case 6:
+                            }
+                            case 6: {
                                 // back
                                 BOOST_LOG_TRIVIAL(info) << "move back " << moveStepDistance;
-                                send_back_json(
-                                        boost::json::value{
-                                                {"cmdId",     cmdId},
-                                                {"packageId", packageId},
-                                                {"msg",       "back"},
-                                                {"result",    true},
-                                        }
-                                );
+                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                m->additionCmd = OwlMailDefine::AdditionCmd::move;
+                                m->x = int16_t(-moveStepDistance);
+                                m->callbackRunner = [this, self = shared_from_this(), cmdId, packageId](
+                                        const OwlMailDefine::MailSerial2Cmd &data
+                                ) {
+                                    send_back_json(
+                                            boost::json::value{
+                                                    {"cmdId",     cmdId},
+                                                    {"packageId", packageId},
+                                                    {"msg",       "back"},
+                                                    // {"result",    true},
+                                                    {"result",    data->ok},
+                                            }
+                                    );
+                                };
+                                sendMail(std::move(m));
                                 break;
+                            }
                             default:
                                 // ignore
                                 BOOST_LOG_TRIVIAL(warning) << "move ignore " << jsv;
@@ -295,31 +393,62 @@ namespace OwlCommandService {
                             );
                             return;
                         }
+                        if (rote > 360 || rote < 0) {
+                            BOOST_LOG_TRIVIAL(warning) << "(rote > 360 || rote < 0)" << jsv;
+                            send_back_json(
+                                    boost::json::value{
+                                            {"msg",    "error"},
+                                            {"error",  "(rote > 360 || rote < 0)"},
+                                            {"result", false},
+                                    }
+                            );
+                            return;
+                        }
                         switch (rotate) {
-                            case 1:
+                            case 1: {
                                 // cw
                                 BOOST_LOG_TRIVIAL(info) << "rotate cw " << rote;
-                                send_back_json(
-                                        boost::json::value{
-                                                {"cmdId",     cmdId},
-                                                {"packageId", packageId},
-                                                {"msg",       "rotate cw"},
-                                                {"result",    true},
-                                        }
-                                );
+                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                m->additionCmd = OwlMailDefine::AdditionCmd::rotate;
+                                m->cw = int16_t(rote);
+                                m->callbackRunner = [this, self = shared_from_this(), cmdId, packageId](
+                                        const OwlMailDefine::MailSerial2Cmd &data
+                                ) {
+                                    send_back_json(
+                                            boost::json::value{
+                                                    {"cmdId",     cmdId},
+                                                    {"packageId", packageId},
+                                                    {"msg",       "rotate cw"},
+                                                    // {"result",    true},
+                                                    {"result",    data->ok},
+                                            }
+                                    );
+                                };
+                                sendMail(std::move(m));
                                 break;
-                            case 2:
+                            }
+                            case 2: {
                                 // ccw
                                 BOOST_LOG_TRIVIAL(info) << "rotate ccw " << rote;
-                                send_back_json(
-                                        boost::json::value{
-                                                {"cmdId",     cmdId},
-                                                {"packageId", packageId},
-                                                {"msg",       "rotate ccw"},
-                                                {"result",    true},
-                                        }
-                                );
+                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                m->additionCmd = OwlMailDefine::AdditionCmd::rotate;
+                                m->cw = int16_t(-rote);
+                                m->callbackRunner = [this, self = shared_from_this(), cmdId, packageId](
+                                        OwlMailDefine::MailSerial2Cmd data
+                                ) {
+                                    send_back_json(
+                                            boost::json::value{
+                                                    {"cmdId",     cmdId},
+                                                    {"packageId", packageId},
+                                                    {"msg",       "rotate ccw"},
+                                                    // {"result",    true},
+                                                    {"result",    data->ok},
+                                            }
+                                    );
+                                };
+                                sendMail(std::move(m));
                                 break;
+                            }
                             default:
                                 // ignore
                                 BOOST_LOG_TRIVIAL(info) << "rotate ignore " << jsv;
@@ -335,6 +464,27 @@ namespace OwlCommandService {
                         }
                     }
                     break;
+                case 15: {
+                    // keep position
+                    BOOST_LOG_TRIVIAL(info) << "keep";
+                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    m->additionCmd = OwlMailDefine::AdditionCmd::keep;
+                    m->callbackRunner = [this, self = shared_from_this(), cmdId, packageId](
+                            OwlMailDefine::MailSerial2Cmd data
+                    ) {
+                        send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "keep"},
+                                        // {"result",    true},
+                                        {"result",    data->ok},
+                                }
+                        );
+                    };
+                    sendMail(std::move(m));
+                    break;
+                }
                 default:
                     // ignore
                     BOOST_LOG_TRIVIAL(warning) << "ignore " << jsv;
