@@ -17,7 +17,6 @@
 #include "ImageService/ImageServiceHttp.h"
 #include "ImageService/CameraReader.h"
 #include "ConfigLoader/ConfigLoader.h"
-#include "AsyncCallbackMailbox/AsyncCallbackMailbox.h"
 
 #include "ImageService/protobuf_test.h"
 
@@ -114,6 +113,7 @@ int main(int argc, const char *argv[]) {
     // load config
     auto config = std::make_shared<OwlConfigLoader::ConfigLoader>();
     config->init(config_file);
+    config->print();
 
     boost::asio::io_context ioc_cmd;
     auto mailbox_cmd = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(

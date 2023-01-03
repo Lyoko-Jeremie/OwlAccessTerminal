@@ -9,6 +9,7 @@
 #include <boost/system.hpp>
 #include <boost/json.hpp>
 #include <boost/utility/string_view.hpp>
+#include <boost/log/trivial.hpp>
 
 namespace OwlConfigLoader {
 
@@ -40,6 +41,23 @@ namespace OwlConfigLoader {
 
         void print() {
             // TODO
+            BOOST_LOG_TRIVIAL(info)
+                << "\n"
+                << "\n" << "ConfigLoader config:"
+                << "\n" << "CommandServiceUdpPort " << config.CommandServiceUdpPort
+                << "\n" << "ImageServiceTcpPort " << config.ImageServiceTcpPort
+                << "\n" << "ImageServiceHttpPort " << config.ImageServiceHttpPort
+                << "\n" << "EmbedWebServerHttpPort " << config.EmbedWebServerHttpPort
+                << "\n" << "airplane_fly_serial_baud_rate " << config.airplane_fly_serial_baud_rate
+                << "\n" << "airplane_fly_serial_addr " << config.airplane_fly_serial_addr
+                << "\n" << "camera_addr_1 " << config.camera_addr_1
+                << "\n" << "camera_addr_2 " << config.camera_addr_2
+                << "\n" << "ConfigEmbedWebServer :"
+                << "\n" << "\t doc_root " << config.embedWebServer.doc_root
+                << "\n" << "\t index_file_of_root " << config.embedWebServer.index_file_of_root
+                << "\n" << "\t backend_json_string " << config.embedWebServer.backend_json_string
+                << "\n" << "\t allowFileExtList " << config.embedWebServer.allowFileExtList
+                << "";
         }
 
         void init(const std::string &filePath) {
