@@ -173,10 +173,10 @@ namespace OwlSerialController {
             // 0xZZ
             (*sendDataString)[6] = uint8_t(uint16_t(data->z) & 0xff);
             (*sendDataString)[7] = uint8_t(uint16_t(data->z) >> 8);
-            // 0xCW1
+            // 0xCW
             (*sendDataString)[8] = uint8_t(uint16_t(data->cw) & 0xff);
             (*sendDataString)[9] = uint8_t(uint16_t(data->cw) >> 8);
-            // 0xBBBB
+            // 0xBB
             (*sendDataString)[11] = char(0xBB);
             // send it
             boost::asio::async_write(
