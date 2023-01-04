@@ -133,8 +133,46 @@ namespace OwlCommandService {
                 case 11: {
                     // takeoff
                     BOOST_LOG_TRIVIAL(info) << "takeoff";
+                    if (!json_o.contains("distance")) {
+                        BOOST_LOG_TRIVIAL(warning) << "move step contains fail " << jsv;
+                        send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "error"},
+                                        {"error",     "takeoff (distance) not find"},
+                                        {"result",    false},
+                                }
+                        );
+                        return;
+                    }
+                    bool good = true;
+                    auto moveStepDistance = getFromJsonObject<int32_t>(json_o, "distance", good);
+                    if (!good) {
+                        BOOST_LOG_TRIVIAL(warning) << "takeoff getFromJsonObject fail" << jsv;
+                        send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(distance) getFromJsonObject fail"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    if (moveStepDistance > 32767 || moveStepDistance < 0) {
+                        BOOST_LOG_TRIVIAL(warning) << "(moveStepDistance > 32767 || moveStepDistance < 0)" << jsv;
+                        send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(moveStepDistance > 32767 || moveStepDistance < 0)"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::takeoff;
+                    m->y = int16_t(moveStepDistance);
                     m->callbackRunner = [this, self = shared_from_this(), cmdId, packageId](
                             const OwlMailDefine::MailSerial2Cmd &data
                     ) {
