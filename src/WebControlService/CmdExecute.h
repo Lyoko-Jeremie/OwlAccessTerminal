@@ -105,7 +105,7 @@ namespace OwlCmdExecute {
         void triggerCleanCeiPool(
                 // we force caller pass the lg ref to make sure ceiMtx_ be locked in caller side,
                 // so we don't need to lock it again , use this way to avoid double-lock issue
-                [[maybe_unused]] const std::lock_guard<typeof(ceiMtx_)> &lg
+                const std::lock_guard<typeof(ceiMtx_)> &lg
         );
 
         void receiveMail(OwlMailDefine::MailWeb2Cmd &&data) {

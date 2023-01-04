@@ -82,8 +82,9 @@ namespace OwlCmdExecute {
     void CmdExecute::triggerCleanCeiPool(
             // we force caller pass the lg ref to make sure ceiMtx_ be locked in caller side,
             // so we don't need to lock it again , use this way to avoid double-lock issue
-            [[maybe_unused]] const std::lock_guard<typeof(ceiMtx_)> &lg
+            const std::lock_guard<typeof(ceiMtx_)> &lg
     ) {
+        boost::ignore_unused(lg);
         auto it = ceiPool_.begin();
         while (it != ceiPool_.end()) {
             if (it->second.expired()) {
