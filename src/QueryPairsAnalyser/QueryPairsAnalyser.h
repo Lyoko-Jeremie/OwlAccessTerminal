@@ -18,18 +18,18 @@ namespace OwlQueryPairsAnalyser {
         QueryPairsType queryPairs;
 
         explicit QueryPairsAnalyser(
-                boost::beast::http::request<boost::beast::http::string_body> &req
+                const boost::string_view& request_target
         ) {
-            parse(req);
+            parse(request_target);
         }
 
-        void parse(boost::beast::http::request<boost::beast::http::string_body> &req) {
+        void parse(const boost::string_view& request_target) {
 
             // from https://github.com/boostorg/beast/issues/787#issuecomment-376259849
             static const std::regex PARSE_URL{R"((/([^ ?]+)?)?/?\??([^/ ]+\=[^/ ]+)?)",
                                               std::regex_constants::ECMAScript | std::regex_constants::icase};
             std::smatch match;
-            auto url = std::string{req.target()};
+            auto url = std::string{request_target};
             if (std::regex_match(url, match, PARSE_URL) && match.size() == 4) {
                 std::string path = match[1];
                 std::string query = match[3];

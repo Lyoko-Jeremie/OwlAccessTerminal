@@ -187,7 +187,7 @@ namespace OwlEmbedWebServer {
             p->sendMail(std::move(data));
         }
 
-        auto queryPairs = std::move(OwlQueryPairsAnalyser::QueryPairsAnalyser{req_}.queryPairs);
+        auto queryPairs = std::move(OwlQueryPairsAnalyser::QueryPairsAnalyser{req_.target()}.queryPairs);
         if (queryPairs.empty()) {
             boost::beast::http::response<boost::beast::http::string_body> res{
                     boost::beast::http::status::not_found,
