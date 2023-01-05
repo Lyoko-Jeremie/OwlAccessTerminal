@@ -49,23 +49,23 @@ namespace OwlSerialController {
         sendDataString->resize(11);
         // make send data
         // 0xAA
-        (*sendDataString)[0] = char(0xAA);
+        (*sendDataString).at(0) = char(0xAA);
         // AdditionCmd
-        (*sendDataString)[1] = uint8_t(data->additionCmd);
+        (*sendDataString).at(1) = uint8_t(data->additionCmd);
         // 0xXX
-        (*sendDataString)[2] = uint8_t(uint16_t(data->x) & 0xff);
-        (*sendDataString)[3] = uint8_t(uint16_t(data->x) >> 8);
+        (*sendDataString).at(2) = uint8_t(uint16_t(data->x) & 0xff);
+        (*sendDataString).at(3) = uint8_t(uint16_t(data->x) >> 8);
         // 0xYY
-        (*sendDataString)[4] = uint8_t(uint16_t(data->y) & 0xff);
-        (*sendDataString)[5] = uint8_t(uint16_t(data->y) >> 8);
+        (*sendDataString).at(4) = uint8_t(uint16_t(data->y) & 0xff);
+        (*sendDataString).at(5) = uint8_t(uint16_t(data->y) >> 8);
         // 0xZZ
-        (*sendDataString)[6] = uint8_t(uint16_t(data->z) & 0xff);
-        (*sendDataString)[7] = uint8_t(uint16_t(data->z) >> 8);
+        (*sendDataString).at(6) = uint8_t(uint16_t(data->z) & 0xff);
+        (*sendDataString).at(7) = uint8_t(uint16_t(data->z) >> 8);
         // 0xCW
-        (*sendDataString)[8] = uint8_t(uint16_t(data->cw) & 0xff);
-        (*sendDataString)[9] = uint8_t(uint16_t(data->cw) >> 8);
+        (*sendDataString).at(8) = uint8_t(uint16_t(data->cw) & 0xff);
+        (*sendDataString).at(9) = uint8_t(uint16_t(data->cw) >> 8);
         // 0xBB
-        (*sendDataString)[11] = char(0xBB);
+        (*sendDataString).at(10) = char(0xBB);
         // send it
         boost::asio::async_write(
                 airplanePortController->sp_,
