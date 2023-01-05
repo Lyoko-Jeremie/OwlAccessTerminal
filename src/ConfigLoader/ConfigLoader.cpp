@@ -27,6 +27,7 @@ namespace OwlConfigLoader {
         Config config_;
 
         config_.CommandServiceUdpPort = get(root, "CommandServiceUdpPort", config_.CommandServiceUdpPort);
+        config_.CommandServiceHttpPort = get(root, "CommandServiceHttpPort", config_.CommandServiceHttpPort);
         config_.ImageServiceTcpPort = get(root, "ImageServiceTcpPort", config_.ImageServiceTcpPort);
         config_.EmbedWebServerHttpPort = get(root, "EmbedWebServerHttpPort", config_.EmbedWebServerHttpPort);
         config_.ImageServiceHttpPort = get(root, "ImageServiceHttpPort", config_.ImageServiceHttpPort);

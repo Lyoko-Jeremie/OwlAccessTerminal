@@ -22,6 +22,7 @@ namespace OwlConfigLoader {
 
     struct Config {
         int CommandServiceUdpPort = 23333;
+        int CommandServiceHttpPort = 23338;
         int ImageServiceTcpPort = 23332;
         int ImageServiceHttpPort = 23331;
         int EmbedWebServerHttpPort = 81;
@@ -40,11 +41,11 @@ namespace OwlConfigLoader {
         Config config;
 
         void print() {
-            // TODO
             BOOST_LOG_TRIVIAL(info)
                 << "\n"
                 << "\n" << "ConfigLoader config:"
                 << "\n" << "CommandServiceUdpPort " << config.CommandServiceUdpPort
+                << "\n" << "CommandServiceHttpPort " << config.CommandServiceHttpPort
                 << "\n" << "ImageServiceTcpPort " << config.ImageServiceTcpPort
                 << "\n" << "ImageServiceHttpPort " << config.ImageServiceHttpPort
                 << "\n" << "EmbedWebServerHttpPort " << config.EmbedWebServerHttpPort
