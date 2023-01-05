@@ -10,6 +10,7 @@
 #include <boost/log/trivial.hpp>
 #include <boost/program_options.hpp>
 #include "CommandService/CommandService.h"
+#include "CommandService/CmdServiceHttp.h"
 #include "CommandService/SerialController.h"
 #include "WebControlService/CmdExecute.h"
 #include "WebControlService/EmbedWebServer/EmbedWebServer.h"
@@ -116,21 +117,36 @@ int main(int argc, const char *argv[]) {
     config->print();
 
     boost::asio::io_context ioc_cmd;
-    auto mailbox_cmd = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
+    auto mailbox_cmd_udp = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
             ioc_cmd, ioc_cmd
     );
     auto cmdService = std::make_shared<OwlCommandService::CommandService>(
             ioc_cmd,
-            mailbox_cmd->shared_from_this(),
+            mailbox_cmd_udp->shared_from_this(),
             boost::asio::ip::udp::endpoint(
                     boost::asio::ip::udp::v4(),
                     config->config.CommandServiceUdpPort
             )
     );
     cmdService->start();
+    auto mailbox_cmd_http = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
+            ioc_cmd, ioc_cmd
+    );
+    auto cmdHttpService = std::make_shared<OwlCommandServiceHttp::CmdServiceHttp>(
+            ioc_cmd,
+            boost::asio::ip::tcp::endpoint(
+                    boost::asio::ip::tcp::v4(),
+                    config->config.CommandServiceHttpPort
+            ),
+            mailbox_cmd_http->shared_from_this()
+    );
+    cmdHttpService->start();
     auto serialControllerService = std::make_shared<OwlSerialController::SerialController>(
             ioc_cmd,
-            mailbox_cmd->shared_from_this()
+            std::vector<OwlMailDefine::CmdSerialMailbox>{
+                    mailbox_cmd_udp->shared_from_this(),
+                    mailbox_cmd_http->shared_from_this()
+            }
     );
     bool serialControllerServiceStartOk = serialControllerService->start(
             config->config.airplane_fly_serial_addr,
