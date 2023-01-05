@@ -121,8 +121,11 @@ add_executable(${ProjectMainName}
         src/ImageService/CameraReader.cpp
         src/ImageService/CameraReader.h
         src/ImageService/ImageServiceMail.h
-        src/WebControlService/EmbedWebServer/QueryPairsAnalyser.cpp
-        src/WebControlService/EmbedWebServer/QueryPairsAnalyser.h)
+        src/QueryPairsAnalyser/QueryPairsAnalyser.cpp
+        src/QueryPairsAnalyser/QueryPairsAnalyser.h
+        src/CommandService/CmdServiceHttp.cpp
+        src/CommandService/CmdServiceHttp.h
+        src/CommandService/ProcessJsonMessage.h)
 
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})
