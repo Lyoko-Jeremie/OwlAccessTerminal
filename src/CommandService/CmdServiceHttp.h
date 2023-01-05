@@ -151,9 +151,10 @@ namespace OwlCommandServiceHttp {
 
                     // this will call process_json_message->sendMail->send_back_json->send_back
                     create_post_response_cmd(jsonS);
+
+                    return;
                 }
 
-                return;
             }
 
             auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
