@@ -55,17 +55,15 @@ namespace OwlQueryPairsAnalyser {
                     }
                 }
 
-                BOOST_LOG_TRIVIAL(info) << "query:" << query << std::endl;
-                BOOST_LOG_TRIVIAL(info) << "queryList:" << "\n";
+                BOOST_LOG_TRIVIAL(info) << "query:" << query;
+                BOOST_LOG_TRIVIAL(info) << "queryList:";
                 for (const auto &a: queryList) {
                     BOOST_LOG_TRIVIAL(info) << "\t" << a;
                 }
-                BOOST_LOG_TRIVIAL(info) << std::endl;
-                BOOST_LOG_TRIVIAL(info) << "queryPairs:" << "\n";
+                BOOST_LOG_TRIVIAL(info) << "queryPairs:";
                 for (const auto &a: queryPairs) {
                     BOOST_LOG_TRIVIAL(info) << "\t" << a.first << " = " << a.second;
                 }
-                BOOST_LOG_TRIVIAL(info) << std::endl;
 
             }
         }
