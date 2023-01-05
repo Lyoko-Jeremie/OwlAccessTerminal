@@ -2,7 +2,7 @@
 
 #include "EmbedWebServerSession.h"
 #include "EmbedWebServerTools.h"
-#include "QueryPairsAnalyser.h"
+#include "../../QueryPairsAnalyser/QueryPairsAnalyser.h"
 
 #include <filesystem>
 #include <boost/algorithm/string.hpp>
