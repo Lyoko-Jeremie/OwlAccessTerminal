@@ -246,7 +246,7 @@ namespace OwlCommandServiceHttp {
             response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
 
             response->result(boost::beast::http::status::ok);
-            response->set(boost::beast::http::field::content_type, "text/json");
+            response->set(boost::beast::http::field::content_type, "application/json");
             boost::beast::ostream(response->body()) << json_string;
             response->content_length(response->body().size());
             write_response(response);
