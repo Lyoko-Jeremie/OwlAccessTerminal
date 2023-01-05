@@ -6,11 +6,11 @@ namespace OwlSerialController {
 
     bool SerialController::start(const std::string &airplanePort, const int bandRate) {
         // TODO set and open the airplanePortController
-        bool init = airplanePortController->open(airplanePort)
-                    && airplanePortController->set_option(
+        initOk = airplanePortController->open(airplanePort)
+                 && airplanePortController->set_option(
                 boost::asio::serial_port::baud_rate(bandRate)
         );
-        if (!init) {
+        if (!initOk) {
             return false;
         }
         boost::asio::async_read(
@@ -43,6 +43,14 @@ namespace OwlSerialController {
     }
 
     void SerialController::receiveMail(OwlMailDefine::MailCmd2Serial &&data, OwlMailDefine::CmdSerialMailbox &mailbox) {
+        if (!initOk) {
+            auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+            data_r->runner = data->callbackRunner;
+            data_r->openError = true;
+            data_r->ok = true;
+            sendMail(std::move(data_r), mailbox);
+            return;
+        }
         // send cmd to serial
         auto sendDataString = std::make_shared<std::vector<uint8_t>>();
         // 0xAA,0xAdditionCmd,0xXXXX,0xYYYY,0xZZZZ,0xCWCW,0xBB

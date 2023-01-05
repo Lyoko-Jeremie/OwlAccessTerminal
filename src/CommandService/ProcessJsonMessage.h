@@ -126,6 +126,7 @@ namespace OwlProcessJsonMessage {
                                         {"msg",       "break"},
                                         // {"result",    true},
                                         {"result",    data->ok},
+                                        {"openError",    data->openError},
                                 }
                         );
                     };
@@ -185,6 +186,7 @@ namespace OwlProcessJsonMessage {
                                         {"msg",       "takeoff"},
                                         // {"result",    true},
                                         {"result",    data->ok},
+                                        {"openError",    data->openError},
                                 }
                         );
                     };
@@ -206,6 +208,7 @@ namespace OwlProcessJsonMessage {
                                         {"msg",       "land"},
                                         // {"result",    true},
                                         {"result",    data->ok},
+                                        {"openError",    data->openError},
                                 }
                         );
                     };
@@ -271,6 +274,7 @@ namespace OwlProcessJsonMessage {
                                                     {"msg",       "up"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
+                                                    {"openError",    data->openError},
                                             }
                                     );
                                 };
@@ -293,6 +297,7 @@ namespace OwlProcessJsonMessage {
                                                     {"msg",       "down"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
+                                                    {"openError",    data->openError},
                                             }
                                     );
                                 };
@@ -315,6 +320,7 @@ namespace OwlProcessJsonMessage {
                                                     {"msg",       "left"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
+                                                    {"openError",    data->openError},
                                             }
                                     );
                                 };
@@ -337,6 +343,7 @@ namespace OwlProcessJsonMessage {
                                                     {"msg",       "right"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
+                                                    {"openError",    data->openError},
                                             }
                                     );
                                 };
@@ -359,6 +366,7 @@ namespace OwlProcessJsonMessage {
                                                     {"msg",       "forward"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
+                                                    {"openError",    data->openError},
                                             }
                                     );
                                 };
@@ -381,6 +389,7 @@ namespace OwlProcessJsonMessage {
                                                     {"msg",       "back"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
+                                                    {"openError",    data->openError},
                                             }
                                     );
                                 };
@@ -461,6 +470,7 @@ namespace OwlProcessJsonMessage {
                                                     {"msg",       "rotate cw"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
+                                                    {"openError",    data->openError},
                                             }
                                     );
                                 };
@@ -483,6 +493,7 @@ namespace OwlProcessJsonMessage {
                                                     {"msg",       "rotate ccw"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
+                                                    {"openError",    data->openError},
                                             }
                                     );
                                 };
@@ -519,6 +530,7 @@ namespace OwlProcessJsonMessage {
                                         {"msg",       "keep"},
                                         // {"result",    true},
                                         {"result",    data->ok},
+                                        {"openError",    data->openError},
                                 }
                         );
                     };

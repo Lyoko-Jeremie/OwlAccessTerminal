@@ -38,6 +38,7 @@ namespace OwlMailDefine {
     struct Serial2Cmd {
         std::function<void(std::shared_ptr<Serial2Cmd>)> runner;
         bool ok = false;
+        bool openError = false;
     };
     using CmdSerialMailbox =
             std::shared_ptr<

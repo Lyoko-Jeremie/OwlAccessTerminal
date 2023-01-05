@@ -114,6 +114,8 @@ namespace OwlSerialController {
 
         std::shared_ptr<PortController> airplanePortController;
 
+        bool initOk = false;
+
     public:
         bool start(
                 const std::string &airplanePort,
