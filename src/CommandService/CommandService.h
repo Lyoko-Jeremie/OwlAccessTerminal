@@ -11,6 +11,7 @@
 #include <boost/system/error_code.hpp>
 #include <boost/utility/string_view.hpp>
 #include "CmdSerialMail.h"
+#include "ProcessJsonMessage.h"
 
 namespace OwlCommandService {
 
@@ -18,7 +19,9 @@ namespace OwlCommandService {
         UDP_Package_Max_Size = (1024 * 1024 * 6)
     }; // 6M
 
-    class CommandService : public std::enable_shared_from_this<CommandService> {
+    class CommandService
+            : public std::enable_shared_from_this<CommandService>,
+              public OwlProcessJsonMessage::ProcessJsonMessageSelfTypeInterface {
     public:
         CommandService(boost::asio::io_context &_ioc,
                        OwlMailDefine::CmdSerialMailbox &&mailbox,
@@ -70,15 +73,26 @@ namespace OwlCommandService {
 
         void send_back(std::string &&json_string);
 
-        void send_back_json(const boost::json::value &json_value);
 
     private:
+        // https://en.cppreference.com/w/cpp/language/friend
+        template<typename SelfType, typename SelfPtrType>
+        friend void OwlProcessJsonMessage::process_json_message(
+                boost::string_view,
+                boost::json::static_resource &,
+                boost::json::parse_options &,
+                // const std::shared_ptr<ProcessJsonMessageSelfTypeInterface> &self
+                const SelfPtrType &
+        );
+
+        void send_back_json(const boost::json::value &json_value) override;
+
         void receiveMail(OwlMailDefine::MailSerial2Cmd &&data) {
             // get callback from data and call it to send back html result
             data->runner(data);
         }
 
-        void sendMail(OwlMailDefine::MailCmd2Serial &&data) {
+        void sendMail(OwlMailDefine::MailCmd2Serial &&data) override {
             // send cmd to serial
             mailbox_->sendA2B(std::move(data));
         }
