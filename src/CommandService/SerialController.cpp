@@ -42,7 +42,7 @@ namespace OwlSerialController {
         return true;
     }
 
-    void SerialController::receiveMail(OwlMailDefine::MailCmd2Serial &&data) {
+    void SerialController::receiveMail(OwlMailDefine::MailCmd2Serial &&data, OwlMailDefine::CmdSerialMailbox &mailbox) {
         // send cmd to serial
         auto sendDataString = std::make_shared<std::vector<uint8_t>>();
         // 0xAA,0xAdditionCmd,0xXXXX,0xYYYY,0xZZZZ,0xCWCW,0xBB
@@ -71,7 +71,7 @@ namespace OwlSerialController {
                 airplanePortController->sp_,
                 boost::asio::buffer(*sendDataString),
                 boost::asio::transfer_exactly(sendDataString->size()),
-                [this, self = shared_from_this(), sendDataString, data](
+                [this, self = shared_from_this(), sendDataString, data, &mailbox](
                         const boost::system::error_code &ec,
                         size_t bytes_transferred
                 ) {
@@ -86,11 +86,11 @@ namespace OwlSerialController {
                                                  << " async_write error: "
                                                  << ec.what();
                         data_r->ok = false;
-                        sendMail(std::move(data_r));
+                        sendMail(std::move(data_r), mailbox);
                         return;
                     }
                     data_r->ok = true;
-                    sendMail(std::move(data_r));
+                    sendMail(std::move(data_r), mailbox);
                 }
         );
     }

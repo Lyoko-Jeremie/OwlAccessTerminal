@@ -89,23 +89,28 @@ namespace OwlSerialController {
     public:
         explicit SerialController(
                 boost::asio::io_context &ioc,
-                OwlMailDefine::CmdSerialMailbox &&mailbox
-        ) : ioc_(ioc), mailbox_(std::move(mailbox)),
+                std::vector<OwlMailDefine::CmdSerialMailbox> &&mailbox_list
+        ) : ioc_(ioc), mailbox_list_(std::move(mailbox_list)),
             airplanePortController(
                     std::make_shared<PortController>(ioc, weak_from_this())
             ) {
-            mailbox_->receiveA2B = [this](OwlMailDefine::MailCmd2Serial &&data) {
-                receiveMail(std::move(data));
-            };
+
+            for (auto &m: mailbox_list_) {
+                m->receiveA2B = [this, &m](OwlMailDefine::MailCmd2Serial &&data) {
+                    receiveMail(std::move(data), m);
+                };
+            }
         }
 
         ~SerialController() {
-            mailbox_->receiveA2B = nullptr;
+            for (auto &m: mailbox_list_) {
+                m->receiveA2B = nullptr;
+            }
         }
 
     private:
         boost::asio::io_context &ioc_;
-        OwlMailDefine::CmdSerialMailbox mailbox_;
+        std::vector<OwlMailDefine::CmdSerialMailbox> mailbox_list_;
 
         std::shared_ptr<PortController> airplanePortController;
 
@@ -118,11 +123,11 @@ namespace OwlSerialController {
     private:
         friend struct PortController;
 
-        void receiveMail(OwlMailDefine::MailCmd2Serial &&data);
+        void receiveMail(OwlMailDefine::MailCmd2Serial &&data, OwlMailDefine::CmdSerialMailbox &mailbox);
 
-        void sendMail(OwlMailDefine::MailSerial2Cmd &&data) {
+        void sendMail(OwlMailDefine::MailSerial2Cmd &&data, OwlMailDefine::CmdSerialMailbox &mailbox) {
             // send cmd result to Service
-            mailbox_->sendB2A(std::move(data));
+            mailbox->sendB2A(std::move(data));
         }
 
     };
