@@ -5,6 +5,8 @@
 
 #include <memory>
 #include <sstream>
+#include <variant>
+#include <functional>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/system.hpp>
 #include <boost/json.hpp>
@@ -20,7 +22,12 @@ namespace OwlConfigLoader {
         std::string allowFileExtList{"htm html js json jpg jpeg png bmp gif ico svg css"};
     };
 
+    using CameraAddrType_1 = int;
+    using CameraAddrType_2 = std::string;
+    using CameraAddrType = std::variant<CameraAddrType_1, CameraAddrType_2>;
+
     struct Config {
+
         int CommandServiceUdpPort = 23333;
         int CommandServiceHttpPort = 23338;
         int ImageServiceTcpPort = 23332;
@@ -29,11 +36,18 @@ namespace OwlConfigLoader {
 
         int airplane_fly_serial_baud_rate = 115200;
         std::string airplane_fly_serial_addr = "/dev/ttys1";
-        int camera_addr_1 = 0;
-        int camera_addr_2 = 1;
+        CameraAddrType camera_addr_1 = CameraAddrType{0};
+        CameraAddrType camera_addr_2 = CameraAddrType{1};
 
         ConfigEmbedWebServer embedWebServer;
     };
+
+    const auto helperCameraAddr2String = []<typename T>(T &a) -> std::string {
+        if constexpr (std::is_same_v<T, std::string>) { return a; }
+        else if constexpr (std::is_same_v<T, int>) { return std::to_string(a); }
+        else { return ""; }
+    };
+
 
     class ConfigLoader : public std::enable_shared_from_this<ConfigLoader> {
     public:
@@ -51,8 +65,8 @@ namespace OwlConfigLoader {
                 << "\n" << "EmbedWebServerHttpPort " << config.EmbedWebServerHttpPort
                 << "\n" << "airplane_fly_serial_baud_rate " << config.airplane_fly_serial_baud_rate
                 << "\n" << "airplane_fly_serial_addr " << config.airplane_fly_serial_addr
-                << "\n" << "camera_addr_1 " << config.camera_addr_1
-                << "\n" << "camera_addr_2 " << config.camera_addr_2
+                << "\n" << "camera_addr_1 " << std::visit(helperCameraAddr2String, config.camera_addr_1)
+                << "\n" << "camera_addr_2 " << std::visit(helperCameraAddr2String, config.camera_addr_2)
                 << "\n" << "ConfigEmbedWebServer :"
                 << "\n" << "\t doc_root " << config.embedWebServer.doc_root
                 << "\n" << "\t index_file_of_root " << config.embedWebServer.index_file_of_root
@@ -88,6 +102,29 @@ namespace OwlConfigLoader {
             } catch (std::exception &e) {
                 return d;
             }
+        }
+
+        CameraAddrType getCameraAddr(const boost::json::object &v, boost::string_view key, CameraAddrType &&d) {
+            try {
+                if (!v.contains(key)) {
+                    return d;
+                }
+            } catch (std::exception &e) {
+                return d;
+            }
+            try {
+                auto rr = boost::json::try_value_to<CameraAddrType_1>(v.at(key));
+                if (rr.has_value()) { return CameraAddrType{rr.value()}; }
+            } catch (std::exception &e) {
+                return d;
+            }
+            try {
+                auto rr = boost::json::try_value_to<CameraAddrType_2>(v.at(key));
+                if (rr.has_value()) { return CameraAddrType{rr.value()}; }
+            } catch (std::exception &e) {
+                return d;
+            }
+            return d;
         }
 
         boost::json::object getObj(const boost::json::object &v, boost::string_view key) {

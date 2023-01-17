@@ -130,8 +130,8 @@ namespace OwlConfigLoader {
         config_.airplane_fly_serial_baud_rate = get(root, "airplane_fly_serial_baud_rate",
                                                     config_.airplane_fly_serial_baud_rate);
         config_.airplane_fly_serial_addr = get(root, "airplane_fly_serial_addr", config_.airplane_fly_serial_addr);
-        config_.camera_addr_1 = get(root, "camera_addr_1", config_.camera_addr_1);
-        config_.camera_addr_2 = get(root, "camera_addr_2", config_.camera_addr_2);
+        config_.camera_addr_1 = getCameraAddr(root, "camera_addr_1", std::move(config_.camera_addr_1));
+        config_.camera_addr_2 = getCameraAddr(root, "camera_addr_2", std::move(config_.camera_addr_2));
 
         if (root.contains("embedWebServer")) {
             auto embedWebServer = getObj(root, "embedWebServer");

@@ -9,26 +9,29 @@
 #include <opencv2/opencv.hpp>
 #include <boost/log/trivial.hpp>
 #include "ImageServiceMail.h"
+#include "../ConfigLoader/ConfigLoader.h"
 
 namespace OwlCameraReader {
 
     struct CameraItem : public std::enable_shared_from_this<CameraItem> {
         int id;
-        int path;
+        OwlConfigLoader::CameraAddrType path;
         std::unique_ptr<cv::VideoCapture> vc;
 
         CameraItem(
                 int id,
-                int path
+                OwlConfigLoader::CameraAddrType path
         ) : id(id), path(path) {
             vc = std::make_unique<cv::VideoCapture>();
             // TODO test this
-            if (vc->open(path)) {
-                BOOST_LOG_TRIVIAL(info) << "CameraItem open ok : id " << id << " path " << path;
+            if (std::visit([this]<typename T>(T &a) { return vc->open(a); }, path)) {
+                BOOST_LOG_TRIVIAL(info) << "CameraItem open ok : id " << id << " path "
+                                        << std::visit(OwlConfigLoader::helperCameraAddr2String, path);
                 vc->set(cv::VideoCaptureProperties::CAP_PROP_FRAME_WIDTH, 1080);
                 vc->set(cv::VideoCaptureProperties::CAP_PROP_FRAME_HEIGHT, 1920);
             } else {
-                BOOST_LOG_TRIVIAL(error) << "CameraItem open error : id " << id << " path " << path;
+                BOOST_LOG_TRIVIAL(error) << "CameraItem open error : id " << id << " path "
+                                         << std::visit(OwlConfigLoader::helperCameraAddr2String, path);
             }
         }
 
@@ -42,7 +45,7 @@ namespace OwlCameraReader {
     public:
         CameraReader(
                 boost::asio::io_context &ioc,
-                std::vector<std::pair<int, int>> camera_info_list,
+                std::vector<std::pair<int, OwlConfigLoader::CameraAddrType>> camera_info_list,
                 OwlMailDefine::ServiceCameraMailbox &&mailbox_tcp_protobuf,
                 OwlMailDefine::ServiceCameraMailbox &&mailbox_http
         ) : ioc_(ioc),
@@ -65,7 +68,7 @@ namespace OwlCameraReader {
 
     private:
         boost::asio::io_context &ioc_;
-        std::vector<std::pair<int, int>> camera_info_list_;
+        std::vector<std::pair<int, OwlConfigLoader::CameraAddrType>> camera_info_list_;
         std::vector<std::shared_ptr<CameraItem>> camera_item_list_;
         OwlMailDefine::ServiceCameraMailbox mailbox_tcp_protobuf_;
         OwlMailDefine::ServiceCameraMailbox mailbox_http_;
