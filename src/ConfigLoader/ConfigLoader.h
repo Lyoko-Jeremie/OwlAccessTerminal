@@ -63,8 +63,14 @@ namespace OwlConfigLoader {
 
         void init(const std::string &filePath) {
             auto j = load_json_file(filePath);
-            if (j.is_object())
+            BOOST_LOG_TRIVIAL(info) << "j.is_object() " << j.is_object() << "\t"
+                                    << "j.kind() " << boost::json::to_string(j.kind());
+            if (j.is_object()) {
                 config = parse_json(j.as_object());
+            } else {
+                BOOST_LOG_TRIVIAL(error)
+                    << "ConfigLoader: config file not exit OR cannot load config file OR config file invalid.";
+            }
         }
 
         static boost::json::value load_json_file(const std::string &filePath);
