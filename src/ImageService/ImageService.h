@@ -127,7 +127,6 @@ namespace OwlImageService {
 
     private:
         boost::asio::io_context &ioc_;
-        boost::asio::strand<boost::asio::io_context::executor_type> acceptor_strand_;
         boost::asio::ip::tcp::acceptor acceptor_;
         OwlMailDefine::ServiceCameraMailbox mailbox_;
 

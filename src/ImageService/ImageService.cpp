@@ -236,73 +236,77 @@ namespace OwlImageService {
                                 // now, send back
                                 if (!camera_data->ok) {
 
-                                    // now create empty package and send it
-                                    auto package_s_ = std::make_shared<CommonTcpPackage>();
+                                    boost::asio::dispatch(socket_.get_executor(), [this, self = shared_from_this()]() {
+                                        // now create empty package and send it
+                                        auto package_s_ = std::make_shared<CommonTcpPackage>();
 
-                                    package_s_->size_ = 0;
-                                    do_send_size(package_s_);
-
+                                        package_s_->size_ = 0;
+                                        do_send_size(package_s_);
+                                    });
                                     return;
                                 }
 
-                                // try to run immediately if now on this ioc, or run it later
-                                boost::asio::dispatch(ioc_, [this, self = shared_from_this(), camera_data, ir]() {
+                                // try to run immediately if now on the same strand, or run it later
+                                boost::asio::dispatch(
+                                        socket_.get_executor(),
+                                        [this, self = shared_from_this(), camera_data, ir]() {
 
-//                                cv::Mat img{6, 6, CV_8UC3, cv::Scalar{0, 0, 0}};
-                                    cv::Mat img = camera_data->image;
-                                    camera_data->image.release();
+                                            // cv::Mat img{6, 6, CV_8UC3, cv::Scalar{0, 0, 0}};
+                                            cv::Mat img = camera_data->image;
+                                            camera_data->image.release();
 
-                                    // resize
-                                    if (ir->need_resize() &&
-                                        ir->image_width() > 0 && ir->image_height() > 0 &&
-                                        ir->image_width() < img.cols && ir->image_height() < img.rows
-                                            ) {
-                                        cv::resize(img, img,
-                                                   {ir->image_width(), ir->image_height()},
-                                                   0, 0,
-                                                   cv::InterpolationFlags::INTER_NEAREST);
-                                    }
+                                            // resize
+                                            if (ir->need_resize() &&
+                                                ir->image_width() > 0 && ir->image_height() > 0 &&
+                                                ir->image_width() < img.cols && ir->image_height() < img.rows
+                                                    ) {
+                                                cv::resize(img, img,
+                                                           {ir->image_width(), ir->image_height()},
+                                                           0, 0,
+                                                           cv::InterpolationFlags::INTER_NEAREST);
+                                            }
 
-                                    // now create ImageResponse package
-                                    ImageResponse is;
-                                    is.set_cmd_id(1);
-                                    {
-                                        std::vector<uchar> imageBuffer;
-                                        cv::imencode(".jpg", img, imageBuffer,
-                                                     {cv::ImwriteFlags::IMWRITE_JPEG_QUALITY, 70});
+                                            // now create ImageResponse package
+                                            ImageResponse is;
+                                            is.set_cmd_id(1);
+                                            {
+                                                std::vector<uchar> imageBuffer;
+                                                cv::imencode(".jpg", img, imageBuffer,
+                                                             {cv::ImwriteFlags::IMWRITE_JPEG_QUALITY, 70});
 
-                                        is.set_image_height(img.rows);
-                                        is.set_image_width(img.cols);
-                                        is.set_image_pixel_channel(img.channels());
-                                        is.set_image_format(ImageFormat::IMAGE_FORMAT_JPG);
+                                                is.set_image_height(img.rows);
+                                                is.set_image_width(img.cols);
+                                                is.set_image_pixel_channel(img.channels());
+                                                is.set_image_format(ImageFormat::IMAGE_FORMAT_JPG);
 
-                                        img.release();
+                                                img.release();
 
-                                        std::string imageString{imageBuffer.begin(), imageBuffer.end()};
-                                        imageBuffer.clear();
+                                                std::string imageString{imageBuffer.begin(), imageBuffer.end()};
+                                                imageBuffer.clear();
 
-                                        is.set_image_data(imageString);
-                                        is.set_image_data_size(imageString.size());
-                                    }
-                                    is.set_is_ok(true);
+                                                is.set_image_data(imageString);
+                                                is.set_image_data_size(imageString.size());
+                                            }
+                                            is.set_is_ok(true);
 
-                                    // now create package and send it
-                                    auto package_s_ = std::make_shared<CommonTcpPackage>();
-                                    // https://stackoverflow.com/questions/44904295/convert-stdstring-to-boostasiostreambuf
-                                    std::string is_string;
-                                    if (!is.SerializeToString(&is_string)) {
-                                        is.clear_image_data();
-                                        BOOST_LOG_TRIVIAL(error) << "do_process_request SerializeToString failed : "
-                                                                 << is.DebugString();
-                                        // ignore
-                                        return;
-                                    }
-                                    std::iostream{&package_s_->data_} << is_string;
-                                    package_s_->size_ = is_string.size();
-                                    do_send_size(package_s_);
+                                            // now create package and send it
+                                            auto package_s_ = std::make_shared<CommonTcpPackage>();
+                                            // https://stackoverflow.com/questions/44904295/convert-stdstring-to-boostasiostreambuf
+                                            std::string is_string;
+                                            if (!is.SerializeToString(&is_string)) {
+                                                is.clear_image_data();
+                                                BOOST_LOG_TRIVIAL(error)
+                                                    << "do_process_request SerializeToString failed : "
+                                                    << is.DebugString();
+                                                // ignore
+                                                return;
+                                            }
+                                            std::iostream{&package_s_->data_} << is_string;
+                                            package_s_->size_ = is_string.size();
+                                            do_send_size(package_s_);
 
-                                    return;
-                                });
+                                            return;
+                                        });
                                 return;
                             };
 
@@ -340,8 +344,7 @@ namespace OwlImageService {
             const boost::asio::ip::tcp::endpoint &endpoint,
             OwlMailDefine::ServiceCameraMailbox &&mailbox)
             : ioc_(ioc),
-              acceptor_strand_(boost::asio::make_strand(ioc)),
-              acceptor_(acceptor_strand_),
+              acceptor_(boost::asio::make_strand(ioc)),
               mailbox_(std::move(mailbox)) {
 
         mailbox_->receiveB2A = [this](OwlMailDefine::MailCamera2Service &&data) {
@@ -384,7 +387,7 @@ namespace OwlImageService {
     void ImageService::do_accept() {
         // The new connection gets its own strand
         acceptor_.async_accept(
-                acceptor_strand_,
+                boost::asio::make_strand(ioc_),
                 [this, self = shared_from_this()](
                         boost::system::error_code ec,
                         boost::asio::ip::tcp::socket socket) {

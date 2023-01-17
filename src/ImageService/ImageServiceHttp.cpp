@@ -33,23 +33,26 @@ namespace OwlImageServiceHttp {
             // now, send back
             if (!camera_data->ok) {
 
-                auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
-                response->version(request_.version());
-                response->keep_alive(false);
+                // try to run immediately if now on the same strand, or run it later
+                boost::asio::dispatch(socket_.get_executor(), [this, self = shared_from_this()]() {
+                    auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+                    response->version(request_.version());
+                    response->keep_alive(false);
 
-                response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+                    response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
 
-                response->result(boost::beast::http::status::internal_server_error);
-                response->set(boost::beast::http::field::content_type, "text/plain");
-                boost::beast::ostream(response->body()) << "(!camera_data->ok)\r\n";
-                response->content_length(response->body().size());
-                write_response(response);
+                    response->result(boost::beast::http::status::internal_server_error);
+                    response->set(boost::beast::http::field::content_type, "text/plain");
+                    boost::beast::ostream(response->body()) << "(!camera_data->ok)\r\n";
+                    response->content_length(response->body().size());
+                    write_response(response);
+                });
                 return;
             }
 
 
-            // try to run immediately if now on this ioc, or run it later
-            boost::asio::dispatch(ioc_, [this, self = shared_from_this(), camera_data]() {
+            // try to run immediately if now on the same strand, or run it later
+            boost::asio::dispatch(socket_.get_executor(), [this, self = shared_from_this(), camera_data]() {
 
 //              cv::Mat img{6, 6, CV_8UC3, cv::Scalar{0, 0, 0}};
                 cv::Mat img = camera_data->image;

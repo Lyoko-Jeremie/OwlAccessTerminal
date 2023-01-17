@@ -27,11 +27,9 @@ namespace OwlImageServiceHttp {
     class ImageServiceHttpConnect : public std::enable_shared_from_this<ImageServiceHttpConnect> {
     public:
         ImageServiceHttpConnect(
-                boost::asio::io_context &ioc,
                 boost::asio::ip::tcp::socket &&socket,
                 std::weak_ptr<ImageServiceHttp> &&parents
-        ) : ioc_(ioc),
-            socket_(std::move(socket)),
+        ) : socket_(std::move(socket)),
             parents_(std::move(parents)) {
         }
 
@@ -43,7 +41,6 @@ namespace OwlImageServiceHttp {
         }
 
     private:
-        boost::asio::io_context &ioc_;
 
         // The socket for the currently connected client.
         boost::asio::ip::tcp::socket socket_;
@@ -174,7 +171,6 @@ namespace OwlImageServiceHttp {
             } else {
                 // Create the session and run it
                 std::make_shared<ImageServiceHttpConnect>(
-                        ioc_,
                         std::move(socket),
                         weak_from_this()
                 )->start();
