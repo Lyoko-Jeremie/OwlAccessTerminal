@@ -185,9 +185,9 @@ int main(int argc, const char *argv[]) {
     imageServiceHttp->start();
     auto cameraReader = std::make_shared<OwlCameraReader::CameraReader>(
             ioc_cameraReader,
-            std::vector<std::pair<int, OwlConfigLoader::CameraAddrType>>{
-                    {1, config->config.camera_addr_1},
-                    {2, config->config.camera_addr_2},
+            std::vector<std::tuple<int, OwlConfigLoader::CameraAddrType, std::string>>{
+                    {1, config->config.camera_addr_1, config->config.camera_1_VideoCaptureAPI},
+                    {2, config->config.camera_addr_2, config->config.camera_2_VideoCaptureAPI},
             },
             mailbox_image_protobuf->shared_from_this(),
             mailbox_image_http->shared_from_this()

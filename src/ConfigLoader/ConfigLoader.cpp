@@ -1,7 +1,58 @@
 // jeremie
 
 #include "ConfigLoader.h"
-#include <sstream>
+
+namespace OwlCameraConfig {
+    const std::map<std::string, VideoCaptureAPIs> VideoCaptureAPITable{
+            {"CAP_ANY",           VideoCaptureAPIs::CAP_ANY},
+            {"CAP_VFW",           VideoCaptureAPIs::CAP_VFW},
+            {"CAP_V4L",           VideoCaptureAPIs::CAP_V4L},
+            {"CAP_V4L2",          VideoCaptureAPIs::CAP_V4L2},
+            {"CAP_FIREWIRE",      VideoCaptureAPIs::CAP_FIREWIRE},
+            {"CAP_FIREWARE",      VideoCaptureAPIs::CAP_FIREWARE},
+            {"CAP_IEEE1394",      VideoCaptureAPIs::CAP_IEEE1394},
+            {"CAP_DC1394",        VideoCaptureAPIs::CAP_DC1394},
+            {"CAP_CMU1394",       VideoCaptureAPIs::CAP_CMU1394},
+            {"CAP_QT",            VideoCaptureAPIs::CAP_QT},
+            {"CAP_UNICAP",        VideoCaptureAPIs::CAP_UNICAP},
+            {"CAP_DSHOW",         VideoCaptureAPIs::CAP_DSHOW},
+            {"CAP_PVAPI",         VideoCaptureAPIs::CAP_PVAPI},
+            {"CAP_OPENNI",        VideoCaptureAPIs::CAP_OPENNI},
+            {"CAP_OPENNI_ASUS",   VideoCaptureAPIs::CAP_OPENNI_ASUS},
+            {"CAP_ANDROID",       VideoCaptureAPIs::CAP_ANDROID},
+            {"CAP_XIAPI",         VideoCaptureAPIs::CAP_XIAPI},
+            {"CAP_AVFOUNDATION",  VideoCaptureAPIs::CAP_AVFOUNDATION},
+            {"CAP_GIGANETIX",     VideoCaptureAPIs::CAP_GIGANETIX},
+            {"CAP_MSMF",          VideoCaptureAPIs::CAP_MSMF},
+            {"CAP_WINRT",         VideoCaptureAPIs::CAP_WINRT},
+            {"CAP_INTELPERC",     VideoCaptureAPIs::CAP_INTELPERC},
+            {"CAP_REALSENSE",     VideoCaptureAPIs::CAP_REALSENSE},
+            {"CAP_OPENNI2",       VideoCaptureAPIs::CAP_OPENNI2},
+            {"CAP_OPENNI2_ASUS",  VideoCaptureAPIs::CAP_OPENNI2_ASUS},
+            {"CAP_OPENNI2_ASTRA", VideoCaptureAPIs::CAP_OPENNI2_ASTRA},
+            {"CAP_GPHOTO2",       VideoCaptureAPIs::CAP_GPHOTO2},
+            {"CAP_GSTREAMER",     VideoCaptureAPIs::CAP_GSTREAMER},
+            {"CAP_FFMPEG",        VideoCaptureAPIs::CAP_FFMPEG},
+            {"CAP_IMAGES",        VideoCaptureAPIs::CAP_IMAGES},
+            {"CAP_ARAVIS",        VideoCaptureAPIs::CAP_ARAVIS},
+            {"CAP_OPENCV_MJPEG",  VideoCaptureAPIs::CAP_OPENCV_MJPEG},
+            {"CAP_INTEL_MFX",     VideoCaptureAPIs::CAP_INTEL_MFX},
+            {"CAP_XINE",          VideoCaptureAPIs::CAP_XINE},
+            {"CAP_UEYE",          VideoCaptureAPIs::CAP_UEYE},
+    };
+
+    VideoCaptureAPIs string2VideoCaptureAPI(const std::string &s) {
+        auto it = VideoCaptureAPITable.find(s);
+        if (it != VideoCaptureAPITable.end()) {
+            BOOST_LOG_TRIVIAL(info) << "string2VideoCaptureAPI it: " << s;
+            return it->second;
+        } else {
+            BOOST_LOG_TRIVIAL(info) << "string2VideoCaptureAPI else it: CAP_ANY";
+            return VideoCaptureAPIs::CAP_ANY;
+        }
+    }
+}
+
 
 namespace OwlConfigLoader {
 
@@ -130,8 +181,11 @@ namespace OwlConfigLoader {
         config_.airplane_fly_serial_baud_rate = get(root, "airplane_fly_serial_baud_rate",
                                                     config_.airplane_fly_serial_baud_rate);
         config_.airplane_fly_serial_addr = get(root, "airplane_fly_serial_addr", config_.airplane_fly_serial_addr);
+
         config_.camera_addr_1 = getCameraAddr(root, "camera_addr_1", std::move(config_.camera_addr_1));
+        config_.camera_1_VideoCaptureAPI = get(root, "camera_1_VideoCaptureAPI", config_.camera_1_VideoCaptureAPI);
         config_.camera_addr_2 = getCameraAddr(root, "camera_addr_2", std::move(config_.camera_addr_2));
+        config_.camera_2_VideoCaptureAPI = get(root, "camera_2_VideoCaptureAPI", config_.camera_2_VideoCaptureAPI);
 
         if (root.contains("embedWebServer")) {
             auto embedWebServer = getObj(root, "embedWebServer");
