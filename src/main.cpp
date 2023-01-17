@@ -157,12 +157,13 @@ int main(int argc, const char *argv[]) {
         << serialControllerServiceStartOk;
 
 
-    boost::asio::io_context ioc_image;
+    boost::asio::io_context ioc_imageWeb;
+    boost::asio::io_context ioc_cameraReader;
     auto mailbox_image_protobuf = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
-            ioc_image, ioc_image
+            ioc_imageWeb, ioc_cameraReader
     );
     auto imageServiceProtobuf = std::make_shared<OwlImageService::ImageService>(
-            ioc_image,
+            ioc_imageWeb,
             boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
                     config->config.ImageServiceTcpPort
@@ -171,10 +172,10 @@ int main(int argc, const char *argv[]) {
     );
     imageServiceProtobuf->start();
     auto mailbox_image_http = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
-            ioc_image, ioc_image
+            ioc_imageWeb, ioc_cameraReader
     );
     auto imageServiceHttp = std::make_shared<OwlImageServiceHttp::ImageServiceHttp>(
-            ioc_image,
+            ioc_imageWeb,
             boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
                     config->config.ImageServiceHttpPort
@@ -183,7 +184,7 @@ int main(int argc, const char *argv[]) {
     );
     imageServiceHttp->start();
     auto cameraReader = std::make_shared<OwlCameraReader::CameraReader>(
-            ioc_image,
+            ioc_cameraReader,
             std::vector<std::pair<int, OwlConfigLoader::CameraAddrType>>{
                     {1, config->config.camera_addr_1},
                     {2, config->config.camera_addr_2},
@@ -233,7 +234,8 @@ int main(int argc, const char *argv[]) {
                 // stop all service on there
                 BOOST_LOG_TRIVIAL(info) << "stopping all service. ";
                 ioc_cmd.stop();
-                ioc_image.stop();
+                ioc_imageWeb.stop();
+                ioc_cameraReader.stop();
                 ioc_web_static.stop();
                 ioc_keyboard.stop();
             }
@@ -246,7 +248,8 @@ int main(int argc, const char *argv[]) {
 
     boost::thread_group tg;
     tg.create_thread(ThreadCallee{ioc_cmd, tg});
-    tg.create_thread(ThreadCallee{ioc_image, tg});
+    tg.create_thread(ThreadCallee{ioc_imageWeb, tg});
+    tg.create_thread(ThreadCallee{ioc_cameraReader, tg});
     tg.create_thread(ThreadCallee{ioc_web_static, tg});
     tg.create_thread(ThreadCallee{ioc_keyboard, tg});
 
@@ -257,7 +260,8 @@ int main(int argc, const char *argv[]) {
         });
     };
     io_running_in_notice(ioc_cmd, "ioc_cmd");
-    io_running_in_notice(ioc_image, "ioc_image");
+    io_running_in_notice(ioc_imageWeb, "ioc_image");
+    io_running_in_notice(ioc_cameraReader, "ioc_image");
     io_running_in_notice(ioc_web_static, "ioc_web_static");
     io_running_in_notice(ioc_keyboard, "ioc_keyboard");
 
