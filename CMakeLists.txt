@@ -27,6 +27,9 @@ if (DEFAULT_CONFIG)
     # ===================== ^^^^^^ config segment ^^^^^^ =================================
 endif ()
 
+if (DEBUG_BOOST_ASIO)
+    add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
+endif ()
 
 option(BOOST_ROOT "")
 
@@ -125,7 +128,8 @@ add_executable(${ProjectMainName}
         src/QueryPairsAnalyser/QueryPairsAnalyser.h
         src/CommandService/CmdServiceHttp.cpp
         src/CommandService/CmdServiceHttp.h
-        src/CommandService/ProcessJsonMessage.h)
+        src/CommandService/ProcessJsonMessage.h
+        src/Log/Log.cpp src/Log/Log.h)
 
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})
