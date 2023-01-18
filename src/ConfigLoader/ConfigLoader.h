@@ -8,6 +8,7 @@
 #include <variant>
 #include <functional>
 #include <map>
+#include <tuple>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/system.hpp>
 #include <boost/json.hpp>
@@ -58,7 +59,7 @@ namespace OwlCameraConfig {
 
     VideoCaptureAPIs string2VideoCaptureAPI(const std::string &s);
 
-}
+} // OwlCameraConfig
 
 namespace OwlConfigLoader {
 
@@ -86,8 +87,12 @@ namespace OwlConfigLoader {
 
         CameraAddrType camera_addr_1 = CameraAddrType{0};
         std::string camera_1_VideoCaptureAPI = "CAP_ANY";
+        int camera_1_w = 1920;
+        int camera_1_h = 1080;
         CameraAddrType camera_addr_2 = CameraAddrType{1};
         std::string camera_2_VideoCaptureAPI = "CAP_ANY";
+        int camera_2_w = 1920;
+        int camera_2_h = 1080;
 
         ConfigEmbedWebServer embedWebServer;
     };
@@ -117,8 +122,12 @@ namespace OwlConfigLoader {
                 << "\n" << "airplane_fly_serial_addr " << config.airplane_fly_serial_addr
                 << "\n" << "camera_addr_1 " << std::visit(helperCameraAddr2String, config.camera_addr_1)
                 << "\n" << "camera_1_VideoCaptureAPI " << config.camera_1_VideoCaptureAPI
+                << "\n" << "camera_1_w " << config.camera_1_w
+                << "\n" << "camera_1_h " << config.camera_1_h
                 << "\n" << "camera_addr_2 " << std::visit(helperCameraAddr2String, config.camera_addr_2)
                 << "\n" << "camera_2_VideoCaptureAPI " << config.camera_2_VideoCaptureAPI
+                << "\n" << "camera_2_w " << config.camera_2_w
+                << "\n" << "camera_2_h " << config.camera_2_h
                 << "\n" << "ConfigEmbedWebServer :"
                 << "\n" << "\t doc_root " << config.embedWebServer.doc_root
                 << "\n" << "\t index_file_of_root " << config.embedWebServer.index_file_of_root
@@ -194,5 +203,11 @@ namespace OwlConfigLoader {
 
 
 } // OwlConfigLoader
+
+namespace OwlCameraConfig {
+    //      id, CameraAddr, VideoCaptureAPI, w, h
+    using CameraInfoTuple =
+            std::tuple<int, OwlConfigLoader::CameraAddrType, std::string, int, int>;
+} // OwlCameraConfig
 
 #endif //OWLACCESSTERMINAL_CONFIGLOADER_H

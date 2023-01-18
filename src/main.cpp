@@ -21,6 +21,8 @@
 
 #include "ImageService/protobuf_test.h"
 
+#include "Log/Log.h"
+
 #include <google/protobuf/stubs/common.h>
 #include <opencv2/imgcodecs.hpp>
 
@@ -160,7 +162,7 @@ int main(int argc, const char *argv[]) {
     boost::asio::io_context ioc_imageWeb;
     boost::asio::io_context ioc_cameraReader;
     auto mailbox_image_protobuf = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
-            ioc_imageWeb, ioc_cameraReader
+            ioc_imageWeb, ioc_imageWeb
     );
     auto imageServiceProtobuf = std::make_shared<OwlImageService::ImageService>(
             ioc_imageWeb,
@@ -172,7 +174,7 @@ int main(int argc, const char *argv[]) {
     );
     imageServiceProtobuf->start();
     auto mailbox_image_http = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
-            ioc_imageWeb, ioc_cameraReader
+            ioc_imageWeb, ioc_imageWeb
     );
     auto imageServiceHttp = std::make_shared<OwlImageServiceHttp::ImageServiceHttp>(
             ioc_imageWeb,
@@ -184,10 +186,12 @@ int main(int argc, const char *argv[]) {
     );
     imageServiceHttp->start();
     auto cameraReader = std::make_shared<OwlCameraReader::CameraReader>(
-            ioc_cameraReader,
-            std::vector<std::tuple<int, OwlConfigLoader::CameraAddrType, std::string>>{
-                    {1, config->config.camera_addr_1, config->config.camera_1_VideoCaptureAPI},
-                    {2, config->config.camera_addr_2, config->config.camera_2_VideoCaptureAPI},
+            ioc_imageWeb,
+            std::vector<OwlCameraConfig::CameraInfoTuple>{
+                    {1, config->config.camera_addr_1, config->config.camera_1_VideoCaptureAPI,
+                            config->config.camera_1_w, config->config.camera_1_h},
+                    {2, config->config.camera_addr_2, config->config.camera_2_VideoCaptureAPI,
+                            config->config.camera_2_w, config->config.camera_2_h},
             },
             mailbox_image_protobuf->shared_from_this(),
             mailbox_image_http->shared_from_this()
@@ -256,12 +260,13 @@ int main(int argc, const char *argv[]) {
 
     auto io_running_in_notice = [](boost::asio::io_context &io, std::string notice) {
         boost::asio::post(io, [notice]() {
+            OwlLog::threadName = notice;
             BOOST_LOG_TRIVIAL(info) << ">>>" << notice << "<<< running thread <<< <<<";
         });
     };
     io_running_in_notice(ioc_cmd, "ioc_cmd");
-    io_running_in_notice(ioc_imageWeb, "ioc_image");
-    io_running_in_notice(ioc_cameraReader, "ioc_image");
+    io_running_in_notice(ioc_imageWeb, "ioc_imageWeb");
+    io_running_in_notice(ioc_cameraReader, "ioc_cameraReader");
     io_running_in_notice(ioc_web_static, "ioc_web_static");
     io_running_in_notice(ioc_keyboard, "ioc_keyboard");
 

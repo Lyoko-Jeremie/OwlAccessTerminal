@@ -184,8 +184,12 @@ namespace OwlConfigLoader {
 
         config_.camera_addr_1 = getCameraAddr(root, "camera_addr_1", std::move(config_.camera_addr_1));
         config_.camera_1_VideoCaptureAPI = get(root, "camera_1_VideoCaptureAPI", config_.camera_1_VideoCaptureAPI);
+        config_.camera_1_w = get(root, "camera_1_w", config_.camera_1_w);
+        config_.camera_1_h = get(root, "camera_1_h", config_.camera_1_h);
         config_.camera_addr_2 = getCameraAddr(root, "camera_addr_2", std::move(config_.camera_addr_2));
         config_.camera_2_VideoCaptureAPI = get(root, "camera_2_VideoCaptureAPI", config_.camera_2_VideoCaptureAPI);
+        config_.camera_2_w = get(root, "camera_2_w", config_.camera_2_w);
+        config_.camera_2_h = get(root, "camera_2_h", config_.camera_2_h);
 
         if (root.contains("embedWebServer")) {
             auto embedWebServer = getObj(root, "embedWebServer");
