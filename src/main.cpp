@@ -37,7 +37,9 @@ struct ThreadCallee {
 
     int operator()() {
         try {
+            auto work_guard_ = boost::asio::make_work_guard(ioc);
             ioc.run();
+            BOOST_LOG_TRIVIAL(warning) << "ThreadCallee ioc exit. thread: " << OwlLog::threadName;
         } catch (int e) {
             tg.interrupt_all();
             BOOST_LOG_TRIVIAL(error) << "catch (int) exception: " << e;
@@ -162,7 +164,7 @@ int main(int argc, const char *argv[]) {
     boost::asio::io_context ioc_imageWeb;
     boost::asio::io_context ioc_cameraReader;
     auto mailbox_image_protobuf = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
-            ioc_imageWeb, ioc_imageWeb
+            ioc_imageWeb, ioc_cameraReader
     );
     auto imageServiceProtobuf = std::make_shared<OwlImageService::ImageService>(
             ioc_imageWeb,
@@ -174,7 +176,7 @@ int main(int argc, const char *argv[]) {
     );
     imageServiceProtobuf->start();
     auto mailbox_image_http = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
-            ioc_imageWeb, ioc_imageWeb
+            ioc_imageWeb, ioc_cameraReader
     );
     auto imageServiceHttp = std::make_shared<OwlImageServiceHttp::ImageServiceHttp>(
             ioc_imageWeb,
@@ -186,7 +188,7 @@ int main(int argc, const char *argv[]) {
     );
     imageServiceHttp->start();
     auto cameraReader = std::make_shared<OwlCameraReader::CameraReader>(
-            ioc_imageWeb,
+            ioc_cameraReader,
             std::vector<OwlCameraConfig::CameraInfoTuple>{
                     {1, config->config.camera_addr_1, config->config.camera_1_VideoCaptureAPI,
                             config->config.camera_1_w, config->config.camera_1_h},
@@ -261,9 +263,10 @@ int main(int argc, const char *argv[]) {
     auto io_running_in_notice = [](boost::asio::io_context &io, std::string notice) {
         boost::asio::post(io, [notice]() {
             OwlLog::threadName = notice;
-            BOOST_LOG_TRIVIAL(info) << ">>>" << notice << "<<< running thread <<< <<<";
+            BOOST_LOG_TRIVIAL(info) << ">>>" << OwlLog::threadName << "<<< running thread <<< <<<";
         });
     };
+    OwlLog::threadName = "main";
     io_running_in_notice(ioc_cmd, "ioc_cmd");
     io_running_in_notice(ioc_imageWeb, "ioc_imageWeb");
     io_running_in_notice(ioc_cameraReader, "ioc_cameraReader");
