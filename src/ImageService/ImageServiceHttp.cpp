@@ -50,15 +50,15 @@ namespace OwlImageServiceHttp {
                 return;
             }
 
-            BOOST_LOG_TRIVIAL(info) << "create_get_response_image cmd_data->callbackRunner"
-                                    << camera_data->camera_id;
+//            BOOST_LOG_TRIVIAL(info) << "create_get_response_image cmd_data->callbackRunner "
+//                                    << camera_data->camera_id;
 
             // try to run immediately if now on the same strand, or run it later
             boost::asio::dispatch(socket_.get_executor(), [this, self = shared_from_this(), camera_data]() {
 
 
-                BOOST_LOG_TRIVIAL(info) << "create_get_response_image cmd_data->callbackRunner dispatch"
-                                        << camera_data->camera_id;
+//                BOOST_LOG_TRIVIAL(info) << "create_get_response_image cmd_data->callbackRunner dispatch "
+//                                        << camera_data->camera_id;
 
 //              cv::Mat img{6, 6, CV_8UC3, cv::Scalar{0, 0, 0}};
                 cv::Mat img = camera_data->image;
