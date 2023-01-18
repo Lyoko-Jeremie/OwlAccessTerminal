@@ -6,6 +6,7 @@
 #include <memory>
 #include <functional>
 #include <boost/asio.hpp>
+#include <boost/log/trivial.hpp>
 
 namespace OwlAsyncCallbackMailbox {
 
@@ -35,21 +36,31 @@ namespace OwlAsyncCallbackMailbox {
 
         // A call this function to send data to B
         void sendA2B(A2B_t &&data) {
+            BOOST_LOG_TRIVIAL(info) << "AsyncCallbackMailbox sendA2B";
             boost::asio::post(ioc_b_, [this, self = this->shared_from_this(), data]() {
+                BOOST_LOG_TRIVIAL(info) << "AsyncCallbackMailbox sendA2B post";
                 // avoid racing
                 auto &c = receiveA2B;
-                if (c)
+                if (c) {
                     c(std::move(data));
+                } else {
+                    BOOST_LOG_TRIVIAL(error) << "AsyncCallbackMailbox sendA2B receiveA2B empty";
+                }
             });
         }
 
         // B call this function to send data to A
         void sendB2A(B2A_t &&data) {
+            BOOST_LOG_TRIVIAL(info) << "AsyncCallbackMailbox sendB2A";
             boost::asio::post(ioc_a_, [this, self = this->shared_from_this(), data]() {
+                BOOST_LOG_TRIVIAL(info) << "AsyncCallbackMailbox sendB2A post";
                 // avoid racing
                 auto &c = receiveB2A;
-                if (c)
+                if (c) {
                     c(std::move(data));
+                } else {
+                    BOOST_LOG_TRIVIAL(error) << "AsyncCallbackMailbox sendB2A receiveB2A empty";
+                }
             });
         }
 
