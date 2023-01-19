@@ -351,18 +351,6 @@ int main(int argc, const char *argv[]) {
     tg.create_thread(ThreadCallee{ioc_web_static, tg, "ioc_web_static"});
     tg.create_thread(ThreadCallee{ioc_keyboard, tg, "ioc_keyboard"});
 
-//    auto io_running_in_notice = [](boost::asio::io_context &io, std::string notice) {
-//        boost::asio::post(io, [notice]() {
-//            OwlLog::threadName = notice;
-//            BOOST_LOG_TRIVIAL(info) << ">>>" << OwlLog::threadName << "<<< running thread <<< <<<";
-//        });
-//    };
-//    io_running_in_notice(ioc_cmd, "ioc_cmd");
-//    io_running_in_notice(ioc_imageWeb, "ioc_imageWeb");
-//    io_running_in_notice(ioc_cameraReader, "ioc_cameraReader");
-//    io_running_in_notice(ioc_web_static, "ioc_web_static");
-//    io_running_in_notice(ioc_keyboard, "ioc_keyboard");
-
 
     BOOST_LOG_TRIVIAL(info) << "boost::thread_group running";
     BOOST_LOG_TRIVIAL(info) << "boost::thread_group size : " << tg.size();
