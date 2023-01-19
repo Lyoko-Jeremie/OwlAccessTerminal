@@ -34,9 +34,12 @@
 struct ThreadCallee {
     boost::asio::io_context &ioc;
     boost::thread_group &tg;
+    std::string thisThreadName;
 
     int operator()() {
         try {
+            OwlLog::threadName = thisThreadName;
+            BOOST_LOG_TRIVIAL(info) << ">>>" << OwlLog::threadName << "<<< running thread <<< <<<";
             // use work to keep ioc run
             auto work_guard_ = boost::asio::make_work_guard(ioc);
             ioc.run();
@@ -255,25 +258,26 @@ int main(int argc, const char *argv[]) {
     BOOST_LOG_TRIVIAL(info) << "processor_count: " << processor_count;
 
     boost::thread_group tg;
-    tg.create_thread(ThreadCallee{ioc_cmd, tg});
-    tg.create_thread(ThreadCallee{ioc_imageWeb, tg});
-    tg.create_thread(ThreadCallee{ioc_cameraReader, tg});
-    tg.create_thread(ThreadCallee{ioc_web_static, tg});
-    tg.create_thread(ThreadCallee{ioc_keyboard, tg});
+    tg.create_thread(ThreadCallee{ioc_cmd, tg, "ioc_cmd"});
+    tg.create_thread(ThreadCallee{ioc_imageWeb, tg, "ioc_imageWeb"});
+    tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 1"});
+    tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 2"});
+    tg.create_thread(ThreadCallee{ioc_web_static, tg, "ioc_web_static"});
+    tg.create_thread(ThreadCallee{ioc_keyboard, tg, "ioc_keyboard"});
 
-
-    auto io_running_in_notice = [](boost::asio::io_context &io, std::string notice) {
-        boost::asio::post(io, [notice]() {
-            OwlLog::threadName = notice;
-            BOOST_LOG_TRIVIAL(info) << ">>>" << OwlLog::threadName << "<<< running thread <<< <<<";
-        });
-    };
     OwlLog::threadName = "main";
-    io_running_in_notice(ioc_cmd, "ioc_cmd");
-    io_running_in_notice(ioc_imageWeb, "ioc_imageWeb");
-    io_running_in_notice(ioc_cameraReader, "ioc_cameraReader");
-    io_running_in_notice(ioc_web_static, "ioc_web_static");
-    io_running_in_notice(ioc_keyboard, "ioc_keyboard");
+
+//    auto io_running_in_notice = [](boost::asio::io_context &io, std::string notice) {
+//        boost::asio::post(io, [notice]() {
+//            OwlLog::threadName = notice;
+//            BOOST_LOG_TRIVIAL(info) << ">>>" << OwlLog::threadName << "<<< running thread <<< <<<";
+//        });
+//    };
+//    io_running_in_notice(ioc_cmd, "ioc_cmd");
+//    io_running_in_notice(ioc_imageWeb, "ioc_imageWeb");
+//    io_running_in_notice(ioc_cameraReader, "ioc_cameraReader");
+//    io_running_in_notice(ioc_web_static, "ioc_web_static");
+//    io_running_in_notice(ioc_keyboard, "ioc_keyboard");
 
 
     BOOST_LOG_TRIVIAL(info) << "boost::thread_group running";
