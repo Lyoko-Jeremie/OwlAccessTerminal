@@ -15,6 +15,7 @@
 namespace OwlCameraReader {
 
     struct CameraItem : public std::enable_shared_from_this<CameraItem> {
+        boost::asio::strand<boost::asio::io_context::executor_type> strand_;
         int id;
         OwlConfigLoader::CameraAddrType path;
         OwlCameraConfig::VideoCaptureAPIs api;
@@ -24,8 +25,10 @@ namespace OwlCameraReader {
         std::unique_ptr<cv::VideoCapture> vc;
 
         explicit CameraItem(
+                boost::asio::strand<boost::asio::io_context::executor_type> strand,
                 OwlCameraConfig::CameraInfoTuple config
-        ) : id(std::get<0>(config)),
+        ) : strand_(std::move(strand)),
+            id(std::get<0>(config)),
             path(std::get<1>(config)),
             api(OwlCameraConfig::string2VideoCaptureAPI(std::get<2>(config))),
             w(std::get<3>(config)),
@@ -91,6 +94,7 @@ namespace OwlCameraReader {
                 // make sure the construct of CameraItem run in self ioc
                 for (auto &t: camera_info_list_) {
                     camera_item_list_.push_back(std::make_shared<CameraItem>(
+                            boost::asio::make_strand(ioc_),
                             t
                     ));
                 }
@@ -102,38 +106,44 @@ namespace OwlCameraReader {
         void getImage(OwlMailDefine::MailService2Camera &&data, OwlMailDefine::ServiceCameraMailbox &mailbox) {
             boost::asio::dispatch(ioc_, [this, self = shared_from_this(), data, &mailbox]() {
                 // make sure all the call to self and to CameraItem run in self ioc
-                OwlMailDefine::MailCamera2Service data_r = std::make_shared<OwlMailDefine::Camera2Service>();
-                data_r->runner = data->callbackRunner;
-                data_r->camera_id = data->camera_id;
                 for (auto &c: camera_item_list_) {
                     if (c->id == data->camera_id) {
-                        if (!c->isOpened()) {
-                            data_r->ok = false;
-                            BOOST_LOG_TRIVIAL(warning) << "getImage (!c->isOpened()) cannot open: " << data->camera_id;
-                        } else {
-                            // read the image
-                            cv::Mat img;
-                            if (!c->vc->read(img)) {
-                                // `false` if no frames has been grabbed
+                        boost::asio::dispatch(c->strand_, [this, self = shared_from_this(), data, &mailbox, c]() {
+                            OwlMailDefine::MailCamera2Service data_r = std::make_shared<OwlMailDefine::Camera2Service>();
+                            data_r->runner = data->callbackRunner;
+                            data_r->camera_id = data->camera_id;
+                            if (!c->isOpened()) {
                                 data_r->ok = false;
-                                BOOST_LOG_TRIVIAL(warning) << "getImage (!c->vc->read(img)) read frame fail: "
+                                BOOST_LOG_TRIVIAL(warning) << "getImage (!c->isOpened()) cannot open: "
                                                            << data->camera_id;
                             } else {
-                                data_r->image = img;
-                                data_r->ok = true;
-                                if (img.empty()) {
+                                // read the image
+                                cv::Mat img;
+                                if (!c->vc->read(img)) {
+                                    // `false` if no frames has been grabbed
                                     data_r->ok = false;
-                                    BOOST_LOG_TRIVIAL(warning) << "getImage (img.empty()) read frame fail: "
+                                    BOOST_LOG_TRIVIAL(warning) << "getImage (!c->vc->read(img)) read frame fail: "
                                                                << data->camera_id;
+                                } else {
+                                    data_r->image = img;
+                                    data_r->ok = true;
+                                    if (img.empty()) {
+                                        data_r->ok = false;
+                                        BOOST_LOG_TRIVIAL(warning) << "getImage (img.empty()) read frame fail: "
+                                                                   << data->camera_id;
+                                    }
                                 }
                             }
-                        }
-                        mailbox->sendB2A(std::move(data_r));
+                            mailbox->sendB2A(std::move(data_r));
+                        });
                         return;
                     }
                 }
                 // cannot find camera
                 BOOST_LOG_TRIVIAL(warning) << "getImage cannot find camera: " << data->camera_id;
+                OwlMailDefine::MailCamera2Service data_r = std::make_shared<OwlMailDefine::Camera2Service>();
+                data_r->runner = data->callbackRunner;
+                data_r->camera_id = data->camera_id;
                 data_r->ok = false;
                 mailbox->sendB2A(std::move(data_r));
                 return;
