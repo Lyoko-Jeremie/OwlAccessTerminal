@@ -37,8 +37,10 @@ struct ThreadCallee {
 
     int operator()() {
         try {
+            // use work to keep ioc run
             auto work_guard_ = boost::asio::make_work_guard(ioc);
             ioc.run();
+            boost::ignore_unused(work_guard_);
             BOOST_LOG_TRIVIAL(warning) << "ThreadCallee ioc exit. thread: " << OwlLog::threadName;
         } catch (int e) {
             tg.interrupt_all();
