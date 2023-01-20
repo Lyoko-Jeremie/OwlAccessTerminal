@@ -4,6 +4,20 @@ project(${ProjectMainName})
 
 set(CMAKE_CXX_STANDARD 20)
 
+#    option(OpenCV_STATIC)
+#    option(OpenCV_WORLD)
+
+set(DEBUG_BOOST_ASIO OFF CACHE BOOL "DEBUG_BOOST_ASIO")
+
+set(OpenCV_STATIC ON CACHE BOOL "OpenCV_STATIC")
+set(OpenCV_WORLD OFF CACHE BOOL "OpenCV_WORLD")
+
+set(BOOST_ROOT "" CACHE PATH "BOOST_ROOT")
+
+set(OpenCV_DIR "" CACHE PATH "OpenCV_DIR")
+
+set(PROTOBUFF_INCLUDE_DIRS "" CACHE PATH "PROTOBUFF_INCLUDE_DIRS")
+set(PROTOBUFF_LIBS "" CACHE FILEPATH "PROTOBUFF_LIBS")
 
 if (DEFAULT_CONFIG)
     # ===================== vvvvvv config segment vvvvvv =================================
@@ -25,18 +39,12 @@ if (DEFAULT_CONFIG)
     #add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
 
     # ===================== ^^^^^^ config segment ^^^^^^ =================================
-endif ()
+endif (DEFAULT_CONFIG)
 
 if (DEBUG_BOOST_ASIO)
     add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
-endif ()
+endif (DEBUG_BOOST_ASIO)
 
-option(BOOST_ROOT "")
-
-option(OpenCV_DIR "")
-
-option(PROTOBUFF_INCLUDE_DIRS "")
-option(PROTOBUFF_LIBS "")
 
 message(STATUS "PROTOBUFF_INCLUDE_DIRS: ${PROTOBUFF_INCLUDE_DIRS}")
 message(STATUS "PROTOBUFF_LIBS: ${PROTOBUFF_LIBS}")
@@ -63,11 +71,11 @@ add_definitions(-DUSE_BOOST_THEAD)
 if (USE_DYNAMIC_BOOST)
     message(STATUS "USE DYNAMIC BOOST !!!")
     add_definitions(-DBOOST_ALL_DYN_LINK=1)
-else ()
+else (USE_DYNAMIC_BOOST)
     message(STATUS "USE STATIC BOOST !!!")
     set(Boost_USE_STATIC_LIBS ON)
     set(Boost_USE_STATIC_RUNTIME OFF)
-endif ()
+endif (USE_DYNAMIC_BOOST)
 
 set(Boost_USE_MULTITHREADED ON)
 #find_package(Boost REQUIRED COMPONENTS  REQUIRED)
@@ -75,9 +83,9 @@ find_package(Boost 1.81.0 REQUIRED COMPONENTS system filesystem program_options 
 
 if (OpenCV_WORLD)
     find_package(OpenCV REQUIRED world)
-elseif ()
+else (OpenCV_WORLD)
     find_package(OpenCV REQUIRED)
-endif ()
+endif (OpenCV_WORLD)
 
 message(STATUS "OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
 message(STATUS "OpenCV_LIBRARY_DIRS: ${OpenCV_LIBRARY_DIRS}")
@@ -141,5 +149,5 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 if (WIN32)
     target_link_libraries(${ProjectMainName} wsock32 ws2_32 crypt32)
-else ()
-endif ()
+else (WIN32)
+endif (WIN32)
