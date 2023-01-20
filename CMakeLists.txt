@@ -137,7 +137,8 @@ add_executable(${ProjectMainName}
         src/CommandService/CmdServiceHttp.cpp
         src/CommandService/CmdServiceHttp.h
         src/CommandService/ProcessJsonMessage.h
-        src/Log/Log.cpp src/Log/Log.h)
+        src/Log/Log.cpp
+        src/Log/Log.h)
 
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})
