@@ -80,6 +80,8 @@ namespace OwlImageServiceHttp {
 
         void create_get_response_image(int camera_id);
 
+        void create_get_response_set_camera_image_size();
+
         // Construct a response message based on the program state.
         void
         create_get_response();

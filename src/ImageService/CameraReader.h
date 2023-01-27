@@ -67,10 +67,18 @@ namespace OwlCameraReader {
             mailbox_http_(mailbox_http) {
 
             mailbox_tcp_protobuf_->receiveA2B = [this](OwlMailDefine::MailService2Camera &&data) {
+                if (data->cmd == OwlMailDefine::ControlCameraCmd::reset) {
+                    resetCamera(std::move(data), mailbox_tcp_protobuf_);
+                    return;
+                }
 //                BOOST_LOG_TRIVIAL(info) << "CameraReader mailbox_tcp_protobuf_->receiveA2B " << data->camera_id;
                 getImage(std::move(data), mailbox_tcp_protobuf_);
             };
             mailbox_http_->receiveA2B = [this](OwlMailDefine::MailService2Camera &&data) {
+                if (data->cmd == OwlMailDefine::ControlCameraCmd::reset) {
+                    resetCamera(std::move(data), mailbox_http_);
+                    return;
+                }
 //                BOOST_LOG_TRIVIAL(info) << "CameraReader mailbox_http_->receiveA2B " << data->camera_id;
                 getImage(std::move(data), mailbox_http_);
             };
@@ -145,6 +153,56 @@ namespace OwlCameraReader {
                 data_r->runner = data->callbackRunner;
                 data_r->camera_id = data->camera_id;
                 data_r->ok = false;
+                mailbox->sendB2A(std::move(data_r));
+                return;
+            });
+        }
+
+        void resetCamera(OwlMailDefine::MailService2Camera &&data, OwlMailDefine::ServiceCameraMailbox &mailbox) {
+            boost::asio::dispatch(ioc_, [this, self = shared_from_this(), data, &mailbox]() {
+
+                auto it1 = std::find_if(camera_item_list_.begin(), camera_item_list_.end(),
+                                        [&data](std::shared_ptr<CameraItem> &a) -> bool {
+                                            return a->id == data->camera_id;
+                                        });
+                auto it2 = std::find_if(camera_info_list_.begin(), camera_info_list_.end(),
+                                        [&data](OwlCameraConfig::CameraInfoTuple &a) -> bool {
+                                            return std::get<0>(a) == data->camera_id;
+                                        });
+
+                if (it2 == camera_info_list_.end()) {
+                    // cannot fine the camera config, means that the camera not exist
+                    OwlMailDefine::MailCamera2Service data_r = std::make_shared<OwlMailDefine::Camera2Service>();
+                    data_r->runner = data->callbackRunner;
+                    data_r->camera_id = data->camera_id;
+                    data_r->ok = false;
+                    data_r->cmd = data->cmd;
+                    mailbox->sendB2A(std::move(data_r));
+                    return;
+                }
+
+                if (it1 != camera_item_list_.end()) {
+                    // remove old camera
+                    camera_item_list_.erase(it1);
+                    it1 = camera_item_list_.end();
+                }
+
+                // re-config camera config
+                //  camera_info_list_.tuple(x,y) = data->cmdParams.variant[<x,y>].pair(x,y)
+                std::get<3>(*it2) = std::get<1>(data->cmdParams).first;
+                std::get<4>(*it2) = std::get<1>(data->cmdParams).second;
+
+                // create new camera
+                camera_item_list_.push_back(std::make_shared<CameraItem>(
+                        boost::asio::make_strand(ioc_),
+                        *it2
+                ));
+
+                OwlMailDefine::MailCamera2Service data_r = std::make_shared<OwlMailDefine::Camera2Service>();
+                data_r->runner = data->callbackRunner;
+                data_r->camera_id = data->camera_id;
+                data_r->ok = true;
+                data_r->cmd = data->cmd;
                 mailbox->sendB2A(std::move(data_r));
                 return;
             });

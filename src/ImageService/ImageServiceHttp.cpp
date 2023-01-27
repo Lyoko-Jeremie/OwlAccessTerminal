@@ -2,6 +2,9 @@
 
 #include "ImageServiceHttp.h"
 #include <boost/lexical_cast.hpp>
+#include <boost/lexical_cast/try_lexical_convert.hpp>
+#include <regex>
+#include "../QueryPairsAnalyser/QueryPairsAnalyser.h"
 
 namespace OwlImageServiceHttp {
     void ImageServiceHttpConnect::create_get_response_image(int camera_id) {
@@ -111,6 +114,131 @@ namespace OwlImageServiceHttp {
 
     }
 
+    void ImageServiceHttpConnect::create_get_response_set_camera_image_size() {
+
+        if (!request_.target().starts_with("/set_camera_image_size=")) {
+            // inner error
+            auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+            response->version(request_.version());
+            response->keep_alive(false);
+
+            response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+
+            response->result(boost::beast::http::status::internal_server_error);
+            response->set(boost::beast::http::field::content_type, "text/plain");
+            boost::beast::ostream(response->body())
+                    << "(!request_.target().starts_with(\"/set_camera_image_size=\"))\r\n";
+            response->content_length(response->body().size());
+            write_response(response);
+            return;
+        }
+
+        auto make_bad_request = [this](const std::string &r) {
+            // bad request
+            auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+            response->version(request_.version());
+            response->keep_alive(false);
+
+            response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+
+            response->result(boost::beast::http::status::bad_request);
+            response->set(boost::beast::http::field::content_type, "text/plain");
+            boost::beast::ostream(response->body()) << r << "\r\n";
+            response->content_length(response->body().size());
+            write_response(response);
+        };
+
+        // "/set_camera_image_size?camera=1&x=1920&y=1080"
+        auto q = OwlQueryPairsAnalyser::QueryPairsAnalyser(request_.target()).queryPairs;
+
+        if (q.count("camera") != 1 || q.count("x") != 1 || q.count("y") != 1) {
+            // bad request
+            make_bad_request(
+                    R"(create_get_response_set_camera_image_size (q.count("camera") != 1 || q.count("x") != 1 || q.count("y") != 1))"
+            );
+            return;
+        }
+
+        int camera_id;
+        int x;
+        int y;
+        if (!boost::conversion::try_lexical_convert(q.find("camera")->second, camera_id) ||
+            !boost::conversion::try_lexical_convert(q.find("x")->second, x) ||
+            !boost::conversion::try_lexical_convert(q.find("y")->second, y) ||
+            camera_id < 1 || x < 2 || y < 2) {
+            // bad request
+            make_bad_request("create_get_response_set_camera_image_size (try_lexical)");
+            return;
+        }
+
+        auto p = parents_.lock();
+        if (!p) {
+            // inner error
+            auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+            response->version(request_.version());
+            response->keep_alive(false);
+
+            response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+
+            response->result(boost::beast::http::status::internal_server_error);
+            response->set(boost::beast::http::field::content_type, "text/plain");
+            boost::beast::ostream(response->body()) << "(!parents_.lock())\r\n";
+            response->content_length(response->body().size());
+            write_response(response);
+            return;
+        }
+
+        // TOD send cmd to let camera re-create
+        OwlMailDefine::MailService2Camera cmd_data = std::make_shared<OwlMailDefine::Service2Camera>();
+        cmd_data->camera_id = camera_id;
+        cmd_data->cmd = OwlMailDefine::ControlCameraCmd::reset;
+        cmd_data->cmdParams = {std::make_pair(x, y)};
+
+        cmd_data->callbackRunner = [this, self = shared_from_this()](
+                const OwlMailDefine::MailCamera2Service &camera_data
+        ) {
+
+            // now, send back
+            if (!camera_data->ok) {
+
+                // try to run immediately if now on the same strand, or run it later
+                boost::asio::dispatch(socket_.get_executor(), [this, self = shared_from_this()]() {
+                    auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+                    response->version(request_.version());
+                    response->keep_alive(false);
+
+                    response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+
+                    response->result(boost::beast::http::status::internal_server_error);
+                    response->set(boost::beast::http::field::content_type, "text/plain");
+                    boost::beast::ostream(response->body()) << "(!camera reset->ok)\r\n";
+                    response->content_length(response->body().size());
+                    write_response(response);
+                });
+                return;
+            }
+
+            boost::asio::dispatch(socket_.get_executor(), [this, self = shared_from_this()]() {
+                auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+                response->version(request_.version());
+                response->keep_alive(false);
+
+                response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+
+                response->result(boost::beast::http::status::ok);
+                response->set(boost::beast::http::field::content_type, "text/plain");
+                boost::beast::ostream(response->body()) << "200\r\n";
+                response->content_length(response->body().size());
+                write_response(response);
+            });
+            return;
+
+        };
+
+        p->sendMail(std::move(cmd_data));
+
+    }
+
     void ImageServiceHttpConnect::create_get_response() {
 
         if (request_.target() == "/1") {
@@ -123,6 +251,10 @@ namespace OwlImageServiceHttp {
         }
         if (request_.target() == "/3") {
             create_get_response_image(3);
+            return;
+        }
+        if (request_.target().starts_with("/set_camera_image_size?")) {
+            create_get_response_set_camera_image_size();
             return;
         }
 
