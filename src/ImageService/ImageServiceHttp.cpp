@@ -97,7 +97,7 @@ namespace OwlImageServiceHttp {
                 boost::beast::http::async_write(
                         socket_,
                         *response,
-                        [self, response, imageBuffer](boost::beast::error_code ec, std::size_t) { ;
+                        [self, response, imageBuffer](boost::beast::error_code ec, std::size_t) {
                             self->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
                             self->deadline_.cancel();
                         });
