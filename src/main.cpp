@@ -26,7 +26,6 @@
 #include "ImageService/ImageServiceHttp.h"
 #include "ImageService/CameraReader.h"
 #include "ConfigLoader/ConfigLoader.h"
-#include "AprilTag/AprilTagService.h"
 
 #include "ImageService/protobuf_test.h"
 
@@ -209,14 +208,7 @@ int main(int argc, const char *argv[]) {
     config->init(config_file);
     config->print();
 
-
-    boost::asio::io_context ioc_tag;
-
     boost::asio::io_context ioc_cmd;
-    auto mailbox_tag_serial = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
-            ioc_tag, ioc_cmd
-    );
-
     auto mailbox_cmd_udp = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
             ioc_cmd, ioc_cmd
     );
@@ -245,8 +237,7 @@ int main(int argc, const char *argv[]) {
             ioc_cmd,
             std::vector<OwlMailDefine::CmdSerialMailbox>{
                     mailbox_cmd_udp->shared_from_this(),
-                    mailbox_cmd_http->shared_from_this(),
-                    mailbox_tag_serial->shared_from_this(),
+                    mailbox_cmd_http->shared_from_this()
             }
     );
     bool serialControllerServiceStartOk = serialControllerService->start(
@@ -258,12 +249,8 @@ int main(int argc, const char *argv[]) {
         << serialControllerServiceStartOk;
 
 
-    boost::asio::io_context ioc_cameraReader;
-    auto mailbox_tag_camera = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
-            ioc_tag, ioc_cameraReader
-    );
-
     boost::asio::io_context ioc_imageWeb;
+    boost::asio::io_context ioc_cameraReader;
     auto mailbox_image_protobuf = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
             ioc_imageWeb, ioc_cameraReader
     );
@@ -297,19 +284,9 @@ int main(int argc, const char *argv[]) {
                             config->config.camera_2_w, config->config.camera_2_h},
             },
             mailbox_image_protobuf->shared_from_this(),
-            mailbox_image_http->shared_from_this(),
-            mailbox_tag_camera->shared_from_this()
+            mailbox_image_http->shared_from_this()
     );
     cameraReader->start();
-
-
-    auto aprilTagService = std::make_shared<OwlAprilTagService::AprilTagService>(
-            ioc_tag,
-            config->config.AprilTagTimerStart,
-            config->config.AprilTagTimerDuration,
-            mailbox_tag_serial->shared_from_this(),
-            mailbox_tag_camera->shared_from_this()
-    );
 
 
     boost::asio::io_context ioc_web_static;
@@ -352,7 +329,6 @@ int main(int argc, const char *argv[]) {
             case SIGTERM: {
                 // stop all service on there
                 BOOST_LOG_TRIVIAL(info) << "stopping all service. ";
-                ioc_tag.stop();
                 ioc_cmd.stop();
                 ioc_imageWeb.stop();
                 ioc_cameraReader.stop();
@@ -370,12 +346,10 @@ int main(int argc, const char *argv[]) {
     BOOST_LOG_TRIVIAL(info) << "processor_count: " << processor_count;
 
     boost::thread_group tg;
-    tg.create_thread(ThreadCallee{ioc_tag, tg, "ioc_tag"});
     tg.create_thread(ThreadCallee{ioc_cmd, tg, "ioc_cmd"});
     tg.create_thread(ThreadCallee{ioc_imageWeb, tg, "ioc_imageWeb"});
-//    tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 1"});
-//    tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 2"});
-    tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 0"});
+    tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 1"});
+    tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 2"});
     tg.create_thread(ThreadCallee{ioc_web_static, tg, "ioc_web_static"});
     tg.create_thread(ThreadCallee{ioc_keyboard, tg, "ioc_keyboard"});
 

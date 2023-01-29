@@ -142,14 +142,15 @@ add_executable(${ProjectMainName}
         src/CommandService/ProcessJsonMessage.h
         src/Log/Log.cpp
         src/Log/Log.h
-        src/AprilTag/AprilTagService.cpp
-        src/AprilTag/AprilTagService.h)
+#        src/AprilTag/AprilTagService.cpp
+#        src/AprilTag/AprilTagService.h
+        )
 
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})
 
 include_directories(${Boost_INCLUDE_DIRS} ${PROTOBUFF_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${AprilTag_INCLUDE_DIRS})
-target_link_libraries(${ProjectMainName} ${Boost_LIBRARIES} ${PROTOBUFF_LIBS} ${OpenCV_LIBRARIES} ${AprilTag_LIB})
+target_link_libraries(${ProjectMainName} ${Boost_LIBRARIES} ${PROTOBUFF_LIBS} ${OpenCV_LIBRARIES} #[[${AprilTag_LIB}]])
 link_directories(${Boost_LIBRARY_DIRS})
 
 
