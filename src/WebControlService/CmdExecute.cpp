@@ -35,6 +35,12 @@ namespace OwlCmdExecute {
                     isRunning = false;
                     if (ec) {
                         isErr = true;
+                        // call caller to process the result
+                        if (callbackEnd) {
+                            callbackEnd();
+                            // clear it to remove some ref maybe on the func
+                            callbackEnd = nullptr;
+                        }
                         return;
                     }
                     result = c.exit_code();

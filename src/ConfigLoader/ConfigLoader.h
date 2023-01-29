@@ -94,6 +94,9 @@ namespace OwlConfigLoader {
         int camera_2_w = 1920;
         int camera_2_h = 1080;
 
+        std::string cmd_nmcli_path = "nmcli";
+        std::string cmd_bash_path = "/bin/bash";
+
         ConfigEmbedWebServer embedWebServer;
     };
 
@@ -128,6 +131,8 @@ namespace OwlConfigLoader {
                 << "\n" << "camera_2_VideoCaptureAPI " << config.camera_2_VideoCaptureAPI
                 << "\n" << "camera_2_w " << config.camera_2_w
                 << "\n" << "camera_2_h " << config.camera_2_h
+                << "\n" << "cmd_nmcli_path " << config.cmd_nmcli_path
+                << "\n" << "cmd_bash_path " << config.cmd_bash_path
                 << "\n" << "ConfigEmbedWebServer :"
                 << "\n" << "\t doc_root " << config.embedWebServer.doc_root
                 << "\n" << "\t index_file_of_root " << config.embedWebServer.index_file_of_root

@@ -191,6 +191,9 @@ namespace OwlConfigLoader {
         config_.camera_2_w = get(root, "camera_2_w", config_.camera_2_w);
         config_.camera_2_h = get(root, "camera_2_h", config_.camera_2_h);
 
+        config_.cmd_nmcli_path = get(root, "cmd_nmcli_path", config_.cmd_nmcli_path);
+        config_.cmd_bash_path = get(root, "cmd_bash_path", config_.cmd_bash_path);
+
         if (root.contains("embedWebServer")) {
             auto embedWebServer = getObj(root, "embedWebServer");
             config_.embedWebServer.doc_root = get(root, "doc_root", config_.embedWebServer.doc_root);

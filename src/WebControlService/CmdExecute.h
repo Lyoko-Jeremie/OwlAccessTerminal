@@ -10,6 +10,7 @@
 #include <boost/asio.hpp>
 #include <boost/process.hpp>
 #include <boost/atomic.hpp>
+#include <boost/log/trivial.hpp>
 
 #include "WebCmdMail.h"
 
@@ -66,8 +67,11 @@ namespace OwlCmdExecute {
     public:
         explicit CmdExecute(
                 boost::asio::io_context &ioc,
+                std::string cmd_nmcli_path,
+                std::string cmd_bash_path,
                 OwlMailDefine::WebCmdMailbox &&mailbox
-        ) : ioc_(ioc), mailbox_(std::move(mailbox)) {
+        ) : ioc_(ioc), mailbox_(std::move(mailbox)),
+            cmd_nmcli_path_(std::move(cmd_nmcli_path)), cmd_bash_path_(std::move(cmd_bash_path)) {
             mailbox_->receiveA2B = [this](OwlMailDefine::MailWeb2Cmd &&data) {
                 receiveMail(std::move(data));
             };
@@ -80,6 +84,9 @@ namespace OwlCmdExecute {
     private:
         boost::asio::io_context &ioc_;
         OwlMailDefine::WebCmdMailbox mailbox_;
+
+        std::string cmd_nmcli_path_;
+        std::string cmd_bash_path_;
 
         std::atomic_size_t ceiIdGenerator_{1};
         std::mutex ceiMtx_;
@@ -108,9 +115,129 @@ namespace OwlCmdExecute {
                 const std::lock_guard<typeof(ceiMtx_)> &lg
         );
 
+        void sendBackResult(std::shared_ptr<CmdExecuteItem> cei, OwlMailDefine::MailWeb2Cmd data) {
+            boost::asio::dispatch(ioc_, [this, self = shared_from_this(), cei, data]() {
+                OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
+                m->runner = data->callbackRunner;
+                if (cei->isErr) {
+                    m->ok = false;
+                    sendMail(std::move(m));
+                    return;
+                }
+                if (!cei->isEnd || !cei->isValid) {
+                    m->ok = false;
+                    sendMail(std::move(m));
+                    return;
+                }
+                m->result = cei->result;
+                m->s_err = std::string{
+                        (std::istreambuf_iterator<char>(&cei->buf_err)),
+                        std::istreambuf_iterator<char>()
+                };
+                m->s_out = std::string{
+                        (std::istreambuf_iterator<char>(&cei->buf_out)),
+                        std::istreambuf_iterator<char>()
+                };
+                m->ok = true;
+                sendMail(std::move(m));
+            });
+        }
+
         void receiveMail(OwlMailDefine::MailWeb2Cmd &&data) {
-            // TODO
-//            createCEI();
+            switch (data->cmd) {
+                case OwlMailDefine::WifiCmd::enable:
+                    // `nmcli wifi on`
+                {
+                    auto cei = createCEI(cmd_bash_path_, R"(nmcli wifi on)");
+                    cei->start([this, self = shared_from_this(), cei, data]() {
+                        this->sendBackResult(cei, data);
+                    });
+                }
+                    return;
+                case OwlMailDefine::WifiCmd::ap:
+                    // `nmcli dev wifi hotspot ssid "<SSID>" password "<PWD>"`
+                {
+                    bool c1 = std::all_of(data->SSID.begin(), data->SSID.end(), [](const char &a) {
+                        return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || (a == '_') || (a == '-');
+                    });
+                    bool c2 = std::all_of(data->PASSWORD.begin(), data->PASSWORD.end(), [](const char &a) {
+                        return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || (a == '_') || (a == '-');
+                    });
+                    if (!c1 || !c2 || data->SSID.length() < 8 || data->PASSWORD.length() < 1) {
+                        BOOST_LOG_TRIVIAL(warning)
+                            << "(!c1 || !c2 || data->SSID.length() < 8 || data->PASSWORD.length() < 1)";
+                        OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
+                        m->ok = false;
+                        m->s_err = "ERROR (!c1 || !c2 || data->SSID.length() < 8 || data->PASSWORD.length() < 1) ERROR";
+                        m->runner = data->callbackRunner;
+                        sendMail(std::move(m));
+                        return;
+                    }
+                    auto cei = createCEI(cmd_bash_path_,
+                                         std::string{R"(nmcli dev wifi hotspot ssid ")"} +
+                                         data->SSID +
+                                         std::string{R"(" password ")"} +
+                                         data->PASSWORD +
+                                         std::string{R"(")"}
+                    );
+                    cei->start([this, self = shared_from_this(), cei, data]() {
+                        this->sendBackResult(cei, data);
+                    });
+                }
+                    return;
+                case OwlMailDefine::WifiCmd::connect:
+                    // `nmcli dev wifi connect "<BSSID>" password "<PWD>"`
+                {
+                    bool c1 = std::all_of(data->SSID.begin(), data->SSID.end(), [](const char &a) {
+                        return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || (a == '_') || (a == '-');
+                    });
+                    bool c2 = std::all_of(data->PASSWORD.begin(), data->PASSWORD.end(), [](const char &a) {
+                        return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || (a == '_') || (a == '-');
+                    });
+                    if (!c1 || !c2 || data->SSID.length() < 8 || data->PASSWORD.length() < 1) {
+                        BOOST_LOG_TRIVIAL(warning)
+                            << "(!c1 || !c2 || data->SSID.length() < 8 || data->PASSWORD.length() < 1)";
+                        OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
+                        m->ok = false;
+                        m->s_err = "ERROR (!c1 || !c2 || data->SSID.length() < 8 || data->PASSWORD.length() < 1) ERROR";
+                        m->runner = data->callbackRunner;
+                        sendMail(std::move(m));
+                        return;
+                    }
+                    auto cei = createCEI(cmd_bash_path_,
+                                         std::string{R"(nmcli dev wifi connect ")"} +
+                                         data->SSID +
+                                         std::string{R"(" password ")"} +
+                                         data->PASSWORD +
+                                         std::string{R"(")"}
+                    );
+                    cei->start([this, self = shared_from_this(), cei, data]() {
+                        this->sendBackResult(cei, data);
+                    });
+                }
+                    return;
+                case OwlMailDefine::WifiCmd::scan:
+                    // `nmcli dev wifi list | cat`
+                {
+                    auto cei = createCEI(cmd_bash_path_, R"(nmcli dev wifi list | cat)");
+                    cei->start([this, self = shared_from_this(), cei, data]() {
+                        this->sendBackResult(cei, data);
+                    });
+                }
+                    return;
+                case OwlMailDefine::WifiCmd::ignore:
+                default:
+                    // invalid
+                    BOOST_LOG_TRIVIAL(error) << "receiveMail MailWeb2Cmd ignore/default.";
+                    {
+                        OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
+                        m->ok = false;
+                        m->s_err = "ERROR receiveMail MailWeb2Cmd ignore/default. ERROR";
+                        m->runner = data->callbackRunner;
+                        sendMail(std::move(m));
+                    }
+                    return;
+            }
         }
 
         void sendMail(OwlMailDefine::MailCmd2Web &&data) {

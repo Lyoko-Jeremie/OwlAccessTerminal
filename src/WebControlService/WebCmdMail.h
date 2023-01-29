@@ -10,6 +10,7 @@ namespace OwlMailDefine {
 
     enum class WifiCmd {
         ignore,
+        enable,
         ap,
         scan,
         connect,
@@ -20,7 +21,8 @@ namespace OwlMailDefine {
 
         WifiCmd cmd;
         bool enableAp = false;
-        std::string connect2SSID;
+        std::string SSID;
+        std::string PASSWORD;
 
         // Cmd2Web.runner = Web2Cmd.callbackRunner
         std::function<void(std::shared_ptr<Cmd2Web>)> callbackRunner;
@@ -28,6 +30,10 @@ namespace OwlMailDefine {
     struct Cmd2Web {
         std::function<void(std::shared_ptr<Cmd2Web>)> runner;
         bool ok = false;
+
+        int result = -1;
+        std::string s_out;
+        std::string s_err;
     };
 
     using WebCmdMailbox =
