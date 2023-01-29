@@ -67,11 +67,13 @@ namespace OwlCameraReader {
                 boost::asio::io_context &ioc,
                 std::vector<OwlCameraConfig::CameraInfoTuple> camera_info_list,
                 OwlMailDefine::ServiceCameraMailbox &&mailbox_tcp_protobuf,
-                OwlMailDefine::ServiceCameraMailbox &&mailbox_http
+                OwlMailDefine::ServiceCameraMailbox &&mailbox_http,
+                OwlMailDefine::ServiceCameraMailbox &&mailbox_tag
         ) : ioc_(ioc),
             camera_info_list_(std::move(camera_info_list)),
             mailbox_tcp_protobuf_(mailbox_tcp_protobuf),
-            mailbox_http_(mailbox_http) {
+            mailbox_http_(mailbox_http),
+            mailbox_tag_(mailbox_tag) {
 
             mailbox_tcp_protobuf_->receiveA2B = [this](OwlMailDefine::MailService2Camera &&data) {
                 if (data->cmd == OwlMailDefine::ControlCameraCmd::reset) {
@@ -89,6 +91,14 @@ namespace OwlCameraReader {
 //                BOOST_LOG_TRIVIAL(info) << "CameraReader mailbox_http_->receiveA2B " << data->camera_id;
                 getImage(std::move(data), mailbox_http_);
             };
+            mailbox_tag_->receiveA2B = [this](OwlMailDefine::MailService2Camera &&data) {
+                if (data->cmd == OwlMailDefine::ControlCameraCmd::reset) {
+                    resetCamera(std::move(data), mailbox_tag_);
+                    return;
+                }
+//                BOOST_LOG_TRIVIAL(info) << "CameraReader mailbox_http_->receiveA2B " << data->camera_id;
+                getImage(std::move(data), mailbox_tag_);
+            };
         }
 
         ~CameraReader() {
@@ -103,6 +113,7 @@ namespace OwlCameraReader {
         std::mutex mtx_camera_item_list_;
         OwlMailDefine::ServiceCameraMailbox mailbox_tcp_protobuf_;
         OwlMailDefine::ServiceCameraMailbox mailbox_http_;
+        OwlMailDefine::ServiceCameraMailbox mailbox_tag_;
     public:
         void
         start() {

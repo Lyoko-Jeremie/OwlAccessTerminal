@@ -38,6 +38,9 @@ if (DEFAULT_CONFIG)
 
     #add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
 
+    set(AprilTag_INCLUDE_DIRS h:/Code/apriltag-build-install/include/apriltag)
+    set(AprilTag_LIB h:/Code/apriltag-build-install/lib/libapriltag.a)
+
     # ===================== ^^^^^^ config segment ^^^^^^ =================================
 endif (DEFAULT_CONFIG)
 
@@ -138,13 +141,15 @@ add_executable(${ProjectMainName}
         src/CommandService/CmdServiceHttp.h
         src/CommandService/ProcessJsonMessage.h
         src/Log/Log.cpp
-        src/Log/Log.h)
+        src/Log/Log.h
+        src/AprilTag/AprilTagService.cpp
+        src/AprilTag/AprilTagService.h)
 
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})
 
-include_directories(${Boost_INCLUDE_DIRS} ${PROTOBUFF_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(${ProjectMainName} ${Boost_LIBRARIES} ${PROTOBUFF_LIBS} ${OpenCV_LIBRARIES})
+include_directories(${Boost_INCLUDE_DIRS} ${PROTOBUFF_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${AprilTag_INCLUDE_DIRS})
+target_link_libraries(${ProjectMainName} ${Boost_LIBRARIES} ${PROTOBUFF_LIBS} ${OpenCV_LIBRARIES} ${AprilTag_LIB})
 link_directories(${Boost_LIBRARY_DIRS})
 
 

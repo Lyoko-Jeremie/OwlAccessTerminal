@@ -16,6 +16,8 @@
   "camera_2_h": 1080,
   "cmd_nmcli_path": "nmcli",
   "cmd_bash_path": "/bin/bash",
+  "AprilTagTimerStart": 1000,
+  "AprilTagTimerDuration": 300,
   "embedWebServer": {
     "doc_root": "./html",
     "index_file_of_root": "index.html",

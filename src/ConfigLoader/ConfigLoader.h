@@ -94,8 +94,12 @@ namespace OwlConfigLoader {
         int camera_2_w = 1920;
         int camera_2_h = 1080;
 
+
         std::string cmd_nmcli_path = "nmcli";
         std::string cmd_bash_path = "/bin/bash";
+
+        int AprilTagTimerStart = 1000;
+        int AprilTagTimerDuration = 300;
 
         ConfigEmbedWebServer embedWebServer;
     };
@@ -133,6 +137,8 @@ namespace OwlConfigLoader {
                 << "\n" << "camera_2_h " << config.camera_2_h
                 << "\n" << "cmd_nmcli_path " << config.cmd_nmcli_path
                 << "\n" << "cmd_bash_path " << config.cmd_bash_path
+                << "\n" << "AprilTagTimerStart " << config.AprilTagTimerStart
+                << "\n" << "AprilTagTimerDuration " << config.AprilTagTimerDuration
                 << "\n" << "ConfigEmbedWebServer :"
                 << "\n" << "\t doc_root " << config.embedWebServer.doc_root
                 << "\n" << "\t index_file_of_root " << config.embedWebServer.index_file_of_root
