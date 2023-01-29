@@ -26,7 +26,7 @@
 #include "ImageService/ImageServiceHttp.h"
 #include "ImageService/CameraReader.h"
 #include "ConfigLoader/ConfigLoader.h"
-#include "AprilTag/AprilTagService.h"
+//#include "AprilTag/AprilTagService.h"
 
 #include "ImageService/protobuf_test.h"
 
@@ -303,13 +303,13 @@ int main(int argc, const char *argv[]) {
     cameraReader->start();
 
 
-    auto aprilTagService = std::make_shared<OwlAprilTagService::AprilTagService>(
-            ioc_tag,
-            config->config.AprilTagTimerStart,
-            config->config.AprilTagTimerDuration,
-            mailbox_tag_serial->shared_from_this(),
-            mailbox_tag_camera->shared_from_this()
-    );
+//    auto aprilTagService = std::make_shared<OwlAprilTagService::AprilTagService>(
+//            ioc_tag,
+//            config->config.AprilTagTimerStart,
+//            config->config.AprilTagTimerDuration,
+//            mailbox_tag_serial->shared_from_this(),
+//            mailbox_tag_camera->shared_from_this()
+//    );
 
 
     boost::asio::io_context ioc_web_static;
