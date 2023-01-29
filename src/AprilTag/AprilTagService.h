@@ -76,31 +76,16 @@ namespace OwlAprilTagService {
 
     private:
 
-        void calcTag(const cv::Mat &image);
+        void calcTag(const cv::Mat &image, const std::function<void(void)> &whenEnd);
 
     private:
-        void time_loop(const boost::system::error_code &ec) {
-            if (ec) {
-                BOOST_LOG_TRIVIAL(error) << "AprilTagService time_loop ec: " << ec.what();
-                // ignore
-                return;
-            }
-
-            // request image and calc it
-            auto m = std::make_shared<OwlMailDefine::Service2Camera>();
-            m->camera_id = 2;
-            m->callbackRunner = [this, self = shared_from_this()]
-                    (const OwlMailDefine::MailCamera2Service &data) {
-                // calc it
-                boost::asio::dispatch(ioc_, [this, self = shared_from_this(), data]() {
-                    this->calcTag(data->image);
-                });
-            };
-            sendMailCamera(std::move(m));
-
+        void next_loop(bool frameMode = false) {
             // https://www.boost.org/doc/libs/1_81_0/doc/html/boost_asio/tutorial/tuttimer3.html
-            // timer_.expires_at(timer_.expiry() + boost::asio::chrono::milliseconds(msTimer_));
-            timer_.expires_from_now(boost::asio::chrono::milliseconds(msDurationTimer_));
+            if (frameMode) {
+                timer_.expires_at(timer_.expiry() + boost::asio::chrono::milliseconds(msDurationTimer_));
+            } else {
+                timer_.expires_from_now(boost::asio::chrono::milliseconds(msDurationTimer_));
+            };
 
             //  // time calc
             //  // (p+T+5)<=(now)
@@ -119,6 +104,31 @@ namespace OwlAprilTagService {
                         time_loop(ec);
                     }
             );
+        }
+
+        void time_loop(const boost::system::error_code &ec) {
+            if (ec) {
+                BOOST_LOG_TRIVIAL(error) << "AprilTagService time_loop ec: " << ec.what();
+                // ignore
+                return;
+            }
+
+            // request image and calc it
+            auto m = std::make_shared<OwlMailDefine::Service2Camera>();
+            m->camera_id = 2;
+            m->callbackRunner = [this, self = shared_from_this()]
+                    (const OwlMailDefine::MailCamera2Service &data) {
+                // calc it
+                boost::asio::dispatch(ioc_, [this, self = shared_from_this(), data]() {
+                    this->calcTag(data->image, [this, self = shared_from_this()]() {
+                        next_loop(false);
+                    });
+                });
+            };
+            sendMailCamera(std::move(m));
+
+            // next_loop(true);
+
         }
 
     };

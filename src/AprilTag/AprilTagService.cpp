@@ -1,6 +1,8 @@
 //jeremie
 
+#include <functional>
 #include <boost/asio/strand.hpp>
+#include <boost/core/ignore_unused.hpp>
 #include "AprilTagService.h"
 
 
@@ -42,9 +44,9 @@ namespace OwlAprilTagService {
     };
 
 
-    void AprilTagService::calcTag(const cv::Mat& image) {
+    void AprilTagService::calcTag(const cv::Mat &image, const std::function<void(void)> &whenEnd) {
         // TODO calc it and call the `sendMailCmd` to send info to airplane controller
-        boost::asio::dispatch(AprilTagData_->strand_, [this, self = shared_from_this(), image]
+        boost::asio::dispatch(AprilTagData_->strand_, [this, self = shared_from_this(), image, whenEnd]
                 () {
 
             image_u8_t img_header = {.width = image.cols,
@@ -55,11 +57,42 @@ namespace OwlAprilTagService {
 
             zarray_t *detections = apriltag_detector_detect(AprilTagData_->td, &img_header);
 
+            BOOST_LOG_TRIVIAL(trace) << "calcTag zarray_size(detections) : " << zarray_size(detections);
             for (int i = 0; i < zarray_size(detections); i++) {
                 apriltag_detection_t *det;
                 zarray_get(detections, i, &det);
 
-                // TODO Do stuff with detections here.
+                BOOST_LOG_TRIVIAL(trace)
+                        << "calcTag : " << i
+                        << " id " << det->id
+                        << " c[0]x " << det->c[0]
+                        << " c[1]y " << det->c[1]
+                        << " p[0] (" << det->p[0][0] << "," << det->p[0][0] << ")"
+                        << " p[1] (" << det->p[1][0] << "," << det->p[1][0] << ")"
+                        << " p[2] (" << det->p[2][0] << "," << det->p[2][0] << ")"
+                        << " p[3] (" << det->p[3][0] << "," << det->p[3][0] << ")"
+                        << " hamming " << det->hamming
+                        << " decision_margin " << det->decision_margin;
+
+                {
+                    // TODO this is debug
+                    if (whenEnd) {
+                        whenEnd();
+                    }
+                }
+                return;
+                // TODO calc tag pos here
+                {
+                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    m->callbackRunner = [whenEnd](OwlMailDefine::MailSerial2Cmd data) {
+                        boost::ignore_unused(data);
+                        // TODO
+                        if (whenEnd) {
+                            whenEnd();
+                        }
+                    };
+                    sendMailCmd(std::move(m));
+                }
 
             }
 
