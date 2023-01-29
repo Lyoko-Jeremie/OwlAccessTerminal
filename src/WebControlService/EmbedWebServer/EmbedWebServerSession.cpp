@@ -24,6 +24,7 @@ namespace OwlEmbedWebServer {
         // Store a type-erased version of the shared
         // pointer in the class to keep it alive.
         self_.res_ = sp;
+        boost::ignore_unused(self_.res_);
 
         // Write the response
         boost::beast::http::async_write(
@@ -54,7 +55,8 @@ namespace OwlEmbedWebServer {
         req_ = {};
 
         // Set the timeout.
-        stream_.expires_after(std::chrono::seconds(30));
+        // stream_.expires_after(std::chrono::seconds(30));
+        stream_.expires_after(std::chrono::seconds(120));
 
         // Read a request
         boost::beast::http::async_read(stream_, buffer_, req_,
@@ -137,6 +139,36 @@ namespace OwlEmbedWebServer {
             return server_error("(!parentRef_.lock())");
         }
 
+        if (std::string{req_.target()} == std::string{R"(/cmd/enable)"}) {
+            OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
+            data->cmd = OwlMailDefine::WifiCmd::enable;
+            data->callbackRunner = [this, self = shared_from_this()](
+                    const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
+            ) {
+                if (!data_r->ok) {
+                    return send_json(
+                            boost::json::value{
+                                    {"msg",    "error"},
+                                    {"error",  "(!data_r->ok)"},
+                                    {"result_code", data_r->result},
+                                    {"s_err", data_r->s_err},
+                                    {"s_out", data_r->s_out},
+                                    {"result", false},
+                            }
+                    );
+                }
+                return send_json(
+                        boost::json::value{
+                                {"result", true},
+                                {"result_code", data_r->result},
+                                {"s_err", data_r->s_err},
+                                {"s_out", data_r->s_out},
+                        }
+                );
+            };
+            p->sendMail(std::move(data));
+        }
+
         if (std::string{req_.target()} == std::string{R"(/cmd/scan)"}) {
             OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
             data->cmd = OwlMailDefine::WifiCmd::scan;
@@ -148,23 +180,28 @@ namespace OwlEmbedWebServer {
                             boost::json::value{
                                     {"msg",    "error"},
                                     {"error",  "(!data_r->ok)"},
+                                    {"result_code", data_r->result},
+                                    {"s_err", data_r->s_err},
+                                    {"s_out", data_r->s_out},
                                     {"result", false},
                             }
                     );
                 }
                 return send_json(
                         boost::json::value{
-                                // TODO wifi list
                                 {"result", true},
+                                {"result_code", data_r->result},
+                                {"s_err", data_r->s_err},
+                                {"s_out", data_r->s_out},
                         }
                 );
             };
             p->sendMail(std::move(data));
         }
 
-        if (std::string{req_.target()} == std::string{R"(/cmd/getInfo)"}) {
+        if (std::string{req_.target()} == std::string{R"(/cmd/connect)"}) {
             OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
-            data->cmd = OwlMailDefine::WifiCmd::scan;
+            data->cmd = OwlMailDefine::WifiCmd::connect;
             data->callbackRunner = [this, self = shared_from_this()](
                     const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
             ) {
@@ -173,14 +210,19 @@ namespace OwlEmbedWebServer {
                             boost::json::value{
                                     {"msg",    "error"},
                                     {"error",  "(!data_r->ok)"},
+                                    {"result_code", data_r->result},
+                                    {"s_err", data_r->s_err},
+                                    {"s_out", data_r->s_out},
                                     {"result", false},
                             }
                     );
                 }
                 return send_json(
                         boost::json::value{
-                                // TODO info
                                 {"result", true},
+                                {"result_code", data_r->result},
+                                {"s_err", data_r->s_err},
+                                {"s_out", data_r->s_out},
                         }
                 );
             };
@@ -208,6 +250,8 @@ namespace OwlEmbedWebServer {
             OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
             data->cmd = OwlMailDefine::WifiCmd::ap;
             data->enableAp = queryPairs.find("apEnable")->second == "1";
+            data->SSID = queryPairs.find("SSID")->second;
+            data->PASSWORD = queryPairs.find("PASSWORD")->second;
             data->callbackRunner = [this, self = shared_from_this()](
                     const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
             ) {
@@ -232,9 +276,13 @@ namespace OwlEmbedWebServer {
             if (queryPairs.count("SSID") == 0) {
                 return bad_request(R"((queryPairs.count("SSID") == 0))");
             }
+            if (queryPairs.count("PASSWORD") == 0) {
+                return bad_request(R"((queryPairs.count("PASSWORD") == 0))");
+            }
             OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
             data->cmd = OwlMailDefine::WifiCmd::connect;
-            data->connect2SSID = queryPairs.find("SSID")->second;
+            data->SSID = queryPairs.find("SSID")->second;
+            data->PASSWORD = queryPairs.find("PASSWORD")->second;
             data->callbackRunner = [this, self = shared_from_this()](
                     const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
             ) {
