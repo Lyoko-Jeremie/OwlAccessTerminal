@@ -102,7 +102,7 @@ void init_logging() {
 
     typedef boost::log::sinks::synchronous_sink<boost::log::sinks::text_ostream_backend> sink_t;
     boost::shared_ptr<sink_t> sink(new sink_t());
-    sink->locked_backend()->add_stream(boost::shared_ptr<std::ostream>(&std::clog, boost::null_deleter()));
+    sink->locked_backend()->add_stream(boost::shared_ptr<std::ostream>(&std::cout, boost::null_deleter()));
     sink->set_formatter(
             boost::log::expressions::stream
                     // << "["
