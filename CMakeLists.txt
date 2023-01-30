@@ -51,9 +51,13 @@ message(STATUS "PROTOBUFF_LIBS: ${PROTOBUFF_LIBS}")
 
 option(USE_DYNAMIC_BOOST "Config USE_DYNAMIC_BOOST")
 
-# -O1 to resolve "string table overflow at offset" error on mingw
-add_definitions(-Wall -Wextra -O1 -g)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "enable -O1 when debug to resolve 'string table overflow at offset' 'too big' error on mingw")
+    # -O1 to resolve "string table overflow at offset" error on mingw
+    add_definitions(-Wall -Wextra -O1 -g)
+endif ()
 
+set(CMAKE_THREAD_PREFER_PTHREAD ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
@@ -87,6 +91,8 @@ else (OpenCV_WORLD)
     find_package(OpenCV REQUIRED)
 endif (OpenCV_WORLD)
 
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+
 message(STATUS "OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
 message(STATUS "OpenCV_LIBRARY_DIRS: ${OpenCV_LIBRARY_DIRS}")
 message(STATUS "OpenCV_LIBRARIES: ${OpenCV_LIBRARIES}")
@@ -100,7 +106,7 @@ message(STATUS "Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
 message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARIES}")
 message(STATUS "Boost_VERSION: ${Boost_VERSION}")
 
-include_directories(CommandService/CMakeLists.txt)
+message(STATUS "CMAKE_THREAD_LIBS_INIT: ${CMAKE_THREAD_LIBS_INIT}")
 
 add_executable(${ProjectMainName}
         src/main.cpp
