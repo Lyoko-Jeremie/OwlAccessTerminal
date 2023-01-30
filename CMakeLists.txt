@@ -38,6 +38,19 @@ if (DEFAULT_CONFIG)
 
     #add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
 
+
+    # config with
+    # -DDEBUG_BOOST_ASIO=OFF
+    # -DOpenCV_STATIC=OFF
+    # -DOpenCV_WORLD=ON
+    # -DOpenCV_DIR=h:/CodeLib/opencv-4.5.5-install/
+    # -DUSE_DYNAMIC_BOOST=OFF
+    # -DBOOST_ROOT=h:/CodeLib/boost_1_81_0_install_x64_v11p3/
+    # -DPROTOBUFF_INCLUDE_DIRS=h:/CodeLib/protobuf-cpp-3.21.11/protobuf-3.21.11-install/include/
+    # -DPROTOBUFF_LIBS=h:/CodeLib/protobuf-cpp-3.21.11/protobuf-3.21.11-install/lib/libprotobuf.a
+    # -DAprilTag_INCLUDE_DIRS=h:/Code/apriltag-build-install/include/apriltag
+    # -DAprilTag_LIB=h:/Code/apriltag-build-install/lib/libapriltag.a
+
     # ===================== ^^^^^^ config segment ^^^^^^ =================================
 endif (DEFAULT_CONFIG)
 
