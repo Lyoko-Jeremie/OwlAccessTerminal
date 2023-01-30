@@ -87,7 +87,7 @@ namespace OwlImageServiceHttp {
         create_get_response();
 
         // Asynchronously transmit the response message.
-        template<typename BodyType =boost::beast::http::dynamic_body>
+        template<typename BodyType = boost::beast::http::dynamic_body>
         void write_response(
                 std::shared_ptr<boost::beast::http::response<BodyType>> response
         ) {
