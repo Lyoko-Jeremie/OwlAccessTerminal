@@ -196,12 +196,12 @@ namespace OwlConfigLoader {
 
         if (root.contains("embedWebServer")) {
             auto embedWebServer = getObj(root, "embedWebServer");
-            config_.embedWebServer.doc_root = get(root, "doc_root", config_.embedWebServer.doc_root);
-            config_.embedWebServer.index_file_of_root = get(root, "index_file_of_root",
+            config_.embedWebServer.doc_root = get(embedWebServer, "doc_root", config_.embedWebServer.doc_root);
+            config_.embedWebServer.index_file_of_root = get(embedWebServer, "index_file_of_root",
                                                             config_.embedWebServer.index_file_of_root);
-            config_.embedWebServer.backend_json_string = get(root, "backend_json_string",
+            config_.embedWebServer.backend_json_string = get(embedWebServer, "backend_json_string",
                                                              config_.embedWebServer.backend_json_string);
-            config_.embedWebServer.allowFileExtList = get(root, "allowFileExtList",
+            config_.embedWebServer.allowFileExtList = get(embedWebServer, "allowFileExtList",
                                                           config_.embedWebServer.allowFileExtList);
         }
 
