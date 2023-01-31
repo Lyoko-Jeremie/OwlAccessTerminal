@@ -14,6 +14,7 @@ namespace OwlMailDefine {
         ap,
         scan,
         connect,
+        showHotspotPassword,
     };
 
     struct Cmd2Web;

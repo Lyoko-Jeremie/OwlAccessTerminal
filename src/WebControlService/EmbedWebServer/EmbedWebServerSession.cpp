@@ -229,6 +229,36 @@ namespace OwlEmbedWebServer {
             p->sendMail(std::move(data));
         }
 
+        if (std::string{req_.target()} == std::string{R"(/cmd/showHotspotPassword)"}) {
+            OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
+            data->cmd = OwlMailDefine::WifiCmd::showHotspotPassword;
+            data->callbackRunner = [this, self = shared_from_this()](
+                    const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
+            ) {
+                if (!data_r->ok) {
+                    return send_json(
+                            boost::json::value{
+                                    {"msg",    "error"},
+                                    {"error",  "(!data_r->ok)"},
+                                    {"result_code", data_r->result},
+                                    {"s_err", data_r->s_err},
+                                    {"s_out", data_r->s_out},
+                                    {"result", false},
+                            }
+                    );
+                }
+                return send_json(
+                        boost::json::value{
+                                {"result", true},
+                                {"result_code", data_r->result},
+                                {"s_err", data_r->s_err},
+                                {"s_out", data_r->s_out},
+                        }
+                );
+            };
+            p->sendMail(std::move(data));
+        }
+
         auto queryPairs = std::move(OwlQueryPairsAnalyser::QueryPairsAnalyser{req_.target()}.queryPairs);
         if (queryPairs.empty()) {
             boost::beast::http::response<boost::beast::http::string_body> res{

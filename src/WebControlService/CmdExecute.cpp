@@ -104,7 +104,7 @@ namespace OwlCmdExecute {
     void CmdExecute::receiveMail(OwlMailDefine::MailWeb2Cmd &&data) {
         switch (data->cmd) {
             case OwlMailDefine::WifiCmd::enable:
-                // `nmcli wifi on`
+                // `nmcli wifi on | cat`
             {
                 auto cei = createCEI(cmd_bash_path_, R"(nmcli wifi on)");
                 cei->start([this, self = shared_from_this(), cei, data]() {
@@ -113,7 +113,7 @@ namespace OwlCmdExecute {
             }
                 return;
             case OwlMailDefine::WifiCmd::ap:
-                // `nmcli dev wifi hotspot ssid "<SSID>" password "<PWD>"`
+                // `nmcli dev wifi hotspot ssid "<SSID>" password "<PWD>" | cat`
             {
                 bool c1 = std::all_of(data->SSID.begin(), data->SSID.end(), [](const char &a) {
                     return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || (a == '_') || (a == '-');
@@ -136,7 +136,7 @@ namespace OwlCmdExecute {
                                      data->SSID +
                                      std::string{R"(" password ")"} +
                                      data->PASSWORD +
-                                     std::string{R"(")"}
+                                     std::string{R"(" | cat)"}
                 );
                 cei->start([this, self = shared_from_this(), cei, data]() {
                     this->sendBackResult(cei, data);
@@ -144,7 +144,7 @@ namespace OwlCmdExecute {
             }
                 return;
             case OwlMailDefine::WifiCmd::connect:
-                // `nmcli dev wifi connect "<BSSID>" password "<PWD>"`
+                // `nmcli dev wifi connect "<BSSID>" password "<PWD>" | cat`
             {
                 bool c1 = std::all_of(data->SSID.begin(), data->SSID.end(), [](const char &a) {
                     return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || (a == '_') || (a == '-');
@@ -167,7 +167,7 @@ namespace OwlCmdExecute {
                                      data->SSID +
                                      std::string{R"(" password ")"} +
                                      data->PASSWORD +
-                                     std::string{R"(")"}
+                                     std::string{R"(" | cat)"}
                 );
                 cei->start([this, self = shared_from_this(), cei, data]() {
                     this->sendBackResult(cei, data);
@@ -178,6 +178,15 @@ namespace OwlCmdExecute {
                 // `nmcli dev wifi list | cat`
             {
                 auto cei = createCEI(cmd_bash_path_, R"(nmcli dev wifi list | cat)");
+                cei->start([this, self = shared_from_this(), cei, data]() {
+                    this->sendBackResult(cei, data);
+                });
+            }
+                return;
+            case OwlMailDefine::WifiCmd::showHotspotPassword:
+                // `nmcli dev wifi show-password | cat`
+            {
+                auto cei = createCEI(cmd_bash_path_, R"(nmcli dev wifi show-password | cat)");
                 cei->start([this, self = shared_from_this(), cei, data]() {
                     this->sendBackResult(cei, data);
                 });
