@@ -102,10 +102,6 @@ int main(int argc, const char *argv[]) {
         std::cout << "usage: " << argv[0] << " [[-c] CONFIG]" << "\n" << std::endl;
 
         std::cout << "    OwlAccessTerminal  Copyright (C) 2023 \n"
-                  // << "    This program comes with ABSOLUTELY NO WARRANTY; \n"
-                  // << "    This is free software, and you are welcome to redistribute it\n"
-                  // << "    under certain conditions; \n"
-                  // << "         GNU GENERAL PUBLIC LICENSE , Version 3 "
                   << "\n" << std::endl;
 
         std::cout << desc << std::endl;
