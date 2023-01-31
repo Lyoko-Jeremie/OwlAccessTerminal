@@ -147,8 +147,8 @@ namespace OwlCommandServiceHttp {
                 if (request_.target().starts_with("/cmd")) {
 
                     auto qp = OwlQueryPairsAnalyser::QueryPairsAnalyser{request_.target()};
-                    std::string jsonS = boost::beast::buffers_to_string(request_.body().data());
 
+                    std::string jsonS = boost::beast::buffers_to_string(request_.body().data());
                     // this will call process_json_message->sendMail->send_back_json->send_back
                     create_post_response_cmd(jsonS);
 
