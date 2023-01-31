@@ -223,6 +223,8 @@ namespace OwlImageService {
 
                         auto p = parents_.lock();
                         if (!p) {
+                            BOOST_LOG_TRIVIAL(error)
+                                << "do_process_request TODO inner error. ";
                             // TODO inner error
                         } else {
 
