@@ -188,6 +188,7 @@ int main(int argc, const char *argv[]) {
                     boost::asio::ip::tcp::v4(),
                     config->config.ImageServiceHttpPort
             ),
+            config->config.downCameraId,
             mailbox_image_http->shared_from_this()
     );
     imageServiceHttp->start();

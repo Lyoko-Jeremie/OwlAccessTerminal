@@ -253,6 +253,10 @@ namespace OwlImageServiceHttp {
             create_get_response_image(3);
             return;
         }
+        if (request_.target() == "/down") {
+            create_get_response_image(downCameraId_);
+            return;
+        }
         if (request_.target().starts_with("/set_camera_image_size?")) {
             create_get_response_set_camera_image_size();
             return;
@@ -263,6 +267,15 @@ namespace OwlImageServiceHttp {
         response->keep_alive(false);
 
         response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+
+        if (request_.target() == "/downCameraId") {
+            response->result(boost::beast::http::status::ok);
+            response->set(boost::beast::http::field::content_type, "text/json");
+            boost::beast::ostream(response->body()) << R"({"downCameraId": )" << downCameraId_ << R"( })";
+            response->content_length(response->body().size());
+            write_response(response);
+            return;
+        }
 
         if (request_.target() == "/") {
             response->result(boost::beast::http::status::ok);
@@ -320,10 +333,12 @@ namespace OwlImageServiceHttp {
     ImageServiceHttp::ImageServiceHttp(
             boost::asio::io_context &ioc,
             const boost::asio::ip::tcp::endpoint &endpoint,
+            int downCameraId,
             OwlMailDefine::ServiceCameraMailbox &&mailbox
     ) : ioc_(ioc),
         acceptor_(boost::asio::make_strand(ioc)),
-        mailbox_(std::move(mailbox)) {
+        mailbox_(std::move(mailbox)),
+        downCameraId_(downCameraId) {
 
         mailbox_->receiveB2A = [this](OwlMailDefine::MailCamera2Service &&data) {
             receiveMail(std::move(data));

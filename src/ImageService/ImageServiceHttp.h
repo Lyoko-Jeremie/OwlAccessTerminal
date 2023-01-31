@@ -28,8 +28,10 @@ namespace OwlImageServiceHttp {
     public:
         ImageServiceHttpConnect(
                 boost::asio::ip::tcp::socket &&socket,
+                int downCameraId,
                 std::weak_ptr<ImageServiceHttp> &&parents
         ) : socket_(std::move(socket)),
+            downCameraId_(downCameraId),
             parents_(std::move(parents)) {
         }
 
@@ -44,6 +46,8 @@ namespace OwlImageServiceHttp {
 
         // The socket for the currently connected client.
         boost::asio::ip::tcp::socket socket_;
+
+        int downCameraId_;
 
         std::weak_ptr<ImageServiceHttp> parents_;
 
@@ -123,6 +127,7 @@ namespace OwlImageServiceHttp {
         ImageServiceHttp(
                 boost::asio::io_context &ioc,
                 const boost::asio::ip::tcp::endpoint &endpoint,
+                int downCameraId,
                 OwlMailDefine::ServiceCameraMailbox &&mailbox
         );
 
@@ -134,6 +139,7 @@ namespace OwlImageServiceHttp {
         boost::asio::io_context &ioc_;
         boost::asio::ip::tcp::acceptor acceptor_;
         OwlMailDefine::ServiceCameraMailbox mailbox_;
+        int downCameraId_;
     public:
         // Start accepting incoming connections
         void
@@ -174,6 +180,7 @@ namespace OwlImageServiceHttp {
                 // Create the session and run it
                 std::make_shared<ImageServiceHttpConnect>(
                         std::move(socket),
+                        downCameraId_,
                         weak_from_this()
                 )->start();
             }
