@@ -8,14 +8,6 @@
 #include <boost/asio/signal_set.hpp>
 #include <boost/thread.hpp>
 #include <boost/log/trivial.hpp>
-#include <boost/core/null_deleter.hpp>
-#include <boost/log/expressions.hpp>
-#include <boost/log/sinks/sync_frontend.hpp>
-#include <boost/log/sinks/text_ostream_backend.hpp>
-#include <boost/log/sources/logger.hpp>
-#include <boost/log/sources/record_ostream.hpp>
-#include <boost/log/support/date_time.hpp>
-#include <boost/log/attributes.hpp>
 #include <boost/program_options.hpp>
 #include "CommandService/CommandService.h"
 #include "CommandService/CmdServiceHttp.h"
