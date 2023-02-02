@@ -115,6 +115,7 @@ namespace OwlCmdExecute {
             case OwlMailDefine::WifiCmd::ap:
                 // `nmcli dev wifi hotspot ssid "<SSID>" password "<PWD>" | cat`
             {
+                // TODO add device name
                 bool c1 = std::all_of(data->SSID.begin(), data->SSID.end(), [](const char &a) {
                     return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || (a == '_') || (a == '-');
                 });
@@ -146,6 +147,7 @@ namespace OwlCmdExecute {
             case OwlMailDefine::WifiCmd::connect:
                 // `nmcli dev wifi connect "<BSSID>" password "<PWD>" | cat`
             {
+                // TODO add device name
                 bool c1 = std::all_of(data->SSID.begin(), data->SSID.end(), [](const char &a) {
                     return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || (a == '_') || (a == '-');
                 });
@@ -186,12 +188,21 @@ namespace OwlCmdExecute {
             case OwlMailDefine::WifiCmd::showHotspotPassword:
                 // `nmcli dev wifi show-password | cat`
             {
+                // TODO add device name
                 auto cei = createCEI(cmd_bash_path_, R"(nmcli dev wifi show-password | cat)");
                 cei->start([this, self = shared_from_this(), cei, data]() {
                     this->sendBackResult(cei, data);
                 });
             }
                 return;
+            case OwlMailDefine::WifiCmd::getWlanDeviceState:
+            {
+                // TODO add device name
+            }
+            case OwlMailDefine::WifiCmd::listWlanDevice:
+            {
+                // TODO
+            }
             case OwlMailDefine::WifiCmd::ignore:
             default:
                 // invalid
