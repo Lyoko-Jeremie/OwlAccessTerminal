@@ -21,6 +21,8 @@
 
 namespace OwlEmbedWebServer {
 
+    struct EmbedWebServerSessionHelperCmd;
+
     // Handles an HTTP server connection
     class EmbedWebServerSession : public std::enable_shared_from_this<EmbedWebServerSession> {
         // This is the C++11 equivalent of a generic lambda.
@@ -48,6 +50,8 @@ namespace OwlEmbedWebServer {
         boost::beast::http::request<boost::beast::http::string_body> req_;
         std::shared_ptr<void> res_;
         send_lambda lambda_;
+
+        friend EmbedWebServerSessionHelperCmd;
 
     public:
         // Take ownership of the stream
@@ -95,6 +99,8 @@ namespace OwlEmbedWebServer {
         void server_error(std::string what);
 
         void bad_request(std::string what);
+
+        void send_EmptyPairs_error();
 
         void send_json(boost::json::value &&o);
     };

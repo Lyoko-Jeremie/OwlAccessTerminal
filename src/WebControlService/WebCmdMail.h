@@ -15,6 +15,8 @@ namespace OwlMailDefine {
         scan,
         connect,
         showHotspotPassword,
+        listWlanDevice,
+        getWlanDeviceState,
     };
 
     struct Cmd2Web;
@@ -24,6 +26,7 @@ namespace OwlMailDefine {
         bool enableAp = false;
         std::string SSID;
         std::string PASSWORD;
+        std::string DEVICE_NAME;
 
         // Cmd2Web.runner = Web2Cmd.callbackRunner
         std::function<void(std::shared_ptr<Cmd2Web>)> callbackRunner;

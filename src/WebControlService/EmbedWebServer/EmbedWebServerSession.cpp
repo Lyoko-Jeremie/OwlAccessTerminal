@@ -8,6 +8,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/asio/dispatch.hpp>
 #include <boost/beast/version.hpp>
+#include <boost/core/ignore_unused.hpp>
+#include <boost/url.hpp>
 #include <utility>
 
 namespace OwlEmbedWebServer {
@@ -132,6 +134,201 @@ namespace OwlEmbedWebServer {
         // At this point the connection is closed gracefully
     }
 
+
+    // ==============================================================================================================
+
+    /**
+     * the hole class are thead safe
+     */
+    struct EmbedWebServerSessionHelperCmd {
+        struct CmdLookupTableVType {
+            OwlMailDefine::WifiCmd cmd;
+
+            using ConfigFunctionType = std::function<
+                    bool(
+                            OwlMailDefine::MailWeb2Cmd &data,
+                            const OwlQueryPairsAnalyser::QueryPairsAnalyser::QueryPairsType &queryPairs,
+                            EmbedWebServerSession &ref
+                    )>;
+
+            std::vector<std::string> paramsCheckList{};
+
+            ConfigFunctionType configFunction = nullptr;
+        };
+
+        using CmdLookupTableType = std::map<std::string, CmdLookupTableVType>;
+
+        CmdLookupTableType::const_iterator operator()(const std::string &s) const {
+            return CmdLookupTable.find(s);
+        }
+
+        CmdLookupTableType::const_iterator operator()() const {
+            return CmdLookupTable.cend();
+        }
+
+        [[nodiscard]] CmdLookupTableType::const_iterator cend() const {
+            return CmdLookupTable.cend();
+        }
+
+        static bool checkParamCheckListHelper(
+                const CmdLookupTableVType &cmdLookupTableV,
+                const OwlQueryPairsAnalyser::QueryPairsAnalyser::QueryPairsType &queryPairs,
+                EmbedWebServerSession &ref
+        ) {
+            if (cmdLookupTableV.paramsCheckList.empty()) {
+                return true;
+            }
+            if (queryPairs.empty()) {
+                ref.send_EmptyPairs_error();
+                return false;
+            }
+            // check every params IN the queryPairs AND all not empty
+            auto n = std::find_if(
+                    cmdLookupTableV.paramsCheckList.begin(),
+                    cmdLookupTableV.paramsCheckList.end(),
+                    [&](const auto &item) {
+                        return !(queryPairs.count(item) == 1 && !queryPairs.find(item)->second.empty());
+                    });
+            if (n != cmdLookupTableV.paramsCheckList.end()) {
+                ref.bad_request(R"((queryPairs.count(")" + *n + R"(") != 1))");
+                return false;
+            }
+            return true;
+        };
+
+        // get return type of `EmbedWebServerSession::parentRef_.lock()`
+        //      use `decltype(std::declval<decltype(EmbedWebServerSession::parentRef_)>().lock())`
+        //      from https://www.appsloveworld.com/cplus/100/12/get-return-type-of-member-function-without-an-object
+        static bool processCmd(const std::shared_ptr<EmbedWebServerSession> &ref,
+                               decltype(std::declval<decltype(EmbedWebServerSession::parentRef_)>().lock()) &p,
+                               const EmbedWebServerSessionHelperCmd &helperCmdLookupTable) {
+
+            auto queryPairs = std::move(
+                    OwlQueryPairsAnalyser::QueryPairsAnalyser{ref->req_.target()}.queryPairs);
+
+            auto url = boost::urls::parse_uri(ref->req_.target()).value();
+            // url.params();
+
+            auto t = helperCmdLookupTable(url.path());
+            if (t != helperCmdLookupTable.cend()) {
+                OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
+                data->cmd = t->second.cmd;
+                if (!t->second.paramsCheckList.empty()) {
+                    if (!checkParamCheckListHelper(t->second, queryPairs, *ref)) {
+                        // need call `ref.bad_request("");` in checkParamCheckListHelper if failed.
+                        // fail, ignore
+                        return false;
+                    }
+                }
+                if (t->second.configFunction) {
+                    if (!t->second.configFunction(data, queryPairs, *ref)) {
+                        // need call `ref.bad_request("");` in configFunction if failed.
+                        // fail, ignore
+                        return false;
+                    }
+                }
+                data->callbackRunner = [ref](
+                        const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
+                ) {
+                    if (!data_r->ok) {
+                        return ref->send_json(
+                                boost::json::value{
+                                        {"result",      false},
+                                        {"msg",         "error"},
+                                        {"error",       "(!data_r->ok)"},
+                                        {"result_code", data_r->result},
+                                        {"s_err",       data_r->s_err},
+                                        {"s_out",       data_r->s_out},
+                                }
+                        );
+                    }
+                    return ref->send_json(
+                            boost::json::value{
+                                    {"result",      true},
+                                    {"result_code", data_r->result},
+                                    {"s_err",       data_r->s_err},
+                                    {"s_out",       data_r->s_out},
+                            }
+                    );
+                };
+                p->sendMail(std::move(data));
+                return true;
+            }
+            return false;
+        }
+
+        const CmdLookupTableType CmdLookupTable{
+                {R"(/cmd/listWlanDevice)",      {OwlMailDefine::WifiCmd::listWlanDevice}},
+                {R"(/cmd/enable)",              {OwlMailDefine::WifiCmd::enable}},
+                {R"(/cmd/scan)",                {OwlMailDefine::WifiCmd::scan}},
+                {R"(/cmd/showHotspotPassword)", {OwlMailDefine::WifiCmd::showHotspotPassword,
+                                                        {"DEVICE_NAME",},
+                                                        [](
+                                                                OwlMailDefine::MailWeb2Cmd &data,
+                                                                const OwlQueryPairsAnalyser::QueryPairsAnalyser::QueryPairsType &queryPairs,
+                                                                EmbedWebServerSession &ref
+                                                        ) -> bool {
+                                                            boost::ignore_unused(ref);
+                                                            data->DEVICE_NAME = queryPairs.find("DEVICE_NAME")->second;
+                                                            return true;
+                                                        }}},
+                {R"(/cmd/ap)",                  {OwlMailDefine::WifiCmd::ap,
+                                                        {
+                                                         "apEnable", "SSID", "PASSWORD",
+                                                        },
+                                                        [](
+                                                                OwlMailDefine::MailWeb2Cmd &data,
+                                                                const OwlQueryPairsAnalyser::QueryPairsAnalyser::QueryPairsType &queryPairs,
+                                                                EmbedWebServerSession &ref
+                                                        ) -> bool {
+                                                            boost::ignore_unused(ref);
+                                                            data->enableAp = queryPairs.find("apEnable")->second == "1";
+                                                            data->SSID = queryPairs.find("SSID")->second;
+                                                            data->PASSWORD = queryPairs.find("PASSWORD")->second;
+                                                            return true;
+                                                        }}},
+                {R"(/cmd/connect)",             {OwlMailDefine::WifiCmd::connect,
+                                                        {"SSID",     "PASSWORD",},
+                                                        [](
+                                                                OwlMailDefine::MailWeb2Cmd &data,
+                                                                const OwlQueryPairsAnalyser::QueryPairsAnalyser::QueryPairsType &queryPairs,
+                                                                EmbedWebServerSession &ref
+                                                        ) -> bool {
+                                                            boost::ignore_unused(ref);
+                                                            data->SSID = queryPairs.find("SSID")->second;
+                                                            data->PASSWORD = queryPairs.find("PASSWORD")->second;
+                                                            return true;
+                                                        }}},
+                {R"(/cmd/getWlanDeviceState)",  {OwlMailDefine::WifiCmd::getWlanDeviceState,
+                                                        {"DEVICE_NAME",},
+                                                        [](
+                                                                OwlMailDefine::MailWeb2Cmd &data,
+                                                                const OwlQueryPairsAnalyser::QueryPairsAnalyser::QueryPairsType &queryPairs,
+                                                                EmbedWebServerSession &ref
+                                                        ) -> bool {
+                                                            boost::ignore_unused(ref);
+                                                            data->DEVICE_NAME = queryPairs.find("DEVICE_NAME")->second;
+                                                            return true;
+                                                        }}},
+        };
+    };
+
+    const EmbedWebServerSessionHelperCmd helperCmdLookupTable;
+
+    // ==============================================================================================================
+
+    void EmbedWebServerSession::send_EmptyPairs_error() {
+        boost::beast::http::response<boost::beast::http::string_body> res{
+                boost::beast::http::status::not_found,
+                req_.version()};
+        res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(boost::beast::http::field::content_type, "text/html");
+        res.keep_alive(req_.keep_alive());
+        res.body() = "The cmd queryPairs empty.";
+        res.prepare_payload();
+        return lambda_(std::move(res));
+    };
+
     void EmbedWebServerSession::on_cmd() {
 
         auto p = parentRef_.lock();
@@ -139,200 +336,12 @@ namespace OwlEmbedWebServer {
             return server_error("(!parentRef_.lock())");
         }
 
-        if (std::string{req_.target()} == std::string{R"(/cmd/enable)"}) {
-            OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
-            data->cmd = OwlMailDefine::WifiCmd::enable;
-            data->callbackRunner = [this, self = shared_from_this()](
-                    const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
-            ) {
-                if (!data_r->ok) {
-                    return send_json(
-                            boost::json::value{
-                                    {"msg",    "error"},
-                                    {"error",  "(!data_r->ok)"},
-                                    {"result_code", data_r->result},
-                                    {"s_err", data_r->s_err},
-                                    {"s_out", data_r->s_out},
-                                    {"result", false},
-                            }
-                    );
-                }
-                return send_json(
-                        boost::json::value{
-                                {"result", true},
-                                {"result_code", data_r->result},
-                                {"s_err", data_r->s_err},
-                                {"s_out", data_r->s_out},
-                        }
-                );
-            };
-            p->sendMail(std::move(data));
-        }
+        OwlEmbedWebServer::EmbedWebServerSessionHelperCmd::processCmd(
+                shared_from_this(),
+                p,
+                helperCmdLookupTable
+        );
 
-        if (std::string{req_.target()} == std::string{R"(/cmd/scan)"}) {
-            OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
-            data->cmd = OwlMailDefine::WifiCmd::scan;
-            data->callbackRunner = [this, self = shared_from_this()](
-                    const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
-            ) {
-                if (!data_r->ok) {
-                    return send_json(
-                            boost::json::value{
-                                    {"msg",    "error"},
-                                    {"error",  "(!data_r->ok)"},
-                                    {"result_code", data_r->result},
-                                    {"s_err", data_r->s_err},
-                                    {"s_out", data_r->s_out},
-                                    {"result", false},
-                            }
-                    );
-                }
-                return send_json(
-                        boost::json::value{
-                                {"result", true},
-                                {"result_code", data_r->result},
-                                {"s_err", data_r->s_err},
-                                {"s_out", data_r->s_out},
-                        }
-                );
-            };
-            p->sendMail(std::move(data));
-        }
-
-        if (std::string{req_.target()} == std::string{R"(/cmd/connect)"}) {
-            OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
-            data->cmd = OwlMailDefine::WifiCmd::connect;
-            data->callbackRunner = [this, self = shared_from_this()](
-                    const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
-            ) {
-                if (!data_r->ok) {
-                    return send_json(
-                            boost::json::value{
-                                    {"msg",    "error"},
-                                    {"error",  "(!data_r->ok)"},
-                                    {"result_code", data_r->result},
-                                    {"s_err", data_r->s_err},
-                                    {"s_out", data_r->s_out},
-                                    {"result", false},
-                            }
-                    );
-                }
-                return send_json(
-                        boost::json::value{
-                                {"result", true},
-                                {"result_code", data_r->result},
-                                {"s_err", data_r->s_err},
-                                {"s_out", data_r->s_out},
-                        }
-                );
-            };
-            p->sendMail(std::move(data));
-        }
-
-        if (std::string{req_.target()} == std::string{R"(/cmd/showHotspotPassword)"}) {
-            OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
-            data->cmd = OwlMailDefine::WifiCmd::showHotspotPassword;
-            data->callbackRunner = [this, self = shared_from_this()](
-                    const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
-            ) {
-                if (!data_r->ok) {
-                    return send_json(
-                            boost::json::value{
-                                    {"msg",    "error"},
-                                    {"error",  "(!data_r->ok)"},
-                                    {"result_code", data_r->result},
-                                    {"s_err", data_r->s_err},
-                                    {"s_out", data_r->s_out},
-                                    {"result", false},
-                            }
-                    );
-                }
-                return send_json(
-                        boost::json::value{
-                                {"result", true},
-                                {"result_code", data_r->result},
-                                {"s_err", data_r->s_err},
-                                {"s_out", data_r->s_out},
-                        }
-                );
-            };
-            p->sendMail(std::move(data));
-        }
-
-        auto queryPairs = std::move(OwlQueryPairsAnalyser::QueryPairsAnalyser{req_.target()}.queryPairs);
-        if (queryPairs.empty()) {
-            boost::beast::http::response<boost::beast::http::string_body> res{
-                    boost::beast::http::status::not_found,
-                    req_.version()};
-            res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
-            res.set(boost::beast::http::field::content_type, "text/html");
-            res.keep_alive(req_.keep_alive());
-            res.body() = "The cmd queryPairs empty.";
-            res.prepare_payload();
-
-            return lambda_(std::move(res));
-        }
-
-        if (std::string{req_.target()} == std::string{R"(/cmd/ap)"}) {
-            if (queryPairs.count("apEnable") == 0) {
-                return bad_request(R"((queryPairs.count("apEnable") == 0))");
-            }
-            OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
-            data->cmd = OwlMailDefine::WifiCmd::ap;
-            data->enableAp = queryPairs.find("apEnable")->second == "1";
-            data->SSID = queryPairs.find("SSID")->second;
-            data->PASSWORD = queryPairs.find("PASSWORD")->second;
-            data->callbackRunner = [this, self = shared_from_this()](
-                    const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
-            ) {
-                if (!data_r->ok) {
-                    return send_json(
-                            boost::json::value{
-                                    {"msg",    "error"},
-                                    {"error",  "(!data_r->ok)"},
-                                    {"result", false},
-                            }
-                    );
-                }
-                return send_json(
-                        boost::json::value{
-                                {"result", true},
-                        }
-                );
-            };
-            p->sendMail(std::move(data));
-        }
-        if (std::string{req_.target()} == std::string{R"(/cmd/connect)"}) {
-            if (queryPairs.count("SSID") == 0) {
-                return bad_request(R"((queryPairs.count("SSID") == 0))");
-            }
-            if (queryPairs.count("PASSWORD") == 0) {
-                return bad_request(R"((queryPairs.count("PASSWORD") == 0))");
-            }
-            OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
-            data->cmd = OwlMailDefine::WifiCmd::connect;
-            data->SSID = queryPairs.find("SSID")->second;
-            data->PASSWORD = queryPairs.find("PASSWORD")->second;
-            data->callbackRunner = [this, self = shared_from_this()](
-                    const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
-            ) {
-                if (!data_r->ok) {
-                    return send_json(
-                            boost::json::value{
-                                    {"msg",    "error"},
-                                    {"error",  "(!data_r->ok)"},
-                                    {"result", false},
-                            }
-                    );
-                }
-                return send_json(
-                        boost::json::value{
-                                {"result", true},
-                        }
-                );
-            };
-            p->sendMail(std::move(data));
-        }
     }
 
     void EmbedWebServerSession::server_error(std::string what) {
