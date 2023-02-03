@@ -4,11 +4,13 @@
 #define OWLACCESSTERMINAL_CMDSERVICEHTTP_H
 
 #include <memory>
+#include <vector>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/asio.hpp>
 #include <boost/json.hpp>
+#include <boost/url.hpp>
 #include <boost/log/trivial.hpp>
 #include "CmdSerialMail.h"
 #include "ProcessJsonMessage.h"
@@ -17,8 +19,9 @@
 namespace OwlCommandServiceHttp {
 
     enum {
-        JSON_Package_Max_Size = (1024 * 1024 * 1)
-    }; // 6M
+        JSON_Package_Max_Size = (1024 * 1024 * 1), // 1
+        JSON_Package_Max_Size_TagInfo = (1024 * 1024 * 6), // 6M
+    };
 
     class CmdServiceHttp;
 
@@ -33,8 +36,10 @@ namespace OwlCommandServiceHttp {
         ) : ioc_(ioc),
             socket_(std::move(socket)),
             parents_(std::move(parents)),
-            json_storage_(),
-            json_storage_resource_(json_storage_.data(), JSON_Package_Max_Size) {
+            json_storage_(std::make_unique<decltype(json_storage_)::element_type>(JSON_Package_Max_Size, 0)),
+            json_storage_resource_(std::make_unique<decltype(json_storage_resource_)::element_type>
+                                           (json_storage_->data(),
+                                            json_storage_->size())) {
 
             json_parse_options_.allow_comments = true;
             json_parse_options_.allow_trailing_commas = true;
@@ -69,8 +74,8 @@ namespace OwlCommandServiceHttp {
 
 
         boost::json::parse_options json_parse_options_;
-        boost::array<unsigned char, JSON_Package_Max_Size> json_storage_;
-        boost::json::static_resource json_storage_resource_;
+        std::unique_ptr<std::vector<unsigned char>> json_storage_;
+        std::unique_ptr<boost::json::static_resource> json_storage_resource_;
 
     private:
 
@@ -133,10 +138,207 @@ namespace OwlCommandServiceHttp {
 
             OwlProcessJsonMessage::process_json_message(
                     jsonS,
-                    json_storage_resource_,
+                    *json_storage_resource_,
                     json_parse_options_,
                     shared_from_this()
             );
+        }
+
+        void process_tag_info() {
+            auto u = boost::urls::parse_uri(request_.target());
+            if (u.has_error()) {
+                auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+                response->version(request_.version());
+                response->keep_alive(false);
+                response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+                response->result(boost::beast::http::status::bad_request);
+                response->set(boost::beast::http::field::content_type, "text/plain");
+                boost::beast::ostream(response->body()) << "invalid post request\r\n";
+                response->content_length(response->body().size());
+                write_response(response);
+                return;
+            }
+            // auto q = u.value().params();
+            // q.find("");
+            std::string jsonS = boost::beast::buffers_to_string(request_.body().data());
+            // resize json space
+            json_storage_ = std::make_unique<decltype(json_storage_)::element_type>(JSON_Package_Max_Size_TagInfo, 0);
+            json_storage_resource_ = std::make_unique<decltype(json_storage_resource_)::element_type>
+                    (json_storage_->data(),
+                     json_storage_->size());
+
+            try {
+
+                boost::system::error_code ec;
+                // auto jsv = boost::string_view{receive_buffer_.data(), bytes_transferred};
+                boost::json::value json_v = boost::json::parse(
+                        jsonS,
+                        ec,
+                        &*json_storage_resource_,
+                        json_parse_options_
+                );
+
+                if (ec) {
+                    // ignore
+                    // std::cerr << ec.what() << "\n";
+                    BOOST_LOG_TRIVIAL(error) << "process_tag_info " << ec.what();
+                    send_back_json({
+                                           {"msg",    "error"},
+                                           {"error",  "boost::json::parse failed : " + ec.what()},
+                                           {"result", false},
+                                   });
+                    return;
+                }
+
+                auto json_o = json_v.as_object();
+                if (!json_o.contains("tagList") || !json_o.at("tagList").is_array()) {
+                    BOOST_LOG_TRIVIAL(warning) << "contains fail (tagList)" << jsonS;
+                    send_back_json(
+                            boost::json::value{
+                                    {"msg",    "error"},
+                                    {"error",  "(tagList) not find || !is_array()"},
+                                    {"result", false},
+                            }
+                    );
+                    return;
+                }
+                auto tl = json_o.at("tagList").as_array();
+
+                if (tl.empty() && !json_o.contains("center")) {
+                    // ignore
+                    send_back_json(
+                            boost::json::value{
+                                    {"result", true},
+                            }
+                    );
+                    return;
+                }
+
+                auto aprilTagInfoList =
+                        std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type>();
+                aprilTagInfoList->reserve(tl.size());
+
+                for (const auto &a: tl) {
+                    auto b = a.as_object();
+                    if (!(
+                            b.contains("id") &&
+                            b.contains("ham") &&
+                            b.contains("dm") &&
+                            b.contains("cX") &&
+                            b.contains("cY") &&
+                            b.contains("cRTy") &&
+                            b.contains("cRBx") &&
+                            b.contains("cRBy") &&
+                            b.contains("cLBx") &&
+                            b.contains("cLBy")
+                    )) {
+                        BOOST_LOG_TRIVIAL(warning) << "invalid tagList items" << jsonS;
+                        send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "invalid tagList items"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+
+                    aprilTagInfoList->emplace_back(
+                            OwlMailDefine::AprilTagInfo{
+                                    .id=              static_cast<int>(b.at("id").get_int64()),
+                                    .hamming=         static_cast<int>(b.at("ham").get_int64()),
+                                    .decision_margin= static_cast<float>(b.at("dm").get_double()),
+                                    .centerX=         b.at("cX").get_double(),
+                                    .centerY=         b.at("cY").get_double(),
+                                    .cornerLTx=       b.at("cLTx").get_double(),
+                                    .cornerLTy=       b.at("cLTy").get_double(),
+                                    .cornerRTx=       b.at("cRTx").get_double(),
+                                    .cornerRTy=       b.at("cRTy").get_double(),
+                                    .cornerRBx=       b.at("cRBx").get_double(),
+                                    .cornerRBy=       b.at("cRBy").get_double(),
+                                    .cornerLBx=       b.at("cLBx").get_double(),
+                                    .cornerLBy=       b.at("cLBy").get_double(),
+                            }
+                    );
+                }
+
+                OwlMailDefine::AprilTagCmd::AprilTagCenterType aprilTagInfoCenter{};
+                if (json_o.contains("center")) {
+                    if (!json_o.at("center").is_object()) {
+                        BOOST_LOG_TRIVIAL(warning) << "(!json_o.at(\"center\").is_object())" << jsonS;
+                        send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(!json_o.at(\"center\").is_object())"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    auto b = json_o.at("center").as_object();
+                    aprilTagInfoCenter = std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type>(
+                            OwlMailDefine::AprilTagInfo{
+                                    .id=              static_cast<int>(b.at("id").get_int64()),
+                                    .hamming=         static_cast<int>(b.at("ham").get_int64()),
+                                    .decision_margin= static_cast<float>(b.at("dm").get_double()),
+                                    .centerX=         b.at("cX").get_double(),
+                                    .centerY=         b.at("cY").get_double(),
+                                    .cornerLTx=       b.at("cLTx").get_double(),
+                                    .cornerLTy=       b.at("cLTy").get_double(),
+                                    .cornerRTx=       b.at("cRTx").get_double(),
+                                    .cornerRTy=       b.at("cRTy").get_double(),
+                                    .cornerRBx=       b.at("cRBx").get_double(),
+                                    .cornerRBy=       b.at("cRBy").get_double(),
+                                    .cornerLBx=       b.at("cLBx").get_double(),
+                                    .cornerLBy=       b.at("cLBy").get_double(),
+                            }
+                    );
+                }
+
+                auto aprilTagCmd = std::make_shared<OwlMailDefine::AprilTagCmd>();
+                aprilTagCmd->aprilTagList = aprilTagInfoList;
+                aprilTagCmd->aprilTagCenter = aprilTagInfoCenter;
+
+                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;
+                m->aprilTagCmdPtr = aprilTagCmd;
+                m->callbackRunner = [this, self = shared_from_this()](
+                        OwlMailDefine::MailSerial2Cmd data
+                ) {
+                    send_back_json(
+                            boost::json::value{
+                                    {"msg",       "AprilTag"},
+                                    {"result",    data->ok},
+                                    {"openError", data->openError},
+                            }
+                    );
+                };
+                sendMail(std::move(m));
+                return;
+
+            } catch (std::exception &e) {
+                std::cerr << "CommandService::process_message \n" << e.what();
+                BOOST_LOG_TRIVIAL(error) << "CommandService::process_message \n" << e.what();
+                // ignore
+                send_back_json(
+                        boost::json::value{
+                                {"msg",    "exception"},
+                                {"error",  e.what()},
+                                {"result", false},
+                        }
+                );
+                return;
+            } catch (...) {
+                // ignore
+                send_back_json(
+                        boost::json::value{
+                                {"msg",    "exception"},
+                                {"error",  "(...)"},
+                                {"result", false},
+                        }
+                );
+                return;
+            }
         }
 
         void
@@ -152,6 +354,11 @@ namespace OwlCommandServiceHttp {
                     // this will call process_json_message->sendMail->send_back_json->send_back
                     create_post_response_cmd(jsonS);
 
+                    return;
+                }
+
+                if (request_.target().starts_with("/tagInfo")) {
+                    process_tag_info();
                     return;
                 }
 

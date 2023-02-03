@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <functional>
+#include <vector>
 #include "../AsyncCallbackMailbox/AsyncCallbackMailbox.h"
 
 namespace OwlMailDefine {
@@ -16,6 +17,34 @@ namespace OwlMailDefine {
         keep = 4,
         move = 10,
         rotate = 11,
+        AprilTag = 100,
+    };
+
+    struct AprilTagInfo {
+        // from :
+        //      typedef struct apriltag_detection apriltag_detection_t;
+        //      struct apriltag_detection
+        int id;
+        int hamming;
+        float decision_margin;
+        double centerX;
+        double centerY;
+        double cornerLTx;
+        double cornerLTy;
+        double cornerRTx;
+        double cornerRTy;
+        double cornerRBx;
+        double cornerRBy;
+        double cornerLBx;
+        double cornerLBy;
+    };
+
+    struct AprilTagCmd {
+        using AprilTagListType = std::shared_ptr<std::vector<OwlMailDefine::AprilTagInfo>>;
+        using AprilTagCenterType = std::shared_ptr<OwlMailDefine::AprilTagInfo>;
+
+        AprilTagListType aprilTagList;
+        AprilTagCenterType aprilTagCenter;
     };
 
     struct Serial2Cmd;
@@ -31,6 +60,8 @@ namespace OwlMailDefine {
         int16_t y = 0;
         // +cw,-ccw
         int16_t cw = 0;
+
+        std::shared_ptr<AprilTagCmd> aprilTagCmdPtr;
 
         // Serial2Cmd.runner = Cmd2Serial.callbackRunner
         std::function<void(std::shared_ptr<Serial2Cmd>)> callbackRunner;
