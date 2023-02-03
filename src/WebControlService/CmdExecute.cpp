@@ -113,64 +113,68 @@ namespace OwlCmdExecute {
             }
                 return;
             case OwlMailDefine::WifiCmd::ap:
-                // `nmcli dev wifi hotspot ssid "<SSID>" password "<PWD>" | cat`
+                // `nmcli dev wifi hotspot ssid "<SSID>" password "<PWD>" ifname "<DEVICE_NAME>" | cat`
             {
-                // TODO add device name
                 bool c1 = std::all_of(data->SSID.begin(), data->SSID.end(), [](const char &a) {
                     return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || (a == '_') || (a == '-');
                 });
                 bool c2 = std::all_of(data->PASSWORD.begin(), data->PASSWORD.end(), [](const char &a) {
                     return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || (a == '_') || (a == '-');
                 });
-                if (!c1 || !c2 || data->SSID.length() < 8 || data->PASSWORD.length() < 1) {
+                bool c3 = std::all_of(data->DEVICE_NAME.begin(), data->DEVICE_NAME.end(), [](const char &a) {
+                    return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || ('0' <= a && a <= '9');
+                });
+                if (!c1 || !c2 || !c3 ||
+                    !data->DEVICE_NAME.starts_with("wlx") || data->DEVICE_NAME.length() < 3 ||
+                    data->SSID.length() < 8 || data->PASSWORD.length() < 1) {
                     BOOST_LOG_TRIVIAL(warning)
-                        << "(!c1 || !c2 || data->SSID.length() < 8 || data->PASSWORD.length() < 1)";
+                        << "(!c1 || !c2 || !c3)";
                     OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
                     m->ok = false;
-                    m->s_err = "ERROR (!c1 || !c2 || data->SSID.length() < 8 || data->PASSWORD.length() < 1) ERROR";
+                    m->s_err = "ERROR (!c1 || !c2 || !c3) ERROR";
                     m->runner = data->callbackRunner;
                     sendMail(std::move(m));
                     return;
                 }
-                auto cei = createCEI(cmd_bash_path_,
-                                     std::string{R"(nmcli dev wifi hotspot ssid ")"} +
-                                     data->SSID +
-                                     std::string{R"(" password ")"} +
-                                     data->PASSWORD +
-                                     std::string{R"(" | cat)"}
-                );
+                auto s = std::string{R"(nmcli dev wifi hotspot ssid "<SSID>" password "<PWD>" | cat)"};
+                boost::replace_all(s, "<BSSID>", data->SSID);
+                boost::replace_all(s, "<PWD>", data->PASSWORD);
+                boost::replace_all(s, "<DEVICE_NAME>", data->DEVICE_NAME);
+                auto cei = createCEI(cmd_bash_path_, s);
                 cei->start([this, self = shared_from_this(), cei, data]() {
                     this->sendBackResult(cei, data);
                 });
             }
                 return;
             case OwlMailDefine::WifiCmd::connect:
-                // `nmcli dev wifi connect "<BSSID>" password "<PWD>" | cat`
+                // `nmcli dev wifi connect "<BSSID>" password "<PWD>" ifname "<DEVICE_NAME>" | cat`
             {
-                // TODO add device name
                 bool c1 = std::all_of(data->SSID.begin(), data->SSID.end(), [](const char &a) {
                     return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || (a == '_') || (a == '-');
                 });
                 bool c2 = std::all_of(data->PASSWORD.begin(), data->PASSWORD.end(), [](const char &a) {
                     return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || (a == '_') || (a == '-');
                 });
-                if (!c1 || !c2 || data->SSID.length() < 8 || data->PASSWORD.length() < 1) {
+                bool c3 = std::all_of(data->DEVICE_NAME.begin(), data->DEVICE_NAME.end(), [](const char &a) {
+                    return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || ('0' <= a && a <= '9');
+                });
+                if (!c1 || !c2 || !c3 ||
+                    !data->DEVICE_NAME.starts_with("wlx") || data->DEVICE_NAME.length() < 3 ||
+                    data->SSID.length() < 8 || data->PASSWORD.length() < 1) {
                     BOOST_LOG_TRIVIAL(warning)
-                        << "(!c1 || !c2 || data->SSID.length() < 8 || data->PASSWORD.length() < 1)";
+                        << "(!c1 || !c2 || !c3)";
                     OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
                     m->ok = false;
-                    m->s_err = "ERROR (!c1 || !c2 || data->SSID.length() < 8 || data->PASSWORD.length() < 1) ERROR";
+                    m->s_err = "ERROR (!c1 || !c2 || !c3) ERROR";
                     m->runner = data->callbackRunner;
                     sendMail(std::move(m));
                     return;
                 }
-                auto cei = createCEI(cmd_bash_path_,
-                                     std::string{R"(nmcli dev wifi connect ")"} +
-                                     data->SSID +
-                                     std::string{R"(" password ")"} +
-                                     data->PASSWORD +
-                                     std::string{R"(" | cat)"}
-                );
+                auto s = std::string{R"(nmcli dev wifi connect "<BSSID>" password "<PWD>" | cat)"};
+                boost::replace_all(s, "<BSSID>", data->SSID);
+                boost::replace_all(s, "<PWD>", data->PASSWORD);
+                boost::replace_all(s, "<DEVICE_NAME>", data->DEVICE_NAME);
+                auto cei = createCEI(cmd_bash_path_, s);
                 cei->start([this, self = shared_from_this(), cei, data]() {
                     this->sendBackResult(cei, data);
                 });
@@ -186,9 +190,8 @@ namespace OwlCmdExecute {
             }
                 return;
             case OwlMailDefine::WifiCmd::showHotspotPassword:
-                // `nmcli dev wifi show-password | cat`
+                // `nmcli dev wifi show-password ifname "<DEVICE_NAME>" | cat`
             {
-                // TODO add device name
                 auto cei = createCEI(cmd_bash_path_, R"(nmcli dev wifi show-password | cat)");
                 cei->start([this, self = shared_from_this(), cei, data]() {
                     this->sendBackResult(cei, data);
@@ -196,12 +199,36 @@ namespace OwlCmdExecute {
             }
                 return;
             case OwlMailDefine::WifiCmd::getWlanDeviceState:
+                // `nmcli dev wifi list ifname "<DEVICE_NAME>" | cat`
             {
-                // TODO add device name
+                bool c1 = std::all_of(data->DEVICE_NAME.begin(), data->DEVICE_NAME.end(), [](const char &a) {
+                    return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || ('0' <= a && a <= '9');
+                });
+                if (!c1 || !data->DEVICE_NAME.starts_with("wlx") || data->DEVICE_NAME.length() < 3) {
+                    BOOST_LOG_TRIVIAL(warning)
+                        << "(!c1 || !data->DEVICE_NAME.starts_with(\"wlx\") || data->DEVICE_NAME.length() < 3)";
+                    OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
+                    m->ok = false;
+                    m->s_err = "(!c1 || !data->DEVICE_NAME.starts_with(\"wlx\") || data->DEVICE_NAME.length() < 3)";
+                    m->runner = data->callbackRunner;
+                    sendMail(std::move(m));
+                    return;
+                }
+                auto s = std::string{R"(nmcli dev wifi list ifname "<DEVICE_NAME>" | cat)"};
+                boost::replace_all(s, "<DEVICE_NAME>", data->DEVICE_NAME);
+                auto cei = createCEI(cmd_bash_path_, s);
+                cei->start([this, self = shared_from_this(), cei, data]() {
+                    this->sendBackResult(cei, data);
+                });
             }
             case OwlMailDefine::WifiCmd::listWlanDevice:
+                // `nmcli dev status | grep " wifi "`
             {
-                // TODO
+                auto s = std::string{R"(nmcli dev status | grep " wifi ")"};
+                auto cei = createCEI(cmd_bash_path_, s);
+                cei->start([this, self = shared_from_this(), cei, data]() {
+                    this->sendBackResult(cei, data);
+                });
             }
             case OwlMailDefine::WifiCmd::ignore:
             default:
