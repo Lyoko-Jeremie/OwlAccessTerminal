@@ -83,7 +83,7 @@ namespace OwlConfigLoader {
         int EmbedWebServerHttpPort = 81;
 
         int airplane_fly_serial_baud_rate = 115200;
-        std::string airplane_fly_serial_addr = "/dev/ttys1";
+        std::string airplane_fly_serial_addr = "/dev/ttyS1";
 
         CameraAddrType camera_addr_1 = CameraAddrType{0};
         std::string camera_1_VideoCaptureAPI = "CAP_ANY";
