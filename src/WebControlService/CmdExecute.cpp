@@ -221,6 +221,7 @@ namespace OwlCmdExecute {
                     this->sendBackResult(cei, data);
                 });
             }
+                return;
             case OwlMailDefine::WifiCmd::listWlanDevice:
                 // `nmcli dev status | grep " wifi "`
             {
@@ -230,6 +231,7 @@ namespace OwlCmdExecute {
                     this->sendBackResult(cei, data);
                 });
             }
+                return;
             case OwlMailDefine::WifiCmd::ignore:
             default:
                 // invalid
