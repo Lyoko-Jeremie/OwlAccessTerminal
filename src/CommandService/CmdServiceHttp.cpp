@@ -44,25 +44,25 @@ namespace OwlCommandServiceHttp {
     }
 
     void CmdServiceHttpConnect::process_tag_info() {
-        BOOST_LOG_TRIVIAL(trace) << "process_tag_info";
-        BOOST_LOG_TRIVIAL(trace) << request_.target();
-//            auto u = boost::urls::parse_uri(request_.target());
-//            if (u.has_error()) {
-//                auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
-//                response->version(request_.version());
-//                response->keep_alive(false);
-//                response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
-//                response->result(boost::beast::http::status::bad_request);
-//                response->set(boost::beast::http::field::content_type, "text/plain");
-//                boost::beast::ostream(response->body())
-//                        << "invalid post request"
-//                        << " " << u.error()
-//                        << " " << u.error().what()
-//                        << "\r\n";
-//                response->content_length(response->body().size());
-//                write_response(response);
-//                return;
-//            }
+//        BOOST_LOG_TRIVIAL(trace) << "process_tag_info";
+//        BOOST_LOG_TRIVIAL(trace) << request_.target();
+        auto u = boost::urls::parse_uri_reference(request_.target());
+        if (u.has_error()) {
+            auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+            response->version(request_.version());
+            response->keep_alive(false);
+            response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+            response->result(boost::beast::http::status::bad_request);
+            response->set(boost::beast::http::field::content_type, "text/plain");
+            boost::beast::ostream(response->body())
+                    << "invalid post request"
+                    << " " << u.error()
+                    << " " << u.error().what()
+                    << "\r\n";
+            response->content_length(response->body().size());
+            write_response(response);
+            return;
+        }
         // auto q = u.value().params();
         // q.find("");
 
@@ -261,7 +261,7 @@ namespace OwlCommandServiceHttp {
     }
 
     void CmdServiceHttpConnect::create_post_response() {
-        BOOST_LOG_TRIVIAL(trace) << "create_post_response";
+//        BOOST_LOG_TRIVIAL(trace) << "create_post_response";
 
         if (request_.body().size() > 0) {
 
@@ -370,7 +370,8 @@ namespace OwlCommandServiceHttp {
 
     CmdServiceHttp::CmdServiceHttp(boost::asio::io_context &ioc, const boost::asio::ip::tcp::endpoint &endpoint,
                                    OwlMailDefine::CmdSerialMailbox &&mailbox) : ioc_(ioc),
-                                                                                acceptor_(boost::asio::make_strand(ioc)),
+                                                                                acceptor_(
+                                                                                        boost::asio::make_strand(ioc)),
                                                                                 mailbox_(std::move(mailbox)) {
 
         mailbox_->receiveB2A = [this](OwlMailDefine::MailSerial2Cmd &&data) {

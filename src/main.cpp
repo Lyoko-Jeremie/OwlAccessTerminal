@@ -62,6 +62,20 @@ struct ThreadCallee {
     }
 };
 
+//int main() {
+//    auto u = boost::urls::parse_uri_reference("/abc?zzxcv=123&er=12");
+//    if (u.has_error()) {
+//        BOOST_LOG_TRIVIAL(trace) << "(u.has_error()) " << u.error().what();
+//    }
+//    BOOST_LOG_TRIVIAL(trace) << "ok";
+//    auto v = u.value();
+//    BOOST_LOG_TRIVIAL(trace) << v.path();
+//    BOOST_LOG_TRIVIAL(trace) << v.query();
+//    // auto q = u.value().params();
+//    // q.find("");
+//
+//}
+
 int main(int argc, const char *argv[]) {
     // Verify that the version of the library that we linked against is
     // compatible with the version of the headers we compiled against.

@@ -206,7 +206,7 @@ namespace OwlEmbedWebServer {
             auto queryPairs = std::move(
                     OwlQueryPairsAnalyser::QueryPairsAnalyser{ref->req_.target()}.queryPairs);
 
-            auto url = boost::urls::parse_uri(ref->req_.target()).value();
+            auto url = boost::urls::parse_uri_reference(ref->req_.target()).value();
             // url.params();
 
             auto t = helperCmdLookupTable(url.path());
