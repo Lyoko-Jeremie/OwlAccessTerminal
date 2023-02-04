@@ -45,16 +45,19 @@ namespace OwlImageService {
                     if (ec == boost::asio::error::eof) {
                         // Connection closed cleanly by peer.
                         BOOST_LOG_TRIVIAL(info) << "Connection closed cleanly by peer.";
+                        close_connect();
                         return;
                     }
                     if (ec) {
                         // Connection error
                         BOOST_LOG_TRIVIAL(error) << "Connection error " << ec.what();
+                        close_connect();
                         return;
                     }
                     if (bytes_transferred != 4) {
                         // bytes_transferred
                         BOOST_LOG_TRIVIAL(error) << "do_receive_size bytes_transferred : " << bytes_transferred;
+                        close_connect();
                         return;
                     }
 
@@ -64,7 +67,8 @@ namespace OwlImageService {
                         // size_ too big, maybe a wrong size_ byte
                         BOOST_LOG_TRIVIAL(warning)
                             << "(package_r_.size_ > TCP_Receive_Package_Max_Size), size_: " << package_r_->size_;
-                        // TODO close the connect
+                        // close connect
+                        close_connect();
                         return;
                     }
 
