@@ -16,7 +16,7 @@ namespace OwlCommandService {
                 ) {
                     if (ec) {
                         // ignore it
-                        std::cerr << ec.what() << "\n";
+//                        std::cerr << ec.what() << "\n";
                         BOOST_LOG_TRIVIAL(error) << ec.what();
                     } else {
                         process_message(bytes_transferred);
@@ -40,7 +40,7 @@ namespace OwlCommandService {
                     boost::ignore_unused(bytes_transferred);
                     // ignore
                     if (ec) {
-                        std::cerr << ec.what() << "\n";
+//                        std::cerr << ec.what() << "\n";
                         BOOST_LOG_TRIVIAL(error) << ec.what();
                     }
                 }

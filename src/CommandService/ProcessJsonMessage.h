@@ -559,7 +559,7 @@ namespace OwlProcessJsonMessage {
             }
             return;
         } catch (std::exception &e) {
-            std::cerr << "CommandService::process_message \n" << e.what();
+//            std::cerr << "CommandService::process_message \n" << e.what();
             BOOST_LOG_TRIVIAL(error) << "CommandService::process_message \n" << e.what();
             // ignore
             self->send_back_json(
