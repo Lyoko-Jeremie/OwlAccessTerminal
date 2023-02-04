@@ -118,62 +118,65 @@ namespace OwlCommandServiceHttp {
             }
             auto tl = json_o.at("tagList").as_array();
 
-            if (tl.empty() && !json_o.contains("center")) {
-                // ignore
-                send_back_json(
-                        boost::json::value{
-                                {"result", true},
-                        }
-                );
-                return;
-            }
+//            if (tl.empty() && !json_o.contains("center")) {
+//                // ignore
+//                send_back_json(
+//                        boost::json::value{
+//                                {"result", true},
+//                        }
+//                );
+//                return;
+//            }
 
-            auto aprilTagInfoList =
-                    std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type>();
-            aprilTagInfoList->reserve(tl.size());
+            std::shared_ptr<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type> aprilTagInfoList{};
+            if (!tl.empty()) {
+                aprilTagInfoList =
+                        std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type>();
+                aprilTagInfoList->reserve(tl.size());
 
-            for (const auto &a: tl) {
-                auto b = a.as_object();
-                if (!(
-                        b.contains("id") &&
-                        b.contains("ham") &&
-                        b.contains("dm") &&
-                        b.contains("cX") &&
-                        b.contains("cY") &&
-                        b.contains("cRTy") &&
-                        b.contains("cRBx") &&
-                        b.contains("cRBy") &&
-                        b.contains("cLBx") &&
-                        b.contains("cLBy")
-                )) {
-                    BOOST_LOG_TRIVIAL(warning) << "invalid tagList items" << jsonS;
-                    send_back_json(
-                            boost::json::value{
-                                    {"msg",    "error"},
-                                    {"error",  "invalid tagList items"},
-                                    {"result", false},
+                for (const auto &a: tl) {
+                    auto b = a.as_object();
+                    if (!(
+                            b.contains("id") &&
+                            b.contains("ham") &&
+                            b.contains("dm") &&
+                            b.contains("cX") &&
+                            b.contains("cY") &&
+                            b.contains("cRTy") &&
+                            b.contains("cRBx") &&
+                            b.contains("cRBy") &&
+                            b.contains("cLBx") &&
+                            b.contains("cLBy")
+                    )) {
+                        BOOST_LOG_TRIVIAL(warning) << "invalid tagList items" << jsonS;
+                        send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "invalid tagList items"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+
+                    aprilTagInfoList->emplace_back(
+                            OwlMailDefine::AprilTagInfo{
+                                    .id=              static_cast<int>(b.at("id").get_int64()),
+                                    .hamming=         static_cast<int>(b.at("ham").get_int64()),
+                                    .decision_margin= static_cast<float>(b.at("dm").get_double()),
+                                    .centerX=         b.at("cX").get_double(),
+                                    .centerY=         b.at("cY").get_double(),
+                                    .cornerLTx=       b.at("cLTx").get_double(),
+                                    .cornerLTy=       b.at("cLTy").get_double(),
+                                    .cornerRTx=       b.at("cRTx").get_double(),
+                                    .cornerRTy=       b.at("cRTy").get_double(),
+                                    .cornerRBx=       b.at("cRBx").get_double(),
+                                    .cornerRBy=       b.at("cRBy").get_double(),
+                                    .cornerLBx=       b.at("cLBx").get_double(),
+                                    .cornerLBy=       b.at("cLBy").get_double(),
                             }
                     );
-                    return;
                 }
-
-                aprilTagInfoList->emplace_back(
-                        OwlMailDefine::AprilTagInfo{
-                                .id=              static_cast<int>(b.at("id").get_int64()),
-                                .hamming=         static_cast<int>(b.at("ham").get_int64()),
-                                .decision_margin= static_cast<float>(b.at("dm").get_double()),
-                                .centerX=         b.at("cX").get_double(),
-                                .centerY=         b.at("cY").get_double(),
-                                .cornerLTx=       b.at("cLTx").get_double(),
-                                .cornerLTy=       b.at("cLTy").get_double(),
-                                .cornerRTx=       b.at("cRTx").get_double(),
-                                .cornerRTy=       b.at("cRTy").get_double(),
-                                .cornerRBx=       b.at("cRBx").get_double(),
-                                .cornerRBy=       b.at("cRBy").get_double(),
-                                .cornerLBx=       b.at("cLBx").get_double(),
-                                .cornerLBy=       b.at("cLBy").get_double(),
-                        }
-                );
             }
 
             OwlMailDefine::AprilTagCmd::AprilTagCenterType aprilTagInfoCenter{};
@@ -230,7 +233,7 @@ namespace OwlCommandServiceHttp {
                        << " ]";
                 }
                 if (!aprilTagInfoList) {
-                    if (!aprilTagInfoCenter) {
+                    if (aprilTagInfoCenter) {
                         ss << "\nNO_LIST";
                     } else {
                         ss << " NO_LIST";
@@ -259,6 +262,16 @@ namespace OwlCommandServiceHttp {
                 }
                 auto s = ss.str();
                 BOOST_LOG_TRIVIAL(trace) << s;
+            }
+
+            if (!aprilTagInfoList && !aprilTagInfoCenter) {
+                // ignore
+                send_back_json(
+                        boost::json::value{
+                                {"result", true},
+                        }
+                );
+                return;
             }
 
             auto aprilTagCmd = std::make_shared<OwlMailDefine::AprilTagCmd>();
