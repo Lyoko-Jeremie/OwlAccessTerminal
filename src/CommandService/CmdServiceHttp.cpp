@@ -4,6 +4,12 @@
 
 namespace OwlCommandServiceHttp {
 
+#ifdef DEBUG_TAG_INFO
+    constexpr bool SHOW_DEBUG_TAG_INFO = true;
+#else
+    constexpr bool SHOW_DEBUG_TAG_INFO = false;
+#endif // DEBUG_TAG_INFO
+
     void CmdServiceHttpConnect::sendMail(OwlMailDefine::MailCmd2Serial &&data) {
         // send cmd to serial
         auto p = getParentRef();
@@ -201,6 +207,58 @@ namespace OwlCommandServiceHttp {
                                 .cornerLBy=       b.at("cLBy").get_double(),
                         }
                 );
+            }
+
+            if constexpr (SHOW_DEBUG_TAG_INFO) {
+                std::stringstream ss;
+                ss << "DEBUG_TAG_INFO ";
+                if (!aprilTagInfoCenter) {
+                    ss << " NO_CENTER";
+                } else {
+                    ss << "\ncenter:"
+                       << " id:" << aprilTagInfoCenter->id
+                       << " x:" << aprilTagInfoCenter->centerX
+                       << " y:" << aprilTagInfoCenter->centerX
+                       << " [" << aprilTagInfoCenter->cornerLTx
+                       << " ," << aprilTagInfoCenter->cornerLTy
+                       << " ;" << aprilTagInfoCenter->cornerRTx
+                       << " ," << aprilTagInfoCenter->cornerRTy
+                       << " ;" << aprilTagInfoCenter->cornerRBx
+                       << " ," << aprilTagInfoCenter->cornerRBy
+                       << " ;" << aprilTagInfoCenter->cornerLBx
+                       << " ," << aprilTagInfoCenter->cornerLBy
+                       << " ]";
+                }
+                if (!aprilTagInfoList) {
+                    if (!aprilTagInfoCenter) {
+                        ss << "\nNO_LIST";
+                    } else {
+                        ss << " NO_LIST";
+                    }
+                } else {
+                    if (aprilTagInfoList->empty()) {
+                        ss << " EMPTY_LIST";
+                    } else {
+                        ss << "\ncenter:" << aprilTagInfoList->size();
+                        for (size_t i = 0; i <= aprilTagInfoList->size(); ++i) {
+                            ss << "\n\t"
+                               << " id:" << aprilTagInfoCenter->id
+                               << " x:" << aprilTagInfoCenter->centerX
+                               << " y:" << aprilTagInfoCenter->centerX
+                               << " [" << aprilTagInfoCenter->cornerLTx
+                               << " ," << aprilTagInfoCenter->cornerLTy
+                               << " ;" << aprilTagInfoCenter->cornerRTx
+                               << " ," << aprilTagInfoCenter->cornerRTy
+                               << " ;" << aprilTagInfoCenter->cornerRBx
+                               << " ," << aprilTagInfoCenter->cornerRBy
+                               << " ;" << aprilTagInfoCenter->cornerLBx
+                               << " ," << aprilTagInfoCenter->cornerLBy
+                               << " ]";
+                        }
+                    }
+                }
+                auto s = ss.str();
+                BOOST_LOG_TRIVIAL(trace) << s;
             }
 
             auto aprilTagCmd = std::make_shared<OwlMailDefine::AprilTagCmd>();
