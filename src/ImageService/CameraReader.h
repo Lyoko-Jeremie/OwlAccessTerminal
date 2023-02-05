@@ -28,26 +28,7 @@ namespace OwlCameraReader {
         explicit CameraItem(
                 boost::asio::strand<boost::asio::io_context::executor_type> strand,
                 OwlCameraConfig::CameraInfoTuple config
-        ) : strand_(std::move(strand)),
-            id(std::get<0>(config)),
-            path(std::get<1>(config)),
-            api(OwlCameraConfig::string2VideoCaptureAPI(std::get<2>(config))),
-            w(std::get<3>(config)),
-            h(std::get<4>(config)) {
-            vc = std::make_unique<cv::VideoCapture>();
-
-            if (std::visit([this]<typename T>(T &a) {
-                return vc->open(a, api);
-            }, path)) {
-                BOOST_LOG_TRIVIAL(info) << "CameraItem open ok : id " << id << " path "
-                                        << std::visit(OwlConfigLoader::helperCameraAddr2String, path);
-                vc->set(cv::VideoCaptureProperties::CAP_PROP_FRAME_WIDTH, w);
-                vc->set(cv::VideoCaptureProperties::CAP_PROP_FRAME_HEIGHT, h);
-            } else {
-                BOOST_LOG_TRIVIAL(error) << "CameraItem open error : id " << id << " path "
-                                         << std::visit(OwlConfigLoader::helperCameraAddr2String, path);
-            }
-        }
+        );
 
         bool isOpened() const {
             return vc && vc->isOpened();
