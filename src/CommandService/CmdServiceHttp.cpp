@@ -243,19 +243,20 @@ namespace OwlCommandServiceHttp {
                         ss << " EMPTY_LIST";
                     } else {
                         ss << "\ncenter:" << aprilTagInfoList->size();
-                        for (size_t i = 0; i <= aprilTagInfoList->size(); ++i) {
+                        for (size_t i = 0; i < aprilTagInfoList->size(); ++i) {
+                            auto a = aprilTagInfoList->at(i);
                             ss << "\n\t"
-                               << " id:" << aprilTagInfoCenter->id
-                               << " x:" << aprilTagInfoCenter->centerX
-                               << " y:" << aprilTagInfoCenter->centerX
-                               << " [" << aprilTagInfoCenter->cornerLTx
-                               << " ," << aprilTagInfoCenter->cornerLTy
-                               << " ;" << aprilTagInfoCenter->cornerRTx
-                               << " ," << aprilTagInfoCenter->cornerRTy
-                               << " ;" << aprilTagInfoCenter->cornerRBx
-                               << " ," << aprilTagInfoCenter->cornerRBy
-                               << " ;" << aprilTagInfoCenter->cornerLBx
-                               << " ," << aprilTagInfoCenter->cornerLBy
+                               << " id:" << a.id
+                               << " x:" << a.centerX
+                               << " y:" << a.centerX
+                               << " [" << a.cornerLTx
+                               << " ," << a.cornerLTy
+                               << " ;" << a.cornerRTx
+                               << " ," << a.cornerRTy
+                               << " ;" << a.cornerRBx
+                               << " ," << a.cornerRBy
+                               << " ;" << a.cornerLBx
+                               << " ," << a.cornerLBy
                                << " ]";
                         }
                     }
