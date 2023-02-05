@@ -171,6 +171,21 @@ namespace OwlImageServiceHttp {
             return;
         }
 
+        OwlCameraConfig::CameraAddrType addr = OwlCameraConfig::CameraAddrType_1_Placeholder;
+        if (q.contains("addr") && q.find("addr")->second.length() > 0) {
+            OwlCameraConfig::CameraAddrType_1 addr2;
+            if (boost::conversion::try_lexical_convert(q.find("addr")->second, addr2)) {
+                addr = addr2;
+            } else {
+                addr = q.find("addr")->second;
+            }
+        }
+        std::string apiType = OwlCameraConfig::Camera_VideoCaptureAPI_Placeholder;
+        if (q.contains("api") && q.find("api")->second.length() > 0) {
+            apiType = q.find("api")->second;
+        }
+
+
         auto p = parents_.lock();
         if (!p) {
             // inner error
@@ -192,7 +207,13 @@ namespace OwlImageServiceHttp {
         OwlMailDefine::MailService2Camera cmd_data = std::make_shared<OwlMailDefine::Service2Camera>();
         cmd_data->camera_id = camera_id;
         cmd_data->cmd = OwlMailDefine::ControlCameraCmd::reset;
-        cmd_data->cmdParams = {std::make_pair(x, y)};
+        cmd_data->cmdParams = {OwlCameraConfig::CameraInfoTuple{
+                camera_id,
+                addr,
+                apiType,
+                x,
+                y,
+        }};
 
         cmd_data->callbackRunner = [this, self = shared_from_this()](
                 const OwlMailDefine::MailCamera2Service &camera_data

@@ -10,6 +10,7 @@
 #include <utility>
 #include <opencv2/opencv.hpp>
 #include "../AsyncCallbackMailbox/AsyncCallbackMailbox.h"
+#include "../ConfigLoader/ConfigLoader.h"
 
 namespace OwlMailDefine {
 
@@ -26,7 +27,7 @@ namespace OwlMailDefine {
         std::function<void(std::shared_ptr<Camera2Service>)> callbackRunner;
 
         ControlCameraCmd cmd = ControlCameraCmd::noop;
-        std::variant<bool, std::pair<int, int>> cmdParams{false};
+        std::variant<bool, OwlCameraConfig::CameraInfoTuple> cmdParams{false};
     };
     struct Camera2Service {
         int camera_id;

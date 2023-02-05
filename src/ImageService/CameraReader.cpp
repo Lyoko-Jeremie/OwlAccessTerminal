@@ -8,7 +8,8 @@ namespace OwlCameraReader {
                            OwlCameraConfig::CameraInfoTuple config) : strand_(std::move(strand)),
                                                                       id(std::get<0>(config)),
                                                                       path(std::get<1>(config)),
-                                                                      api(OwlCameraConfig::string2VideoCaptureAPI(std::get<2>(config))),
+                                                                      api(OwlCameraConfig::string2VideoCaptureAPI(
+                                                                              std::get<2>(config))),
                                                                       w(std::get<3>(config)),
                                                                       h(std::get<4>(config)) {
         vc = std::make_unique<cv::VideoCapture>();
@@ -26,13 +27,15 @@ namespace OwlCameraReader {
         }
     }
 
-    
+
     CameraReader::CameraReader(boost::asio::io_context &ioc,
                                std::vector<OwlCameraConfig::CameraInfoTuple> camera_info_list,
                                OwlMailDefine::ServiceCameraMailbox &&mailbox_tcp_protobuf,
                                OwlMailDefine::ServiceCameraMailbox &&mailbox_http) : ioc_(ioc),
-                                                                                     camera_info_list_(std::move(camera_info_list)),
-                                                                                     mailbox_tcp_protobuf_(mailbox_tcp_protobuf),
+                                                                                     camera_info_list_(std::move(
+                                                                                             camera_info_list)),
+                                                                                     mailbox_tcp_protobuf_(
+                                                                                             mailbox_tcp_protobuf),
                                                                                      mailbox_http_(mailbox_http) {
 
         mailbox_tcp_protobuf_->receiveA2B = [this](OwlMailDefine::MailService2Camera &&data) {
@@ -66,7 +69,8 @@ namespace OwlCameraReader {
         });
     }
 
-    void CameraReader::getImage(OwlMailDefine::MailService2Camera &&data, OwlMailDefine::ServiceCameraMailbox &mailbox) {
+    void
+    CameraReader::getImage(OwlMailDefine::MailService2Camera &&data, OwlMailDefine::ServiceCameraMailbox &mailbox) {
         boost::asio::dispatch(ioc_, [this, self = shared_from_this(), data, &mailbox]() {
             // make sure all the call to self and to CameraItem run in self ioc
             {
@@ -136,13 +140,20 @@ namespace OwlCameraReader {
                                         });
 
                 if (it2 == camera_info_list_.end()) {
-                    // cannot fine the camera config, means that the camera not exist
-                    OwlMailDefine::MailCamera2Service data_r = std::make_shared<OwlMailDefine::Camera2Service>();
-                    data_r->runner = data->callbackRunner;
-                    data_r->camera_id = data->camera_id;
-                    data_r->ok = false;
-                    data_r->cmd = data->cmd;
-                    mailbox->sendB2A(std::move(data_r));
+                    // // cannot fine the camera config, means that the camera not exist
+                    // OwlMailDefine::MailCamera2Service data_r = std::make_shared<OwlMailDefine::Camera2Service>();
+                    // data_r->runner = data->callbackRunner;
+                    // data_r->camera_id = data->camera_id;
+                    // data_r->ok = false;
+                    // data_r->cmd = data->cmd;
+                    // mailbox->sendB2A(std::move(data_r));
+
+                    // create new camera
+                    camera_info_list_.push_back(std::get<1>(data->cmdParams));
+                    camera_item_list_.push_back(std::make_shared<CameraItem>(
+                            boost::asio::make_strand(ioc_),
+                            std::get<1>(data->cmdParams)
+                    ));
                     return;
                 }
 
@@ -155,9 +166,26 @@ namespace OwlCameraReader {
                 }
 
                 // re-config camera config
-                //  camera_info_list_.tuple(x,y) = data->cmdParams.variant[<x,y>].pair(x,y)
-                std::get<3>(*it2) = std::get<1>(data->cmdParams).first;
-                std::get<4>(*it2) = std::get<1>(data->cmdParams).second;
+                //  camera_info_list_.tuple(x,y) = data->cmdParams.variant[<x,y>].tuple(id, CameraAddr, VideoCaptureAPI, w, h)
+                std::get<3>(*it2) = std::get<3>(std::get<1>(data->cmdParams));
+                std::get<3>(*it2) = std::get<3>(std::get<1>(data->cmdParams));
+
+                //                      id, CameraAddr, VideoCaptureAPI, w, h
+                if (std::get<2>(std::get<1>(data->cmdParams)) != OwlConfigLoader::Camera_VideoCaptureAPI_Placeholder) {
+                    std::get<2>(*it2) = std::get<2>(std::get<1>(data->cmdParams));
+                }
+
+                auto addr = std::get<1>(std::get<1>(data->cmdParams));
+                if (std::holds_alternative<OwlConfigLoader::CameraAddrType_1>(addr) &&
+                    std::get<0>(addr) != OwlConfigLoader::CameraAddrType_1_Placeholder) {
+                    //  path = CameraAddr
+                    std::get<1>(*it2) = std::get<0>(addr);
+                }
+                if (std::holds_alternative<OwlConfigLoader::CameraAddrType_2>(addr) &&
+                    std::get<1>(addr) != OwlConfigLoader::CameraAddrType_2_Placeholder) {
+                    //  path = CameraAddr
+                    std::get<1>(*it2) = std::get<0>(addr);
+                }
 
                 // create new camera
                 camera_item_list_.push_back(std::make_shared<CameraItem>(
@@ -176,4 +204,5 @@ namespace OwlCameraReader {
             return;
         });
     }
+
 } // OwlCameraReader
