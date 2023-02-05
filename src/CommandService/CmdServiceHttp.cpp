@@ -180,8 +180,8 @@ namespace OwlCommandServiceHttp {
             }
 
             OwlMailDefine::AprilTagCmd::AprilTagCenterType aprilTagInfoCenter{};
-            if (json_o.contains("center")) {
-                if (!json_o.at("center").is_object()) {
+            if (json_o.contains("centerTag")) {
+                if (!json_o.at("centerTag").is_object()) {
                     BOOST_LOG_TRIVIAL(warning) << "(!json_o.at(\"center\").is_object())" << jsonS;
                     send_back_json(
                             boost::json::value{
@@ -192,7 +192,7 @@ namespace OwlCommandServiceHttp {
                     );
                     return;
                 }
-                auto b = json_o.at("center").as_object();
+                auto b = json_o.at("centerTag").as_object();
                 aprilTagInfoCenter = std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type>(
                         OwlMailDefine::AprilTagInfo{
                                 .id=              static_cast<int>(b.at("id").get_int64()),
@@ -213,6 +213,7 @@ namespace OwlCommandServiceHttp {
             }
 
             if constexpr (SHOW_DEBUG_TAG_INFO) {
+                BOOST_LOG_TRIVIAL(trace) << jsonS;
                 std::stringstream ss;
                 ss << "DEBUG_TAG_INFO ";
                 if (!aprilTagInfoCenter) {
@@ -242,7 +243,7 @@ namespace OwlCommandServiceHttp {
                     if (aprilTagInfoList->empty()) {
                         ss << " EMPTY_LIST";
                     } else {
-                        ss << "\ncenter:" << aprilTagInfoList->size();
+                        ss << "\naprilTagInfoList.size():" << aprilTagInfoList->size();
                         for (size_t i = 0; i < aprilTagInfoList->size(); ++i) {
                             auto a = aprilTagInfoList->at(i);
                             ss << "\n\t"
