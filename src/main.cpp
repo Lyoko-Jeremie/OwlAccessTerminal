@@ -76,6 +76,60 @@ struct ThreadCallee {
 //
 //}
 
+#include <opencv2/aruco.hpp>
+
+int main2(int argc, const char *argv[]) {
+
+    std::cout << "Hello, World!" << std::endl;
+    OwlLog::threadName = "main";
+    OwlLog::init_logging();
+
+//    auto image = cv::imread(R"(d:\FTPMain\Upload\Apriltag\tag36h11_1.png)");
+//    auto image = cv::imread(R"(d:\FTPMain\Upload\1.jpg)");
+    auto image = cv::imread(R"(000.png)");
+
+    if (image.empty()) {
+        std::cout << "(image.empty())" << std::endl;
+        return 0;
+    }
+
+    BOOST_LOG_TRIVIAL(trace) << "image:"
+                             << " cols " << image.cols
+                             << " rows " << image.rows
+                             << " channels " << image.channels();
+//    if (image.channels() > 1) {
+//        cv::cvtColor(image, image, cv::ColorConversionCodes::COLOR_BGR2GRAY);
+//    }
+//    cv::resize(image, image, cv::Size{640, 480}, 0, 0, cv::InterpolationFlags::INTER_CUBIC);
+    BOOST_LOG_TRIVIAL(trace) << "image:"
+                             << " cols " << image.cols
+                             << " rows " << image.rows
+                             << " channels " << image.channels();
+
+    std::vector<int> markerIds;
+    std::vector<std::vector<cv::Point2f>> markerCorners, rejectedCandidates;
+    cv::aruco::DetectorParameters detectorParams = cv::aruco::DetectorParameters();
+    cv::aruco::Dictionary dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_APRILTAG_36h11);
+    cv::aruco::ArucoDetector detector(dictionary, detectorParams);
+    detector.detectMarkers(image, markerCorners, markerIds, rejectedCandidates);
+
+    BOOST_LOG_TRIVIAL(trace) << "markerIds.size():" << markerIds.size();
+    BOOST_LOG_TRIVIAL(trace) << "markerCorners.size():" << markerCorners.size();
+    BOOST_LOG_TRIVIAL(trace) << "rejectedCandidates.size():" << rejectedCandidates.size();
+
+    cv::Mat markerImage;
+    cv::aruco::generateImageMarker(dictionary, 1, 200, markerImage, 1);
+    cv::imwrite("marker1.png", markerImage);
+
+    auto im1 = image.clone();
+    cv::aruco::drawDetectedMarkers(im1, rejectedCandidates);
+    cv::imwrite("123.png", im1);
+    auto im2 = image.clone();
+    cv::aruco::drawDetectedMarkers(im2, markerCorners);
+    cv::imwrite("321.png", im2);
+
+}
+
 int main(int argc, const char *argv[]) {
     // Verify that the version of the library that we linked against is
     // compatible with the version of the headers we compiled against.

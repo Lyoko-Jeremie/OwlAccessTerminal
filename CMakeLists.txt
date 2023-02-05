@@ -105,7 +105,7 @@ find_package(Boost 1.81.0 REQUIRED COMPONENTS system filesystem program_options 
 if (OpenCV_WORLD)
     find_package(OpenCV REQUIRED world)
 else (OpenCV_WORLD)
-    find_package(OpenCV REQUIRED core imdecode)
+    find_package(OpenCV REQUIRED core imgcodecs aruco)
 endif (OpenCV_WORLD)
 
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
