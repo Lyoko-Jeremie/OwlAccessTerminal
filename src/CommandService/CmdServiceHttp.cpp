@@ -213,7 +213,7 @@ namespace OwlCommandServiceHttp {
             }
 
             if constexpr (SHOW_DEBUG_TAG_INFO) {
-                BOOST_LOG_TRIVIAL(trace) << jsonS;
+//                BOOST_LOG_TRIVIAL(trace) << jsonS;
                 std::stringstream ss;
                 ss << "DEBUG_TAG_INFO ";
                 if (!aprilTagInfoCenter) {
