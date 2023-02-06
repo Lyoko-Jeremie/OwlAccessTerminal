@@ -13,6 +13,7 @@
 #include <boost/log/trivial.hpp>
 
 #include "WebCmdMail.h"
+#include "../ConfigLoader/ConfigLoader.h"
 
 namespace OwlCmdExecute {
 //  https://www.boost.org/doc/libs/1_81_0/doc/html/boost_process/tutorial.html
@@ -67,11 +68,10 @@ namespace OwlCmdExecute {
     public:
         explicit CmdExecute(
                 boost::asio::io_context &ioc,
-                std::string cmd_nmcli_path,
-                std::string cmd_bash_path,
+                std::shared_ptr<OwlConfigLoader::ConfigLoader> &&config,
                 OwlMailDefine::WebCmdMailbox &&mailbox
         ) : ioc_(ioc), mailbox_(std::move(mailbox)),
-            cmd_nmcli_path_(std::move(cmd_nmcli_path)), cmd_bash_path_(std::move(cmd_bash_path)) {
+            config_(std::move(config)) {
             mailbox_->receiveA2B = [this](OwlMailDefine::MailWeb2Cmd &&data) {
                 receiveMail(std::move(data));
             };
@@ -85,24 +85,13 @@ namespace OwlCmdExecute {
         boost::asio::io_context &ioc_;
         OwlMailDefine::WebCmdMailbox mailbox_;
 
-        std::string cmd_nmcli_path_;
-        std::string cmd_bash_path_;
+        std::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
 
         std::atomic_size_t ceiIdGenerator_{1};
         std::mutex ceiMtx_;
         std::unordered_map<size_t, std::weak_ptr<CmdExecuteItem>> ceiPool_;
 
     public:
-        auto test_(const std::string &pName, const std::string &params) {
-
-            auto p = createCEI(pName, params);
-
-            p->start([p]() {
-
-            });
-
-            return p;
-        }
 
     private:
         friend void CmdExecuteItem::destroy() const;

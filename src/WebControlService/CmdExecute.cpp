@@ -106,7 +106,9 @@ namespace OwlCmdExecute {
             case OwlMailDefine::WifiCmd::enable:
                 // `nmcli wifi on | cat`
             {
-                auto cei = createCEI(cmd_bash_path_, R"(nmcli wifi on)");
+                auto cei = createCEI(
+                        config_->config().cmd_bash_path,
+                        config_->config().wifiCmd.enable);
                 cei->start([this, self = shared_from_this(), cei, data]() {
                     this->sendBackResult(cei, data);
                 });
@@ -136,11 +138,11 @@ namespace OwlCmdExecute {
                     sendMail(std::move(m));
                     return;
                 }
-                auto s = std::string{R"(nmcli dev wifi hotspot ssid "<SSID>" password "<PWD>" | cat)"};
+                auto s = std::string{config_->config().wifiCmd.ap};
                 boost::replace_all(s, "<BSSID>", data->SSID);
                 boost::replace_all(s, "<PWD>", data->PASSWORD);
                 boost::replace_all(s, "<DEVICE_NAME>", data->DEVICE_NAME);
-                auto cei = createCEI(cmd_bash_path_, s);
+                auto cei = createCEI(config_->config().cmd_bash_path, s);
                 cei->start([this, self = shared_from_this(), cei, data]() {
                     this->sendBackResult(cei, data);
                 });
@@ -170,11 +172,11 @@ namespace OwlCmdExecute {
                     sendMail(std::move(m));
                     return;
                 }
-                auto s = std::string{R"(nmcli dev wifi connect "<BSSID>" password "<PWD>" | cat)"};
+                auto s = std::string{config_->config().wifiCmd.connect};
                 boost::replace_all(s, "<BSSID>", data->SSID);
                 boost::replace_all(s, "<PWD>", data->PASSWORD);
                 boost::replace_all(s, "<DEVICE_NAME>", data->DEVICE_NAME);
-                auto cei = createCEI(cmd_bash_path_, s);
+                auto cei = createCEI(config_->config().cmd_bash_path, s);
                 cei->start([this, self = shared_from_this(), cei, data]() {
                     this->sendBackResult(cei, data);
                 });
@@ -183,7 +185,7 @@ namespace OwlCmdExecute {
             case OwlMailDefine::WifiCmd::scan:
                 // `nmcli dev wifi list | cat`
             {
-                auto cei = createCEI(cmd_bash_path_, R"(nmcli dev wifi list | cat)");
+                auto cei = createCEI(config_->config().cmd_bash_path, config_->config().wifiCmd.scan);
                 cei->start([this, self = shared_from_this(), cei, data]() {
                     this->sendBackResult(cei, data);
                 });
@@ -192,7 +194,7 @@ namespace OwlCmdExecute {
             case OwlMailDefine::WifiCmd::showHotspotPassword:
                 // `nmcli dev wifi show-password ifname "<DEVICE_NAME>" | cat`
             {
-                auto cei = createCEI(cmd_bash_path_, R"(nmcli dev wifi show-password | cat)");
+                auto cei = createCEI(config_->config().cmd_bash_path, config_->config().wifiCmd.showHotspotPassword);
                 cei->start([this, self = shared_from_this(), cei, data]() {
                     this->sendBackResult(cei, data);
                 });
@@ -214,9 +216,9 @@ namespace OwlCmdExecute {
                     sendMail(std::move(m));
                     return;
                 }
-                auto s = std::string{R"(nmcli dev wifi list ifname "<DEVICE_NAME>" | cat)"};
+                auto s = std::string{config_->config().wifiCmd.getWlanDeviceState};
                 boost::replace_all(s, "<DEVICE_NAME>", data->DEVICE_NAME);
-                auto cei = createCEI(cmd_bash_path_, s);
+                auto cei = createCEI(config_->config().cmd_bash_path, s);
                 cei->start([this, self = shared_from_this(), cei, data]() {
                     this->sendBackResult(cei, data);
                 });
@@ -225,8 +227,8 @@ namespace OwlCmdExecute {
             case OwlMailDefine::WifiCmd::listWlanDevice:
                 // `nmcli dev status | grep " wifi "`
             {
-                auto s = std::string{R"(nmcli dev status | grep " wifi ")"};
-                auto cei = createCEI(cmd_bash_path_, s);
+                auto s = std::string{config_->config().wifiCmd.listWlanDevice};
+                auto cei = createCEI(config_->config().cmd_bash_path, s);
                 cei->start([this, self = shared_from_this(), cei, data]() {
                     this->sendBackResult(cei, data);
                 });

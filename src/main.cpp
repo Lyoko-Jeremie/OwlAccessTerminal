@@ -287,8 +287,7 @@ int main(int argc, const char *argv[]) {
     webService->start();
     auto cmdExecuteService = std::make_shared<OwlCmdExecute::CmdExecute>(
             ioc_web_static,
-            config->config().cmd_nmcli_path,
-            config->config().cmd_bash_path,
+            config->shared_from_this(),
             mailbox_web->shared_from_this()
     );
 
