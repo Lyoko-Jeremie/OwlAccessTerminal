@@ -209,6 +209,20 @@ namespace OwlConfigLoader {
                                                          config.embedWebServer.allowFileExtList);
         }
 
+        if (root.contains("wifiCmd")) {
+            auto wifiCmd = getObj(root, "wifiCmd");
+            config.wifiCmd.enable = get(wifiCmd, "enable", config.wifiCmd.enable);
+            config.wifiCmd.ap = get(wifiCmd, "ap", config.wifiCmd.ap);
+            config.wifiCmd.connect = get(wifiCmd, "connect", config.wifiCmd.connect);
+            config.wifiCmd.scan = get(wifiCmd, "scan", config.wifiCmd.scan);
+            config.wifiCmd.showHotspotPassword = get(wifiCmd, "showHotspotPassword",
+                                                     config.wifiCmd.showHotspotPassword);
+            config.wifiCmd.getWlanDeviceState = get(wifiCmd, "getWlanDeviceState",
+                                                    config.wifiCmd.getWlanDeviceState);
+            config.wifiCmd.listWlanDevice = get(wifiCmd, "listWlanDevice",
+                                                config.wifiCmd.listWlanDevice);
+        }
+
         return std::move(_config_);
     }
 

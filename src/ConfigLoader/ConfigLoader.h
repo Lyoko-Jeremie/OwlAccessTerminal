@@ -80,6 +80,16 @@ namespace OwlConfigLoader {
     const auto Camera_VideoCaptureAPI_Placeholder = std::string{};
     const auto Camera_VideoCaptureAPI_Default = std::string{"CAP_ANY"};
 
+    struct WifiCmd {
+        std::string enable{R"(nmcli wifi on)"};
+        std::string ap{R"(nmcli dev wifi hotspot ssid "<SSID>" password "<PWD>" | cat)"};
+        std::string connect{R"(nmcli dev wifi connect "<BSSID>" password "<PWD>" | cat)"};
+        std::string scan{R"(nmcli dev wifi list | cat)"};
+        std::string showHotspotPassword{R"(nmcli dev wifi show-password | cat)"};
+        std::string getWlanDeviceState{R"(nmcli dev wifi list ifname "<DEVICE_NAME>" | cat)"};
+        std::string listWlanDevice{R"(nmcli dev status | grep " wifi ")"};
+    };
+
     struct Config {
 
         int CommandServiceUdpPort = 23333;
@@ -107,6 +117,8 @@ namespace OwlConfigLoader {
         std::string cmd_bash_path = "/bin/bash";
 
         ConfigEmbedWebServer embedWebServer;
+
+        WifiCmd wifiCmd;
 
     };
 
@@ -149,6 +161,14 @@ namespace OwlConfigLoader {
                 << "\n" << "\t index_file_of_root " << config.embedWebServer.index_file_of_root
                 << "\n" << "\t backend_json_string " << config.embedWebServer.backend_json_string
                 << "\n" << "\t allowFileExtList " << config.embedWebServer.allowFileExtList
+                << "\n" << "wifiCmd :"
+                << "\n" << "\t enable " << config.wifiCmd.enable
+                << "\n" << "\t ap " << config.wifiCmd.ap
+                << "\n" << "\t connect " << config.wifiCmd.connect
+                << "\n" << "\t scan " << config.wifiCmd.scan
+                << "\n" << "\t showHotspotPassword " << config.wifiCmd.showHotspotPassword
+                << "\n" << "\t getWlanDeviceState " << config.wifiCmd.getWlanDeviceState
+                << "\n" << "\t listWlanDevice " << config.wifiCmd.listWlanDevice
                 << "";
         }
 
