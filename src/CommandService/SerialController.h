@@ -10,6 +10,7 @@
 #include <boost/core/ignore_unused.hpp>
 #include <utility>
 #include "CmdSerialMail.h"
+#include "../ConfigLoader/ConfigLoader.h"
 
 namespace OwlSerialController {
 
@@ -72,11 +73,13 @@ namespace OwlSerialController {
         bool open(
                 const std::string &deviceName,
                 boost::system::error_code &ec
-        ) {
-            deviceName_ = deviceName;
-            sp_.open(deviceName, ec);
+        );
+
+        bool close(){
+            boost::system::error_code ec;
+            sp_.close(ec);
             if (ec) {
-                BOOST_LOG_TRIVIAL(error) << "PortController open error: " << ec.what();
+                BOOST_LOG_TRIVIAL(error) << "PortController close error: " << ec.what();
                 return false;
             }
             return true;
@@ -89,8 +92,9 @@ namespace OwlSerialController {
     public:
         explicit SerialController(
                 boost::asio::io_context &ioc,
+                std::shared_ptr<OwlConfigLoader::ConfigLoader> &&config,
                 std::vector<OwlMailDefine::CmdSerialMailbox> &&mailbox_list
-        ) : ioc_(ioc), mailbox_list_(std::move(mailbox_list)),
+        ) : ioc_(ioc), config_(std::move(config)), mailbox_list_(std::move(mailbox_list)),
             airplanePortController(
                     std::make_shared<PortController>(ioc, weak_from_this())
             ) {
@@ -110,6 +114,7 @@ namespace OwlSerialController {
 
     private:
         boost::asio::io_context &ioc_;
+        std::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
         std::vector<OwlMailDefine::CmdSerialMailbox> mailbox_list_;
 
         std::shared_ptr<PortController> airplanePortController;
@@ -117,10 +122,6 @@ namespace OwlSerialController {
         bool initOk = false;
 
     public:
-        bool start(
-                const std::string &airplanePort,
-                int bandRate
-        );
 
     private:
         friend struct PortController;
@@ -130,6 +131,12 @@ namespace OwlSerialController {
         void sendMail(OwlMailDefine::MailSerial2Cmd &&data, OwlMailDefine::CmdSerialMailbox &mailbox) {
             // send cmd result to Service
             mailbox->sendB2A(std::move(data));
+        }
+
+        bool initPort();
+
+        void portDataIn(const std::shared_ptr<PortController> &pt, size_t bytes_transferred) {
+            pt->readBuffer.consume(bytes_transferred);
         }
 
     };

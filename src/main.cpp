@@ -219,18 +219,12 @@ int main(int argc, const char *argv[]) {
     cmdHttpService->start();
     auto serialControllerService = std::make_shared<OwlSerialController::SerialController>(
             ioc_cmd,
+            config->shared_from_this(),
             std::vector<OwlMailDefine::CmdSerialMailbox>{
                     mailbox_cmd_udp->shared_from_this(),
                     mailbox_cmd_http->shared_from_this()
             }
     );
-    bool serialControllerServiceStartOk = serialControllerService->start(
-            config->config.airplane_fly_serial_addr,
-            config->config.airplane_fly_serial_baud_rate
-    );
-    BOOST_LOG_TRIVIAL(info)
-        << "serialControllerService start: "
-        << serialControllerServiceStartOk;
 
 
     boost::asio::io_context ioc_imageWeb;

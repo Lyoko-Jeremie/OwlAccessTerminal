@@ -4,46 +4,21 @@
 
 namespace OwlSerialController {
 
-    bool SerialController::start(const std::string &airplanePort, const int bandRate) {
-        // TODO set and open the airplanePortController
-        initOk = airplanePortController->open(airplanePort)
+    bool SerialController::initPort() {
+        airplanePortController->close();
+        // set and open the airplanePortController
+        initOk = airplanePortController->open(config_->config.airplane_fly_serial_addr)
                  && airplanePortController->set_option(
-                boost::asio::serial_port::baud_rate(bandRate)
+                boost::asio::serial_port::baud_rate(config_->config.airplane_fly_serial_baud_rate)
         );
         if (!initOk) {
             return false;
         }
-        boost::asio::async_read(
-                airplanePortController->sp_,
-                airplanePortController->readBuffer,
-                [this, self = weak_from_this()](
-                        const boost::system::error_code &ec,
-                        size_t bytes_transferred
-                ) {
-                    if (!ec) {
-                        // error
-                        BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                 << " airplanePortController"
-                                                 << " async_read error: "
-                                                 << ec.what();
-                        return;
-                    }
-                    return;
-//                        {
-//                            auto thisP = self.lock();
-//                            if (thisP) {
-//                                // TODO process the data
-//                                thisP->airplanePortController->
-//                                        readBuffer.consume(bytes_transferred);
-//                            }
-//                        }
-                }
-        );
         return true;
     }
 
     void SerialController::receiveMail(OwlMailDefine::MailCmd2Serial &&data, OwlMailDefine::CmdSerialMailbox &mailbox) {
-        if (!initOk) {
+        if (!initOk && !initPort()) {
             auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
             data_r->runner = data->callbackRunner;
             data_r->openError = true;
@@ -192,6 +167,44 @@ namespace OwlSerialController {
                 return;
             }
         }
+    }
+
+    bool PortController::open(const std::string &deviceName, boost::system::error_code &ec) {
+        if (sp_.is_open()) {
+            close();
+        }
+        deviceName_ = deviceName;
+        sp_.open(deviceName, ec);
+        if (ec) {
+            BOOST_LOG_TRIVIAL(error) << "PortController open error: " << ec.what();
+            return false;
+        }
+        boost::asio::async_read(
+                sp_,
+                readBuffer,
+                [this, self = shared_from_this()](
+                        const boost::system::error_code &ec,
+                        size_t bytes_transferred
+                ) {
+                    if (!ec) {
+                        // error
+                        BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                                 << " airplanePortController"
+                                                 << " async_read error: "
+                                                 << ec.what();
+                        return;
+                    }
+                    auto ptr = parentRef_.lock();
+                    if (!ptr) {
+                        BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                                 << " async_read"
+                                                 << " parentRef_.lock() ptr lost.";
+                        return;
+                    }
+                    ptr->portDataIn(self, bytes_transferred);
+                }
+        );
+        return true;
     }
 
 } // OwlSerialController
