@@ -4,6 +4,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/lexical_cast/try_lexical_convert.hpp>
 #include <regex>
+#include <utility>
 #include "../QueryPairsAnalyser/QueryPairsAnalyser.h"
 
 namespace OwlImageServiceHttp {
@@ -96,9 +97,9 @@ namespace OwlImageServiceHttp {
 
     void ImageServiceHttpConnect::create_get_response_set_camera_image_size() {
 
-        if (!request_.target().starts_with("/set_camera_image_size=")) {
+        if (!request_.target().starts_with("/set_camera_image_size?")) {
             // inner error
-            internal_server_error("(!request_.target().starts_with(\"/set_camera_image_size=\"))");
+            internal_server_error("(!request_.target().starts_with(\"/set_camera_image_size?\"))");
             return;
         }
 
@@ -196,49 +197,31 @@ namespace OwlImageServiceHttp {
 
     void ImageServiceHttpConnect::create_get_response_set_camera_direct() {
 
-        if (!request_.target().starts_with("/set_camera_image_size=")) {
+        if (!request_.target().starts_with("/set_camera_direct?")) {
             // inner error
-            internal_server_error("(!request_.target().starts_with(\"/set_camera_image_size=\"))");
+            internal_server_error("(!request_.target().starts_with(\"/set_camera_image_size?\"))");
             return;
         }
 
-        // "/set_camera_image_size?camera=1&x=1920&y=1080"
+        // "/set_camera_direct?camera=1&direct=front"
         auto q = OwlQueryPairsAnalyser::QueryPairsAnalyser(request_.target()).queryPairs;
 
-        if (q.count("camera") != 1 || q.count("x") != 1 || q.count("y") != 1) {
+        if (q.count("camera") != 1 || q.count("direct") != 1) {
             // bad request
             bad_request(
-                    R"(create_get_response_set_camera_image_size (q.count("camera") != 1 || q.count("x") != 1 || q.count("y") != 1))"
+                    R"(create_get_response_set_camera_direct (q.count("camera") != 1 || q.count("direct") != 1))"
             );
             return;
         }
 
         int camera_id;
-        int x;
-        int y;
-        if (!boost::conversion::try_lexical_convert(q.find("camera")->second, camera_id) ||
-            !boost::conversion::try_lexical_convert(q.find("x")->second, x) ||
-            !boost::conversion::try_lexical_convert(q.find("y")->second, y) ||
-            camera_id < 1 || x < 2 || y < 2) {
+        std::string direct = q.find("camera")->second;
+        if (!boost::conversion::try_lexical_convert(q.find("camera")->second, camera_id)
+            || (direct != "down" && direct != "front")) {
             // bad request
-            bad_request("create_get_response_set_camera_image_size (try_lexical)");
+            bad_request("create_get_response_set_camera_direct (try_lexical)");
             return;
         }
-
-        OwlCameraConfig::CameraAddrType addr = OwlCameraConfig::CameraAddrType_1_Placeholder;
-        if (q.contains("addr") && q.find("addr")->second.length() > 0) {
-            OwlCameraConfig::CameraAddrType_1 addr2;
-            if (boost::conversion::try_lexical_convert(q.find("addr")->second, addr2)) {
-                addr = addr2;
-            } else {
-                addr = q.find("addr")->second;
-            }
-        }
-        std::string apiType = OwlCameraConfig::Camera_VideoCaptureAPI_Placeholder;
-        if (q.contains("api") && q.find("api")->second.length() > 0) {
-            apiType = q.find("api")->second;
-        }
-
 
         auto p = parents_.lock();
         if (!p) {
@@ -247,50 +230,13 @@ namespace OwlImageServiceHttp {
             return;
         }
 
-        // TOD send cmd to let camera re-create
-        OwlMailDefine::MailService2Camera cmd_data = std::make_shared<OwlMailDefine::Service2Camera>();
-        cmd_data->camera_id = camera_id;
-        cmd_data->cmd = OwlMailDefine::ControlCameraCmd::reset;
-        cmd_data->cmdParams = {OwlCameraConfig::CameraInfoTuple{
-                camera_id,
-                addr,
-                apiType,
-                x,
-                y,
-        }};
+        if (direct == "down") {
+            config_->config().downCameraId.store(camera_id);
+        }
+        if (direct == "front") {
+            config_->config().frontCameraId.store(camera_id);
+        }
 
-        cmd_data->callbackRunner = [this, self = shared_from_this()](
-                const OwlMailDefine::MailCamera2Service &camera_data
-        ) {
-
-            // now, send back
-            if (!camera_data->ok) {
-
-                // try to run immediately if now on the same strand, or run it later
-                boost::asio::dispatch(socket_.get_executor(), [this, self = shared_from_this()]() {
-                    internal_server_error("(!camera reset->ok)");
-                });
-                return;
-            }
-
-            boost::asio::dispatch(socket_.get_executor(), [this, self = shared_from_this()]() {
-                auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
-                response->version(request_.version());
-                response->keep_alive(false);
-
-                response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
-
-                response->result(boost::beast::http::status::ok);
-                response->set(boost::beast::http::field::content_type, "text/plain");
-                boost::beast::ostream(response->body()) << "200\r\n";
-                response->content_length(response->body().size());
-                write_response(response);
-            });
-            return;
-
-        };
-
-        p->sendMail(std::move(cmd_data));
 
     }
 
@@ -309,11 +255,11 @@ namespace OwlImageServiceHttp {
             return;
         }
         if (request_.target() == "/down") {
-            create_get_response_image(downCameraId_);
+            create_get_response_image(config_->config().downCameraId.load());
             return;
         }
         if (request_.target() == "/front") {
-            create_get_response_image(frontCameraId_);
+            create_get_response_image(config_->config().frontCameraId.load());
             return;
         }
         if (request_.target().starts_with("/set_camera_image_size?")) {
@@ -334,7 +280,17 @@ namespace OwlImageServiceHttp {
         if (request_.target() == "/downCameraId") {
             response->result(boost::beast::http::status::ok);
             response->set(boost::beast::http::field::content_type, "text/json");
-            boost::beast::ostream(response->body()) << R"({"downCameraId": )" << downCameraId_ << R"( })";
+            boost::beast::ostream(response->body()) << R"({"downCameraId": )" << config_->config().downCameraId.load()
+                                                    << R"( })";
+            response->content_length(response->body().size());
+            write_response(response);
+            return;
+        }
+        if (request_.target() == "/frontCameraId") {
+            response->result(boost::beast::http::status::ok);
+            response->set(boost::beast::http::field::content_type, "text/json");
+            boost::beast::ostream(response->body()) << R"({"downCameraId": )" << config_->config().frontCameraId.load()
+                                                    << R"( })";
             response->content_length(response->body().size());
             write_response(response);
             return;
@@ -425,14 +381,12 @@ namespace OwlImageServiceHttp {
     ImageServiceHttp::ImageServiceHttp(
             boost::asio::io_context &ioc,
             const boost::asio::ip::tcp::endpoint &endpoint,
-            int downCameraId,
-            int frontCameraId,
+            std::shared_ptr<OwlConfigLoader::ConfigLoader> config,
             OwlMailDefine::ServiceCameraMailbox &&mailbox
     ) : ioc_(ioc),
         acceptor_(boost::asio::make_strand(ioc)),
-        mailbox_(std::move(mailbox)),
-        downCameraId_(downCameraId),
-        frontCameraId_(frontCameraId) {
+        config_(std::move(config)),
+        mailbox_(std::move(mailbox)) {
 
         mailbox_->receiveB2A = [this](OwlMailDefine::MailCamera2Service &&data) {
             receiveMail(std::move(data));

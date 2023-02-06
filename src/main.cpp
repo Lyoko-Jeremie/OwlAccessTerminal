@@ -201,7 +201,7 @@ int main(int argc, const char *argv[]) {
             mailbox_cmd_udp->shared_from_this(),
             boost::asio::ip::udp::endpoint(
                     boost::asio::ip::udp::v4(),
-                    config->config.CommandServiceUdpPort
+                    config->config().CommandServiceUdpPort
             )
     );
     cmdService->start();
@@ -212,7 +212,7 @@ int main(int argc, const char *argv[]) {
             ioc_cmd,
             boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
-                    config->config.CommandServiceHttpPort
+                    config->config().CommandServiceHttpPort
             ),
             mailbox_cmd_http->shared_from_this()
     );
@@ -236,7 +236,7 @@ int main(int argc, const char *argv[]) {
             ioc_imageWeb,
             boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
-                    config->config.ImageServiceTcpPort
+                    config->config().ImageServiceTcpPort
             ),
             mailbox_image_protobuf->shared_from_this()
     );
@@ -248,20 +248,19 @@ int main(int argc, const char *argv[]) {
             ioc_imageWeb,
             boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
-                    config->config.ImageServiceHttpPort
+                    config->config().ImageServiceHttpPort
             ),
-            config->config.downCameraId,
-            config->config.frontCameraId,
+            config->shared_from_this(),
             mailbox_image_http->shared_from_this()
     );
     imageServiceHttp->start();
     auto cameraReader = std::make_shared<OwlCameraReader::CameraReader>(
             ioc_cameraReader,
             std::vector<OwlCameraConfig::CameraInfoTuple>{
-                    {1, config->config.camera_addr_1, config->config.camera_1_VideoCaptureAPI,
-                            config->config.camera_1_w, config->config.camera_1_h},
-                    {2, config->config.camera_addr_2, config->config.camera_2_VideoCaptureAPI,
-                            config->config.camera_2_w, config->config.camera_2_h},
+                    {1, config->config().camera_addr_1, config->config().camera_1_VideoCaptureAPI,
+                            config->config().camera_1_w, config->config().camera_1_h},
+                    {2, config->config().camera_addr_2, config->config().camera_2_VideoCaptureAPI,
+                            config->config().camera_2_w, config->config().camera_2_h},
             },
             mailbox_image_protobuf->shared_from_this(),
             mailbox_image_http->shared_from_this()
@@ -278,18 +277,18 @@ int main(int argc, const char *argv[]) {
             mailbox_web->shared_from_this(),
             boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
-                    config->config.EmbedWebServerHttpPort
+                    config->config().EmbedWebServerHttpPort
             ),
-            std::make_shared<std::string>(config->config.embedWebServer.doc_root),
-            std::make_shared<std::string>(config->config.embedWebServer.index_file_of_root),
-            std::make_shared<std::string>(config->config.embedWebServer.backend_json_string),
-            std::make_shared<std::string>(config->config.embedWebServer.allowFileExtList)
+            std::make_shared<std::string>(config->config().embedWebServer.doc_root),
+            std::make_shared<std::string>(config->config().embedWebServer.index_file_of_root),
+            std::make_shared<std::string>(config->config().embedWebServer.backend_json_string),
+            std::make_shared<std::string>(config->config().embedWebServer.allowFileExtList)
     );
     webService->start();
     auto cmdExecuteService = std::make_shared<OwlCmdExecute::CmdExecute>(
             ioc_web_static,
-            config->config.cmd_nmcli_path,
-            config->config.cmd_bash_path,
+            config->config().cmd_nmcli_path,
+            config->config().cmd_bash_path,
             mailbox_web->shared_from_this()
     );
 

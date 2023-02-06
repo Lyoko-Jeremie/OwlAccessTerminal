@@ -160,7 +160,7 @@ namespace OwlConfigLoader {
         return p.release();
     }
 
-    Config ConfigLoader::parse_json(const boost::json::value &&json_v) {
+    std::shared_ptr<Config> &&ConfigLoader::parse_json(const boost::json::value &&json_v) {
         const auto &root = json_v.as_object();
 
         {
@@ -171,43 +171,45 @@ namespace OwlConfigLoader {
             // BOOST_LOG_TRIVIAL(info) << "parse_json from : \n" << boost::json::serialize(root);
         }
 
-        Config config_;
+        std::shared_ptr<Config> _config_ = std::make_shared<Config>();
+        auto &config = *_config_;
 
-        config_.CommandServiceUdpPort = get(root, "CommandServiceUdpPort", config_.CommandServiceUdpPort);
-        config_.CommandServiceHttpPort = get(root, "CommandServiceHttpPort", config_.CommandServiceHttpPort);
-        config_.ImageServiceTcpPort = get(root, "ImageServiceTcpPort", config_.ImageServiceTcpPort);
-        config_.EmbedWebServerHttpPort = get(root, "EmbedWebServerHttpPort", config_.EmbedWebServerHttpPort);
-        config_.ImageServiceHttpPort = get(root, "ImageServiceHttpPort", config_.ImageServiceHttpPort);
-        config_.airplane_fly_serial_baud_rate = get(root, "airplane_fly_serial_baud_rate",
-                                                    config_.airplane_fly_serial_baud_rate);
-        config_.airplane_fly_serial_addr = get(root, "airplane_fly_serial_addr", config_.airplane_fly_serial_addr);
+        config.CommandServiceUdpPort = get(root, "CommandServiceUdpPort", config.CommandServiceUdpPort);
+        config.CommandServiceHttpPort = get(root, "CommandServiceHttpPort", config.CommandServiceHttpPort);
+        config.ImageServiceTcpPort = get(root, "ImageServiceTcpPort", config.ImageServiceTcpPort);
+        config.EmbedWebServerHttpPort = get(root, "EmbedWebServerHttpPort", config.EmbedWebServerHttpPort);
+        config.ImageServiceHttpPort = get(root, "ImageServiceHttpPort", config.ImageServiceHttpPort);
+        config.airplane_fly_serial_baud_rate = get(root, "airplane_fly_serial_baud_rate",
+                                                   config.airplane_fly_serial_baud_rate);
+        config.airplane_fly_serial_addr = get(root, "airplane_fly_serial_addr", config.airplane_fly_serial_addr);
 
-        config_.camera_addr_1 = getCameraAddr(root, "camera_addr_1", std::move(config_.camera_addr_1));
-        config_.camera_1_VideoCaptureAPI = get(root, "camera_1_VideoCaptureAPI", config_.camera_1_VideoCaptureAPI);
-        config_.camera_1_w = get(root, "camera_1_w", config_.camera_1_w);
-        config_.camera_1_h = get(root, "camera_1_h", config_.camera_1_h);
-        config_.camera_addr_2 = getCameraAddr(root, "camera_addr_2", std::move(config_.camera_addr_2));
-        config_.camera_2_VideoCaptureAPI = get(root, "camera_2_VideoCaptureAPI", config_.camera_2_VideoCaptureAPI);
-        config_.camera_2_w = get(root, "camera_2_w", config_.camera_2_w);
-        config_.camera_2_h = get(root, "camera_2_h", config_.camera_2_h);
+        config.camera_addr_1 = getCameraAddr(root, "camera_addr_1", std::move(config.camera_addr_1));
+        config.camera_1_VideoCaptureAPI = get(root, "camera_1_VideoCaptureAPI", config.camera_1_VideoCaptureAPI);
+        config.camera_1_w = get(root, "camera_1_w", config.camera_1_w);
+        config.camera_1_h = get(root, "camera_1_h", config.camera_1_h);
+        config.camera_addr_2 = getCameraAddr(root, "camera_addr_2", std::move(config.camera_addr_2));
+        config.camera_2_VideoCaptureAPI = get(root, "camera_2_VideoCaptureAPI", config.camera_2_VideoCaptureAPI);
+        config.camera_2_w = get(root, "camera_2_w", config.camera_2_w);
+        config.camera_2_h = get(root, "camera_2_h", config.camera_2_h);
 
-        config_.downCameraId = get(root, "downCameraId", config_.downCameraId);
-        config_.frontCameraId = get(root, "frontCameraId", config_.frontCameraId);
+        getAtomic(root, "downCameraId", config.downCameraId);
+        getAtomic(root, "frontCameraId", config.frontCameraId);
 
-        config_.cmd_nmcli_path = get(root, "cmd_nmcli_path", config_.cmd_nmcli_path);
-        config_.cmd_bash_path = get(root, "cmd_bash_path", config_.cmd_bash_path);
+        config.cmd_nmcli_path = get(root, "cmd_nmcli_path", config.cmd_nmcli_path);
+        config.cmd_bash_path = get(root, "cmd_bash_path", config.cmd_bash_path);
 
         if (root.contains("embedWebServer")) {
             auto embedWebServer = getObj(root, "embedWebServer");
-            config_.embedWebServer.doc_root = get(embedWebServer, "doc_root", config_.embedWebServer.doc_root);
-            config_.embedWebServer.index_file_of_root = get(embedWebServer, "index_file_of_root",
-                                                            config_.embedWebServer.index_file_of_root);
-            config_.embedWebServer.backend_json_string = get(embedWebServer, "backend_json_string",
-                                                             config_.embedWebServer.backend_json_string);
-            config_.embedWebServer.allowFileExtList = get(embedWebServer, "allowFileExtList",
-                                                          config_.embedWebServer.allowFileExtList);
+            config.embedWebServer.doc_root = get(embedWebServer, "doc_root", config.embedWebServer.doc_root);
+            config.embedWebServer.index_file_of_root = get(embedWebServer, "index_file_of_root",
+                                                           config.embedWebServer.index_file_of_root);
+            config.embedWebServer.backend_json_string = get(embedWebServer, "backend_json_string",
+                                                            config.embedWebServer.backend_json_string);
+            config.embedWebServer.allowFileExtList = get(embedWebServer, "allowFileExtList",
+                                                         config.embedWebServer.allowFileExtList);
         }
 
-        return config_;
+        return std::move(_config_);
     }
+
 } // OwlConfigLoader

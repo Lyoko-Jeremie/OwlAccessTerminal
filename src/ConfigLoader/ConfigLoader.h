@@ -10,6 +10,7 @@
 #include <map>
 #include <tuple>
 #include <limits>
+#include <atomic>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/system.hpp>
 #include <boost/json.hpp>
@@ -99,13 +100,14 @@ namespace OwlConfigLoader {
         int camera_2_w = 1920;
         int camera_2_h = 1080;
 
-        int downCameraId = 1;
-        int frontCameraId = 2;
+        std::atomic_int downCameraId{1};
+        std::atomic_int frontCameraId{2};
 
         std::string cmd_nmcli_path = "nmcli";
         std::string cmd_bash_path = "/bin/bash";
 
         ConfigEmbedWebServer embedWebServer;
+
     };
 
     const auto helperCameraAddr2String = []<typename T>(T &a) -> std::string {
@@ -118,9 +120,8 @@ namespace OwlConfigLoader {
     class ConfigLoader : public std::enable_shared_from_this<ConfigLoader> {
     public:
 
-        Config config;
-
         void print() {
+            auto &config = *config_;
             BOOST_LOG_TRIVIAL(info)
                 << "\n"
                 << "\n" << "ConfigLoader config:"
@@ -139,8 +140,8 @@ namespace OwlConfigLoader {
                 << "\n" << "camera_2_VideoCaptureAPI " << config.camera_2_VideoCaptureAPI
                 << "\n" << "camera_2_w " << config.camera_2_w
                 << "\n" << "camera_2_h " << config.camera_2_h
-                << "\n" << "downCameraId " << config.downCameraId
-                << "\n" << "frontCameraId " << config.frontCameraId
+                << "\n" << "downCameraId " << config.downCameraId.load()
+                << "\n" << "frontCameraId " << config.frontCameraId.load()
                 << "\n" << "cmd_nmcli_path " << config.cmd_nmcli_path
                 << "\n" << "cmd_bash_path " << config.cmd_bash_path
                 << "\n" << "ConfigEmbedWebServer :"
@@ -156,16 +157,25 @@ namespace OwlConfigLoader {
             BOOST_LOG_TRIVIAL(info) << "j.is_object() " << j.is_object() << "\t"
                                     << "j.kind() " << boost::json::to_string(j.kind());
             if (j.is_object()) {
-                config = parse_json(j.as_object());
+                config_ = std::move(parse_json(j.as_object()));
             } else {
                 BOOST_LOG_TRIVIAL(error)
                     << "ConfigLoader: config file not exit OR cannot load config file OR config file invalid.";
             }
         }
 
+        Config &config() {
+            return *config_;
+        }
+
+    private:
+        std::shared_ptr<Config> config_ = std::make_shared<Config>();
+
+    private:
+
         static boost::json::value load_json_file(const std::string &filePath);
 
-        Config parse_json(const boost::json::value &&json_v);
+        std::shared_ptr<Config> &&parse_json(const boost::json::value &&json_v);
 
         template<typename T>
         std::remove_cvref_t<T> get(const boost::json::object &v, boost::string_view key, T &&d) {
@@ -175,6 +185,22 @@ namespace OwlConfigLoader {
                 }
                 auto rr = boost::json::try_value_to<std::remove_cvref_t<T>>(v.at(key));
                 return rr.has_value() ? rr.value() : d;
+            } catch (std::exception &e) {
+                return d;
+            }
+        }
+
+        template<typename AT, typename T = std::remove_cvref_t<typename std::remove_cvref_t<AT>::value_type>>
+        AT &getAtomic(const boost::json::object &v, boost::string_view key, AT &d) {
+            try {
+                if (!v.contains(key)) {
+                    return d;
+                }
+                auto rr = boost::json::try_value_to<std::remove_cvref_t<T>>(v.at(key));
+                if (rr.has_value()) {
+                    d.store(rr.value());
+                }
+                return d;
             } catch (std::exception &e) {
                 return d;
             }

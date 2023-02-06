@@ -28,12 +28,10 @@ namespace OwlImageServiceHttp {
     public:
         ImageServiceHttpConnect(
                 boost::asio::ip::tcp::socket &&socket,
-                int downCameraId,
-                int frontCameraId,
+                std::shared_ptr<OwlConfigLoader::ConfigLoader> config,
                 std::weak_ptr<ImageServiceHttp> &&parents
         ) : socket_(std::move(socket)),
-            downCameraId_(downCameraId),
-            frontCameraId_(frontCameraId),
+            config_(std::move(config)),
             parents_(std::move(parents)) {
         }
 
@@ -49,8 +47,7 @@ namespace OwlImageServiceHttp {
         // The socket for the currently connected client.
         boost::asio::ip::tcp::socket socket_;
 
-        int downCameraId_;
-        int frontCameraId_;
+        std::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
 
         std::weak_ptr<ImageServiceHttp> parents_;
 
@@ -134,8 +131,7 @@ namespace OwlImageServiceHttp {
         ImageServiceHttp(
                 boost::asio::io_context &ioc,
                 const boost::asio::ip::tcp::endpoint &endpoint,
-                int downCameraId,
-                int frontCameraId_,
+                std::shared_ptr<OwlConfigLoader::ConfigLoader> config,
                 OwlMailDefine::ServiceCameraMailbox &&mailbox
         );
 
@@ -146,9 +142,8 @@ namespace OwlImageServiceHttp {
     private:
         boost::asio::io_context &ioc_;
         boost::asio::ip::tcp::acceptor acceptor_;
+        std::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
         OwlMailDefine::ServiceCameraMailbox mailbox_;
-        int downCameraId_;
-        int frontCameraId_;
     public:
         // Start accepting incoming connections
         void
@@ -189,8 +184,7 @@ namespace OwlImageServiceHttp {
                 // Create the session and run it
                 std::make_shared<ImageServiceHttpConnect>(
                         std::move(socket),
-                        downCameraId_,
-                        frontCameraId_,
+                        config_->shared_from_this(),
                         weak_from_this()
                 )->start();
             }
