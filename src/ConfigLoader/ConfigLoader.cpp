@@ -192,6 +192,7 @@ namespace OwlConfigLoader {
         config_.camera_2_h = get(root, "camera_2_h", config_.camera_2_h);
 
         config_.downCameraId = get(root, "downCameraId", config_.downCameraId);
+        config_.frontCameraId = get(root, "frontCameraId", config_.frontCameraId);
 
         config_.cmd_nmcli_path = get(root, "cmd_nmcli_path", config_.cmd_nmcli_path);
         config_.cmd_bash_path = get(root, "cmd_bash_path", config_.cmd_bash_path);

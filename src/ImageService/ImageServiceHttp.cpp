@@ -278,6 +278,10 @@ namespace OwlImageServiceHttp {
             create_get_response_image(downCameraId_);
             return;
         }
+        if (request_.target() == "/front") {
+            create_get_response_image(frontCameraId_);
+            return;
+        }
         if (request_.target().starts_with("/set_camera_image_size?")) {
             create_get_response_set_camera_image_size();
             return;
@@ -355,11 +359,13 @@ namespace OwlImageServiceHttp {
             boost::asio::io_context &ioc,
             const boost::asio::ip::tcp::endpoint &endpoint,
             int downCameraId,
+            int frontCameraId,
             OwlMailDefine::ServiceCameraMailbox &&mailbox
     ) : ioc_(ioc),
         acceptor_(boost::asio::make_strand(ioc)),
         mailbox_(std::move(mailbox)),
-        downCameraId_(downCameraId) {
+        downCameraId_(downCameraId),
+        frontCameraId_(frontCameraId) {
 
         mailbox_->receiveB2A = [this](OwlMailDefine::MailCamera2Service &&data) {
             receiveMail(std::move(data));

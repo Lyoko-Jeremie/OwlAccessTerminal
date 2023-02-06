@@ -251,6 +251,7 @@ int main(int argc, const char *argv[]) {
                     config->config.ImageServiceHttpPort
             ),
             config->config.downCameraId,
+            config->config.frontCameraId,
             mailbox_image_http->shared_from_this()
     );
     imageServiceHttp->start();

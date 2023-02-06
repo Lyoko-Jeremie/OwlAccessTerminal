@@ -15,6 +15,7 @@
   "camera_2_w": 800,
   "camera_2_h": 600,
   "downCameraId": 2,
+  "frontCameraId": 1,
   "cmd_nmcli_path": "nmcli",
   "cmd_bash_path": "/bin/bash",
   "embedWebServer": {
