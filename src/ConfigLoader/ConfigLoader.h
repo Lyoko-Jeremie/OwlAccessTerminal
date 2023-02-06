@@ -177,7 +177,7 @@ namespace OwlConfigLoader {
             BOOST_LOG_TRIVIAL(info) << "j.is_object() " << j.is_object() << "\t"
                                     << "j.kind() " << boost::json::to_string(j.kind());
             if (j.is_object()) {
-                config_ = std::move(parse_json(j.as_object()));
+                config_ = parse_json(j.as_object());
             } else {
                 BOOST_LOG_TRIVIAL(error)
                     << "ConfigLoader: config file not exit OR cannot load config file OR config file invalid.";
@@ -195,7 +195,7 @@ namespace OwlConfigLoader {
 
         static boost::json::value load_json_file(const std::string &filePath);
 
-        std::shared_ptr<Config> &&parse_json(const boost::json::value &&json_v);
+        std::shared_ptr<Config> parse_json(const boost::json::value &&json_v);
 
         template<typename T>
         std::remove_cvref_t<T> get(const boost::json::object &v, boost::string_view key, T &&d) {

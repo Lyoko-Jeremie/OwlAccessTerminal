@@ -160,7 +160,7 @@ namespace OwlConfigLoader {
         return p.release();
     }
 
-    std::shared_ptr<Config> &&ConfigLoader::parse_json(const boost::json::value &&json_v) {
+    std::shared_ptr<Config> ConfigLoader::parse_json(const boost::json::value &&json_v) {
         const auto &root = json_v.as_object();
 
         {
@@ -223,7 +223,7 @@ namespace OwlConfigLoader {
                                                 config.wifiCmd.listWlanDevice);
         }
 
-        return std::move(_config_);
+        return _config_;
     }
 
 } // OwlConfigLoader
