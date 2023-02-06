@@ -82,16 +82,20 @@ namespace OwlImageServiceHttp {
         }
 
         // Determine what needs to be done with the request message.
-        void
-        process_request();
+        void process_request();
+
+        void bad_request(const std::string &r);
+
+        void internal_server_error(const std::string &r);
 
         void create_get_response_image(int camera_id);
 
         void create_get_response_set_camera_image_size();
 
+        void create_get_response_set_camera_direct();
+
         // Construct a response message based on the program state.
-        void
-        create_get_response();
+        void create_get_response();
 
         // Asynchronously transmit the response message.
         template<typename BodyType = boost::beast::http::dynamic_body>
