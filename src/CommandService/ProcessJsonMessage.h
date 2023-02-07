@@ -808,6 +808,55 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
+                case 20: {
+                    // flyMode
+                    BOOST_LOG_TRIVIAL(info) << "flyMode";
+                    if (!json_o.contains("flyMode")) {
+                        BOOST_LOG_TRIVIAL(warning) << "flyMode contains fail " << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "error"},
+                                        {"error",     "speed (flyMode) not find"},
+                                        {"result",    false},
+                                }
+                        );
+                        return;
+                    }
+                    bool good = true;
+                    auto flyMode = getFromJsonObject<int32_t>(json_o, "flyMode", good);
+                    if (!good) {
+                        BOOST_LOG_TRIVIAL(warning) << "flyMode getFromJsonObject fail" << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(flyMode) flyMode fail"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    m->additionCmd = OwlMailDefine::AdditionCmd::flyMode;
+                    m->x = static_cast<int16_t>(flyMode);
+                    m->callbackRunner = [self, cmdId, packageId](
+                            OwlMailDefine::MailSerial2Cmd data
+                    ) {
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "keep"},
+                                        // {"result",    true},
+                                        {"result",    data->ok},
+                                        {"openError", data->openError},
+                                }
+                        );
+                    };
+                    self->sendMail(std::move(m));
+                    break;
+                }
                 default:
                     // ignore
                     BOOST_LOG_TRIVIAL(warning) << "ignore " << jsv;
