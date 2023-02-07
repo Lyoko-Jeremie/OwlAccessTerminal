@@ -644,7 +644,7 @@ namespace OwlProcessJsonMessage {
                     auto g = getFromJsonObject<int32_t>(json_o, "g", good);
                     auto r = getFromJsonObject<int32_t>(json_o, "r", good);
                     if (!good) {
-                        BOOST_LOG_TRIVIAL(warning) << "gotoPosition getFromJsonObject fail" << jsv;
+                        BOOST_LOG_TRIVIAL(warning) << "led getFromJsonObject fail" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -671,6 +671,67 @@ namespace OwlProcessJsonMessage {
                     m->y = static_cast<int16_t>(g);
                     m->z = static_cast<int16_t>(r);
                     m->cw = static_cast<int16_t>(ledMode);
+                    m->callbackRunner = [self, cmdId, packageId](
+                            OwlMailDefine::MailSerial2Cmd data
+                    ) {
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "keep"},
+                                        // {"result",    true},
+                                        {"result",    data->ok},
+                                        {"openError", data->openError},
+                                }
+                        );
+                    };
+                    self->sendMail(std::move(m));
+                    break;
+                }
+                case 18: {
+                    // high
+                    BOOST_LOG_TRIVIAL(info) << "high";
+                    if (!json_o.contains("high")) {
+                        BOOST_LOG_TRIVIAL(warning) << "high contains fail " << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "error"},
+                                        {"error",     "high (high) not find"},
+                                        {"result",    false},
+                                }
+                        );
+                        return;
+                    }
+                    bool good = true;
+                    // 1:static , 2:Breathing , 3:rainbow(sin)
+                    auto high = getFromJsonObject<int32_t>(json_o, "high", good);
+                    if (!good) {
+                        BOOST_LOG_TRIVIAL(warning) << "high getFromJsonObject fail" << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(high) high fail"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    if (high < 0 || high > 32767) {
+                        BOOST_LOG_TRIVIAL(warning) << "(high < 0 || high > 32767)" << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(high < 0 || high > 32767)"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    m->additionCmd = OwlMailDefine::AdditionCmd::led;
+                    m->y = static_cast<int16_t>(high);
                     m->callbackRunner = [self, cmdId, packageId](
                             OwlMailDefine::MailSerial2Cmd data
                     ) {
