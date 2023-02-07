@@ -195,7 +195,6 @@ namespace OwlConfigLoader {
         getAtomic(root, "downCameraId", config.downCameraId);
         getAtomic(root, "frontCameraId", config.frontCameraId);
 
-        config.cmd_nmcli_path = get(root, "cmd_nmcli_path", config.cmd_nmcli_path);
         config.cmd_bash_path = get(root, "cmd_bash_path", config.cmd_bash_path);
 
         if (root.contains("embedWebServer")) {
