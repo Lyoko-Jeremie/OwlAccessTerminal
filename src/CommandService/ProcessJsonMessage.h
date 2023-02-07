@@ -705,7 +705,6 @@ namespace OwlProcessJsonMessage {
                         return;
                     }
                     bool good = true;
-                    // 1:static , 2:Breathing , 3:rainbow(sin)
                     auto high = getFromJsonObject<int32_t>(json_o, "high", good);
                     if (!good) {
                         BOOST_LOG_TRIVIAL(warning) << "high getFromJsonObject fail" << jsv;
@@ -730,8 +729,68 @@ namespace OwlProcessJsonMessage {
                         return;
                     }
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
-                    m->additionCmd = OwlMailDefine::AdditionCmd::led;
+                    m->additionCmd = OwlMailDefine::AdditionCmd::high;
                     m->y = static_cast<int16_t>(high);
+                    m->callbackRunner = [self, cmdId, packageId](
+                            OwlMailDefine::MailSerial2Cmd data
+                    ) {
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "keep"},
+                                        // {"result",    true},
+                                        {"result",    data->ok},
+                                        {"openError", data->openError},
+                                }
+                        );
+                    };
+                    self->sendMail(std::move(m));
+                    break;
+                }
+                case 19: {
+                    // speed
+                    BOOST_LOG_TRIVIAL(info) << "speed";
+                    if (!json_o.contains("speed")) {
+                        BOOST_LOG_TRIVIAL(warning) << "speed contains fail " << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "error"},
+                                        {"error",     "speed (speed) not find"},
+                                        {"result",    false},
+                                }
+                        );
+                        return;
+                    }
+                    bool good = true;
+                    auto speed = getFromJsonObject<int32_t>(json_o, "speed", good);
+                    if (!good) {
+                        BOOST_LOG_TRIVIAL(warning) << "speed getFromJsonObject fail" << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(speed) speed fail"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    if (speed <= 0 || speed > 32767) {
+                        BOOST_LOG_TRIVIAL(warning) << "(speed <= 0 || speed > 32767)" << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(speed <= 0 || speed > 32767)"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    m->additionCmd = OwlMailDefine::AdditionCmd::speed;
+                    m->x = static_cast<int16_t>(speed);
                     m->callbackRunner = [self, cmdId, packageId](
                             OwlMailDefine::MailSerial2Cmd data
                     ) {
