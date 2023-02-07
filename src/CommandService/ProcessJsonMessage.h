@@ -544,6 +544,82 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
+                case 16: {
+                    // goto position
+                    BOOST_LOG_TRIVIAL(info) << "gotoPosition";
+                    if (!json_o.contains("x") && !json_o.contains("y") && !json_o.contains("h")) {
+                        BOOST_LOG_TRIVIAL(warning) << "gotoPosition contains fail " << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "error"},
+                                        {"error",     "gotoPosition (x||y||h) not find"},
+                                        {"result",    false},
+                                }
+                        );
+                        return;
+                    }
+                    bool good = true;
+                    auto x = getFromJsonObject<int32_t>(json_o, "x", good);
+                    auto y = getFromJsonObject<int32_t>(json_o, "y", good);
+                    auto h = getFromJsonObject<int32_t>(json_o, "h", good);
+                    if (!good) {
+                        BOOST_LOG_TRIVIAL(warning) << "gotoPosition getFromJsonObject fail" << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(x||y||h) getFromJsonObject fail"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    // TODO
+                    if (x < 0 || y < 0 || h < 0) {
+                        BOOST_LOG_TRIVIAL(warning) << "(x < 0 || y < 0 || h < 0)" << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(x < 0 || y < 0 || h < 0)"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    if (x > 32767 || y > 32767 || h > 32767) {
+                        BOOST_LOG_TRIVIAL(warning) << "(x > 32767 || y > 32767 || h > 32767)" << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(x > 32767 || y > 32767 || h > 32767)"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    m->additionCmd = OwlMailDefine::AdditionCmd::gotoPosition;
+                    m->x = static_cast<int16_t>(y);
+                    m->z = static_cast<int16_t>(x);
+                    m->y = static_cast<int16_t>(h);
+                    m->callbackRunner = [self, cmdId, packageId](
+                            OwlMailDefine::MailSerial2Cmd data
+                    ) {
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "keep"},
+                                        // {"result",    true},
+                                        {"result",    data->ok},
+                                        {"openError", data->openError},
+                                }
+                        );
+                    };
+                    self->sendMail(std::move(m));
+                    break;
+                }
                 default:
                     // ignore
                     BOOST_LOG_TRIVIAL(warning) << "ignore " << jsv;

@@ -17,6 +17,7 @@ namespace OwlMailDefine {
         keep = 4,
         move = 10,
         rotate = 11,
+        gotoPosition = 11,
         AprilTag = 100,
     };
 
