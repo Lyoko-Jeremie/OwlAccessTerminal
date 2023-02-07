@@ -225,4 +225,43 @@ namespace OwlConfigLoader {
         return _config_;
     }
 
+    void ConfigLoader::print() {
+        auto &config = *config_;
+        BOOST_LOG_TRIVIAL(info)
+            << "\n"
+            << "\n" << "ConfigLoader config:"
+            << "\n" << "CommandServiceUdpPort " << config.CommandServiceUdpPort
+            << "\n" << "CommandServiceHttpPort " << config.CommandServiceHttpPort
+            << "\n" << "ImageServiceTcpPort " << config.ImageServiceTcpPort
+            << "\n" << "ImageServiceHttpPort " << config.ImageServiceHttpPort
+            << "\n" << "EmbedWebServerHttpPort " << config.EmbedWebServerHttpPort
+            << "\n" << "airplane_fly_serial_baud_rate " << config.airplane_fly_serial_baud_rate
+            << "\n" << "airplane_fly_serial_addr " << config.airplane_fly_serial_addr
+            << "\n" << "camera_addr_1 " << std::visit(helperCameraAddr2String, config.camera_addr_1)
+            << "\n" << "camera_1_VideoCaptureAPI " << config.camera_1_VideoCaptureAPI
+            << "\n" << "camera_1_w " << config.camera_1_w
+            << "\n" << "camera_1_h " << config.camera_1_h
+            << "\n" << "camera_addr_2 " << std::visit(helperCameraAddr2String, config.camera_addr_2)
+            << "\n" << "camera_2_VideoCaptureAPI " << config.camera_2_VideoCaptureAPI
+            << "\n" << "camera_2_w " << config.camera_2_w
+            << "\n" << "camera_2_h " << config.camera_2_h
+            << "\n" << "downCameraId " << config.downCameraId.load()
+            << "\n" << "frontCameraId " << config.frontCameraId.load()
+            << "\n" << "cmd_bash_path " << config.cmd_bash_path
+            << "\n" << "ConfigEmbedWebServer :"
+            << "\n" << "\t doc_root " << config.embedWebServer.doc_root
+            << "\n" << "\t index_file_of_root " << config.embedWebServer.index_file_of_root
+            << "\n" << "\t backend_json_string " << config.embedWebServer.backend_json_string
+            << "\n" << "\t allowFileExtList " << config.embedWebServer.allowFileExtList
+            << "\n" << "wifiCmd :"
+            << "\n" << "\t enable " << config.wifiCmd.enable
+            << "\n" << "\t ap " << config.wifiCmd.ap
+            << "\n" << "\t connect " << config.wifiCmd.connect
+            << "\n" << "\t scan " << config.wifiCmd.scan
+            << "\n" << "\t showHotspotPassword " << config.wifiCmd.showHotspotPassword
+            << "\n" << "\t getWlanDeviceState " << config.wifiCmd.getWlanDeviceState
+            << "\n" << "\t listWlanDevice " << config.wifiCmd.listWlanDevice
+            << "";
+    }
+
 } // OwlConfigLoader
