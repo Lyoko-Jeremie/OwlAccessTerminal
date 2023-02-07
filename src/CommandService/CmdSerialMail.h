@@ -18,6 +18,7 @@ namespace OwlMailDefine {
         move = 10,
         rotate = 11,
         gotoPosition = 11,
+        led = 12,
         AprilTag = 100,
     };
 

@@ -620,6 +620,74 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
+                case 17: {
+                    // led
+                    BOOST_LOG_TRIVIAL(info) << "led";
+                    if (!json_o.contains("ledMode")
+                        && !json_o.contains("b") && !json_o.contains("g") && !json_o.contains("r")) {
+                        BOOST_LOG_TRIVIAL(warning) << "led contains fail " << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "error"},
+                                        {"error",     "led (ledMode||x||y||h) not find"},
+                                        {"result",    false},
+                                }
+                        );
+                        return;
+                    }
+                    bool good = true;
+                    // 1:static , 2:Breathing , 3:rainbow(sin)
+                    auto ledMode = getFromJsonObject<int32_t>(json_o, "ledMode", good);
+                    auto b = getFromJsonObject<int32_t>(json_o, "b", good);
+                    auto g = getFromJsonObject<int32_t>(json_o, "g", good);
+                    auto r = getFromJsonObject<int32_t>(json_o, "r", good);
+                    if (!good) {
+                        BOOST_LOG_TRIVIAL(warning) << "gotoPosition getFromJsonObject fail" << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(ledMode||x||y||h) getFromJsonObject fail"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    if (b < 0 || g < 0 || r < 0 || b > 255 || g > 255 || r > 255) {
+                        BOOST_LOG_TRIVIAL(warning) << "(b < 0 || g < 0 || r < 0 || b > 255 || g > 255 || r > 255)" << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(b < 0 || g < 0 || r < 0 || b > 255 || g > 255 || r > 255)"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    m->additionCmd = OwlMailDefine::AdditionCmd::led;
+                    m->x = static_cast<int16_t>(b);
+                    m->y = static_cast<int16_t>(g);
+                    m->z = static_cast<int16_t>(r);
+                    m->cw = static_cast<int16_t>(ledMode);
+                    m->callbackRunner = [self, cmdId, packageId](
+                            OwlMailDefine::MailSerial2Cmd data
+                    ) {
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "keep"},
+                                        // {"result",    true},
+                                        {"result",    data->ok},
+                                        {"openError", data->openError},
+                                }
+                        );
+                    };
+                    self->sendMail(std::move(m));
+                    break;
+                }
                 default:
                     // ignore
                     BOOST_LOG_TRIVIAL(warning) << "ignore " << jsv;
