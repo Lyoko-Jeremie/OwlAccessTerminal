@@ -18,6 +18,7 @@
 #include "ImageService/ImageServiceHttp.h"
 #include "ImageService/CameraReader.h"
 #include "ConfigLoader/ConfigLoader.h"
+#include "TimeService/TimeService.h"
 
 #include "ImageService/protobuf_test.h"
 
@@ -227,7 +228,15 @@ int main(int argc, const char *argv[]) {
     );
 
 
+    boost::asio::io_context ioc_time;
     boost::asio::io_context ioc_imageWeb;
+    auto mailbox_imageWeb_time = std::make_shared<OwlMailDefine::ServiceTimeMailbox::element_type>(
+            ioc_imageWeb, ioc_time
+    );
+    auto timeService = std::make_shared<OwlTimeService::TimeService>(
+            ioc_time,
+            mailbox_imageWeb_time->shared_from_this()
+    );
     boost::asio::io_context ioc_cameraReader;
     auto mailbox_image_protobuf = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
             ioc_imageWeb, ioc_cameraReader
@@ -251,7 +260,8 @@ int main(int argc, const char *argv[]) {
                     config->config().ImageServiceHttpPort
             ),
             config->shared_from_this(),
-            mailbox_image_http->shared_from_this()
+            mailbox_image_http->shared_from_this(),
+            mailbox_imageWeb_time->shared_from_this()
     );
     imageServiceHttp->start();
     auto cameraReader = std::make_shared<OwlCameraReader::CameraReader>(
@@ -308,6 +318,7 @@ int main(int argc, const char *argv[]) {
                 // stop all service on there
                 BOOST_LOG_TRIVIAL(info) << "stopping all service. ";
                 ioc_cmd.stop();
+                ioc_time.stop();
                 ioc_imageWeb.stop();
                 ioc_cameraReader.stop();
                 ioc_web_static.stop();
@@ -325,6 +336,7 @@ int main(int argc, const char *argv[]) {
 
     boost::thread_group tg;
     tg.create_thread(ThreadCallee{ioc_cmd, tg, "ioc_cmd"});
+    tg.create_thread(ThreadCallee{ioc_time, tg, "ioc_time"});
     tg.create_thread(ThreadCallee{ioc_imageWeb, tg, "ioc_imageWeb"});
     tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 1"});
     tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 2"});

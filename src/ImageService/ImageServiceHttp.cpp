@@ -34,59 +34,71 @@ namespace OwlImageServiceHttp {
                 return;
             }
 
-//            BOOST_LOG_TRIVIAL(info) << "create_get_response_image cmd_data->callbackRunner "
-//                                    << camera_data->camera_id;
+            OwlMailDefine::MailService2Time time_data = std::make_shared<OwlMailDefine::Service2Time>();
+            time_data->cmd = OwlMailDefine::TimeServiceCmd::getSyncClock;
+            time_data->callbackRunner = [this, self = shared_from_this(), camera_data](
+                    const OwlMailDefine::MailTime2Service &time_data_r
+            ) {
+                std::string time_string;
+                if (!boost::conversion::try_lexical_convert<std::string>(time_data_r->clockTimestampMs, time_string)) {
+                    BOOST_LOG_TRIVIAL(error)
+                        << "ImageServiceHttpConnect::create_get_response_image try_lexical_convert error";
+                    time_string = "0";
+                    return;
+                }
 
-            // try to run immediately if now on the same strand, or run it later
-            boost::asio::dispatch(socket_.get_executor(), [this, self = shared_from_this(), camera_data]() {
-
-
-//                BOOST_LOG_TRIVIAL(info) << "create_get_response_image cmd_data->callbackRunner dispatch "
-//                                        << camera_data->camera_id;
+                // try to run immediately if now on the same strand, or run it later
+                boost::asio::dispatch(socket_.get_executor(), [
+                        this, self = shared_from_this(), camera_data, time_string
+                ]() {
 
 //              cv::Mat img{6, 6, CV_8UC3, cv::Scalar{0, 0, 0}};
-                cv::Mat img = camera_data->image;
-                camera_data->image.release();
+                    cv::Mat img = camera_data->image;
+                    camera_data->image.release();
 
-                auto imageBuffer = std::make_shared<std::vector<uchar>>();
-                cv::imencode(".jpg", img, *imageBuffer,
-                             {cv::ImwriteFlags::IMWRITE_JPEG_QUALITY, 70});
-
-
-                // https://www.boost.org/doc/libs/develop/libs/beast/example/doc/http_examples.hpp
-                //      `send_cgi_response()`
-                auto response = std::make_shared<boost::beast::http::response<boost::beast::http::buffer_body>>();
-                response->version(request_.version());
-                response->keep_alive(false);
-
-                response->result(boost::beast::http::status::ok);
-                response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
-
-                response->set(boost::beast::http::field::content_type, "image/jpeg");
-
-                response->set("X-image-height", boost::lexical_cast<std::string>(img.rows));
-                response->set("X-image-width", boost::lexical_cast<std::string>(img.cols));
-                response->set("X-image-pixel-channel", boost::lexical_cast<std::string>(img.channels()));
-                response->set("X-image-format", "jpg");
-
-                img.release();
-
-                response->body().data = imageBuffer->data();
-                response->body().size = imageBuffer->size();
+                    auto imageBuffer = std::make_shared<std::vector<uchar>>();
+                    cv::imencode(".jpg", img, *imageBuffer,
+                                 {cv::ImwriteFlags::IMWRITE_JPEG_QUALITY, 70});
 
 
-                boost::beast::http::async_write(
-                        socket_,
-                        *response,
-                        [self, response, imageBuffer](boost::beast::error_code ec, std::size_t) {
-                            self->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
-                            self->deadline_.cancel();
-                        });
+                    // https://www.boost.org/doc/libs/develop/libs/beast/example/doc/http_examples.hpp
+                    //      `send_cgi_response()`
+                    auto response = std::make_shared<boost::beast::http::response<boost::beast::http::buffer_body>>();
+                    response->version(request_.version());
+                    response->keep_alive(false);
 
-                return;
+                    response->result(boost::beast::http::status::ok);
+                    response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+
+                    response->set(boost::beast::http::field::content_type, "image/jpeg");
+
+                    response->set("X-image-height", boost::lexical_cast<std::string>(img.rows));
+                    response->set("X-image-width", boost::lexical_cast<std::string>(img.cols));
+                    response->set("X-image-pixel-channel", boost::lexical_cast<std::string>(img.channels()));
+                    response->set("X-image-format", "jpg");
+                    response->set("X-SteadyClockTimestampMs", time_string);
+
+                    img.release();
+
+                    response->body().data = imageBuffer->data();
+                    response->body().size = imageBuffer->size();
 
 
-            });
+                    boost::beast::http::async_write(
+                            socket_,
+                            *response,
+                            [self, response, imageBuffer](boost::beast::error_code ec, std::size_t) {
+                                self->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
+                                self->deadline_.cancel();
+                            });
+
+                    return;
+
+
+                });
+
+
+            };
 
 
         };
@@ -148,7 +160,7 @@ namespace OwlImageServiceHttp {
             return;
         }
 
-        // TOD send cmd to let camera re-create
+        // send cmd to let camera re-create
         OwlMailDefine::MailService2Camera cmd_data = std::make_shared<OwlMailDefine::Service2Camera>();
         cmd_data->camera_id = camera_id;
         cmd_data->cmd = OwlMailDefine::ControlCameraCmd::reset;
@@ -240,6 +252,78 @@ namespace OwlImageServiceHttp {
 
     }
 
+    void ImageServiceHttpConnect::create_get_response_time() {
+
+        if (!request_.target().starts_with("/time?")) {
+            // inner error
+            internal_server_error("(!request_.target().starts_with(\"/set_camera_image_size?\"))");
+            return;
+        }
+
+        // "/time?setTimestamp=123456"
+        auto q = OwlQueryPairsAnalyser::QueryPairsAnalyser(request_.target()).queryPairs;
+
+        if (q.count("setTimestamp") != 1) {
+            // bad request
+            bad_request(
+                    R"(create_get_response_time (q.count("setTimestamp") != 1))"
+            );
+            return;
+        }
+
+        int64_t set_timestamp;
+        if (!boost::conversion::try_lexical_convert(q.find("setTimestamp")->second, set_timestamp)) {
+            // bad request
+            bad_request("create_get_response_set_camera_direct (try_lexical)");
+            return;
+        }
+
+        auto p = parents_.lock();
+        if (!p) {
+            // inner error
+            internal_server_error("(!parents_.lock())");
+            return;
+        }
+
+        auto data = std::make_shared<OwlMailDefine::Service2Time>();
+        data->cmd = OwlMailDefine::TimeServiceCmd::setNowClock;
+        data->clockTimestampMs = set_timestamp;
+
+        data->callbackRunner = [this, self = shared_from_this()](
+                const OwlMailDefine::MailTime2Service &data_r
+        ) {
+
+            boost::asio::dispatch(socket_.get_executor(), [this, self = shared_from_this(), data_r]() {
+
+                std::string ts;
+                if (!boost::conversion::try_lexical_convert<std::string>(data_r->clockTimestampMs, ts)) {
+                    BOOST_LOG_TRIVIAL(error)
+                        << "ImageServiceHttpConnect::create_get_response_time try_lexical_convert error";
+                    internal_server_error("try_lexical_convert error");
+                    return;
+                }
+
+                auto js = std::string{R"({"steadyClockTimestampMs": <NUMBER>})"};
+                boost::replace_all(js, "<NUMBER>", boost::lexical_cast<std::string>(data_r->clockTimestampMs));
+
+                auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+                response->version(request_.version());
+                response->keep_alive(false);
+
+                response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+
+                response->result(boost::beast::http::status::ok);
+                response->set(boost::beast::http::field::content_type, "text/plain");
+                boost::beast::ostream(response->body()) << js << "\r\n";
+                response->content_length(response->body().size());
+                write_response(response);
+            });
+
+        };
+
+
+    }
+
     void ImageServiceHttpConnect::create_get_response() {
 
         if (request_.target() == "/1") {
@@ -268,6 +352,10 @@ namespace OwlImageServiceHttp {
         }
         if (request_.target().starts_with("/set_camera_image_direct?")) {
             create_get_response_set_camera_direct();
+            return;
+        }
+        if (request_.target().starts_with("/time?")) {
+            create_get_response_time();
             return;
         }
 
@@ -382,14 +470,19 @@ namespace OwlImageServiceHttp {
             boost::asio::io_context &ioc,
             const boost::asio::ip::tcp::endpoint &endpoint,
             std::shared_ptr<OwlConfigLoader::ConfigLoader> config,
-            OwlMailDefine::ServiceCameraMailbox &&mailbox
+            OwlMailDefine::ServiceCameraMailbox &&mailbox,
+            OwlMailDefine::ServiceTimeMailbox &&mailbox_time
     ) : ioc_(ioc),
         acceptor_(boost::asio::make_strand(ioc)),
         config_(std::move(config)),
-        mailbox_(std::move(mailbox)) {
+        mailbox_(std::move(mailbox)),
+        mailbox_time_(std::move(mailbox_time)) {
 
         mailbox_->receiveB2A = [this](OwlMailDefine::MailCamera2Service &&data) {
             receiveMail(std::move(data));
+        };
+        mailbox_time_->receiveB2A = [this](OwlMailDefine::MailTime2Service &&data) {
+            data->runner(data);
         };
 
         boost::beast::error_code ec;

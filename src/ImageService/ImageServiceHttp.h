@@ -5,7 +5,6 @@
 
 #include <memory>
 #include "ImageServiceMail.h"
-
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
@@ -18,6 +17,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include "../TimeService/TimeServiceMail.h"
 
 
 namespace OwlImageServiceHttp {
@@ -91,6 +91,8 @@ namespace OwlImageServiceHttp {
 
         void create_get_response_set_camera_direct();
 
+        void create_get_response_time();
+
         // Construct a response message based on the program state.
         void create_get_response();
 
@@ -132,7 +134,8 @@ namespace OwlImageServiceHttp {
                 boost::asio::io_context &ioc,
                 const boost::asio::ip::tcp::endpoint &endpoint,
                 std::shared_ptr<OwlConfigLoader::ConfigLoader> config,
-                OwlMailDefine::ServiceCameraMailbox &&mailbox
+                OwlMailDefine::ServiceCameraMailbox &&mailbox,
+                OwlMailDefine::ServiceTimeMailbox &&mailbox_time
         );
 
         ~ImageServiceHttp() {
@@ -144,6 +147,7 @@ namespace OwlImageServiceHttp {
         boost::asio::ip::tcp::acceptor acceptor_;
         std::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
         OwlMailDefine::ServiceCameraMailbox mailbox_;
+        OwlMailDefine::ServiceTimeMailbox mailbox_time_;
     public:
         // Start accepting incoming connections
         void
