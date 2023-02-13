@@ -45,7 +45,9 @@ namespace OwlSerialController {
                 case OwlMailDefine::AdditionCmd::stop:
                 case OwlMailDefine::AdditionCmd::move:
                 case OwlMailDefine::AdditionCmd::rotate:
-                case OwlMailDefine::AdditionCmd::keep: {
+                case OwlMailDefine::AdditionCmd::keep:
+                case OwlMailDefine::AdditionCmd::high:
+                case OwlMailDefine::AdditionCmd::speed: {
                     // send cmd to serial
                     auto sendDataString = std::make_shared<std::vector<uint8_t>>();
                     // 0xAA,0xAdditionCmd,0xXXXX,0xYYYY,0xZZZZ,0xCWCW,0xBB
@@ -98,6 +100,117 @@ namespace OwlSerialController {
                     );
                     return;
                 }
+                case OwlMailDefine::AdditionCmd::flyMode: {
+                    BOOST_LOG_TRIVIAL(warning) << "SerialController"
+                                               << " receiveMail"
+                                               << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::flyMode"
+                                               << " not impl";
+                    // send cmd to serial
+                    auto sendDataString = std::make_shared<std::vector<uint8_t>>();
+                    // TODO
+                    // send it
+                    boost::asio::async_write(
+                            airplanePortController->sp_,
+                            boost::asio::buffer(*sendDataString),
+                            boost::asio::transfer_exactly(sendDataString->size()),
+                            [this, self = shared_from_this(), sendDataString, data, &mailbox](
+                                    const boost::system::error_code &ec,
+                                    size_t bytes_transferred
+                            ) {
+                                boost::ignore_unused(bytes_transferred);
+                                // make cmd result
+                                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                                data_r->runner = data->callbackRunner;
+                                if (!ec) {
+                                    // error
+                                    BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                                             << " receiveMail"
+                                                             << " async_write error: "
+                                                             << ec.what();
+                                    data_r->ok = false;
+                                    sendMail(std::move(data_r), mailbox);
+                                    return;
+                                }
+                                data_r->ok = true;
+                                sendMail(std::move(data_r), mailbox);
+                            }
+                    );
+                }
+                    break;
+                case OwlMailDefine::AdditionCmd::gotoPosition: {
+                    BOOST_LOG_TRIVIAL(warning) << "SerialController"
+                                               << " receiveMail"
+                                               << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::gotoPosition"
+                                               << " not impl";
+                    // send cmd to serial
+                    auto sendDataString = std::make_shared<std::vector<uint8_t>>();
+                    // TODO
+                    // send it
+                    boost::asio::async_write(
+                            airplanePortController->sp_,
+                            boost::asio::buffer(*sendDataString),
+                            boost::asio::transfer_exactly(sendDataString->size()),
+                            [this, self = shared_from_this(), sendDataString, data, &mailbox](
+                                    const boost::system::error_code &ec,
+                                    size_t bytes_transferred
+                            ) {
+                                boost::ignore_unused(bytes_transferred);
+                                // make cmd result
+                                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                                data_r->runner = data->callbackRunner;
+                                if (!ec) {
+                                    // error
+                                    BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                                             << " receiveMail"
+                                                             << " async_write error: "
+                                                             << ec.what();
+                                    data_r->ok = false;
+                                    sendMail(std::move(data_r), mailbox);
+                                    return;
+                                }
+                                data_r->ok = true;
+                                sendMail(std::move(data_r), mailbox);
+                            }
+                    );
+                }
+                    break;
+                case OwlMailDefine::AdditionCmd::led: {
+                    BOOST_LOG_TRIVIAL(warning) << "SerialController"
+                                               << " receiveMail"
+                                               << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::led"
+                                               << " not impl";
+                    // send cmd to serial
+                    auto sendDataString = std::make_shared<std::vector<uint8_t>>();
+                    // TODO
+                    // send it
+                    boost::asio::async_write(
+                            airplanePortController->sp_,
+                            boost::asio::buffer(*sendDataString),
+                            boost::asio::transfer_exactly(sendDataString->size()),
+                            [this, self = shared_from_this(), sendDataString, data, &mailbox](
+                                    const boost::system::error_code &ec,
+                                    size_t bytes_transferred
+                            ) {
+                                boost::ignore_unused(bytes_transferred);
+                                // make cmd result
+                                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                                data_r->runner = data->callbackRunner;
+                                if (!ec) {
+                                    // error
+                                    BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                                             << " receiveMail"
+                                                             << " async_write error: "
+                                                             << ec.what();
+                                    data_r->ok = false;
+                                    sendMail(std::move(data_r), mailbox);
+                                    return;
+                                }
+                                data_r->ok = true;
+                                sendMail(std::move(data_r), mailbox);
+                            }
+                    );
+                }
+                    break;
                 case OwlMailDefine::AdditionCmd::AprilTag: {
                     BOOST_LOG_TRIVIAL(warning) << "SerialController"
                                                << " receiveMail"
