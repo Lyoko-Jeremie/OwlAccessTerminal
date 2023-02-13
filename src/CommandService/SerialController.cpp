@@ -86,7 +86,7 @@ namespace OwlSerialController {
                                 // make cmd result
                                 auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
                                 data_r->runner = data->callbackRunner;
-                                if (!ec) {
+                                if (ec) {
                                     // error
                                     BOOST_LOG_TRIVIAL(error) << "SerialController"
                                                              << " receiveMail"
@@ -123,7 +123,7 @@ namespace OwlSerialController {
                                 // make cmd result
                                 auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
                                 data_r->runner = data->callbackRunner;
-                                if (!ec) {
+                                if (ec) {
                                     // error
                                     BOOST_LOG_TRIVIAL(error) << "SerialController"
                                                              << " receiveMail"
@@ -160,7 +160,7 @@ namespace OwlSerialController {
                                 // make cmd result
                                 auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
                                 data_r->runner = data->callbackRunner;
-                                if (!ec) {
+                                if (ec) {
                                     // error
                                     BOOST_LOG_TRIVIAL(error) << "SerialController"
                                                              << " receiveMail"
@@ -197,7 +197,7 @@ namespace OwlSerialController {
                                 // make cmd result
                                 auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
                                 data_r->runner = data->callbackRunner;
-                                if (!ec) {
+                                if (ec) {
                                     // error
                                     BOOST_LOG_TRIVIAL(error) << "SerialController"
                                                              << " receiveMail"
@@ -256,7 +256,7 @@ namespace OwlSerialController {
                                 // make cmd result
                                 auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
                                 data_r->runner = data->callbackRunner;
-                                if (!ec) {
+                                if (ec) {
                                     // error
                                     BOOST_LOG_TRIVIAL(error) << "SerialController"
                                                              << " receiveMail"
