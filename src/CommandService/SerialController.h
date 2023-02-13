@@ -26,11 +26,13 @@ namespace OwlSerialController {
                 std::weak_ptr<SerialController> &&parentRef
         );
 
-        boost::asio::serial_port sp_;
+        ~PortController() {
+            close();
+        }
+
+        std::shared_ptr<boost::asio::serial_port> sp_;
         std::weak_ptr<SerialController> parentRef_;
         std::string deviceName_;
-
-        boost::asio::streambuf readBuffer;
 
         std::shared_ptr<StateReader> stateReader_;
 
@@ -59,7 +61,7 @@ namespace OwlSerialController {
                 boost::system::error_code &ec
         ) {
             boost::asio::serial_port::baud_rate(0);
-            sp_.set_option(option, ec);
+            sp_->set_option(option, ec);
             if (ec) {
                 BOOST_LOG_TRIVIAL(error) << "PortController set_option error: " << ec.what();
                 return false;
@@ -80,20 +82,16 @@ namespace OwlSerialController {
         );
 
         bool close() {
-            boost::system::error_code ec;
-            sp_.close(ec);
-            if (ec) {
-                BOOST_LOG_TRIVIAL(error) << "PortController close error: " << ec.what();
-                return false;
+            if (sp_->is_open()) {
+                boost::system::error_code ec;
+                sp_->close(ec);
+                if (ec) {
+                    BOOST_LOG_TRIVIAL(error) << "PortController close error: " << ec.what();
+                    return false;
+                }
             }
             return true;
         }
-
-        void read();
-
-        void read_exactly(size_t need_bytes_transferred);
-
-        void read_until(const std::shared_ptr<std::string> &until_delim_ptr);
 
     };
 

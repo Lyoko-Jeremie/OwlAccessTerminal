@@ -75,7 +75,7 @@ namespace OwlSerialController {
                     (*sendDataString).at(10) = char(0xBB);
                     // send it
                     boost::asio::async_write(
-                            airplanePortController->sp_,
+                            *(airplanePortController->sp_),
                             boost::asio::buffer(*sendDataString),
                             boost::asio::transfer_exactly(sendDataString->size()),
                             [this, self = shared_from_this(), sendDataString, data, &mailbox](
@@ -112,7 +112,7 @@ namespace OwlSerialController {
                     // TODO
                     // send it
                     boost::asio::async_write(
-                            airplanePortController->sp_,
+                            *(airplanePortController->sp_),
                             boost::asio::buffer(*sendDataString),
                             boost::asio::transfer_exactly(sendDataString->size()),
                             [this, self = shared_from_this(), sendDataString, data, &mailbox](
@@ -149,7 +149,7 @@ namespace OwlSerialController {
                     // TODO
                     // send it
                     boost::asio::async_write(
-                            airplanePortController->sp_,
+                            *(airplanePortController->sp_),
                             boost::asio::buffer(*sendDataString),
                             boost::asio::transfer_exactly(sendDataString->size()),
                             [this, self = shared_from_this(), sendDataString, data, &mailbox](
@@ -186,7 +186,7 @@ namespace OwlSerialController {
                     // TODO
                     // send it
                     boost::asio::async_write(
-                            airplanePortController->sp_,
+                            *(airplanePortController->sp_),
                             boost::asio::buffer(*sendDataString),
                             boost::asio::transfer_exactly(sendDataString->size()),
                             [this, self = shared_from_this(), sendDataString, data, &mailbox](
@@ -245,7 +245,7 @@ namespace OwlSerialController {
                     // TODO
                     // send it
                     boost::asio::async_write(
-                            airplanePortController->sp_,
+                            *(airplanePortController->sp_),
                             boost::asio::buffer(*sendDataString),
                             boost::asio::transfer_exactly(sendDataString->size()),
                             [this, self = shared_from_this(), sendDataString, data, &mailbox](
@@ -288,89 +288,26 @@ namespace OwlSerialController {
     }
 
     bool PortController::open(const std::string &deviceName, boost::system::error_code &ec) {
-        if (sp_.is_open()) {
+        if (sp_->is_open()) {
             close();
         }
         deviceName_ = deviceName;
-        sp_.open(deviceName, ec);
+        sp_->open(deviceName, ec);
         if (ec) {
             BOOST_LOG_TRIVIAL(error) << "PortController open error: " << ec.what();
             return false;
         }
-        read();
+        stateReader_->start();
         return true;
     }
 
-    void PortController::read() {
-        boost::asio::async_read(
-                sp_,
-                readBuffer,
-                [this, self = shared_from_this()](
-                        const boost::system::error_code &ec,
-                        size_t bytes_transferred
-                ) {
-                    if (!ec) {
-                        // error
-                        BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                 << " airplanePortController"
-                                                 << " async_read error: "
-                                                 << ec.what();
-                        return;
-                    }
-                    stateReader_->portDataIn(self, bytes_transferred);
-                }
-        );
-    }
-
-    void PortController::read_exactly(size_t need_bytes_transferred) {
-        boost::asio::async_read(
-                sp_,
-                readBuffer,
-                boost::asio::transfer_exactly(need_bytes_transferred),
-                [this, self = shared_from_this()](
-                        const boost::system::error_code &ec,
-                        size_t bytes_transferred
-                ) {
-                    if (!ec) {
-                        // error
-                        BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                 << " airplanePortController"
-                                                 << " read_exactly error: "
-                                                 << ec.what();
-                        return;
-                    }
-                    stateReader_->portDataIn(self, bytes_transferred);
-                }
-        );
-    }
-
-    void PortController::read_until(const std::shared_ptr<std::string> &until_delim_ptr) {
-        boost::asio::async_read_until(
-                sp_,
-                readBuffer,
-                *until_delim_ptr,
-                [this, self = shared_from_this(), until_delim_ptr](
-                        const boost::system::error_code &ec,
-                        size_t bytes_transferred
-                ) {
-                    if (!ec) {
-                        // error
-                        BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                 << " airplanePortController"
-                                                 << " read_until error: "
-                                                 << ec.what();
-                        return;
-                    }
-                    stateReader_->portDataIn(self, bytes_transferred);
-                }
-        );
-    }
 
     PortController::PortController(
             boost::asio::io_context &ioc,
             std::weak_ptr<SerialController> &&parentRef)
-            : sp_(ioc), parentRef_(std::move(parentRef)) {
-        stateReader_ = std::make_shared<StateReader>(weak_from_this());
+            : sp_(std::make_shared<boost::asio::serial_port>(boost::asio::make_strand(ioc))),
+              parentRef_(std::move(parentRef)) {
+        stateReader_ = std::make_shared<StateReader>(weak_from_this(), sp_);
     }
 
 
