@@ -7,6 +7,7 @@
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/spawn.hpp>
 #include <boost/bind/bind.hpp>
+#include <boost/array.hpp>
 
 using boost::asio::use_awaitable;
 #if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
@@ -35,9 +36,10 @@ namespace OwlSerialController {
         void start() {
             boost::asio::co_spawn(
                     serialPort_->get_executor(),
-                    [this, self = shared_from_this()]() -> boost::asio::awaitable<bool> {
-                        co_return co_await run(self);
-                    },
+                    // [this, self = shared_from_this()]() -> boost::asio::awaitable<bool> {
+                    //     co_return co_await run(self);
+                    // },
+                    boost::bind(&StateReaderImpl::run, this, shared_from_this()),
                     [](std::exception_ptr e, bool r) {
                         if (r) {
                             BOOST_LOG_TRIVIAL(error) << "StateReaderImpl run() ok";
@@ -67,9 +69,16 @@ namespace OwlSerialController {
                     // https://www.boost.org/doc/libs/1_78_0/doc/html/boost_asio/overview/core/cpp20_coroutines.html
                     boost::system::error_code ec;
                     std::size_t bytes_transferred = 0;
-                    bytes_transferred = co_await boost::asio::async_read(
+
+                    // ======================== find start
+                    std::string delim{static_cast<char>(0xAA),
+                                      static_cast<char>(0xAA),
+                                      static_cast<char>(0xAA),
+                                      static_cast<char>(0xAA)};
+                    bytes_transferred = co_await boost::asio::async_read_until(
                             *serialPort_,
                             readBuffer_,
+                            delim,
                             boost::asio::redirect_error(boost::asio::use_awaitable, ec));
                     if (!ec) {
                         // error
@@ -80,6 +89,8 @@ namespace OwlSerialController {
                     }
                     // TODO process bytes_transferred
                     readBuffer_.consume(bytes_transferred);
+                    // ======================== find next
+
                 }
             } catch (const std::exception &e) {
                 BOOST_LOG_TRIVIAL(error) << e.what();
