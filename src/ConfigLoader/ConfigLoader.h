@@ -80,6 +80,7 @@ namespace OwlConfigLoader {
     const auto Camera_VideoCaptureAPI_Placeholder = std::string{};
     const auto Camera_VideoCaptureAPI_Default = std::string{"CAP_ANY"};
 
+#ifdef EnableWebStaticModule
     struct WifiCmd {
         std::string enable{R"(nmcli wifi on)"};
         std::string ap{R"(nmcli dev wifi hotspot ssid "<SSID>" password "<PWD>" | cat)"};
@@ -89,6 +90,7 @@ namespace OwlConfigLoader {
         std::string getWlanDeviceState{R"(nmcli dev wifi list ifname "<DEVICE_NAME>" | cat)"};
         std::string listWlanDevice{R"(nmcli dev status | grep " wifi ")"};
     };
+#endif // EnableWebStaticModule
 
     struct Config {
 
@@ -117,7 +119,9 @@ namespace OwlConfigLoader {
 
         ConfigEmbedWebServer embedWebServer;
 
+#ifdef EnableWebStaticModule
         WifiCmd wifiCmd;
+#endif // EnableWebStaticModule
 
     };
 

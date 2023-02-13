@@ -208,6 +208,7 @@ namespace OwlConfigLoader {
                                                          config.embedWebServer.allowFileExtList);
         }
 
+#ifdef EnableWebStaticModule
         if (root.contains("wifiCmd")) {
             auto wifiCmd = getObj(root, "wifiCmd");
             config.wifiCmd.enable = get(wifiCmd, "enable", config.wifiCmd.enable);
@@ -221,6 +222,7 @@ namespace OwlConfigLoader {
             config.wifiCmd.listWlanDevice = get(wifiCmd, "listWlanDevice",
                                                 config.wifiCmd.listWlanDevice);
         }
+#endif // EnableWebStaticModule
 
         return _config_;
     }
@@ -253,6 +255,7 @@ namespace OwlConfigLoader {
             << "\n" << "\t index_file_of_root " << config.embedWebServer.index_file_of_root
             << "\n" << "\t backend_json_string " << config.embedWebServer.backend_json_string
             << "\n" << "\t allowFileExtList " << config.embedWebServer.allowFileExtList
+            #ifdef EnableWebStaticModule
             << "\n" << "wifiCmd :"
             << "\n" << "\t enable " << config.wifiCmd.enable
             << "\n" << "\t ap " << config.wifiCmd.ap
@@ -261,6 +264,7 @@ namespace OwlConfigLoader {
             << "\n" << "\t showHotspotPassword " << config.wifiCmd.showHotspotPassword
             << "\n" << "\t getWlanDeviceState " << config.wifiCmd.getWlanDeviceState
             << "\n" << "\t listWlanDevice " << config.wifiCmd.listWlanDevice
+            #endif // EnableWebStaticModule
             << "";
     }
 
