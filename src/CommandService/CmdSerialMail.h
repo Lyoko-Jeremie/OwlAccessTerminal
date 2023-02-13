@@ -17,11 +17,11 @@ namespace OwlMailDefine {
         keep = 4,
         move = 10,
         rotate = 11,
-        gotoPosition = 11,
-        led = 12,
-        high = 13,
-        speed = 14,
-        flyMode = 15,
+        gotoPosition = 12,
+        led = 13,
+        high = 14,
+        speed = 15,
+        flyMode = 16,
         AprilTag = 100,
     };
 
