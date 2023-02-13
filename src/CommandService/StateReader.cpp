@@ -35,7 +35,9 @@ namespace OwlSerialController {
         void start() {
             boost::asio::co_spawn(
                     serialPort_->get_executor(),
-                    boost::bind(&StateReaderImpl::run, this),
+                    [this, self = shared_from_this()]() -> boost::asio::awaitable<bool> {
+                        co_return co_await run(self);
+                    },
                     [](std::exception_ptr e, bool r) {
                         if (r) {
                             BOOST_LOG_TRIVIAL(error) << "StateReaderImpl run() ok";
@@ -53,9 +55,10 @@ namespace OwlSerialController {
 
     private:
 
-        boost::asio::awaitable<bool> run() {
+        boost::asio::awaitable<bool> run(std::shared_ptr<StateReaderImpl> _ptr_) {
             // https://www.boost.org/doc/libs/1_81_0/doc/html/boost_asio/example/cpp20/coroutines/echo_server.cpp
 
+            boost::ignore_unused(_ptr_);
             auto executor = co_await boost::asio::this_coro::executor;
 
             try {
@@ -82,6 +85,7 @@ namespace OwlSerialController {
                 BOOST_LOG_TRIVIAL(error) << e.what();
             }
 
+            boost::ignore_unused(_ptr_);
             co_return true;
         }
 
