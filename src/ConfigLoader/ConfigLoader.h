@@ -65,12 +65,14 @@ namespace OwlCameraConfig {
 
 namespace OwlConfigLoader {
 
+#ifdef EnableWebStaticModule
     struct ConfigEmbedWebServer {
         std::string doc_root{"./html"};
         std::string index_file_of_root{"index.html"};
         std::string backend_json_string{"{}"};
         std::string allowFileExtList{"htm html js json jpg jpeg png bmp gif ico svg css"};
     };
+#endif // EnableWebStaticModule
 
     using CameraAddrType_1 = int;
     const auto CameraAddrType_1_Placeholder = std::numeric_limits<CameraAddrType_1>::max();
@@ -117,9 +119,9 @@ namespace OwlConfigLoader {
 
         std::string cmd_bash_path = "/bin/bash";
 
+#ifdef EnableWebStaticModule
         ConfigEmbedWebServer embedWebServer;
 
-#ifdef EnableWebStaticModule
         WifiCmd wifiCmd;
 #endif // EnableWebStaticModule
 

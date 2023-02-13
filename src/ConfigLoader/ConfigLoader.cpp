@@ -197,6 +197,7 @@ namespace OwlConfigLoader {
 
         config.cmd_bash_path = get(root, "cmd_bash_path", config.cmd_bash_path);
 
+#ifdef EnableWebStaticModule
         if (root.contains("embedWebServer")) {
             auto embedWebServer = getObj(root, "embedWebServer");
             config.embedWebServer.doc_root = get(embedWebServer, "doc_root", config.embedWebServer.doc_root);
@@ -208,7 +209,6 @@ namespace OwlConfigLoader {
                                                          config.embedWebServer.allowFileExtList);
         }
 
-#ifdef EnableWebStaticModule
         if (root.contains("wifiCmd")) {
             auto wifiCmd = getObj(root, "wifiCmd");
             config.wifiCmd.enable = get(wifiCmd, "enable", config.wifiCmd.enable);
@@ -250,12 +250,12 @@ namespace OwlConfigLoader {
             << "\n" << "downCameraId " << config.downCameraId.load()
             << "\n" << "frontCameraId " << config.frontCameraId.load()
             << "\n" << "cmd_bash_path " << config.cmd_bash_path
+            #ifdef EnableWebStaticModule
             << "\n" << "ConfigEmbedWebServer :"
             << "\n" << "\t doc_root " << config.embedWebServer.doc_root
             << "\n" << "\t index_file_of_root " << config.embedWebServer.index_file_of_root
             << "\n" << "\t backend_json_string " << config.embedWebServer.backend_json_string
             << "\n" << "\t allowFileExtList " << config.embedWebServer.allowFileExtList
-            #ifdef EnableWebStaticModule
             << "\n" << "wifiCmd :"
             << "\n" << "\t enable " << config.wifiCmd.enable
             << "\n" << "\t ap " << config.wifiCmd.ap
