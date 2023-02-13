@@ -78,16 +78,18 @@ namespace OwlSerialController {
             boost::ignore_unused(_ptr_);
             auto executor = co_await boost::asio::this_coro::executor;
 
+            boost::system::error_code ec;
+            std::size_t bytes_transferred = 0;
             try {
                 for (;;) {
                     // https://github.com/chriskohlhoff/asio/issues/915
                     // https://www.boost.org/doc/libs/1_78_0/doc/html/boost_asio/overview/core/cpp20_coroutines.html
-                    boost::system::error_code ec;
-                    std::size_t bytes_transferred = 0;
                     size_t strange = 0;
 
                     // ======================== find start
                     for (;;) {
+                        ec.clear();
+                        bytes_transferred = 0;
                         bytes_transferred = co_await boost::asio::async_read(
                                 *serialPort_,
                                 readBuffer_,
