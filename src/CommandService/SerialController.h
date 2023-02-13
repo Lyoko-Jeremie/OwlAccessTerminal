@@ -15,20 +15,7 @@
 namespace OwlSerialController {
 
 
-    struct AirplaneState {
-    };
-
-    struct PortController;
-
-    class StateReader {
-    public:
-        explicit StateReader(std::weak_ptr<PortController> parentRef) : parentRef_(std::move(parentRef)) {}
-
-        std::weak_ptr<PortController> parentRef_;
-
-        void portDataIn(const std::shared_ptr<PortController> &pt, size_t bytes_transferred);
-    };
-
+    class StateReader;
 
     class SerialController;
 
@@ -37,9 +24,7 @@ namespace OwlSerialController {
         explicit PortController(
                 boost::asio::io_context &ioc,
                 std::weak_ptr<SerialController> &&parentRef
-        ) : sp_(ioc), parentRef_(std::move(parentRef)) {
-            stateReader_ = std::make_shared<StateReader>(weak_from_this());
-        }
+        );
 
         boost::asio::serial_port sp_;
         std::weak_ptr<SerialController> parentRef_;

@@ -1,7 +1,7 @@
 // jeremie
 
 #include "SerialController.h"
-
+#include "./StateReader.h"
 #include <boost/asio/read_until.hpp>
 
 namespace OwlSerialController {
@@ -366,10 +366,11 @@ namespace OwlSerialController {
         );
     }
 
-    void StateReader::portDataIn(const std::shared_ptr<PortController> &pt, size_t bytes_transferred) {
-        // TODO
-        pt->readBuffer;
-        pt->readBuffer.consume(bytes_transferred);
+    PortController::PortController(
+            boost::asio::io_context &ioc,
+            std::weak_ptr<SerialController> &&parentRef)
+            : sp_(ioc), parentRef_(std::move(parentRef)) {
+        stateReader_ = std::make_shared<StateReader>(weak_from_this());
     }
 
 
