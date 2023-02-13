@@ -111,19 +111,21 @@ namespace OwlSerialController {
                             continue;
                         }
                         strange = 0;
-                        std::string s{
-                                (std::istreambuf_iterator<char>(&readBuffer_)),
-                                std::istreambuf_iterator<char>()
-                        };
-                        auto p = s.find(delimStart);
-                        if (p == std::string::npos) {
-                            continue;
-                        } else {
-                            // we find the start delim
-                            // trim the other data before start delim
-                            readBuffer_.consume(p);
-                            // goto next step
-                            break;
+                        {
+                            std::string s{
+                                    (std::istreambuf_iterator<char>(&readBuffer_)),
+                                    std::istreambuf_iterator<char>()
+                            };
+                            auto p = s.find(delimStart);
+                            if (p == std::string::npos) {
+                                continue;
+                            } else {
+                                // we find the start delim
+                                // trim the other data before start delim
+                                readBuffer_.consume(p);
+                                // goto next step
+                                break;
+                            }
                         }
                     }
 
