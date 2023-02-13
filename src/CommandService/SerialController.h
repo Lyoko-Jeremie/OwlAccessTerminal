@@ -14,6 +14,22 @@
 
 namespace OwlSerialController {
 
+
+    struct AirplaneState {
+    };
+
+    struct PortController;
+
+    class StateReader {
+    public:
+        explicit StateReader(std::weak_ptr<PortController> parentRef) : parentRef_(std::move(parentRef)) {}
+
+        std::weak_ptr<PortController> parentRef_;
+
+        void portDataIn(const std::shared_ptr<PortController> &pt, size_t bytes_transferred);
+    };
+
+
     class SerialController;
 
     struct PortController : public std::enable_shared_from_this<PortController> {
@@ -22,6 +38,7 @@ namespace OwlSerialController {
                 boost::asio::io_context &ioc,
                 std::weak_ptr<SerialController> &&parentRef
         ) : sp_(ioc), parentRef_(std::move(parentRef)) {
+            stateReader_ = std::make_shared<StateReader>(weak_from_this());
         }
 
         boost::asio::serial_port sp_;
@@ -29,6 +46,8 @@ namespace OwlSerialController {
         std::string deviceName_;
 
         boost::asio::streambuf readBuffer;
+
+        std::shared_ptr<StateReader> stateReader_;
 
         /**
          * @tparam SettableSerialPortOption from boost::asio::serial_port::
@@ -75,7 +94,7 @@ namespace OwlSerialController {
                 boost::system::error_code &ec
         );
 
-        bool close(){
+        bool close() {
             boost::system::error_code ec;
             sp_.close(ec);
             if (ec) {
@@ -85,6 +104,11 @@ namespace OwlSerialController {
             return true;
         }
 
+        void read();
+
+        void read_exactly(size_t need_bytes_transferred);
+
+        void read_until(const std::shared_ptr<std::string> &until_delim_ptr);
 
     };
 
@@ -134,10 +158,6 @@ namespace OwlSerialController {
         }
 
         bool initPort();
-
-        void portDataIn(const std::shared_ptr<PortController> &pt, size_t bytes_transferred) {
-            pt->readBuffer.consume(bytes_transferred);
-        }
 
     };
 

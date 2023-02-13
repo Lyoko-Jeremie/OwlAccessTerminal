@@ -2,6 +2,8 @@
 
 #include "SerialController.h"
 
+#include <boost/asio/read_until.hpp>
+
 namespace OwlSerialController {
 
     bool SerialController::initPort() {
@@ -295,6 +297,11 @@ namespace OwlSerialController {
             BOOST_LOG_TRIVIAL(error) << "PortController open error: " << ec.what();
             return false;
         }
+        read();
+        return true;
+    }
+
+    void PortController::read() {
         boost::asio::async_read(
                 sp_,
                 readBuffer,
@@ -310,17 +317,60 @@ namespace OwlSerialController {
                                                  << ec.what();
                         return;
                     }
-                    auto ptr = parentRef_.lock();
-                    if (!ptr) {
-                        BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                 << " async_read"
-                                                 << " parentRef_.lock() ptr lost.";
-                        return;
-                    }
-                    ptr->portDataIn(self, bytes_transferred);
+                    stateReader_->portDataIn(self, bytes_transferred);
                 }
         );
-        return true;
     }
+
+    void PortController::read_exactly(size_t need_bytes_transferred) {
+        boost::asio::async_read(
+                sp_,
+                readBuffer,
+                boost::asio::transfer_exactly(need_bytes_transferred),
+                [this, self = shared_from_this()](
+                        const boost::system::error_code &ec,
+                        size_t bytes_transferred
+                ) {
+                    if (!ec) {
+                        // error
+                        BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                                 << " airplanePortController"
+                                                 << " read_exactly error: "
+                                                 << ec.what();
+                        return;
+                    }
+                    stateReader_->portDataIn(self, bytes_transferred);
+                }
+        );
+    }
+
+    void PortController::read_until(const std::shared_ptr<std::string> &until_delim_ptr) {
+        boost::asio::async_read_until(
+                sp_,
+                readBuffer,
+                *until_delim_ptr,
+                [this, self = shared_from_this(), until_delim_ptr](
+                        const boost::system::error_code &ec,
+                        size_t bytes_transferred
+                ) {
+                    if (!ec) {
+                        // error
+                        BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                                 << " airplanePortController"
+                                                 << " read_until error: "
+                                                 << ec.what();
+                        return;
+                    }
+                    stateReader_->portDataIn(self, bytes_transferred);
+                }
+        );
+    }
+
+    void StateReader::portDataIn(const std::shared_ptr<PortController> &pt, size_t bytes_transferred) {
+        // TODO
+        pt->readBuffer;
+        pt->readBuffer.consume(bytes_transferred);
+    }
+
 
 } // OwlSerialController
