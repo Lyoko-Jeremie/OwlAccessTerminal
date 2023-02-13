@@ -108,6 +108,21 @@ else (OpenCV_WORLD)
     find_package(OpenCV REQUIRED core imgcodecs aruco)
 endif (OpenCV_WORLD)
 
+if (EnableWebStaticModule)
+    add_definitions(-DEnableWebStaticModule=1)
+    list(APPEND WebStaticModuleFiles
+            src/WebControlService/EmbedWebServer/EmbedWebServer.h
+            src/WebControlService/EmbedWebServer/EmbedWebServer.cpp
+            src/WebControlService/EmbedWebServer/EmbedWebServerSession.h
+            src/WebControlService/EmbedWebServer/EmbedWebServerSession.cpp
+            src/WebControlService/EmbedWebServer/EmbedWebServerTools.h
+            src/WebControlService/EmbedWebServer/EmbedWebServerTools.cpp
+            src/WebControlService/CmdExecute.cpp
+            src/WebControlService/CmdExecute.h
+            src/WebControlService/WebCmdMail.h
+            )
+endif (EnableWebStaticModule)
+
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
 message(STATUS "OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}")
@@ -129,27 +144,18 @@ add_executable(${ProjectMainName}
         src/main.cpp
         src/CommandService/CommandService.cpp
         src/CommandService/CommandService.h
-        src/WebControlService/EmbedWebServer/EmbedWebServer.h
-        src/WebControlService/EmbedWebServer/EmbedWebServer.cpp
-        src/WebControlService/EmbedWebServer/EmbedWebServerSession.h
-        src/WebControlService/EmbedWebServer/EmbedWebServerSession.cpp
-        src/WebControlService/EmbedWebServer/EmbedWebServerTools.h
-        src/WebControlService/EmbedWebServer/EmbedWebServerTools.cpp
         src/ImageService/ImageProtobufDefine/ImageProtocol/ImageProtocol.pb.h
         src/ImageService/ImageProtobufDefine/ImageProtocol/ImageProtocol.pb.cc
         src/ImageService/protobuf_test.h
         src/ImageService/protobuf_test.cpp
         src/ImageService/ImageService.h
         src/ImageService/ImageService.cpp
-        src/WebControlService/CmdExecute.cpp
-        src/WebControlService/CmdExecute.h
         src/CommandService/SerialController.cpp
         src/CommandService/SerialController.h
         src/ConfigLoader/ConfigLoader.cpp
         src/ConfigLoader/ConfigLoader.h
         src/AsyncCallbackMailbox/AsyncCallbackMailbox.h
         src/CommandService/CmdSerialMail.h
-        src/WebControlService/WebCmdMail.h
         src/ImageService/ImageServiceHttp.cpp
         src/ImageService/ImageServiceHttp.h
         src/ImageService/CameraReader.cpp
@@ -166,6 +172,10 @@ add_executable(${ProjectMainName}
         src/TimeService/TimeService.cpp
         src/TimeService/TimeService.h)
 
+
+if (EnableWebStaticModule)
+    target_link_libraries(${ProjectMainName} ${WebStaticModuleFiles})
+endif (EnableWebStaticModule)
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})
 

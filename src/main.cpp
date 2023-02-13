@@ -278,6 +278,7 @@ int main(int argc, const char *argv[]) {
     cameraReader->start();
 
 
+#ifdef EnableWebStaticModule
     boost::asio::io_context ioc_web_static;
     auto mailbox_web = std::make_shared<OwlMailDefine::WebCmdMailbox::element_type>(
             ioc_web_static, ioc_web_static
@@ -300,7 +301,7 @@ int main(int argc, const char *argv[]) {
             config->shared_from_this(),
             mailbox_web->shared_from_this()
     );
-
+#endif // EnableWebStaticModule
 
     boost::asio::io_context ioc_keyboard;
     boost::asio::signal_set sig(ioc_keyboard);
@@ -321,7 +322,9 @@ int main(int argc, const char *argv[]) {
                 ioc_time.stop();
                 ioc_imageWeb.stop();
                 ioc_cameraReader.stop();
+#ifdef EnableWebStaticModule
                 ioc_web_static.stop();
+#endif // EnableWebStaticModule
                 ioc_keyboard.stop();
             }
                 break;
@@ -340,7 +343,9 @@ int main(int argc, const char *argv[]) {
     tg.create_thread(ThreadCallee{ioc_imageWeb, tg, "ioc_imageWeb"});
     tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 1"});
     tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 2"});
+#ifdef EnableWebStaticModule
     tg.create_thread(ThreadCallee{ioc_web_static, tg, "ioc_web_static"});
+#endif // EnableWebStaticModule
     tg.create_thread(ThreadCallee{ioc_keyboard, tg, "ioc_keyboard"});
 
 
