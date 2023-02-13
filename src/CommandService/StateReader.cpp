@@ -3,11 +3,13 @@
 #include "StateReader.h"
 #include "./SerialController.h"
 #include <utility>
+#include <string_view>
 #include <boost/asio/read_until.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/spawn.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/array.hpp>
+#include <boost/utility/string_view.hpp>
 
 using boost::asio::use_awaitable;
 #if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
@@ -42,7 +44,7 @@ namespace OwlSerialController {
                     boost::bind(&StateReaderImpl::run, this, shared_from_this()),
                     [](std::exception_ptr e, bool r) {
                         if (r) {
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl run() ok";
+                            BOOST_LOG_TRIVIAL(warning) << "StateReaderImpl run() ok";
                         } else {
                             BOOST_LOG_TRIVIAL(error) << "StateReaderImpl run() error";
                         }
@@ -57,6 +59,20 @@ namespace OwlSerialController {
 
     private:
 
+        const std::string delimStart{
+                (char) (0xAA),
+                (char) (0xAA),
+                (char) (0xAA),
+                (char) (0xAA),
+        };
+        const std::string delimEnd{
+                (char) (0xBB),
+                (char) (0xBB),
+                (char) (0xBB),
+                (char) (0xBB),
+        };
+    private:
+
         boost::asio::awaitable<bool> run(std::shared_ptr<StateReaderImpl> _ptr_) {
             // https://www.boost.org/doc/libs/1_81_0/doc/html/boost_asio/example/cpp20/coroutines/echo_server.cpp
 
@@ -69,23 +85,41 @@ namespace OwlSerialController {
                     // https://www.boost.org/doc/libs/1_78_0/doc/html/boost_asio/overview/core/cpp20_coroutines.html
                     boost::system::error_code ec;
                     std::size_t bytes_transferred = 0;
+                    size_t strange = 0;
 
                     // ======================== find start
-                    std::string delim{static_cast<char>(0xAA),
-                                      static_cast<char>(0xAA),
-                                      static_cast<char>(0xAA),
-                                      static_cast<char>(0xAA)};
-                    bytes_transferred = co_await boost::asio::async_read_until(
-                            *serialPort_,
-                            readBuffer_,
-                            delim,
-                            boost::asio::redirect_error(boost::asio::use_awaitable, ec));
-                    if (!ec) {
-                        // error
-                        BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
-                                                 << " async_read error: "
-                                                 << ec.what();
-                        co_return false;
+                    for (;;) {
+                        bytes_transferred = co_await boost::asio::async_read(
+                                *serialPort_,
+                                readBuffer_,
+                                boost::asio::redirect_error(boost::asio::use_awaitable, ec));
+                        if (ec) {
+                            // error
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                                                     << " async_read error: "
+                                                     << ec.what();
+                            co_return false;
+                        }
+                        if (bytes_transferred == 0) {
+                            ++strange;
+                            if (strange > 10) {
+                                BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                                                         << " async_read strange";
+                                co_return false;
+                            }
+                            continue;
+                        }
+                        strange = 0;
+                        std::string s{
+                                (std::istreambuf_iterator<char>(&readBuffer_)),
+                                std::istreambuf_iterator<char>()
+                        };
+                        auto p = s.find(delimStart);
+                        if (p == std::string::npos) {
+                            continue;
+                        } else {
+
+                        }
                     }
                     // TODO process bytes_transferred
                     readBuffer_.consume(bytes_transferred);
@@ -114,7 +148,7 @@ namespace OwlSerialController {
                             const boost::system::error_code &ec,
                             size_t bytes_transferred
                     ) {
-                        if (!ec) {
+                        if (ec) {
                             // error
                             BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
                                                      << " async_read error: "
@@ -135,7 +169,7 @@ namespace OwlSerialController {
                             const boost::system::error_code &ec,
                             size_t bytes_transferred
                     ) {
-                        if (!ec) {
+                        if (ec) {
                             // error
                             BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
                                                      << " read_exactly error: "
@@ -156,7 +190,7 @@ namespace OwlSerialController {
                             const boost::system::error_code &ec,
                             size_t bytes_transferred
                     ) {
-                        if (!ec) {
+                        if (ec) {
                             // error
                             BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
                                                      << " read_until error: "
