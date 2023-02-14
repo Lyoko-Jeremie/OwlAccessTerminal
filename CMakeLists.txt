@@ -172,7 +172,9 @@ add_executable(${ProjectMainName}
         src/TimeService/TimeService.cpp
         src/TimeService/TimeService.h
         src/CommandService/StateReader.cpp
-        src/CommandService/StateReader.h)
+        src/CommandService/StateReader.h
+        src/CommandService/AirplaneState.cpp
+        src/CommandService/AirplaneState.h)
 
 
 if (EnableWebStaticModule)

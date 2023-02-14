@@ -1,7 +1,6 @@
 // jeremie
 
 #include "StateReader.h"
-#include "./SerialController.h"
 #include <utility>
 #include <string_view>
 #include <memory>
@@ -11,6 +10,8 @@
 #include <boost/asio/spawn.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/array.hpp>
+#include "./SerialController.h"
+#include "./AirplaneState.h"
 
 using boost::asio::use_awaitable;
 #if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
