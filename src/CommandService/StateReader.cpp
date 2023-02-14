@@ -4,6 +4,7 @@
 #include "./SerialController.h"
 #include <utility>
 #include <string_view>
+#include <memory>
 #include <deque>
 #include <boost/asio/read_until.hpp>
 #include <boost/asio/co_spawn.hpp>
@@ -282,6 +283,18 @@ namespace OwlSerialController {
 
                     }
 
+                    // send
+                    {
+                        auto ptr_sr = parentRef_.lock();
+                        if (!ptr_sr) {
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                                                     << " parentRef_.lock() ptr_sr failed.";
+                            co_return false;
+                        }
+                        // do a ptr copy to make sure ptr not release by next loop too early
+                        ptr_sr->sendAirplaneState(airplaneState_->shared_from_this());
+                    }
+
 
                     // ======================================= make clean
                     // clean all used data
@@ -326,6 +339,19 @@ namespace OwlSerialController {
 
     void StateReader::start() {
         impl->start();
+    }
+
+    void StateReader::sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState) {
+        boost::asio::dispatch(serialPort_->get_executor(), [
+                this, self = shared_from_this(), airplaneState]() {
+            auto ptr = parentRef_.lock();
+            if (!ptr) {
+                BOOST_LOG_TRIVIAL(error) << "PortController"
+                                         << " parentRef_.lock() failed.";
+                return;
+            }
+            ptr->sendAirplaneState(airplaneState);
+        });
     }
 
 } // OwlSerialController

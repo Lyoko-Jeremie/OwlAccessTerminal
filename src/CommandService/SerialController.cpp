@@ -287,6 +287,7 @@ namespace OwlSerialController {
         });
     }
 
+
     bool PortController::open(const std::string &deviceName, boost::system::error_code &ec) {
         if (sp_->is_open()) {
             close();
@@ -310,5 +311,24 @@ namespace OwlSerialController {
         stateReader_ = std::make_shared<StateReader>(weak_from_this(), sp_);
     }
 
+    void PortController::sendAirplaneState(const std::shared_ptr<AirplaneState>& airplaneState) {
+        boost::asio::dispatch(sp_->get_executor(), [
+                this, self = shared_from_this(), airplaneState]() {
+            auto ptr = parentRef_.lock();
+            if (!ptr) {
+                BOOST_LOG_TRIVIAL(error) << "PortController"
+                                         << " parentRef_.lock() failed.";
+                return;
+            }
+            ptr->sendAirplaneState(airplaneState);
+        });
+    }
+
+    void SerialController::sendAirplaneState(const std::shared_ptr<AirplaneState>& airplaneState) {
+        boost::asio::dispatch(ioc_, [this, self = shared_from_this(), airplaneState]() {
+            // TODO
+            airplaneState;
+        });
+    }
 
 } // OwlSerialController

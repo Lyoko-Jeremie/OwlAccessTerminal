@@ -15,6 +15,8 @@
 namespace OwlSerialController {
 
 
+    struct AirplaneState;
+
     class StateReader;
 
     class SerialController;
@@ -35,6 +37,10 @@ namespace OwlSerialController {
         std::string deviceName_;
 
         std::shared_ptr<StateReader> stateReader_;
+
+        friend class StateReader;
+
+        void sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState);
 
         /**
          * @tparam SettableSerialPortOption from boost::asio::serial_port::
@@ -129,6 +135,8 @@ namespace OwlSerialController {
         bool initOk = false;
 
     public:
+
+        void sendAirplaneState(const std::shared_ptr<AirplaneState>& airplaneState);
 
     private:
         friend struct PortController;
