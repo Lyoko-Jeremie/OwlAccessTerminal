@@ -54,7 +54,7 @@ namespace OwlSerialController {
                     auto sendDataString = std::make_shared<std::vector<uint8_t>>();
                     // 0xAA,0xAdditionCmd,0xXXXX,0xYYYY,0xZZZZ,0xCWCW,0xBB
                     sendDataString->resize(11);
-                    // make send data
+                    // make send data [big-endian with 8bit(byte)]
                     // 0xAA
                     (*sendDataString).at(0) = char(0xAA);
                     // AdditionCmd
