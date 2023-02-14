@@ -19,7 +19,37 @@ namespace OwlSerialController {
         return true;
     }
 
+    void SerialController::receiveMailGetAirplaneState(
+            OwlMailDefine::MailCmd2Serial &&data,
+            OwlMailDefine::CmdSerialMailbox &mailbox) {
+        switch (data->additionCmd) {
+            case OwlMailDefine::AdditionCmd::getAirplaneState: {
+                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                data_r->runner = data->callbackRunner;
+                data_r->ok = newestAirplaneState.operator bool();
+                data_r->newestAirplaneState = newestAirplaneState->shared_from_this();
+                sendMail(std::move(data_r), mailbox);
+                return;
+            }
+            default: {
+                BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                         << " receiveMailGetAirplaneState"
+                                         << " switch (data->additionCmd) default";
+                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                data_r->runner = data->callbackRunner;
+                data_r->openError = true;
+                data_r->ok = false;
+                sendMail(std::move(data_r), mailbox);
+                return;
+            }
+        }
+    }
+
     void SerialController::receiveMail(OwlMailDefine::MailCmd2Serial &&data, OwlMailDefine::CmdSerialMailbox &mailbox) {
+        if (data->additionCmd == OwlMailDefine::AdditionCmd::getAirplaneState) {
+            receiveMailGetAirplaneState(std::move(data), mailbox);
+            return;
+        }
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
             if (!initOk && !initPort()) {
@@ -311,7 +341,7 @@ namespace OwlSerialController {
         stateReader_ = std::make_shared<StateReader>(weak_from_this(), sp_);
     }
 
-    void PortController::sendAirplaneState(const std::shared_ptr<AirplaneState>& airplaneState) {
+    void PortController::sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState) {
         boost::asio::dispatch(sp_->get_executor(), [
                 this, self = shared_from_this(), airplaneState]() {
             auto ptr = parentRef_.lock();
@@ -324,10 +354,9 @@ namespace OwlSerialController {
         });
     }
 
-    void SerialController::sendAirplaneState(const std::shared_ptr<AirplaneState>& airplaneState) {
+    void SerialController::sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState) {
         boost::asio::dispatch(ioc_, [this, self = shared_from_this(), airplaneState]() {
-            // TODO
-            airplaneState;
+            newestAirplaneState = airplaneState;
         });
     }
 

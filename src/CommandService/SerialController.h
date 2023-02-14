@@ -136,12 +136,20 @@ namespace OwlSerialController {
 
     public:
 
-        void sendAirplaneState(const std::shared_ptr<AirplaneState>& airplaneState);
+        void sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState);
+
+    private:
+
+        std::shared_ptr<AirplaneState> newestAirplaneState;
 
     private:
         friend struct PortController;
 
         void receiveMail(OwlMailDefine::MailCmd2Serial &&data, OwlMailDefine::CmdSerialMailbox &mailbox);
+
+        void receiveMailGetAirplaneState(
+                OwlMailDefine::MailCmd2Serial &&data,
+                OwlMailDefine::CmdSerialMailbox &mailbox);
 
         void sendMail(OwlMailDefine::MailSerial2Cmd &&data, OwlMailDefine::CmdSerialMailbox &mailbox) {
             // send cmd result to Service

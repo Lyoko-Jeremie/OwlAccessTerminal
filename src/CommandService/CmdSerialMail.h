@@ -7,6 +7,7 @@
 #include <functional>
 #include <vector>
 #include "../AsyncCallbackMailbox/AsyncCallbackMailbox.h"
+#include "./AirplaneState.h"
 
 namespace OwlMailDefine {
     enum class AdditionCmd {
@@ -23,6 +24,8 @@ namespace OwlMailDefine {
         gotoPosition = 15,
         flyMode = 16,
         AprilTag = 100,
+
+        getAirplaneState = 1000,
     };
 
     struct AprilTagInfo {
@@ -75,6 +78,8 @@ namespace OwlMailDefine {
         std::function<void(std::shared_ptr<Serial2Cmd>)> runner;
         bool ok = false;
         bool openError = false;
+
+        std::shared_ptr<OwlSerialController::AirplaneState> newestAirplaneState;
     };
     using CmdSerialMailbox =
             std::shared_ptr<
