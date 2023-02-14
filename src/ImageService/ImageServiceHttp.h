@@ -73,8 +73,11 @@ namespace OwlImageServiceHttp {
                     [self](boost::beast::error_code ec,
                            std::size_t bytes_transferred) {
                         boost::ignore_unused(bytes_transferred);
-                        if (!ec)
-                            self->process_request();
+                        if (ec) {
+                            BOOST_LOG_TRIVIAL(warning) << "ImageServiceHttpConnect read_request error: " << ec.what();
+                            return;
+                        }
+                        self->process_request();
                     });
         }
 
@@ -119,10 +122,12 @@ namespace OwlImageServiceHttp {
 
             deadline_.async_wait(
                     [self](boost::beast::error_code ec) {
-                        if (!ec) {
-                            // Close socket to cancel any outstanding operation.
-                            self->socket_.close(ec);
+                        if (ec) {
+                            BOOST_LOG_TRIVIAL(warning) << "ImageServiceHttpConnect check_deadline : " << ec.what();
+                            return;
                         }
+                        // Close socket to cancel any outstanding operation.
+                        self->socket_.close(ec);
                     });
         }
     };

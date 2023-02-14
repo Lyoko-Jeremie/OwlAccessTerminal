@@ -91,8 +91,11 @@ namespace OwlCommandServiceHttp {
                     [self](boost::beast::error_code ec,
                            std::size_t bytes_transferred) {
                         boost::ignore_unused(bytes_transferred);
-                        if (!ec)
-                            self->process_request();
+                        if (ec) {
+                            BOOST_LOG_TRIVIAL(warning) << "CmdServiceHttpConnect read_request error: " << ec.what();
+                            return;
+                        }
+                        self->process_request();
                     });
         }
 
@@ -117,12 +120,12 @@ namespace OwlCommandServiceHttp {
 
         void process_tag_info();
 
-        void
-        create_post_response();
+        void create_post_response();
 
         // Construct a response message based on the program state.
-        void
-        create_get_response();
+        void create_get_response();
+
+        void create_get_airplane_state();
 
         // Asynchronously transmit the response message.
         template<typename BodyType =boost::beast::http::dynamic_body>
@@ -147,10 +150,12 @@ namespace OwlCommandServiceHttp {
 
             deadline_.async_wait(
                     [self](boost::beast::error_code ec) {
-                        if (!ec) {
-                            // Close socket to cancel any outstanding operation.
-                            self->socket_.close(ec);
+                        if (ec) {
+                            BOOST_LOG_TRIVIAL(warning) << "CmdServiceHttpConnect check_deadline : " << ec.what();
+                            return;
                         }
+                        // Close socket to cancel any outstanding operation.
+                        self->socket_.close(ec);
                     });
         }
 
