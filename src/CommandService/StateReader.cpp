@@ -4,6 +4,7 @@
 #include "./SerialController.h"
 #include <utility>
 #include <string_view>
+#include <deque>
 #include <boost/asio/read_until.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/spawn.hpp>
@@ -19,6 +20,29 @@ using boost::asio::use_awaitable;
 namespace OwlSerialController {
 
 
+    template<typename T>
+    T loadDataLittleEndian(const std::string_view &data_) {
+        // https://www.ruanyifeng.com/blog/2016/11/byte-order.html
+        // https://zh.wikipedia.org/zh-cn/%E5%AD%97%E8%8A%82%E5%BA%8F
+        if constexpr (sizeof(T) == sizeof(uint64_t)) {
+            const uint64_t *data = reinterpret_cast<const uint64_t *>(data_.data());
+            return (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24)
+                   | (data[4] << 32) | (data[5] << 40) | (data[6] << 49) | (data[7] << 58);
+        }
+        if constexpr (sizeof(T) == sizeof(uint32_t)) {
+            const uint32_t *data = reinterpret_cast<const uint32_t *>(data_.data());
+            return (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
+        }
+        if constexpr (sizeof(T) == sizeof(uint16_t)) {
+            const uint16_t *data = reinterpret_cast<const uint16_t *>(data_.data());
+            return (data[0] << 0) | (data[1] << 8);
+        }
+        if constexpr (sizeof(T) == sizeof(uint8_t)) {
+            const uint8_t *data = reinterpret_cast<const uint8_t *>(data_.data());
+            return (data[0] << 0);
+        }
+    }
+
     class StateReaderImpl : std::enable_shared_from_this<StateReaderImpl> {
     public:
         StateReaderImpl(
@@ -31,6 +55,12 @@ namespace OwlSerialController {
 
         boost::asio::streambuf readBuffer_;
         std::shared_ptr<boost::asio::serial_port> serialPort_;
+
+        std::shared_ptr<AirplaneState> airplaneState_;
+        uint8_t dataSize_ = 0;
+
+        boost::system::error_code ec_{};
+        std::size_t bytes_transferred_ = 0;
 
     public:
 
@@ -78,8 +108,6 @@ namespace OwlSerialController {
             boost::ignore_unused(_ptr_);
             auto executor = co_await boost::asio::this_coro::executor;
 
-            boost::system::error_code ec;
-            std::size_t bytes_transferred = 0;
             try {
                 for (;;) {
                     // https://github.com/chriskohlhoff/asio/issues/915
@@ -88,20 +116,21 @@ namespace OwlSerialController {
 
                     // ======================== find start
                     for (;;) {
-                        ec.clear();
-                        bytes_transferred = 0;
-                        bytes_transferred = co_await boost::asio::async_read(
+                        ec_.clear();
+                        bytes_transferred_ = 0;
+                        bytes_transferred_ = co_await boost::asio::async_read(
                                 *serialPort_,
                                 readBuffer_,
-                                boost::asio::redirect_error(use_awaitable, ec));
-                        if (ec) {
+                                boost::asio::redirect_error(use_awaitable, ec_));
+                        boost::ignore_unused(_ptr_);
+                        if (ec_) {
                             // error
                             BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
                                                      << " async_read find start error: "
-                                                     << ec.what();
+                                                     << ec_.what();
                             co_return false;
                         }
-                        if (bytes_transferred == 0) {
+                        if (bytes_transferred_ == 0) {
                             ++strange;
                             if (strange > 10) {
                                 BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
@@ -136,29 +165,30 @@ namespace OwlSerialController {
                             std::istreambuf_iterator<char>()
                     }.starts_with(delimStart)) {
                         BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
-                                                 << " find next start error !!!";
+                                                 << " check next start tag error !!!";
                         co_return false;
                     }
                     // remove start tag
                     readBuffer_.consume(delimStart.size());
                     // find data length tag
-                    if (readBuffer_.size() < sizeof(uint32_t)) {
-                        ec.clear();
-                        bytes_transferred = 0;
-                        bytes_transferred = co_await boost::asio::async_read(
+                    if (readBuffer_.size() < sizeof(typeof(dataSize_))) {
+                        ec_.clear();
+                        bytes_transferred_ = 0;
+                        bytes_transferred_ = co_await boost::asio::async_read(
                                 *serialPort_,
                                 readBuffer_,
-                                boost::asio::transfer_at_least((sizeof(uint32_t) - readBuffer_.size())),
-                                boost::asio::redirect_error(use_awaitable, ec));
-                        boost::ignore_unused(bytes_transferred);
-                        if (ec) {
+                                boost::asio::transfer_at_least((sizeof(typeof(dataSize_)) - readBuffer_.size())),
+                                boost::asio::redirect_error(use_awaitable, ec_));
+                        boost::ignore_unused(bytes_transferred_);
+                        boost::ignore_unused(_ptr_);
+                        if (ec_) {
                             // error
                             BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
                                                      << " async_read_until data length tag error: "
-                                                     << ec.what();
+                                                     << ec_.what();
                             co_return false;
                         }
-                        if (readBuffer_.size() < sizeof(uint32_t)) {
+                        if (readBuffer_.size() < sizeof(typeof(dataSize_))) {
                             BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
                                                      << " async_read_until data length tag bad";
                             co_return false;
@@ -167,53 +197,113 @@ namespace OwlSerialController {
 
 
                     // now we have the data length tag and more data
-                    // TODO load size
-                    size_t dataSize = 0;
+                    // load size
+                    dataSize_ = 0;
                     {
+                        static_assert(sizeof(typeof(dataSize_)) == 1);
+                        // dataSize_ = uint8_t
                         std::string d{
                                 (std::istreambuf_iterator<char>(&readBuffer_)),
                                 std::istreambuf_iterator<char>()
                         };
-                        static_cast<uint16_t>(d[0]);
-                        static_cast<uint16_t>(d[1]);
-                        // TODO dataSize <- d
+                        // dataSize <- d
+                        dataSize_ = static_cast<uint8_t>(d[0]);
                     }
                     // dataSize+len_tag+end_tag
-                    if (readBuffer_.size() < (dataSize + sizeof(uint32_t) + delimEnd.size())) {
-                        ec.clear();
-                        bytes_transferred = 0;
-                        bytes_transferred = co_await boost::asio::async_read(
+                    if (readBuffer_.size() < (dataSize_ + sizeof(uint32_t) + delimEnd.size())) {
+                        ec_.clear();
+                        bytes_transferred_ = 0;
+                        bytes_transferred_ = co_await boost::asio::async_read(
                                 *serialPort_,
                                 readBuffer_,
                                 boost::asio::transfer_exactly(
-                                        (dataSize + sizeof(uint32_t) + delimEnd.size()) - readBuffer_.size()),
-                                boost::asio::redirect_error(use_awaitable, ec));
-                        boost::ignore_unused(bytes_transferred);
-                        if (ec) {
+                                        (dataSize_ + sizeof(uint32_t) + delimEnd.size()) - readBuffer_.size()),
+                                boost::asio::redirect_error(use_awaitable, ec_));
+                        boost::ignore_unused(bytes_transferred_);
+                        boost::ignore_unused(_ptr_);
+                        if (ec_) {
                             // error
                             BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
                                                      << " async_read_until data error: "
-                                                     << ec.what();
+                                                     << ec_.what();
                             co_return false;
                         }
-                        if (readBuffer_.size() < (dataSize + sizeof(uint32_t) + delimEnd.size())) {
+                        if (readBuffer_.size() < (dataSize_ + sizeof(uint32_t) + delimEnd.size())) {
                             BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
                                                      << " async_read_until data bad";
                             co_return false;
                         }
                     }
 
+                    if (readBuffer_.size() < (dataSize_ + sizeof(uint32_t) + delimEnd.size())) {
+                        BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                                                 << " async_read_until data bad";
+                        co_return false;
+                    }
                     // ======================================= process data
-                    // TODO
-                    auto data = std::make_shared<AirplaneState>();
-                    // TODO data
+                    airplaneState_ = std::make_shared<AirplaneState>();
+                    {
+                        // https://stackoverflow.com/questions/41220792/how-copy-or-reuse-boostasiostreambuf
+                        // std::vector<uint8_t> data(readBuffer_.size());
+                        // boost::asio::buffer_copy(boost::asio::buffer(data), readBuffer_.data());
+                        std::string data{
+                                (std::istreambuf_iterator<char>(&readBuffer_)),
+                                std::istreambuf_iterator<char>()
+                        };
+
+                        // https://www.ruanyifeng.com/blog/2016/11/byte-order.html
+                        static_assert(sizeof(typeof(AirplaneState::pitch)) == sizeof(int32_t));
+                        airplaneState_->pitch = loadDataLittleEndian<int32_t>({data.begin(), data.end()});
+                        // airplaneState_->pitch = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
+                        static_assert(sizeof(typeof(AirplaneState::roll)) == sizeof(int32_t));
+                        airplaneState_->roll = loadDataLittleEndian<int32_t>(
+                                {data.begin() + sizeof(int32_t), data.end()});
+                        // airplaneState_->roll = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
+                        static_assert(sizeof(typeof(AirplaneState::yaw)) == sizeof(int32_t));
+                        airplaneState_->yaw = loadDataLittleEndian<int32_t>(
+                                {data.begin() + sizeof(int32_t) * 2, data.end()});
+
+                        data.erase(data.begin(), data.end() + sizeof(int32_t) * 3);
+
+                        static_assert(sizeof(typeof(AirplaneState::high)) == sizeof(uint16_t));
+                        airplaneState_->high = loadDataLittleEndian<uint16_t>(
+                                {data.begin(), data.end()});
+                        data.erase(data.begin(), data.end() + sizeof(uint16_t));
+
+                        static_assert(sizeof(typeof(AirplaneState::vx)) == sizeof(int32_t));
+                        airplaneState_->vx = loadDataLittleEndian<int32_t>(
+                                {data.begin(), data.end()});
+                        static_assert(sizeof(typeof(AirplaneState::vy)) == sizeof(int32_t));
+                        airplaneState_->vy = loadDataLittleEndian<int32_t>(
+                                {data.begin() + sizeof(int32_t) * 1, data.end()});
+                        static_assert(sizeof(typeof(AirplaneState::vz)) == sizeof(int32_t));
+                        airplaneState_->vz = loadDataLittleEndian<int32_t>(
+                                {data.begin() + sizeof(int32_t) * 2, data.end()});
+
+                    }
 
 
                     // ======================================= make clean
-                    // clean all data
-                    readBuffer_.consume(readBuffer_.size());
-                    // goto next read loop
-                    continue;
+                    // clean all used data
+                    {
+                        std::string s{
+                                (std::istreambuf_iterator<char>(&readBuffer_)),
+                                std::istreambuf_iterator<char>()
+                        };
+                        auto p = s.find(delimEnd);
+                        if (p == std::string::npos) {
+                            // error, never go there
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                                                     << " make clean check error. never gone.";
+                            co_return false;
+                        } else {
+                            // we find the end delim
+                            // trim the other data include end delim
+                            readBuffer_.consume(p + delimEnd.size());
+                            // goto next loop
+                            continue;
+                        }
+                    }
 
                 }
             } catch (const std::exception &e) {
@@ -224,73 +314,7 @@ namespace OwlSerialController {
             co_return true;
         }
 
-        void portDataIn(size_t bytes_transferred) {
-            // TODO
 
-            readBuffer_.consume(bytes_transferred);
-        }
-
-        void read() {
-            boost::asio::async_read(
-                    *serialPort_,
-                    readBuffer_,
-                    [this, self = shared_from_this()](
-                            const boost::system::error_code &ec,
-                            size_t bytes_transferred
-                    ) {
-                        if (ec) {
-                            // error
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
-                                                     << " async_read error: "
-                                                     << ec.what();
-                            return;
-                        }
-                        portDataIn(bytes_transferred);
-                    }
-            );
-        }
-
-        void read_exactly(size_t need_bytes_transferred) {
-            boost::asio::async_read(
-                    *serialPort_,
-                    readBuffer_,
-                    boost::asio::transfer_exactly(need_bytes_transferred),
-                    [this, self = shared_from_this()](
-                            const boost::system::error_code &ec,
-                            size_t bytes_transferred
-                    ) {
-                        if (ec) {
-                            // error
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
-                                                     << " read_exactly error: "
-                                                     << ec.what();
-                            return;
-                        }
-                        portDataIn(bytes_transferred);
-                    }
-            );
-        }
-
-        void read_until(const std::shared_ptr<std::string> &until_delim_ptr) {
-            boost::asio::async_read_until(
-                    *serialPort_,
-                    readBuffer_,
-                    *until_delim_ptr,
-                    [this, self = shared_from_this(), until_delim_ptr](
-                            const boost::system::error_code &ec,
-                            size_t bytes_transferred
-                    ) {
-                        if (ec) {
-                            // error
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
-                                                     << " read_until error: "
-                                                     << ec.what();
-                            return;
-                        }
-                        portDataIn(bytes_transferred);
-                    }
-            );
-        }
     };
 
 
