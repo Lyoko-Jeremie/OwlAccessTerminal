@@ -195,7 +195,7 @@ int main(int argc, const char *argv[]) {
 
     boost::asio::io_context ioc_cmd;
     auto mailbox_cmd_udp = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
-            ioc_cmd, ioc_cmd
+            ioc_cmd, ioc_cmd, "mailbox_cmd_udp"
     );
     auto cmdService = std::make_shared<OwlCommandService::CommandService>(
             ioc_cmd,
@@ -207,7 +207,7 @@ int main(int argc, const char *argv[]) {
     );
     cmdService->start();
     auto mailbox_cmd_http = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
-            ioc_cmd, ioc_cmd
+            ioc_cmd, ioc_cmd, "mailbox_cmd_http"
     );
     auto cmdHttpService = std::make_shared<OwlCommandServiceHttp::CmdServiceHttp>(
             ioc_cmd,
@@ -231,7 +231,7 @@ int main(int argc, const char *argv[]) {
     boost::asio::io_context ioc_time;
     boost::asio::io_context ioc_imageWeb;
     auto mailbox_imageWeb_time = std::make_shared<OwlMailDefine::ServiceTimeMailbox::element_type>(
-            ioc_imageWeb, ioc_time
+            ioc_imageWeb, ioc_time, "mailbox_imageWeb_time"
     );
     auto timeService = std::make_shared<OwlTimeService::TimeService>(
             ioc_time,
@@ -239,7 +239,7 @@ int main(int argc, const char *argv[]) {
     );
     boost::asio::io_context ioc_cameraReader;
     auto mailbox_image_protobuf = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
-            ioc_imageWeb, ioc_cameraReader
+            ioc_imageWeb, ioc_cameraReader, "mailbox_image_protobuf"
     );
     auto imageServiceProtobuf = std::make_shared<OwlImageService::ImageService>(
             ioc_imageWeb,
@@ -251,7 +251,7 @@ int main(int argc, const char *argv[]) {
     );
     imageServiceProtobuf->start();
     auto mailbox_image_http = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
-            ioc_imageWeb, ioc_cameraReader
+            ioc_imageWeb, ioc_cameraReader, "mailbox_image_http"
     );
     auto imageServiceHttp = std::make_shared<OwlImageServiceHttp::ImageServiceHttp>(
             ioc_imageWeb,
@@ -281,7 +281,7 @@ int main(int argc, const char *argv[]) {
 #ifdef EnableWebStaticModule
     boost::asio::io_context ioc_web_static;
     auto mailbox_web = std::make_shared<OwlMailDefine::WebCmdMailbox::element_type>(
-            ioc_web_static, ioc_web_static
+            ioc_web_static, ioc_web_static, "mailbox_web"
     );
     auto webService = std::make_shared<OwlEmbedWebServer::EmbedWebServer>(
             ioc_web_static,
