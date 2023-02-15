@@ -126,263 +126,16 @@ namespace OwlSerialController {
                     sendMail(std::move(data_r), mailbox);
                     return;
                 }
-                case OwlMailDefine::AdditionCmd::takeoff: {
-                    constexpr uint8_t packageSize = 6;
-                    makeADataBuffer<packageSize>(
-                            {
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(data->additionCmd),
-                                    // data size
-                                    uint8_t(packageSize - 4),
-
-                                    // moveStepDistance
-                                    uint8_t(uint16_t(data->y) & 0xff),
-                                    uint8_t(uint16_t(data->y) >> 8),
-
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
-                case OwlMailDefine::AdditionCmd::land: {
-                    constexpr uint8_t packageSize = 4;
-                    makeADataBuffer<packageSize>(
-                            {
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(data->additionCmd),
-                                    // data size
-                                    uint8_t(packageSize - 4),
-
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
-                case OwlMailDefine::AdditionCmd::stop: {
-                    constexpr uint8_t packageSize = 4;
-                    makeADataBuffer<packageSize>(
-                            {
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(data->additionCmd),
-                                    // data size
-                                    uint8_t(packageSize - 4),
-
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
-                case OwlMailDefine::AdditionCmd::move: {
-                    // send cmd to serial
-                    // 0xAA,0xAdditionCmd,0xXXXX,0xYYYY,0xZZZZ,0xCWCW,0xBB
-                    // make send data
-                    constexpr uint8_t packageSize = 12;
-                    makeADataBuffer<packageSize>(
-                            {
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(data->additionCmd),
-                                    // data size
-                                    uint8_t(packageSize - 4),
-
-                                    // forward/back
-                                    uint8_t(uint16_t(data->x) & 0xff),
-                                    uint8_t(uint16_t(data->x) >> 8),
-
-                                    // up/down
-                                    uint8_t(uint16_t(data->y) & 0xff),
-                                    uint8_t(uint16_t(data->y) >> 8),
-
-                                    // left/right
-                                    uint8_t(uint16_t(data->z) & 0xff),
-                                    uint8_t(uint16_t(data->z) >> 8),
-
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
-                case OwlMailDefine::AdditionCmd::rotate: {
-                    constexpr uint8_t packageSize = 4;
-                    makeADataBuffer<packageSize>(
-                            {
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(data->additionCmd),
-                                    // data size
-                                    uint8_t(packageSize - 4),
-
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
-                case OwlMailDefine::AdditionCmd::keep: {
-                    constexpr uint8_t packageSize = 6;
-                    makeADataBuffer<packageSize>(
-                            {
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(data->additionCmd),
-                                    // data size
-                                    uint8_t(packageSize - 4),
-
-                                    // rote
-                                    uint8_t(uint16_t(data->cw) & 0xff),
-                                    uint8_t(uint16_t(data->cw) >> 8),
-
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
-                case OwlMailDefine::AdditionCmd::high: {
-                    constexpr uint8_t packageSize = 6;
-                    makeADataBuffer<packageSize>(
-                            {
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(data->additionCmd),
-                                    // data size
-                                    uint8_t(packageSize - 4),
-
-                                    // high
-                                    uint8_t(uint16_t(data->y) & 0xff),
-                                    uint8_t(uint16_t(data->y) >> 8),
-
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
-                case OwlMailDefine::AdditionCmd::speed: {
-                    constexpr uint8_t packageSize = 6;
-                    makeADataBuffer<packageSize>(
-                            {
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(data->additionCmd),
-                                    // data size
-                                    uint8_t(packageSize - 4),
-
-                                    // speed
-                                    uint8_t(uint16_t(data->x) & 0xff),
-                                    uint8_t(uint16_t(data->x) >> 8),
-
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
-                case OwlMailDefine::AdditionCmd::flyMode: {
-                    constexpr uint8_t packageSize = 6;
-                    makeADataBuffer<packageSize>(
-                            {
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(data->additionCmd),
-                                    // data size
-                                    uint8_t(packageSize - 4),
-
-                                    // flyMode
-                                    uint8_t(uint16_t(data->x) & 0xff),
-                                    uint8_t(uint16_t(data->x) >> 8),
-
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
-                case OwlMailDefine::AdditionCmd::gotoPosition: {
-                    constexpr uint8_t packageSize = 10;
-                    makeADataBuffer<packageSize>(
-                            {
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(data->additionCmd),
-                                    // data size
-                                    uint8_t(packageSize - 4),
-
-                                    // y -> map.forward
-                                    uint8_t(uint16_t(data->x) & 0xff),
-                                    uint8_t(uint16_t(data->x) >> 8),
-
-                                    // h -> high
-                                    uint8_t(uint16_t(data->y) & 0xff),
-                                    uint8_t(uint16_t(data->y) >> 8),
-
-                                    // x -> map.right
-                                    uint8_t(uint16_t(data->z) & 0xff),
-                                    uint8_t(uint16_t(data->z) >> 8),
-
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
+                case OwlMailDefine::AdditionCmd::takeoff:
+                case OwlMailDefine::AdditionCmd::land:
+                case OwlMailDefine::AdditionCmd::stop:
+                case OwlMailDefine::AdditionCmd::move:
+                case OwlMailDefine::AdditionCmd::rotate:
+                case OwlMailDefine::AdditionCmd::keep:
+                case OwlMailDefine::AdditionCmd::high:
+                case OwlMailDefine::AdditionCmd::speed:
+                case OwlMailDefine::AdditionCmd::flyMode:
+                case OwlMailDefine::AdditionCmd::gotoPosition:
                 case OwlMailDefine::AdditionCmd::led: {
                     constexpr uint8_t packageSize = 12;
                     makeADataBuffer<packageSize>(
@@ -395,19 +148,15 @@ namespace OwlSerialController {
                                     // data size
                                     uint8_t(packageSize - 4),
 
-                                    // B
                                     uint8_t(uint16_t(data->x) & 0xff),
                                     uint8_t(uint16_t(data->x) >> 8),
 
-                                    // G
                                     uint8_t(uint16_t(data->y) & 0xff),
                                     uint8_t(uint16_t(data->y) >> 8),
 
-                                    // R
                                     uint8_t(uint16_t(data->z) & 0xff),
                                     uint8_t(uint16_t(data->z) >> 8),
 
-                                    // ledMode
                                     uint8_t(uint16_t(data->cw) & 0xff),
                                     uint8_t(uint16_t(data->cw) >> 8),
 
