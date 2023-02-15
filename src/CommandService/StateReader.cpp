@@ -291,7 +291,7 @@ namespace OwlSerialController {
 
                 }
             } catch (const std::exception &e) {
-                BOOST_LOG_TRIVIAL(error) << e.what();
+                BOOST_LOG_TRIVIAL(error) << "StateReaderImpl awaitable catch (const std::exception &e) :" << e.what();
             }
 
             boost::ignore_unused(_ptr_);
