@@ -106,6 +106,31 @@ namespace OwlCommandServiceHttp {
             }
 
             auto json_o = json_v.as_object();
+            if (!json_o.contains("imageCenterX") || !json_o.at("imageCenterX").is_int64()) {
+                BOOST_LOG_TRIVIAL(warning) << "contains fail (imageCenterX)" << jsonS;
+                send_back_json(
+                        boost::json::value{
+                                {"msg",    "error"},
+                                {"error",  "(imageCenterX) not find || !is_int64()"},
+                                {"result", false},
+                        }
+                );
+                return;
+            }
+            if (!json_o.contains("imageCenterY") || !json_o.at("imageCenterY").is_int64()) {
+                BOOST_LOG_TRIVIAL(warning) << "contains fail (imageCenterY)" << jsonS;
+                send_back_json(
+                        boost::json::value{
+                                {"msg",    "error"},
+                                {"error",  "(imageCenterY) not find || !is_int64()"},
+                                {"result", false},
+                        }
+                );
+                return;
+            }
+            auto imageCenterX = json_o.at("imageCenterX").get_int64();
+            auto imageCenterY = json_o.at("imageCenterY").get_int64();
+
             if (!json_o.contains("tagList") || !json_o.at("tagList").is_array()) {
                 BOOST_LOG_TRIVIAL(warning) << "contains fail (tagList)" << jsonS;
                 send_back_json(
@@ -280,6 +305,8 @@ namespace OwlCommandServiceHttp {
             auto aprilTagCmd = std::make_shared<OwlMailDefine::AprilTagCmd>();
             aprilTagCmd->aprilTagList = aprilTagInfoList;
             aprilTagCmd->aprilTagCenter = aprilTagInfoCenter;
+            aprilTagCmd->imageCenterX = imageCenterX;
+            aprilTagCmd->imageCenterY = imageCenterY;
 
             auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
             m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;
