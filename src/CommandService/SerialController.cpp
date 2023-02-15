@@ -108,15 +108,16 @@ namespace OwlSerialController {
     }
 
     void SerialController::receiveMail(OwlMailDefine::MailCmd2Serial &&data, OwlMailDefine::CmdSerialMailbox &mailbox) {
-        BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "additionCmd: "
-                                 << (uint8_t) (data->additionCmd);
+        BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail ";
         if (data->additionCmd == OwlMailDefine::AdditionCmd::getAirplaneState) {
             receiveMailGetAirplaneState(std::move(data), mailbox);
             return;
         }
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
+            BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch ";
             if (!initOk && !initPort()) {
+                BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch initError";
                 auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
                 data_r->runner = data->callbackRunner;
                 data_r->openError = true;
@@ -124,6 +125,7 @@ namespace OwlSerialController {
                 sendMail(std::move(data_r), mailbox);
                 return;
             }
+            BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch initOk";
             switch (data->additionCmd) {
                 case OwlMailDefine::AdditionCmd::ignore: {
                     BOOST_LOG_TRIVIAL(error) << "SerialController"
