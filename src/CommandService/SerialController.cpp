@@ -128,8 +128,8 @@ namespace OwlSerialController {
 
                                     // AdditionCmd
                                     uint8_t(data->additionCmd),
-                                    // package size
-                                    uint8_t(packageSize),
+                                    // data size
+                                    uint8_t(packageSize - 4),
 
                                     // 0xXX
                                     uint8_t(uint16_t(data->x) & 0xff),
@@ -161,10 +161,6 @@ namespace OwlSerialController {
                     return;
                 }
                 case OwlMailDefine::AdditionCmd::flyMode: {
-                    BOOST_LOG_TRIVIAL(warning) << "SerialController"
-                                               << " receiveMail"
-                                               << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::flyMode"
-                                               << " not impl";
                     // send cmd to serial
                     // make send data
                     constexpr uint8_t packageSize = 6;
@@ -175,8 +171,8 @@ namespace OwlSerialController {
 
                                     // AdditionCmd
                                     uint8_t(data->additionCmd),
-                                    // package size
-                                    uint8_t(packageSize),
+                                    // data size
+                                    uint8_t(packageSize - 4),
 
                                     // flyMode
                                     uint8_t(uint16_t(data->x) & 0xff),
@@ -193,13 +189,9 @@ namespace OwlSerialController {
                             data,
                             mailbox
                     );
+                    return;
                 }
-                    break;
                 case OwlMailDefine::AdditionCmd::gotoPosition: {
-                    BOOST_LOG_TRIVIAL(warning) << "SerialController"
-                                               << " receiveMail"
-                                               << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::gotoPosition"
-                                               << " not impl";
                     // send cmd to serial
                     // make send data
                     constexpr uint8_t packageSize = 10;
@@ -210,8 +202,8 @@ namespace OwlSerialController {
 
                                     // AdditionCmd
                                     uint8_t(data->additionCmd),
-                                    // package size
-                                    uint8_t(packageSize),
+                                    // data size
+                                    uint8_t(packageSize - 4),
 
                                     // y -> map.forward
                                     uint8_t(uint16_t(data->x) & 0xff),
@@ -236,13 +228,9 @@ namespace OwlSerialController {
                             data,
                             mailbox
                     );
+                    return;
                 }
-                    break;
                 case OwlMailDefine::AdditionCmd::led: {
-                    BOOST_LOG_TRIVIAL(warning) << "SerialController"
-                                               << " receiveMail"
-                                               << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::led"
-                                               << " not impl";
                     // send cmd to serial
                     // make send data
                     constexpr uint8_t packageSize = 12;
@@ -253,8 +241,8 @@ namespace OwlSerialController {
 
                                     // AdditionCmd
                                     uint8_t(data->additionCmd),
-                                    // package size
-                                    uint8_t(packageSize),
+                                    // data size
+                                    uint8_t(packageSize - 4),
 
                                     // B
                                     uint8_t(uint16_t(data->x) & 0xff),
@@ -283,13 +271,9 @@ namespace OwlSerialController {
                             data,
                             mailbox
                     );
+                    return;
                 }
-                    break;
                 case OwlMailDefine::AdditionCmd::AprilTag: {
-                    BOOST_LOG_TRIVIAL(warning) << "SerialController"
-                                               << " receiveMail"
-                                               << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag"
-                                               << " not impl";
 
                     if (!data->aprilTagCmdPtr) {
                         BOOST_LOG_TRIVIAL(error) << "SerialController"
@@ -330,8 +314,8 @@ namespace OwlSerialController {
 
                                     // AdditionCmd
                                     uint8_t(data->additionCmd),
-                                    // package size
-                                    uint8_t(packageSize),
+                                    // data size
+                                    uint8_t(packageSize - 4),
 
                                     // image size
                                     uint8_t(uint16_t(pcx) & 0xff),
@@ -360,8 +344,8 @@ namespace OwlSerialController {
                             data,
                             mailbox
                     );
+                    return;
                 }
-                    break;
                 default: {
                     BOOST_LOG_TRIVIAL(error) << "SerialController"
                                              << " receiveMail"
