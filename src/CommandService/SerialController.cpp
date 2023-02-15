@@ -8,12 +8,19 @@
 namespace OwlSerialController {
 
     bool SerialController::initPort() {
+        BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort close";
         airplanePortController->close();
         // set and open the airplanePortController
-        initOk = airplanePortController->open(config_->config().airplane_fly_serial_addr)
-                 && airplanePortController->set_option(
-                boost::asio::serial_port::baud_rate(config_->config().airplane_fly_serial_baud_rate)
-        );
+        BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort open";
+        initOk = airplanePortController->open(config_->config().airplane_fly_serial_addr);
+        BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort open " << initOk;
+        if (initOk) {
+            initOk = airplanePortController->set_option(
+                    boost::asio::serial_port::baud_rate(config_->config().airplane_fly_serial_baud_rate)
+            );
+            BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort set_option " << initOk;
+        }
+        BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort initOk " << initOk;
         if (!initOk) {
             return false;
         }
