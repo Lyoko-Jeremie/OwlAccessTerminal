@@ -25,6 +25,14 @@ namespace OwlSerialController {
             OwlMailDefine::CmdSerialMailbox &mailbox) {
         switch (data->additionCmd) {
             case OwlMailDefine::AdditionCmd::getAirplaneState: {
+                if (!newestAirplaneState) {
+                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    data_r->runner = data->callbackRunner;
+                    data_r->openError = true;
+                    data_r->ok = false;
+                    sendMail(std::move(data_r), mailbox);
+                    return;
+                }
                 auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
                 data_r->runner = data->callbackRunner;
                 data_r->ok = newestAirplaneState.operator bool();
