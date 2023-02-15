@@ -123,7 +123,7 @@ namespace OwlImageServiceHttp {
             deadline_.async_wait(
                     [self](boost::beast::error_code ec) {
                         if (ec) {
-                            BOOST_LOG_TRIVIAL(warning) << "ImageServiceHttpConnect check_deadline : " << ec.what();
+                            // BOOST_LOG_TRIVIAL(warning) << "ImageServiceHttpConnect check_deadline : " << ec.what();
                             return;
                         }
                         // Close socket to cancel any outstanding operation.
