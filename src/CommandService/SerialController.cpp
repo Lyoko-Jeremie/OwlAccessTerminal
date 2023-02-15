@@ -46,6 +46,42 @@ namespace OwlSerialController {
         }
     }
 
+    template<uint8_t packageSize>
+    void sendADataBuffer(
+            std::shared_ptr<SerialController> selfPtr,
+            std::shared_ptr<std::array<uint8_t, packageSize>> sendDataBuffer,
+            OwlMailDefine::MailCmd2Serial &&data,
+            OwlMailDefine::CmdSerialMailbox &mailbox
+    ) {
+        // send it
+        boost::asio::async_write(
+                *(selfPtr->airplanePortController->sp_),
+                boost::asio::buffer(*sendDataBuffer),
+                boost::asio::transfer_exactly(sendDataBuffer->size()),
+                [selfPtr, sendDataBuffer, data, &mailbox](
+                        const boost::system::error_code &ec,
+                        size_t bytes_transferred
+                ) {
+                    boost::ignore_unused(bytes_transferred);
+                    // make cmd result
+                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    data_r->runner = data->callbackRunner;
+                    if (ec) {
+                        // error
+                        BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                                 << " receiveMail"
+                                                 << " async_write error: "
+                                                 << ec.what();
+                        data_r->ok = false;
+                        selfPtr->sendMail(std::move(data_r), mailbox);
+                        return;
+                    }
+                    data_r->ok = true;
+                    selfPtr->sendMail(std::move(data_r), mailbox);
+                }
+        );
+    }
+
     void SerialController::receiveMail(OwlMailDefine::MailCmd2Serial &&data, OwlMailDefine::CmdSerialMailbox &mailbox) {
         if (data->additionCmd == OwlMailDefine::AdditionCmd::getAirplaneState) {
             receiveMailGetAirplaneState(std::move(data), mailbox);

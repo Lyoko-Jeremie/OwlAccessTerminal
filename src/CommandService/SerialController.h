@@ -134,6 +134,14 @@ namespace OwlSerialController {
 
         bool initOk = false;
 
+        template<uint8_t packageSize>
+        friend void sendADataBuffer(
+                std::shared_ptr<SerialController> selfPtr,
+                std::shared_ptr<std::array<uint8_t, packageSize>> sendDataBuffer,
+                OwlMailDefine::MailCmd2Serial &&data,
+                OwlMailDefine::CmdSerialMailbox &mailbox
+        );
+
     public:
 
         void sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState);
