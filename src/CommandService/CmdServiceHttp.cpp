@@ -16,6 +16,8 @@ namespace OwlCommandServiceHttp {
         auto p = getParentRef();
         if (p) {
             p->sendMail(std::move(data));
+        } else {
+            BOOST_LOG_TRIVIAL(error) << "CmdServiceHttpConnect::sendMail() " << "(!p)";
         }
     }
 
@@ -509,6 +511,7 @@ namespace OwlCommandServiceHttp {
     std::shared_ptr<CmdServiceHttp> CmdServiceHttpConnect::getParentRef() {
         auto p = parents_.lock();
         if (!p) {
+            BOOST_LOG_TRIVIAL(error) << "CmdServiceHttpConnect::getParentRef() " << "(!p)";
             // inner error
             auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
             response->version(request_.version());
