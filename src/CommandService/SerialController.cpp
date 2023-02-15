@@ -297,8 +297,11 @@ namespace OwlSerialController {
             BOOST_LOG_TRIVIAL(error) << "PortController open error: " << ec.what();
             return false;
         }
-        BOOST_LOG_TRIVIAL(trace) << "PortController::open start";
+        BOOST_LOG_TRIVIAL(trace) << "PortController::open ok";
+#ifndef DEBUG_DisableStateReader
+        BOOST_LOG_TRIVIAL(trace) << "PortController::open start stateReader_";
         stateReader_->start();
+#endif // DEBUG_DisableStateReader
         BOOST_LOG_TRIVIAL(trace) << "PortController::open true";
         return true;
     }

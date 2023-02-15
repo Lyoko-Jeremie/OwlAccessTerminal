@@ -65,6 +65,9 @@ endif (DEBUG_TAG_INFO)
 if (DEBUG_Mailbox)
     add_definitions(-DDEBUG_AsyncCallbackMailbox)
 endif (DEBUG_Mailbox)
+if (DEBUG_NoStateReader)
+    add_definitions(-DDEBUG_DisableStateReader)
+endif (DEBUG_NoStateReader)
 
 
 message(STATUS "PROTOBUFF_INCLUDE_DIRS: ${PROTOBUFF_INCLUDE_DIRS}")
