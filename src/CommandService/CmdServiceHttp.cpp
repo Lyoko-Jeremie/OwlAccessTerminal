@@ -128,8 +128,8 @@ namespace OwlCommandServiceHttp {
                 );
                 return;
             }
-            auto imageCenterX = json_o.at("imageCenterX").get_int64();
-            auto imageCenterY = json_o.at("imageCenterY").get_int64();
+            auto imageX = json_o.at("imageX").get_int64();
+            auto imageY = json_o.at("imageY").get_int64();
 
             if (!json_o.contains("tagList") || !json_o.at("tagList").is_array()) {
                 BOOST_LOG_TRIVIAL(warning) << "contains fail (tagList)" << jsonS;
@@ -305,8 +305,8 @@ namespace OwlCommandServiceHttp {
             auto aprilTagCmd = std::make_shared<OwlMailDefine::AprilTagCmd>();
             aprilTagCmd->aprilTagList = aprilTagInfoList;
             aprilTagCmd->aprilTagCenter = aprilTagInfoCenter;
-            aprilTagCmd->imageCenterX = imageCenterX;
-            aprilTagCmd->imageCenterY = imageCenterY;
+            aprilTagCmd->imageX = imageX;
+            aprilTagCmd->imageY = imageY;
 
             auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
             m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;

@@ -51,8 +51,8 @@ namespace OwlMailDefine {
         using AprilTagListType = std::shared_ptr<std::vector<OwlMailDefine::AprilTagInfo>>;
         using AprilTagCenterType = std::shared_ptr<OwlMailDefine::AprilTagInfo>;
 
-        uint64_t imageCenterX{0};
-        uint64_t imageCenterY{0};
+        uint64_t imageX{0};
+        uint64_t imageY{0};
 
         AprilTagListType aprilTagList;
         AprilTagCenterType aprilTagCenter;
