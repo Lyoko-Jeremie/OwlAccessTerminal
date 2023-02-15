@@ -202,7 +202,7 @@ namespace OwlSerialController {
 
                     // send cmd to serial
                     // make send data
-                    constexpr uint8_t packageSize = 14;
+                    constexpr uint8_t packageSize = 16;
                     makeADataBuffer<packageSize>(
                             {
                                     // 0xAA
@@ -224,6 +224,10 @@ namespace OwlSerialController {
                                     uint8_t(uint16_t(cx) >> 8),
                                     uint8_t(uint16_t(cy) & 0xff),
                                     uint8_t(uint16_t(cy) >> 8),
+
+                                    // tag degree
+                                    uint8_t(uint16_t(d) & 0xff),
+                                    uint8_t(uint16_t(d) >> 8),
 
                                     // tag id
                                     uint8_t(uint16_t(id) & 0xff),
