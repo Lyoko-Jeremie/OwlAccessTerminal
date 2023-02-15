@@ -108,6 +108,8 @@ namespace OwlSerialController {
     }
 
     void SerialController::receiveMail(OwlMailDefine::MailCmd2Serial &&data, OwlMailDefine::CmdSerialMailbox &mailbox) {
+        BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "additionCmd: "
+                                 << (uint8_t) (data->additionCmd);
         if (data->additionCmd == OwlMailDefine::AdditionCmd::getAirplaneState) {
             receiveMailGetAirplaneState(std::move(data), mailbox);
             return;
