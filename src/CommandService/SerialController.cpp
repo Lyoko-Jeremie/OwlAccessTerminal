@@ -137,6 +137,9 @@ namespace OwlSerialController {
                 case OwlMailDefine::AdditionCmd::flyMode:
                 case OwlMailDefine::AdditionCmd::gotoPosition:
                 case OwlMailDefine::AdditionCmd::led: {
+                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                                             << " receiveMail"
+                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::* move class";
                     constexpr uint8_t packageSize = 12;
                     makeADataBuffer<packageSize>(
                             {
@@ -170,6 +173,9 @@ namespace OwlSerialController {
                     return;
                 }
                 case OwlMailDefine::AdditionCmd::AprilTag: {
+                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                                             << " receiveMail"
+                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag";
 
                     if (!data->aprilTagCmdPtr) {
                         BOOST_LOG_TRIVIAL(error) << "SerialController"
