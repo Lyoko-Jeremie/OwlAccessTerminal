@@ -16,7 +16,7 @@ namespace OwlSerialController {
         Land = 4,       // when land
     };
 
-    constexpr uint8_t AirplaneStateDataSize = 39;
+    constexpr uint8_t AirplaneStateDataSize = 29;
 
     struct AirplaneState : std::enable_shared_from_this<AirplaneState> {
         uint8_t stateFly{0};    // StateFly

@@ -67,13 +67,14 @@ namespace OwlSerialController {
     public:
 
         void start() {
+            auto selfPtr = shared_from_this();
             boost::asio::co_spawn(
                     serialPort_->get_executor(),
                     // [this, self = shared_from_this()]() -> boost::asio::awaitable<bool> {
                     //     co_return co_await run(self);
                     // },
-                    boost::bind(&StateReaderImpl::run, this, shared_from_this()),
-                    [](std::exception_ptr e, bool r) {
+                    boost::bind(&StateReaderImpl::run, this, selfPtr),
+                    [selfPtr](std::exception_ptr e, bool r) {
                         if (r) {
                             BOOST_LOG_TRIVIAL(warning) << "StateReaderImpl run() ok";
                         } else {
@@ -249,21 +250,20 @@ namespace OwlSerialController {
                             BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
                                                      << " (dataSize_ != AirplaneStateDataSize )";
                         } else {
-                            loadData();
+                            loadData(_ptr_);
+                            // send
+                            {
+                                auto ptr_sr = parentRef_.lock();
+                                if (!ptr_sr) {
+                                    BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                                                             << " parentRef_.lock() ptr_sr failed.";
+                                    co_return false;
+                                }
+                                // do a ptr copy to make sure ptr not release by next loop too early
+                                ptr_sr->sendAirplaneState(airplaneState_->shared_from_this());
+                            }
                         }
 
-                    }
-
-                    // send
-                    {
-                        auto ptr_sr = parentRef_.lock();
-                        if (!ptr_sr) {
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
-                                                     << " parentRef_.lock() ptr_sr failed.";
-                            co_return false;
-                        }
-                        // do a ptr copy to make sure ptr not release by next loop too early
-                        ptr_sr->sendAirplaneState(airplaneState_->shared_from_this());
                     }
 
 
@@ -285,6 +285,7 @@ namespace OwlSerialController {
                             // trim the other data include end delim
                             readBuffer_.consume(p + delimEnd.size());
                             // goto next loop
+                            boost::ignore_unused(_ptr_);
                             continue;
                         }
                     }
@@ -299,7 +300,7 @@ namespace OwlSerialController {
         }
 
 
-        void loadData() {
+        void loadData(std::shared_ptr<StateReaderImpl> _ptr_) {
 
             // https://stackoverflow.com/questions/41220792/how-copy-or-reuse-boostasiostreambuf
             // std::vector<uint8_t> data(readBuffer_.size());
@@ -351,6 +352,7 @@ namespace OwlSerialController {
                     {data.begin(), data.end()});
             data.erase(data.begin(), data.end() + sizeof(uint16_t) * 1);
 
+            boost::ignore_unused(_ptr_);
         }
 
 
