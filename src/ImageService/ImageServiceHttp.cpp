@@ -23,6 +23,12 @@ namespace OwlImageServiceHttp {
         cmd_data->callbackRunner = [this, self = shared_from_this()](
                 const OwlMailDefine::MailCamera2Service &camera_data
         ) {
+            auto p = parents_.lock();
+            if (!p) {
+                // inner error
+                internal_server_error("(!parents_.lock())");
+                return;
+            }
 
             // now, send back
             if (!camera_data->ok) {
@@ -44,6 +50,10 @@ namespace OwlImageServiceHttp {
                     BOOST_LOG_TRIVIAL(error)
                         << "ImageServiceHttpConnect::create_get_response_image try_lexical_convert error";
                     time_string = "0";
+                    boost::asio::dispatch(socket_.get_executor(), [this, self = shared_from_this()]() {
+                        internal_server_error(
+                                "ImageServiceHttpConnect::create_get_response_image try_lexical_convert error");
+                    });
                     return;
                 }
 
@@ -97,9 +107,9 @@ namespace OwlImageServiceHttp {
 
                 });
 
-
             };
 
+            p->sendMailTime(std::move(time_data));
 
         };
 

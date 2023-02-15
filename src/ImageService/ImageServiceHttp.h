@@ -173,6 +173,11 @@ namespace OwlImageServiceHttp {
             mailbox_->sendA2B(std::move(data));
         }
 
+        void sendMailTime(OwlMailDefine::MailService2Time &&data) {
+            // send cmd to camera
+            mailbox_time_->sendA2B(std::move(data));
+        }
+
     private:
         void
         do_accept() {
