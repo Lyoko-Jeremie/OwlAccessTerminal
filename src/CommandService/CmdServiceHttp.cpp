@@ -1,6 +1,7 @@
 // jeremie
 
 #include "CmdServiceHttp.h"
+#include "./AirplaneState.h"
 
 namespace OwlCommandServiceHttp {
 
@@ -373,6 +374,49 @@ namespace OwlCommandServiceHttp {
 
     }
 
+    void CmdServiceHttpConnect::create_get_airplane_state() {
+
+        auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+        m->additionCmd = OwlMailDefine::AdditionCmd::getAirplaneState;
+        m->callbackRunner = [this, self = shared_from_this()](
+                OwlMailDefine::MailSerial2Cmd data
+        ) {
+            auto state = data->newestAirplaneState;
+            if (!state) {
+                send_back_json(
+                        boost::json::value{
+                                {"msg",    "newestAirplaneState nullptr"},
+                                {"error",  "nullptr"},
+                                {"result", false},
+                        }
+                );
+                return;
+            }
+            send_back_json(
+                    boost::json::value{
+                            {"result",       true},
+                            {"state",        {
+                                                     {"timestamp", state->timestamp},
+                                                     {"stateFly", state->stateFly},
+                                                     {"pitch", state->pitch},
+                                                     {"roll", state->roll},
+                                                     {"yaw", state->yaw},
+                                                     {"vx", state->vx},
+                                                     {"vy", state->vy},
+                                                     {"vz", state->vz},
+                                                     {"high", state->high},
+                                                     {"voltage", state->voltage},
+                                             }
+                            },
+                            {"nowTimestamp", std::chrono::time_point_cast<std::chrono::milliseconds>(
+                                    std::chrono::steady_clock::now()).time_since_epoch().count()},
+                    }
+            );
+        };
+        sendMail(std::move(m));
+
+    }
+
     void CmdServiceHttpConnect::create_get_response() {
 
         auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
@@ -381,6 +425,20 @@ namespace OwlCommandServiceHttp {
 
         response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
 
+        if (request_.target() == "/nowTimestamp") {
+            response->result(boost::beast::http::status::ok);
+            response->set(boost::beast::http::field::content_type, "text/html");
+            boost::beast::ostream(response->body())
+                    << std::chrono::time_point_cast<std::chrono::milliseconds>(
+                            std::chrono::steady_clock::now()).time_since_epoch().count() << "\r\n";
+            response->content_length(response->body().size());
+            write_response(response);
+            return;
+        }
+        if (request_.target() == "/AirplaneState") {
+            create_get_airplane_state();
+            return;
+        }
         if (request_.target() == "/") {
             response->result(boost::beast::http::status::ok);
             response->set(boost::beast::http::field::content_type, "text/html");
