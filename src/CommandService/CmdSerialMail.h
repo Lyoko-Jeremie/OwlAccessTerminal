@@ -58,11 +58,41 @@ namespace OwlMailDefine {
         AprilTagCenterType aprilTagCenter;
     };
 
-    struct Serial2Cmd;
-    struct Cmd2Serial {
+    struct JoyConGyro {
+        // area direct speed
+        int16_t x;
+        int16_t y;
+        int16_t z;
+        // rotate 4-matrix
+        int16_t a;
+        int16_t b;
+        int16_t c;
+        int16_t d;
+    };
+    struct JoyCon {
+        int8_t leftRockerX{0};
+        int8_t leftRockerY{0};
+        int8_t rightRockerX{0};
+        int8_t rightRockerY{0};
+        int8_t leftBackTop{0};
+        int8_t leftBackBottom{0};
+        int8_t rightBackTop{0};
+        int8_t rightBackBottom{0};
 
-        // AdditionCmd
-        AdditionCmd additionCmd = AdditionCmd::ignore;
+        int8_t CrossUp{0};
+        int8_t CrossDown{0};
+        int8_t CrossLeft{0};
+        int8_t CrossRight{0};
+
+        int8_t A{0};
+        int8_t B{0};
+        int8_t X{0};
+        int8_t Y{0};
+        int8_t buttonAdd{0};
+        int8_t buttonReduce{0};
+
+    };
+
     struct MoveCmd {
         // +forward,-back
         int16_t x{0};
@@ -79,8 +109,11 @@ namespace OwlMailDefine {
 
         // AdditionCmd
         AdditionCmd additionCmd = AdditionCmd::ignore;
+
         std::shared_ptr<MoveCmd> moveCmdPtr;
         std::shared_ptr<AprilTagCmd> aprilTagCmdPtr;
+        std::shared_ptr<JoyCon> joyConPtr;
+        std::shared_ptr<JoyConGyro> joyConGyroPtr;
 
         // Serial2Cmd.runner = Cmd2Serial.callbackRunner
         std::function<void(std::shared_ptr<Serial2Cmd>)> callbackRunner;
