@@ -88,6 +88,7 @@ namespace OwlSerialController {
         );
 
         bool close() {
+            BOOST_LOG_TRIVIAL(trace) << "PortController::close";
             if (sp_->is_open()) {
                 boost::system::error_code ec;
                 sp_->close(ec);
@@ -96,6 +97,7 @@ namespace OwlSerialController {
                     return false;
                 }
             }
+            BOOST_LOG_TRIVIAL(trace) << "PortController::close true";
             return true;
         }
 

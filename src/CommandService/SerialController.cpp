@@ -12,6 +12,8 @@ namespace OwlSerialController {
         airplanePortController->close();
         // set and open the airplanePortController
         BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort open";
+        BOOST_LOG_TRIVIAL(trace) << "config_->config().airplane_fly_serial_addr "
+                                 << config_->config().airplane_fly_serial_addr;
         initOk = airplanePortController->open(config_->config().airplane_fly_serial_addr);
         BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort open " << initOk;
         if (initOk) {
@@ -284,16 +286,20 @@ namespace OwlSerialController {
 
 
     bool PortController::open(const std::string &deviceName, boost::system::error_code &ec) {
+        BOOST_LOG_TRIVIAL(trace) << "PortController::open";
         if (sp_->is_open()) {
             close();
         }
+        BOOST_LOG_TRIVIAL(trace) << "PortController::open do";
         deviceName_ = deviceName;
         sp_->open(deviceName, ec);
         if (ec) {
             BOOST_LOG_TRIVIAL(error) << "PortController open error: " << ec.what();
             return false;
         }
+        BOOST_LOG_TRIVIAL(trace) << "PortController::open start";
         stateReader_->start();
+        BOOST_LOG_TRIVIAL(trace) << "PortController::open true";
         return true;
     }
 
