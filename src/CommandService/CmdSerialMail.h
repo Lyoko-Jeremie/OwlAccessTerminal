@@ -25,6 +25,9 @@ namespace OwlMailDefine {
         flyMode = 16,
         AprilTag = 100,
 
+        JoyCon = 101,
+        JoyConGyro = 102,
+
         getAirplaneState = 1000,
     };
 

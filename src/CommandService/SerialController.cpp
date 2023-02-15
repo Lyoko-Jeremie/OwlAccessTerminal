@@ -161,9 +161,21 @@ namespace OwlSerialController {
                     BOOST_LOG_TRIVIAL(trace) << "SerialController"
                                              << " receiveMail"
                                              << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::* move class";
+                    auto mcp = data->moveCmdPtr;
+                    if (!mcp) {
+                        BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                                 << " receiveMail"
+                                                 << " OwlMailDefine::AdditionCmd::* move class nullptr";
+                        auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                        data_r->runner = data->callbackRunner;
+                        data_r->openError = false;
+                        data_r->ok = false;
+                        sendMail(std::move(data_r), mailbox);
+                        return;
+                    }
                     constexpr uint8_t packageSize = 12;
                     makeADataBuffer<packageSize>(
-                            {
+                            std::array<uint8_t, packageSize>{
                                     // 0xAA
                                     uint8_t(0xAA),
 
@@ -172,17 +184,17 @@ namespace OwlSerialController {
                                     // data size
                                     uint8_t(packageSize - 4),
 
-                                    uint8_t(uint16_t(data->moveCmdPtr->x) & 0xff),
-                                    uint8_t(uint16_t(data->moveCmdPtr->x) >> 8),
+                                    uint8_t(uint16_t(mcp->x) & 0xff),
+                                    uint8_t(uint16_t(mcp->x) >> 8),
 
-                                    uint8_t(uint16_t(data->moveCmdPtr->y) & 0xff),
-                                    uint8_t(uint16_t(data->moveCmdPtr->y) >> 8),
+                                    uint8_t(uint16_t(mcp->y) & 0xff),
+                                    uint8_t(uint16_t(mcp->y) >> 8),
 
-                                    uint8_t(uint16_t(data->moveCmdPtr->z) & 0xff),
-                                    uint8_t(uint16_t(data->moveCmdPtr->z) >> 8),
+                                    uint8_t(uint16_t(mcp->z) & 0xff),
+                                    uint8_t(uint16_t(mcp->z) >> 8),
 
-                                    uint8_t(uint16_t(data->moveCmdPtr->cw) & 0xff),
-                                    uint8_t(uint16_t(data->moveCmdPtr->cw) >> 8),
+                                    uint8_t(uint16_t(mcp->cw) & 0xff),
+                                    uint8_t(uint16_t(mcp->cw) >> 8),
 
                                     // 0xBB
                                     uint8_t(0xBB),
@@ -231,7 +243,7 @@ namespace OwlSerialController {
                     // make send data
                     constexpr uint8_t packageSize = 16;
                     makeADataBuffer<packageSize>(
-                            {
+                            std::array<uint8_t, packageSize>{
                                     // 0xAA
                                     uint8_t(0xAA),
 
@@ -259,6 +271,111 @@ namespace OwlSerialController {
                                     // tag id
                                     uint8_t(uint16_t(id) & 0xff),
                                     uint8_t(uint16_t(id) >> 8),
+
+                                    // 0xBB
+                                    uint8_t(0xBB),
+                            },
+                            shared_from_this(),
+                            data,
+                            mailbox
+                    );
+                    return;
+                }
+                case OwlMailDefine::AdditionCmd::JoyCon: {
+                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                                             << " receiveMail"
+                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::JoyCon";
+                    auto jcp = data->joyConPtr;
+                    if (!jcp) {
+                        BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                                 << " receiveMail"
+                                                 << " OwlMailDefine::AdditionCmd::JoyCon nullptr";
+                        auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                        data_r->runner = data->callbackRunner;
+                        data_r->openError = false;
+                        data_r->ok = false;
+                        sendMail(std::move(data_r), mailbox);
+                        return;
+                    }
+                    constexpr uint8_t packageSize = 22;
+                    makeADataBuffer<packageSize>(
+                            std::array<uint8_t, packageSize>{
+                                    // 0xAA
+                                    uint8_t(0xAA),
+
+                                    // AdditionCmd
+                                    uint8_t(data->additionCmd),
+                                    // data size
+                                    uint8_t(packageSize - 4),
+
+                                    uint8_t(jcp->leftRockerX),
+                                    uint8_t(jcp->leftRockerY),
+                                    uint8_t(jcp->rightRockerX),
+                                    uint8_t(jcp->rightRockerY),
+
+                                    uint8_t(jcp->leftBackTop),
+                                    uint8_t(jcp->leftBackBottom),
+                                    uint8_t(jcp->rightBackTop),
+                                    uint8_t(jcp->rightBackBottom),
+
+                                    uint8_t(jcp->CrossUp),
+                                    uint8_t(jcp->CrossDown),
+                                    uint8_t(jcp->CrossLeft),
+                                    uint8_t(jcp->CrossRight),
+
+                                    uint8_t(jcp->A),
+                                    uint8_t(jcp->B),
+                                    uint8_t(jcp->X),
+                                    uint8_t(jcp->Y),
+
+                                    uint8_t(jcp->buttonAdd),
+                                    uint8_t(jcp->buttonReduce),
+
+                                    // 0xBB
+                                    uint8_t(0xBB),
+                            },
+                            shared_from_this(),
+                            data,
+                            mailbox
+                    );
+                    return;
+                }
+                case OwlMailDefine::AdditionCmd::JoyConGyro: {
+                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                                             << " receiveMail"
+                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::JoyConGyro";
+                    auto jcgp = data->joyConPtr;
+                    if (!jcgp) {
+                        BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                                 << " receiveMail"
+                                                 << " OwlMailDefine::AdditionCmd::JoyConGyro nullptr";
+                        auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                        data_r->runner = data->callbackRunner;
+                        data_r->openError = false;
+                        data_r->ok = false;
+                        sendMail(std::move(data_r), mailbox);
+                        return;
+                    }
+                    constexpr uint8_t packageSize = 12;
+                    makeADataBuffer<packageSize>(
+                            std::array<uint8_t, packageSize>{
+                                    // 0xAA
+                                    uint8_t(0xAA),
+
+                                    // AdditionCmd
+                                    uint8_t(data->additionCmd),
+                                    // data size
+                                    uint8_t(packageSize - 4),
+
+                                    uint8_t(jcgp->A),
+                                    uint8_t(jcgp->B),
+                                    uint8_t(jcgp->X),
+                                    uint8_t(jcgp->Y),
+
+                                    uint8_t(jcgp->A),
+                                    uint8_t(jcgp->B),
+                                    uint8_t(jcgp->X),
+                                    uint8_t(jcgp->Y),
 
                                     // 0xBB
                                     uint8_t(0xBB),
