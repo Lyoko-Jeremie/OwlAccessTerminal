@@ -84,13 +84,16 @@ namespace OwlSerialController {
                     // send cmd to serial
                     // 0xAA,0xAdditionCmd,0xXXXX,0xYYYY,0xZZZZ,0xCWCW,0xBB
                     // make send data
-                    auto sendDataString = std::make_shared<std::array<uint8_t, 11>>(
-                            std::array<uint8_t, 11>{
+                    constexpr uint8_t packageSize = 12;
+                    auto sendDataBuffer = std::make_shared<std::array<uint8_t, packageSize>>(
+                            std::array<uint8_t, packageSize>{
                                     // 0xAA
                                     uint8_t(0xAA),
 
                                     // AdditionCmd
                                     uint8_t(data->additionCmd),
+                                    // package size
+                                    uint8_t(packageSize),
 
                                     // 0xXX
                                     uint8_t(uint16_t(data->x) & 0xff),
@@ -109,15 +112,15 @@ namespace OwlSerialController {
                                     uint8_t(uint16_t(data->cw) >> 8),
 
                                     // 0xBB
-                                    uint8_t(0xAA),
+                                    uint8_t(0xBB),
                             }
                     );
                     // send it
                     boost::asio::async_write(
                             *(airplanePortController->sp_),
-                            boost::asio::buffer(*sendDataString),
-                            boost::asio::transfer_exactly(sendDataString->size()),
-                            [this, self = shared_from_this(), sendDataString, data, &mailbox](
+                            boost::asio::buffer(*sendDataBuffer),
+                            boost::asio::transfer_exactly(sendDataBuffer->size()),
+                            [this, self = shared_from_this(), sendDataBuffer, data, &mailbox](
                                     const boost::system::error_code &ec,
                                     size_t bytes_transferred
                             ) {
@@ -147,14 +150,32 @@ namespace OwlSerialController {
                                                << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::flyMode"
                                                << " not impl";
                     // send cmd to serial
-                    auto sendDataString = std::make_shared<std::vector<uint8_t>>();
-                    // TODO
+                    // make send data
+                    constexpr uint8_t packageSize = 6;
+                    auto sendDataBuffer = std::make_shared<std::array<uint8_t, packageSize>>(
+                            std::array<uint8_t, packageSize>{
+                                    // 0xAA
+                                    uint8_t(0xAA),
+
+                                    // AdditionCmd
+                                    uint8_t(data->additionCmd),
+                                    // package size
+                                    uint8_t(packageSize),
+
+                                    // flyMode
+                                    uint8_t(uint16_t(data->x) & 0xff),
+                                    uint8_t(uint16_t(data->x) >> 8),
+
+                                    // 0xBB
+                                    uint8_t(0xBB),
+                            }
+                    );
                     // send it
                     boost::asio::async_write(
                             *(airplanePortController->sp_),
-                            boost::asio::buffer(*sendDataString),
-                            boost::asio::transfer_exactly(sendDataString->size()),
-                            [this, self = shared_from_this(), sendDataString, data, &mailbox](
+                            boost::asio::buffer(*sendDataBuffer),
+                            boost::asio::transfer_exactly(sendDataBuffer->size()),
+                            [this, self = shared_from_this(), sendDataBuffer, data, &mailbox](
                                     const boost::system::error_code &ec,
                                     size_t bytes_transferred
                             ) {
@@ -184,14 +205,40 @@ namespace OwlSerialController {
                                                << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::gotoPosition"
                                                << " not impl";
                     // send cmd to serial
-                    auto sendDataString = std::make_shared<std::vector<uint8_t>>();
-                    // TODO
+                    // make send data
+                    constexpr uint8_t packageSize = 10;
+                    auto sendDataBuffer = std::make_shared<std::array<uint8_t, packageSize>>(
+                            std::array<uint8_t, packageSize>{
+                                    // 0xAA
+                                    uint8_t(0xAA),
+
+                                    // AdditionCmd
+                                    uint8_t(data->additionCmd),
+                                    // package size
+                                    uint8_t(packageSize),
+
+                                    // y -> map.forward
+                                    uint8_t(uint16_t(data->x) & 0xff),
+                                    uint8_t(uint16_t(data->x) >> 8),
+
+                                    // h -> high
+                                    uint8_t(uint16_t(data->y) & 0xff),
+                                    uint8_t(uint16_t(data->y) >> 8),
+
+                                    // x -> map.right
+                                    uint8_t(uint16_t(data->z) & 0xff),
+                                    uint8_t(uint16_t(data->z) >> 8),
+
+                                    // 0xBB
+                                    uint8_t(0xBB),
+                            }
+                    );
                     // send it
                     boost::asio::async_write(
                             *(airplanePortController->sp_),
-                            boost::asio::buffer(*sendDataString),
-                            boost::asio::transfer_exactly(sendDataString->size()),
-                            [this, self = shared_from_this(), sendDataString, data, &mailbox](
+                            boost::asio::buffer(*sendDataBuffer),
+                            boost::asio::transfer_exactly(sendDataBuffer->size()),
+                            [this, self = shared_from_this(), sendDataBuffer, data, &mailbox](
                                     const boost::system::error_code &ec,
                                     size_t bytes_transferred
                             ) {
@@ -221,14 +268,44 @@ namespace OwlSerialController {
                                                << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::led"
                                                << " not impl";
                     // send cmd to serial
-                    auto sendDataString = std::make_shared<std::vector<uint8_t>>();
-                    // TODO
+                    // make send data
+                    constexpr uint8_t packageSize = 12;
+                    auto sendDataBuffer = std::make_shared<std::array<uint8_t, packageSize>>(
+                            std::array<uint8_t, packageSize>{
+                                    // 0xAA
+                                    uint8_t(0xAA),
+
+                                    // AdditionCmd
+                                    uint8_t(data->additionCmd),
+                                    // package size
+                                    uint8_t(packageSize),
+
+                                    // B
+                                    uint8_t(uint16_t(data->x) & 0xff),
+                                    uint8_t(uint16_t(data->x) >> 8),
+
+                                    // G
+                                    uint8_t(uint16_t(data->y) & 0xff),
+                                    uint8_t(uint16_t(data->y) >> 8),
+
+                                    // R
+                                    uint8_t(uint16_t(data->z) & 0xff),
+                                    uint8_t(uint16_t(data->z) >> 8),
+
+                                    // ledMode
+                                    uint8_t(uint16_t(data->cw) & 0xff),
+                                    uint8_t(uint16_t(data->cw) >> 8),
+
+                                    // 0xBB
+                                    uint8_t(0xBB),
+                            }
+                    );
                     // send it
                     boost::asio::async_write(
                             *(airplanePortController->sp_),
-                            boost::asio::buffer(*sendDataString),
-                            boost::asio::transfer_exactly(sendDataString->size()),
-                            [this, self = shared_from_this(), sendDataString, data, &mailbox](
+                            boost::asio::buffer(*sendDataBuffer),
+                            boost::asio::transfer_exactly(sendDataBuffer->size()),
+                            [this, self = shared_from_this(), sendDataBuffer, data, &mailbox](
                                     const boost::system::error_code &ec,
                                     size_t bytes_transferred
                             ) {
@@ -266,8 +343,8 @@ namespace OwlSerialController {
                         return;
                     }
 
-                    auto pcx = static_cast<uint16_t>(data->aprilTagCmdPtr->imageCenterX);
-                    auto pcy = static_cast<uint16_t>(data->aprilTagCmdPtr->imageCenterY);
+                    auto pcx = static_cast<uint16_t>(data->aprilTagCmdPtr->imageX);
+                    auto pcy = static_cast<uint16_t>(data->aprilTagCmdPtr->imageY);
 
                     auto center = data->aprilTagCmdPtr->aprilTagCenter;
                     if (!center) {
@@ -287,45 +364,45 @@ namespace OwlSerialController {
                     auto cx = static_cast<uint16_t>(center->centerX);
                     auto cy = static_cast<uint16_t>(center->centerY);
 
-                    // TODO
-
                     // send cmd to serial
-                    // 0xAA,0xAdditionCmd,0xXXXX,0xYYYY,0xZZZZ,0xCWCW,0xBB
                     // make send data
-                    auto sendDataString = std::make_shared<std::array<uint8_t, 11>>(
-                            std::array<uint8_t, 11>{
+                    constexpr uint8_t packageSize = 14;
+                    auto sendDataBuffer = std::make_shared<std::array<uint8_t, packageSize>>(
+                            std::array<uint8_t, packageSize>{
                                     // 0xAA
                                     uint8_t(0xAA),
 
                                     // AdditionCmd
                                     uint8_t(data->additionCmd),
+                                    // package size
+                                    uint8_t(packageSize),
 
-                                    // 0xXX
-                                    uint8_t(uint16_t(data->x) & 0xff),
-                                    uint8_t(uint16_t(data->x) >> 8),
+                                    // image size
+                                    uint8_t(uint16_t(pcx) & 0xff),
+                                    uint8_t(uint16_t(pcx) >> 8),
+                                    uint8_t(uint16_t(pcy) & 0xff),
+                                    uint8_t(uint16_t(pcy) >> 8),
 
-                                    // 0xYY
-                                    uint8_t(uint16_t(data->y) & 0xff),
-                                    uint8_t(uint16_t(data->y) >> 8),
+                                    // tag center
+                                    uint8_t(uint16_t(cx) & 0xff),
+                                    uint8_t(uint16_t(cx) >> 8),
+                                    uint8_t(uint16_t(cy) & 0xff),
+                                    uint8_t(uint16_t(cy) >> 8),
 
-                                    // 0xZZ
-                                    uint8_t(uint16_t(data->z) & 0xff),
-                                    uint8_t(uint16_t(data->z) >> 8),
-
-                                    // 0xCW
-                                    uint8_t(uint16_t(data->cw) & 0xff),
-                                    uint8_t(uint16_t(data->cw) >> 8),
+                                    // tag id
+                                    uint8_t(uint16_t(id) & 0xff),
+                                    uint8_t(uint16_t(id) >> 8),
 
                                     // 0xBB
-                                    uint8_t(0xAA),
+                                    uint8_t(0xBB),
                             }
                     );
                     // send it
                     boost::asio::async_write(
                             *(airplanePortController->sp_),
-                            boost::asio::buffer(*sendDataString),
-                            boost::asio::transfer_exactly(sendDataString->size()),
-                            [this, self = shared_from_this(), sendDataString, data, &mailbox](
+                            boost::asio::buffer(*sendDataBuffer),
+                            boost::asio::transfer_exactly(sendDataBuffer->size()),
+                            [this, self = shared_from_this(), sendDataBuffer, data, &mailbox](
                                     const boost::system::error_code &ec,
                                     size_t bytes_transferred
                             ) {
