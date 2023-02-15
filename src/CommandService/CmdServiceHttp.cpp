@@ -106,23 +106,23 @@ namespace OwlCommandServiceHttp {
             }
 
             auto json_o = json_v.as_object();
-            if (!json_o.contains("imageCenterX") || !json_o.at("imageCenterX").is_int64()) {
+            if (!json_o.contains("imageX") || !json_o.at("imageX").is_int64()) {
                 BOOST_LOG_TRIVIAL(warning) << "contains fail (imageCenterX)" << jsonS;
                 send_back_json(
                         boost::json::value{
                                 {"msg",    "error"},
-                                {"error",  "(imageCenterX) not find || !is_int64()"},
+                                {"error",  "(imageX) not find || !is_int64()"},
                                 {"result", false},
                         }
                 );
                 return;
             }
-            if (!json_o.contains("imageCenterY") || !json_o.at("imageCenterY").is_int64()) {
-                BOOST_LOG_TRIVIAL(warning) << "contains fail (imageCenterY)" << jsonS;
+            if (!json_o.contains("imageY") || !json_o.at("imageY").is_int64()) {
+                BOOST_LOG_TRIVIAL(warning) << "contains fail (imageY)" << jsonS;
                 send_back_json(
                         boost::json::value{
                                 {"msg",    "error"},
-                                {"error",  "(imageCenterY) not find || !is_int64()"},
+                                {"error",  "(imageY) not find || !is_int64()"},
                                 {"result", false},
                         }
                 );
