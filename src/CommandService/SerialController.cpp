@@ -50,7 +50,7 @@ namespace OwlSerialController {
     void sendADataBuffer(
             std::shared_ptr<SerialController> selfPtr,
             std::shared_ptr<std::array<uint8_t, packageSize>> sendDataBuffer,
-            OwlMailDefine::MailCmd2Serial &&data,
+            OwlMailDefine::MailCmd2Serial data,
             OwlMailDefine::CmdSerialMailbox &mailbox
     ) {
         // send it
@@ -152,31 +152,11 @@ namespace OwlSerialController {
                             }
                     );
                     // send it
-                    boost::asio::async_write(
-                            *(airplanePortController->sp_),
-                            boost::asio::buffer(*sendDataBuffer),
-                            boost::asio::transfer_exactly(sendDataBuffer->size()),
-                            [this, self = shared_from_this(), sendDataBuffer, data, &mailbox](
-                                    const boost::system::error_code &ec,
-                                    size_t bytes_transferred
-                            ) {
-                                boost::ignore_unused(bytes_transferred);
-                                // make cmd result
-                                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
-                                data_r->runner = data->callbackRunner;
-                                if (ec) {
-                                    // error
-                                    BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                             << " receiveMail"
-                                                             << " async_write error: "
-                                                             << ec.what();
-                                    data_r->ok = false;
-                                    sendMail(std::move(data_r), mailbox);
-                                    return;
-                                }
-                                data_r->ok = true;
-                                sendMail(std::move(data_r), mailbox);
-                            }
+                    sendADataBuffer<packageSize>(
+                            shared_from_this(),
+                            sendDataBuffer,
+                            data,
+                            mailbox
                     );
                     return;
                 }
@@ -207,31 +187,11 @@ namespace OwlSerialController {
                             }
                     );
                     // send it
-                    boost::asio::async_write(
-                            *(airplanePortController->sp_),
-                            boost::asio::buffer(*sendDataBuffer),
-                            boost::asio::transfer_exactly(sendDataBuffer->size()),
-                            [this, self = shared_from_this(), sendDataBuffer, data, &mailbox](
-                                    const boost::system::error_code &ec,
-                                    size_t bytes_transferred
-                            ) {
-                                boost::ignore_unused(bytes_transferred);
-                                // make cmd result
-                                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
-                                data_r->runner = data->callbackRunner;
-                                if (ec) {
-                                    // error
-                                    BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                             << " receiveMail"
-                                                             << " async_write error: "
-                                                             << ec.what();
-                                    data_r->ok = false;
-                                    sendMail(std::move(data_r), mailbox);
-                                    return;
-                                }
-                                data_r->ok = true;
-                                sendMail(std::move(data_r), mailbox);
-                            }
+                    sendADataBuffer<packageSize>(
+                            shared_from_this(),
+                            sendDataBuffer,
+                            data,
+                            mailbox
                     );
                 }
                     break;
@@ -270,31 +230,11 @@ namespace OwlSerialController {
                             }
                     );
                     // send it
-                    boost::asio::async_write(
-                            *(airplanePortController->sp_),
-                            boost::asio::buffer(*sendDataBuffer),
-                            boost::asio::transfer_exactly(sendDataBuffer->size()),
-                            [this, self = shared_from_this(), sendDataBuffer, data, &mailbox](
-                                    const boost::system::error_code &ec,
-                                    size_t bytes_transferred
-                            ) {
-                                boost::ignore_unused(bytes_transferred);
-                                // make cmd result
-                                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
-                                data_r->runner = data->callbackRunner;
-                                if (ec) {
-                                    // error
-                                    BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                             << " receiveMail"
-                                                             << " async_write error: "
-                                                             << ec.what();
-                                    data_r->ok = false;
-                                    sendMail(std::move(data_r), mailbox);
-                                    return;
-                                }
-                                data_r->ok = true;
-                                sendMail(std::move(data_r), mailbox);
-                            }
+                    sendADataBuffer<packageSize>(
+                            shared_from_this(),
+                            sendDataBuffer,
+                            data,
+                            mailbox
                     );
                 }
                     break;
@@ -337,31 +277,11 @@ namespace OwlSerialController {
                             }
                     );
                     // send it
-                    boost::asio::async_write(
-                            *(airplanePortController->sp_),
-                            boost::asio::buffer(*sendDataBuffer),
-                            boost::asio::transfer_exactly(sendDataBuffer->size()),
-                            [this, self = shared_from_this(), sendDataBuffer, data, &mailbox](
-                                    const boost::system::error_code &ec,
-                                    size_t bytes_transferred
-                            ) {
-                                boost::ignore_unused(bytes_transferred);
-                                // make cmd result
-                                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
-                                data_r->runner = data->callbackRunner;
-                                if (ec) {
-                                    // error
-                                    BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                             << " receiveMail"
-                                                             << " async_write error: "
-                                                             << ec.what();
-                                    data_r->ok = false;
-                                    sendMail(std::move(data_r), mailbox);
-                                    return;
-                                }
-                                data_r->ok = true;
-                                sendMail(std::move(data_r), mailbox);
-                            }
+                    sendADataBuffer<packageSize>(
+                            shared_from_this(),
+                            sendDataBuffer,
+                            data,
+                            mailbox
                     );
                 }
                     break;
@@ -434,31 +354,11 @@ namespace OwlSerialController {
                             }
                     );
                     // send it
-                    boost::asio::async_write(
-                            *(airplanePortController->sp_),
-                            boost::asio::buffer(*sendDataBuffer),
-                            boost::asio::transfer_exactly(sendDataBuffer->size()),
-                            [this, self = shared_from_this(), sendDataBuffer, data, &mailbox](
-                                    const boost::system::error_code &ec,
-                                    size_t bytes_transferred
-                            ) {
-                                boost::ignore_unused(bytes_transferred);
-                                // make cmd result
-                                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
-                                data_r->runner = data->callbackRunner;
-                                if (ec) {
-                                    // error
-                                    BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                             << " receiveMail"
-                                                             << " async_write error: "
-                                                             << ec.what();
-                                    data_r->ok = false;
-                                    sendMail(std::move(data_r), mailbox);
-                                    return;
-                                }
-                                data_r->ok = true;
-                                sendMail(std::move(data_r), mailbox);
-                            }
+                    sendADataBuffer<packageSize>(
+                            shared_from_this(),
+                            sendDataBuffer,
+                            data,
+                            mailbox
                     );
                 }
                     break;
