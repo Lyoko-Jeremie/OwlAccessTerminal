@@ -3,6 +3,7 @@
 #include "SerialController.h"
 #include "./StateReader.h"
 #include <boost/asio/read_until.hpp>
+#include <array>
 
 namespace OwlSerialController {
 
@@ -81,28 +82,36 @@ namespace OwlSerialController {
                 case OwlMailDefine::AdditionCmd::high:
                 case OwlMailDefine::AdditionCmd::speed: {
                     // send cmd to serial
-                    auto sendDataString = std::make_shared<std::vector<uint8_t>>();
                     // 0xAA,0xAdditionCmd,0xXXXX,0xYYYY,0xZZZZ,0xCWCW,0xBB
-                    sendDataString->resize(11);
-                    // make send data [big-endian with 8bit(byte)]
-                    // 0xAA
-                    (*sendDataString).at(0) = char(0xAA);
-                    // AdditionCmd
-                    (*sendDataString).at(1) = uint8_t(data->additionCmd);
-                    // 0xXX
-                    (*sendDataString).at(2) = uint8_t(uint16_t(data->x) & 0xff);
-                    (*sendDataString).at(3) = uint8_t(uint16_t(data->x) >> 8);
-                    // 0xYY
-                    (*sendDataString).at(4) = uint8_t(uint16_t(data->y) & 0xff);
-                    (*sendDataString).at(5) = uint8_t(uint16_t(data->y) >> 8);
-                    // 0xZZ
-                    (*sendDataString).at(6) = uint8_t(uint16_t(data->z) & 0xff);
-                    (*sendDataString).at(7) = uint8_t(uint16_t(data->z) >> 8);
-                    // 0xCW
-                    (*sendDataString).at(8) = uint8_t(uint16_t(data->cw) & 0xff);
-                    (*sendDataString).at(9) = uint8_t(uint16_t(data->cw) >> 8);
-                    // 0xBB
-                    (*sendDataString).at(10) = char(0xBB);
+                    // make send data
+                    auto sendDataString = std::make_shared<std::array<uint8_t, 11>>(
+                            std::array<uint8_t, 11>{
+                                    // 0xAA
+                                    uint8_t(0xAA),
+
+                                    // AdditionCmd
+                                    uint8_t(data->additionCmd),
+
+                                    // 0xXX
+                                    uint8_t(uint16_t(data->x) & 0xff),
+                                    uint8_t(uint16_t(data->x) >> 8),
+
+                                    // 0xYY
+                                    uint8_t(uint16_t(data->y) & 0xff),
+                                    uint8_t(uint16_t(data->y) >> 8),
+
+                                    // 0xZZ
+                                    uint8_t(uint16_t(data->z) & 0xff),
+                                    uint8_t(uint16_t(data->z) >> 8),
+
+                                    // 0xCW
+                                    uint8_t(uint16_t(data->cw) & 0xff),
+                                    uint8_t(uint16_t(data->cw) >> 8),
+
+                                    // 0xBB
+                                    uint8_t(0xAA),
+                            }
+                    );
                     // send it
                     boost::asio::async_write(
                             *(airplanePortController->sp_),
@@ -281,28 +290,36 @@ namespace OwlSerialController {
                     // TODO
 
                     // send cmd to serial
-                    auto sendDataString = std::make_shared<std::vector<uint8_t>>();
                     // 0xAA,0xAdditionCmd,0xXXXX,0xYYYY,0xZZZZ,0xCWCW,0xBB
-                    sendDataString->resize(11);
                     // make send data
-                    // 0xAA
-                    (*sendDataString).at(0) = char(0xAA);
-                    // AdditionCmd
-                    (*sendDataString).at(1) = uint8_t(data->additionCmd);
-                    // 0xXX
-                    (*sendDataString).at(2) = uint8_t(uint16_t(data->x) & 0xff);
-                    (*sendDataString).at(3) = uint8_t(uint16_t(data->x) >> 8);
-                    // 0xYY
-                    (*sendDataString).at(4) = uint8_t(uint16_t(data->y) & 0xff);
-                    (*sendDataString).at(5) = uint8_t(uint16_t(data->y) >> 8);
-                    // 0xZZ
-                    (*sendDataString).at(6) = uint8_t(uint16_t(data->z) & 0xff);
-                    (*sendDataString).at(7) = uint8_t(uint16_t(data->z) >> 8);
-                    // 0xCW
-                    (*sendDataString).at(8) = uint8_t(uint16_t(data->cw) & 0xff);
-                    (*sendDataString).at(9) = uint8_t(uint16_t(data->cw) >> 8);
-                    // 0xBB
-                    (*sendDataString).at(10) = char(0xBB);
+                    auto sendDataString = std::make_shared<std::array<uint8_t, 11>>(
+                            std::array<uint8_t, 11>{
+                                    // 0xAA
+                                    uint8_t(0xAA),
+
+                                    // AdditionCmd
+                                    uint8_t(data->additionCmd),
+
+                                    // 0xXX
+                                    uint8_t(uint16_t(data->x) & 0xff),
+                                    uint8_t(uint16_t(data->x) >> 8),
+
+                                    // 0xYY
+                                    uint8_t(uint16_t(data->y) & 0xff),
+                                    uint8_t(uint16_t(data->y) >> 8),
+
+                                    // 0xZZ
+                                    uint8_t(uint16_t(data->z) & 0xff),
+                                    uint8_t(uint16_t(data->z) >> 8),
+
+                                    // 0xCW
+                                    uint8_t(uint16_t(data->cw) & 0xff),
+                                    uint8_t(uint16_t(data->cw) >> 8),
+
+                                    // 0xBB
+                                    uint8_t(0xAA),
+                            }
+                    );
                     // send it
                     boost::asio::async_write(
                             *(airplanePortController->sp_),
