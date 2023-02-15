@@ -109,8 +109,64 @@ namespace OwlSerialController {
                     sendMail(std::move(data_r), mailbox);
                     return;
                 }
-                case OwlMailDefine::AdditionCmd::takeoff:
-                case OwlMailDefine::AdditionCmd::land:
+                case OwlMailDefine::AdditionCmd::takeoff: {
+                    // send cmd to serial
+                    // make send data
+                    constexpr uint8_t packageSize = 6;
+                    auto sendDataBuffer = std::make_shared<std::array<uint8_t, packageSize>>(
+                            std::array<uint8_t, packageSize>{
+                                    // 0xAA
+                                    uint8_t(0xAA),
+
+                                    // AdditionCmd
+                                    uint8_t(data->additionCmd),
+                                    // data size
+                                    uint8_t(packageSize - 4),
+
+                                    // moveStepDistance
+                                    uint8_t(uint16_t(data->y) & 0xff),
+                                    uint8_t(uint16_t(data->y) >> 8),
+
+                                    // 0xBB
+                                    uint8_t(0xBB),
+                            }
+                    );
+                    // send it
+                    sendADataBuffer<packageSize>(
+                            shared_from_this(),
+                            sendDataBuffer,
+                            data,
+                            mailbox
+                    );
+                    return;
+                }
+                case OwlMailDefine::AdditionCmd::land: {
+                    // send cmd to serial
+                    // make send data
+                    constexpr uint8_t packageSize = 4;
+                    auto sendDataBuffer = std::make_shared<std::array<uint8_t, packageSize>>(
+                            std::array<uint8_t, packageSize>{
+                                    // 0xAA
+                                    uint8_t(0xAA),
+
+                                    // AdditionCmd
+                                    uint8_t(data->additionCmd),
+                                    // data size
+                                    uint8_t(packageSize - 4),
+
+                                    // 0xBB
+                                    uint8_t(0xBB),
+                            }
+                    );
+                    // send it
+                    sendADataBuffer<packageSize>(
+                            shared_from_this(),
+                            sendDataBuffer,
+                            data,
+                            mailbox
+                    );
+                    return;
+                }
                 case OwlMailDefine::AdditionCmd::stop:
                 case OwlMailDefine::AdditionCmd::move:
                 case OwlMailDefine::AdditionCmd::rotate:
