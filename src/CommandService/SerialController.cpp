@@ -172,17 +172,17 @@ namespace OwlSerialController {
                                     // data size
                                     uint8_t(packageSize - 4),
 
-                                    uint8_t(uint16_t(data->x) & 0xff),
-                                    uint8_t(uint16_t(data->x) >> 8),
+                                    uint8_t(uint16_t(data->moveCmdPtr->x) & 0xff),
+                                    uint8_t(uint16_t(data->moveCmdPtr->x) >> 8),
 
-                                    uint8_t(uint16_t(data->y) & 0xff),
-                                    uint8_t(uint16_t(data->y) >> 8),
+                                    uint8_t(uint16_t(data->moveCmdPtr->y) & 0xff),
+                                    uint8_t(uint16_t(data->moveCmdPtr->y) >> 8),
 
-                                    uint8_t(uint16_t(data->z) & 0xff),
-                                    uint8_t(uint16_t(data->z) >> 8),
+                                    uint8_t(uint16_t(data->moveCmdPtr->z) & 0xff),
+                                    uint8_t(uint16_t(data->moveCmdPtr->z) >> 8),
 
-                                    uint8_t(uint16_t(data->cw) & 0xff),
-                                    uint8_t(uint16_t(data->cw) >> 8),
+                                    uint8_t(uint16_t(data->moveCmdPtr->cw) & 0xff),
+                                    uint8_t(uint16_t(data->moveCmdPtr->cw) >> 8),
 
                                     // 0xBB
                                     uint8_t(0xBB),

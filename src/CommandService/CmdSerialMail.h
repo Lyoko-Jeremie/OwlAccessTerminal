@@ -63,15 +63,23 @@ namespace OwlMailDefine {
 
         // AdditionCmd
         AdditionCmd additionCmd = AdditionCmd::ignore;
+    struct MoveCmd {
         // +forward,-back
-        int16_t x = 0;
+        int16_t x{0};
         // +right,-left
-        int16_t z = 0;
+        int16_t z{0};
         // +up,-down
-        int16_t y = 0;
+        int16_t y{0};
         // +cw,-ccw
-        int16_t cw = 0;
+        int16_t cw{0};
+    };
 
+    struct Serial2Cmd;
+    struct Cmd2Serial {
+
+        // AdditionCmd
+        AdditionCmd additionCmd = AdditionCmd::ignore;
+        std::shared_ptr<MoveCmd> moveCmdPtr;
         std::shared_ptr<AprilTagCmd> aprilTagCmdPtr;
 
         // Serial2Cmd.runner = Cmd2Serial.callbackRunner
