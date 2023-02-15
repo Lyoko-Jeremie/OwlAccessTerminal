@@ -62,6 +62,10 @@ if (DEBUG_TAG_INFO)
     add_definitions(-DDEBUG_TAG_INFO)
 endif (DEBUG_TAG_INFO)
 
+if (DEBUG_Mailbox)
+    add_definitions(-DDEBUG_AsyncCallbackMailbox)
+endif (DEBUG_Mailbox)
+
 
 message(STATUS "PROTOBUFF_INCLUDE_DIRS: ${PROTOBUFF_INCLUDE_DIRS}")
 message(STATUS "PROTOBUFF_LIBS: ${PROTOBUFF_LIBS}")
