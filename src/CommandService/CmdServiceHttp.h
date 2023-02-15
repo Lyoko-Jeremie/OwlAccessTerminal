@@ -150,8 +150,15 @@ namespace OwlCommandServiceHttp {
 
             deadline_.async_wait(
                     [self](boost::beast::error_code ec) {
+                        if (ec == boost::beast::errc::operation_canceled) {
+                            return;
+                        }
+                        if (ec == boost::beast::errc::timed_out) {
+                            BOOST_LOG_TRIVIAL(warning) << "CmdServiceHttpConnect check_deadline : " << ec.what();
+                            return;
+                        }
                         if (ec) {
-                            // BOOST_LOG_TRIVIAL(warning) << "CmdServiceHttpConnect check_deadline : " << ec.what();
+                            BOOST_LOG_TRIVIAL(warning) << "CmdServiceHttpConnect check_deadline : " << ec.what();
                             return;
                         }
                         // Close socket to cancel any outstanding operation.
