@@ -245,55 +245,12 @@ namespace OwlSerialController {
                     // ======================================= process data
                     airplaneState_ = std::make_shared<AirplaneState>();
                     {
-                        // https://stackoverflow.com/questions/41220792/how-copy-or-reuse-boostasiostreambuf
-                        // std::vector<uint8_t> data(readBuffer_.size());
-                        // boost::asio::buffer_copy(boost::asio::buffer(data), readBuffer_.data());
-                        std::string data{
-                                (std::istreambuf_iterator<char>(&readBuffer_)),
-                                std::istreambuf_iterator<char>()
-                        };
-
-                        // https://www.ruanyifeng.com/blog/2016/11/byte-order.html
-                        static_assert(sizeof(typeof(AirplaneState::stateFly)) == sizeof(uint8_t));
-                        airplaneState_->stateFly = loadDataLittleEndian<uint8_t>({data.begin(), data.end()});
-                        data.erase(data.begin(), data.end() + sizeof(uint8_t) * 1);
-
-
-                        static_assert(sizeof(typeof(AirplaneState::pitch)) == sizeof(int32_t));
-                        airplaneState_->pitch = loadDataLittleEndian<int32_t>({data.begin(), data.end()});
-                        // airplaneState_->pitch = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
-                        static_assert(sizeof(typeof(AirplaneState::roll)) == sizeof(int32_t));
-                        airplaneState_->roll = loadDataLittleEndian<int32_t>(
-                                {data.begin() + sizeof(int32_t) * 1, data.end()});
-                        // airplaneState_->roll = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
-                        static_assert(sizeof(typeof(AirplaneState::yaw)) == sizeof(int32_t));
-                        airplaneState_->yaw = loadDataLittleEndian<int32_t>(
-                                {data.begin() + sizeof(int32_t) * 2, data.end()});
-
-                        data.erase(data.begin(), data.end() + sizeof(int32_t) * 3);
-
-
-                        static_assert(sizeof(typeof(AirplaneState::vx)) == sizeof(int32_t));
-                        airplaneState_->vx = loadDataLittleEndian<int32_t>(
-                                {data.begin(), data.end()});
-                        static_assert(sizeof(typeof(AirplaneState::vy)) == sizeof(int32_t));
-                        airplaneState_->vy = loadDataLittleEndian<int32_t>(
-                                {data.begin() + sizeof(int32_t) * 1, data.end()});
-                        static_assert(sizeof(typeof(AirplaneState::vz)) == sizeof(int32_t));
-                        airplaneState_->vz = loadDataLittleEndian<int32_t>(
-                                {data.begin() + sizeof(int32_t) * 2, data.end()});
-
-                        data.erase(data.begin(), data.end() + sizeof(int32_t) * 3);
-
-                        static_assert(sizeof(typeof(AirplaneState::high)) == sizeof(uint16_t));
-                        airplaneState_->high = loadDataLittleEndian<uint16_t>(
-                                {data.begin(), data.end()});
-                        data.erase(data.begin(), data.end() + sizeof(uint16_t) * 1);
-
-                        static_assert(sizeof(typeof(AirplaneState::voltage)) == sizeof(uint16_t));
-                        airplaneState_->voltage = loadDataLittleEndian<uint16_t>(
-                                {data.begin(), data.end()});
-                        data.erase(data.begin(), data.end() + sizeof(uint16_t) * 1);
+                        if (dataSize_ != AirplaneStateDataSize) {
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                                                     << " (dataSize_ != AirplaneStateDataSize )";
+                        } else {
+                            loadData();
+                        }
 
                     }
 
@@ -339,6 +296,61 @@ namespace OwlSerialController {
 
             boost::ignore_unused(_ptr_);
             co_return true;
+        }
+
+
+        void loadData() {
+
+            // https://stackoverflow.com/questions/41220792/how-copy-or-reuse-boostasiostreambuf
+            // std::vector<uint8_t> data(readBuffer_.size());
+            // boost::asio::buffer_copy(boost::asio::buffer(data), readBuffer_.data());
+            std::string data{
+                    (std::istreambuf_iterator<char>(&readBuffer_)),
+                    std::istreambuf_iterator<char>()
+            };
+
+            // https://www.ruanyifeng.com/blog/2016/11/byte-order.html
+            static_assert(sizeof(typeof(AirplaneState::stateFly)) == sizeof(uint8_t));
+            airplaneState_->stateFly = loadDataLittleEndian<uint8_t>({data.begin(), data.end()});
+            data.erase(data.begin(), data.end() + sizeof(uint8_t) * 1);
+
+
+            static_assert(sizeof(typeof(AirplaneState::pitch)) == sizeof(int32_t));
+            airplaneState_->pitch = loadDataLittleEndian<int32_t>({data.begin(), data.end()});
+            // airplaneState_->pitch = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
+            static_assert(sizeof(typeof(AirplaneState::roll)) == sizeof(int32_t));
+            airplaneState_->roll = loadDataLittleEndian<int32_t>(
+                    {data.begin() + sizeof(int32_t) * 1, data.end()});
+            // airplaneState_->roll = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
+            static_assert(sizeof(typeof(AirplaneState::yaw)) == sizeof(int32_t));
+            airplaneState_->yaw = loadDataLittleEndian<int32_t>(
+                    {data.begin() + sizeof(int32_t) * 2, data.end()});
+
+            data.erase(data.begin(), data.end() + sizeof(int32_t) * 3);
+
+
+            static_assert(sizeof(typeof(AirplaneState::vx)) == sizeof(int32_t));
+            airplaneState_->vx = loadDataLittleEndian<int32_t>(
+                    {data.begin(), data.end()});
+            static_assert(sizeof(typeof(AirplaneState::vy)) == sizeof(int32_t));
+            airplaneState_->vy = loadDataLittleEndian<int32_t>(
+                    {data.begin() + sizeof(int32_t) * 1, data.end()});
+            static_assert(sizeof(typeof(AirplaneState::vz)) == sizeof(int32_t));
+            airplaneState_->vz = loadDataLittleEndian<int32_t>(
+                    {data.begin() + sizeof(int32_t) * 2, data.end()});
+
+            data.erase(data.begin(), data.end() + sizeof(int32_t) * 3);
+
+            static_assert(sizeof(typeof(AirplaneState::high)) == sizeof(uint16_t));
+            airplaneState_->high = loadDataLittleEndian<uint16_t>(
+                    {data.begin(), data.end()});
+            data.erase(data.begin(), data.end() + sizeof(uint16_t) * 1);
+
+            static_assert(sizeof(typeof(AirplaneState::voltage)) == sizeof(uint16_t));
+            airplaneState_->voltage = loadDataLittleEndian<uint16_t>(
+                    {data.begin(), data.end()});
+            data.erase(data.begin(), data.end() + sizeof(uint16_t) * 1);
+
         }
 
 
