@@ -196,7 +196,8 @@ add_executable(${ProjectMainName}
         src/CommandService/AirplaneState.h
         src/CommandService/StateReaderImplNormal.h
         src/CommandService/StateReaderImplCo.h
-        src/CommandService/LoadDataLittleEndian.h)
+        src/CommandService/LoadDataLittleEndian.h
+        src/Log/BoostAssertionFailed.cpp)
 
 
 if (EnableWebStaticModule)
