@@ -77,7 +77,7 @@ namespace OwlSerialController {
                         bytes_transferred_ = bytes_transferred;
                         if (ec_) {
                             // error
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplNormal"
                                                      << " async_read find start error: "
                                                      << ec_.what();
                             return;
@@ -85,7 +85,7 @@ namespace OwlSerialController {
                         if (bytes_transferred_ == 0) {
                             ++strange;
                             if (strange > 10) {
-                                BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
+                                BOOST_LOG_TRIVIAL(error) << "StateReaderImplNormal"
                                                          << " async_read strange";
                                 return;
                             }
@@ -114,7 +114,7 @@ namespace OwlSerialController {
                                 (std::istreambuf_iterator<char>(&readBuffer_)),
                                 std::istreambuf_iterator<char>()
                         }.starts_with(delimStart)) {
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplNormal"
                                                      << " check next start tag error !!!";
                             return;
                         }
@@ -170,13 +170,13 @@ namespace OwlSerialController {
                         boost::ignore_unused(bytes_transferred_);
                         if (ec_) {
                             // error
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplNormal"
                                                      << " async_read_until data error: "
                                                      << ec_.what();
                             return;
                         }
                         if (readBuffer_.size() < (dataSize_ + sizeof(uint32_t) + delimEnd.size())) {
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplNormal"
                                                      << " async_read_until data bad";
                             return;
                         }
@@ -188,7 +188,7 @@ namespace OwlSerialController {
         void processData() {
 
             if (readBuffer_.size() < (dataSize_ + sizeof(uint32_t) + delimEnd.size())) {
-                BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
+                BOOST_LOG_TRIVIAL(error) << "StateReaderImplNormal"
                                          << " async_read_until data bad";
                 return;
             }
@@ -196,7 +196,7 @@ namespace OwlSerialController {
             airplaneState_ = std::make_shared<AirplaneState>();
             {
                 if (dataSize_ != AirplaneStateDataSize) {
-                    BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
+                    BOOST_LOG_TRIVIAL(error) << "StateReaderImplNormal"
                                              << " (dataSize_ != AirplaneStateDataSize ) , ignore!!!";
                     // ignore this package
                 } else {
@@ -205,7 +205,7 @@ namespace OwlSerialController {
                     {
                         auto ptr_sr = parentRef_.lock();
                         if (!ptr_sr) {
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplNormal"
                                                      << " parentRef_.lock() ptr_sr failed.";
                             return;
                         }
@@ -232,7 +232,7 @@ namespace OwlSerialController {
                 auto p = s.find(delimEnd);
                 if (p == std::string::npos) {
                     // error, never go there
-                    BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
+                    BOOST_LOG_TRIVIAL(error) << "StateReaderImplNormal"
                                              << " make clean check error. never gone.";
                     return;
                 } else {
