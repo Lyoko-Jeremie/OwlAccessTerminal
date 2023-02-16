@@ -4,6 +4,8 @@
 #include "./StateReader.h"
 #include <boost/asio/read_until.hpp>
 #include <array>
+#include <utility>
+#include <type_traits>
 
 namespace OwlSerialController {
 
@@ -116,8 +118,14 @@ namespace OwlSerialController {
         );
     }
 
+    // https://stackoverflow.com/questions/8357240/how-to-automatically-convert-strongly-typed-enum-into-int
+    template<typename E>
+    constexpr auto to_underlying(E e) noexcept {
+        return static_cast<std::underlying_type_t<E>>(e);
+    }
+
     void SerialController::receiveMail(OwlMailDefine::MailCmd2Serial &&data, OwlMailDefine::CmdSerialMailbox &mailbox) {
-        BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail ";
+        BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << to_underlying(data->additionCmd);;
         if (data->additionCmd == OwlMailDefine::AdditionCmd::getAirplaneState) {
             receiveMailGetAirplaneState(std::move(data), mailbox);
             return;
@@ -180,7 +188,7 @@ namespace OwlSerialController {
                                     uint8_t(0xAA),
 
                                     // AdditionCmd
-                                    uint8_t(data->additionCmd),
+                                    uint8_t(to_underlying(data->additionCmd)),
                                     // data size
                                     uint8_t(packageSize - 4),
 
@@ -248,7 +256,7 @@ namespace OwlSerialController {
                                     uint8_t(0xAA),
 
                                     // AdditionCmd
-                                    uint8_t(data->additionCmd),
+                                    uint8_t(to_underlying(data->additionCmd)),
                                     // data size
                                     uint8_t(packageSize - 4),
 
@@ -304,7 +312,7 @@ namespace OwlSerialController {
                                     uint8_t(0xAA),
 
                                     // AdditionCmd
-                                    uint8_t(data->additionCmd),
+                                    uint8_t(to_underlying(data->additionCmd)),
                                     // data size
                                     uint8_t(packageSize - 4),
 
@@ -363,7 +371,7 @@ namespace OwlSerialController {
                                     uint8_t(0xAA),
 
                                     // AdditionCmd
-                                    uint8_t(data->additionCmd),
+                                    uint8_t(to_underlying(data->additionCmd)),
                                     // data size
                                     uint8_t(packageSize - 4),
 
