@@ -234,6 +234,7 @@ namespace OwlSerialController {
                     // error, never go there
                     BOOST_LOG_TRIVIAL(error) << "StateReaderImplNormal"
                                              << " make clean check error. never gone.";
+                    BOOST_ASSERT(p != std::string::npos);
                     return;
                 } else {
                     // we find the end delim
