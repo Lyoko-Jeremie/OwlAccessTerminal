@@ -20,6 +20,8 @@ namespace OwlSerialController {
 
     class StateReaderImplCo;
 
+    class StateReaderImplNormal;
+
     class StateReader : std::enable_shared_from_this<StateReader> {
     public:
         StateReader(
@@ -29,6 +31,8 @@ namespace OwlSerialController {
 
     private:
         friend class StateReaderImplCo;
+
+        friend class StateReaderImplNormal;
 
         std::weak_ptr<PortController> parentRef_;
 

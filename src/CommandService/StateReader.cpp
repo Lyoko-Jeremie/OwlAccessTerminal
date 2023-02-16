@@ -45,9 +45,9 @@ namespace OwlSerialController {
         }
     }
 
-    class StateReaderImpl : std::enable_shared_from_this<StateReaderImpl> {
+    class StateReaderImplNormal : std::enable_shared_from_this<StateReaderImplNormal> {
     public:
-        StateReaderImpl(
+        StateReaderImplNormal(
                 std::weak_ptr<StateReader> parentRef,
                 std::shared_ptr<boost::asio::serial_port> serialPort
         ) : parentRef_(std::move(parentRef)), serialPort_(std::move(serialPort)) {}
