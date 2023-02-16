@@ -163,6 +163,7 @@ add_executable(${ProjectMainName}
         src/ConfigLoader/ConfigLoader.h
         src/AsyncCallbackMailbox/AsyncCallbackMailbox.h
         src/CommandService/CmdSerialMail.h
+        src/CommandService/CmdSerialMail.cpp
         src/ImageService/ImageServiceHttp.cpp
         src/ImageService/ImageServiceHttp.h
         src/ImageService/CameraReader.cpp

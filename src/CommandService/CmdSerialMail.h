@@ -6,10 +6,12 @@
 #include <memory>
 #include <functional>
 #include <vector>
+#include <map>
 #include "../AsyncCallbackMailbox/AsyncCallbackMailbox.h"
 #include "./AirplaneState.h"
 
 namespace OwlMailDefine {
+
     enum class AdditionCmd {
         ignore = 0,
         takeoff = 1,
@@ -25,11 +27,13 @@ namespace OwlMailDefine {
         flyMode = 16,
         AprilTag = 100,
 
-        JoyCon = 101,
-        JoyConGyro = 102,
+        JoyCon = 111,
+        JoyConSimple = 112,
+        JoyConGyro = 116,
 
         getAirplaneState = 1000,
     };
+    extern const std::map<AdditionCmd, std::string> AdditionCmdNameLookupTable;
 
     struct AprilTagInfo {
         // from :
