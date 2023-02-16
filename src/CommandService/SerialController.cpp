@@ -348,6 +348,55 @@ namespace OwlSerialController {
                     );
                     return;
                 }
+                case OwlMailDefine::AdditionCmd::JoyConSimple: {
+                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                                             << " receiveMail"
+                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::JoyConSimple";
+                    auto jcp = data->joyConPtr;
+                    if (!jcp) {
+                        BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                                 << " receiveMail"
+                                                 << " OwlMailDefine::AdditionCmd::JoyConSimple nullptr";
+                        auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                        data_r->runner = data->callbackRunner;
+                        data_r->openError = false;
+                        data_r->ok = false;
+                        sendMail(std::move(data_r), mailbox);
+                        return;
+                    }
+                    constexpr uint8_t packageSize = 14;
+                    makeADataBuffer<packageSize>(
+                            std::array<uint8_t, packageSize>{
+                                    // 0xAA
+                                    uint8_t(0xAA),
+
+                                    // AdditionCmd
+                                    uint8_t(to_underlying(data->additionCmd)),
+                                    // data size
+                                    uint8_t(packageSize - 4),
+
+                                    uint8_t(jcp->leftRockerX),
+                                    uint8_t(jcp->leftRockerY),
+                                    uint8_t(jcp->rightRockerX),
+                                    uint8_t(jcp->rightRockerY),
+
+                                    uint8_t(jcp->leftBackTop),
+                                    uint8_t(jcp->leftBackBottom),
+                                    uint8_t(jcp->rightBackTop),
+                                    uint8_t(jcp->rightBackBottom),
+
+                                    uint8_t(jcp->buttonAdd),
+                                    uint8_t(jcp->buttonReduce),
+
+                                    // 0xBB
+                                    uint8_t(0xBB),
+                            },
+                            shared_from_this(),
+                            data,
+                            mailbox
+                    );
+                    return;
+                }
                 case OwlMailDefine::AdditionCmd::JoyConGyro: {
                     BOOST_LOG_TRIVIAL(trace) << "SerialController"
                                              << " receiveMail"
