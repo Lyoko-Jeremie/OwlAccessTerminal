@@ -51,6 +51,8 @@ if (DEFAULT_CONFIG)
     # -DAprilTag_INCLUDE_DIRS=h:/Code/apriltag-build-install/include/apriltag
     # -DAprilTag_LIB=h:/Code/apriltag-build-install/lib/libapriltag.a
 
+    set(StateReaderImpl_UseNormal ON)
+
     # ===================== ^^^^^^ config segment ^^^^^^ =================================
 endif (DEFAULT_CONFIG)
 
@@ -68,6 +70,12 @@ endif (DEBUG_Mailbox)
 if (DEBUG_NoStateReader)
     add_definitions(-DDEBUG_DisableStateReader)
 endif (DEBUG_NoStateReader)
+
+if (StateReaderImpl_UseNormal)
+    add_definitions(-DUseStateReaderImplNormal)
+else (StateReaderImpl_UseNormal) # StateReaderImpl_UseCo
+    add_definitions(-DUseStateReaderImplCo)
+endif (StateReaderImpl_UseNormal)
 
 
 message(STATUS "PROTOBUFF_INCLUDE_DIRS: ${PROTOBUFF_INCLUDE_DIRS}")
@@ -182,7 +190,10 @@ add_executable(${ProjectMainName}
         src/CommandService/StateReader.cpp
         src/CommandService/StateReader.h
         src/CommandService/AirplaneState.cpp
-        src/CommandService/AirplaneState.h)
+        src/CommandService/AirplaneState.h
+        src/CommandService/StateReaderImplNormal.h
+        src/CommandService/StateReaderImplCo.h
+        src/CommandService/LoadDataLittleEndian.h)
 
 
 if (EnableWebStaticModule)

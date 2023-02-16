@@ -22,6 +22,12 @@ namespace OwlSerialController {
 
     class StateReaderImplNormal;
 
+#ifdef UseStateReaderImplNormal
+    using StateReaderImpl = StateReaderImplNormal;
+#else // UseStateReaderImplCo
+    using StateReaderImpl = StateReaderImplCo;
+#endif // UseStateReaderImplNormal
+
     class StateReader : std::enable_shared_from_this<StateReader> {
     public:
         StateReader(
@@ -38,7 +44,7 @@ namespace OwlSerialController {
 
         std::shared_ptr<boost::asio::serial_port> serialPort_;
 
-        std::shared_ptr<StateReaderImplCo> impl;
+        std::shared_ptr<StateReaderImpl> impl;
 
         void sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState);
 
