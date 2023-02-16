@@ -20,7 +20,6 @@
 namespace OwlSerialController {
 
 
-
     class StateReaderImplNormal : std::enable_shared_from_this<StateReaderImplNormal> {
     public:
         StateReaderImplNormal(
@@ -115,7 +114,9 @@ namespace OwlSerialController {
                                 std::istreambuf_iterator<char>()
                         }.starts_with(delimStart)) {
                             BOOST_LOG_TRIVIAL(error) << "StateReaderImplNormal"
-                                                     << " check next start tag error !!!";
+                                                     << " check next start tag error, never go there !!!";
+                            BOOST_ASSERT_MSG(false,
+                                             "StateReaderImplNormal check next start tag error, never go there !!!");
                             return;
                         }
                         // remove start tag

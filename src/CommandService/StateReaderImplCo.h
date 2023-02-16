@@ -184,7 +184,8 @@ namespace OwlSerialController {
                         std::istreambuf_iterator<char>()
                 }.starts_with(delimStart)) {
                     BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
-                                             << " check next start tag error !!!";
+                                             << " check next start tag error, never go there !!!";
+                    BOOST_ASSERT_MSG(false, "StateReaderImplCo check next start tag error, never go there !!!");
                     co_return false;
                 }
                 // remove start tag
