@@ -77,6 +77,9 @@ else (StateReaderImpl_UseNormal) # StateReaderImpl_UseCo
     add_definitions(-DUseStateReaderImplCo)
 endif (StateReaderImpl_UseNormal)
 
+# https://www.boost.org/doc/libs/1_81_0/libs/assert/doc/html/assert.html
+add_definitions(-DBOOST_ENABLE_ASSERT_HANDLER)
+
 
 message(STATUS "PROTOBUFF_INCLUDE_DIRS: ${PROTOBUFF_INCLUDE_DIRS}")
 message(STATUS "PROTOBUFF_LIBS: ${PROTOBUFF_LIBS}")
