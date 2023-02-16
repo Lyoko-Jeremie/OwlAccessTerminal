@@ -284,6 +284,8 @@ namespace OwlSerialController {
                         BOOST_LOG_TRIVIAL(trace) << "StateReaderImplCo"
                                                  << " do loadData";
                         loadData(_ptr_);
+                        BOOST_LOG_TRIVIAL(trace) << "StateReaderImplCo"
+                                                 << " do loadData ok";
                         // send
                         {
                             auto ptr_sr = parentRef_.lock();
