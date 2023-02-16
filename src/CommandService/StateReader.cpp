@@ -45,9 +45,9 @@ namespace OwlSerialController {
         }
     }
 
-    class StateReaderImpl : std::enable_shared_from_this<StateReaderImpl> {
+    class StateReaderImplCo : std::enable_shared_from_this<StateReaderImplCo> {
     public:
-        StateReaderImpl(
+        StateReaderImplCo(
                 std::weak_ptr<StateReader> parentRef,
                 std::shared_ptr<boost::asio::serial_port> serialPort
         ) : parentRef_(std::move(parentRef)), serialPort_(std::move(serialPort)) {}
@@ -73,19 +73,19 @@ namespace OwlSerialController {
                     // [this, self = shared_from_this()]() -> boost::asio::awaitable<bool> {
                     //     co_return co_await run(self);
                     // },
-                    boost::bind(&StateReaderImpl::run, this, selfPtr),
+                    boost::bind(&StateReaderImplCo::run, this, selfPtr),
                     [selfPtr](std::exception_ptr e, bool r) {
                         if (r) {
-                            BOOST_LOG_TRIVIAL(warning) << "StateReaderImpl run() ok";
+                            BOOST_LOG_TRIVIAL(warning) << "StateReaderImplCo run() ok";
                         } else {
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl run() error";
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo run() error";
                         }
                         // https://stackoverflow.com/questions/14232814/how-do-i-make-a-call-to-what-on-stdexception-ptr
                         try { std::rethrow_exception(std::move(e)); }
                         catch (const std::exception &e) { BOOST_LOG_TRIVIAL(error) << e.what(); }
                         catch (const std::string &e) { BOOST_LOG_TRIVIAL(error) << e; }
                         catch (const char *e) { BOOST_LOG_TRIVIAL(error) << e; }
-                        catch (...) { BOOST_LOG_TRIVIAL(error) << "StateReaderImpl co_spawn catch (...)"; }
+                        catch (...) { BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo co_spawn catch (...)"; }
                     });
         }
 
@@ -105,7 +105,7 @@ namespace OwlSerialController {
         };
     private:
 
-        boost::asio::awaitable<bool> run(std::shared_ptr<StateReaderImpl> _ptr_) {
+        boost::asio::awaitable<bool> run(std::shared_ptr<StateReaderImplCo> _ptr_) {
             // https://www.boost.org/doc/libs/1_81_0/doc/html/boost_asio/example/cpp20/coroutines/echo_server.cpp
 
             boost::ignore_unused(_ptr_);
@@ -128,7 +128,7 @@ namespace OwlSerialController {
                         boost::ignore_unused(_ptr_);
                         if (ec_) {
                             // error
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
                                                      << " async_read find start error: "
                                                      << ec_.what();
                             co_return false;
@@ -136,7 +136,7 @@ namespace OwlSerialController {
                         if (bytes_transferred_ == 0) {
                             ++strange;
                             if (strange > 10) {
-                                BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                                BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
                                                          << " async_read strange";
                                 co_return false;
                             }
@@ -167,7 +167,7 @@ namespace OwlSerialController {
                             (std::istreambuf_iterator<char>(&readBuffer_)),
                             std::istreambuf_iterator<char>()
                     }.starts_with(delimStart)) {
-                        BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                        BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
                                                  << " check next start tag error !!!";
                         co_return false;
                     }
@@ -186,13 +186,13 @@ namespace OwlSerialController {
                         boost::ignore_unused(_ptr_);
                         if (ec_) {
                             // error
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
                                                      << " async_read_until data length tag error: "
                                                      << ec_.what();
                             co_return false;
                         }
                         if (readBuffer_.size() < sizeof(typeof(dataSize_))) {
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
                                                      << " async_read_until data length tag bad";
                             co_return false;
                         }
@@ -226,20 +226,20 @@ namespace OwlSerialController {
                         boost::ignore_unused(_ptr_);
                         if (ec_) {
                             // error
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
                                                      << " async_read_until data error: "
                                                      << ec_.what();
                             co_return false;
                         }
                         if (readBuffer_.size() < (dataSize_ + sizeof(uint32_t) + delimEnd.size())) {
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
                                                      << " async_read_until data bad";
                             co_return false;
                         }
                     }
 
                     if (readBuffer_.size() < (dataSize_ + sizeof(uint32_t) + delimEnd.size())) {
-                        BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                        BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
                                                  << " async_read_until data bad";
                         co_return false;
                     }
@@ -247,7 +247,7 @@ namespace OwlSerialController {
                     airplaneState_ = std::make_shared<AirplaneState>();
                     {
                         if (dataSize_ != AirplaneStateDataSize) {
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
                                                      << " (dataSize_ != AirplaneStateDataSize )";
                         } else {
                             loadData(_ptr_);
@@ -255,7 +255,7 @@ namespace OwlSerialController {
                             {
                                 auto ptr_sr = parentRef_.lock();
                                 if (!ptr_sr) {
-                                    BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                                    BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
                                                              << " parentRef_.lock() ptr_sr failed.";
                                     co_return false;
                                 }
@@ -277,7 +277,7 @@ namespace OwlSerialController {
                         auto p = s.find(delimEnd);
                         if (p == std::string::npos) {
                             // error, never go there
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImpl"
+                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
                                                      << " make clean check error. never gone.";
                             co_return false;
                         } else {
@@ -292,7 +292,7 @@ namespace OwlSerialController {
 
                 }
             } catch (const std::exception &e) {
-                BOOST_LOG_TRIVIAL(error) << "StateReaderImpl awaitable catch (const std::exception &e) :" << e.what();
+                BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo awaitable catch (const std::exception &e) :" << e.what();
             }
 
             boost::ignore_unused(_ptr_);
@@ -300,7 +300,7 @@ namespace OwlSerialController {
         }
 
 
-        void loadData(std::shared_ptr<StateReaderImpl> _ptr_) {
+        void loadData(std::shared_ptr<StateReaderImplCo> _ptr_) {
 
             // https://stackoverflow.com/questions/41220792/how-copy-or-reuse-boostasiostreambuf
             // std::vector<uint8_t> data(readBuffer_.size());
@@ -363,7 +363,7 @@ namespace OwlSerialController {
                              std::shared_ptr<boost::asio::serial_port> serialPort)
             : parentRef_(std::move(parentRef)),
               serialPort_(std::move(serialPort)),
-              impl(std::make_shared<StateReaderImpl>(weak_from_this(), serialPort_)) {}
+              impl(std::make_shared<StateReaderImplCo>(weak_from_this(), serialPort_)) {}
 
     void StateReader::start() {
         impl->start();

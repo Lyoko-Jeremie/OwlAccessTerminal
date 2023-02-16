@@ -18,7 +18,7 @@ namespace OwlSerialController {
 
     struct PortController;
 
-    class StateReaderImpl;
+    class StateReaderImplCo;
 
     class StateReader : std::enable_shared_from_this<StateReader> {
     public:
@@ -28,13 +28,13 @@ namespace OwlSerialController {
         );
 
     private:
-        friend class StateReaderImpl;
+        friend class StateReaderImplCo;
 
         std::weak_ptr<PortController> parentRef_;
 
         std::shared_ptr<boost::asio::serial_port> serialPort_;
 
-        std::shared_ptr<StateReaderImpl> impl;
+        std::shared_ptr<StateReaderImplCo> impl;
 
         void sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState);
 
