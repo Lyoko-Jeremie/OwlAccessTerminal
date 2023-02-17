@@ -20,8 +20,14 @@ namespace OwlSerialController {
     }
 
     void StateReader::start() {
-        BOOST_ASSERT(impl);
         BOOST_LOG_TRIVIAL(warning) << "StateReader::start()";
+        if constexpr (true) {
+            BOOST_ASSERT(!weak_from_this().expired());
+            BOOST_ASSERT(!parentRef_.expired());
+            BOOST_ASSERT(!parentRef_.lock()->parentRef_.expired());
+            BOOST_ASSERT(!parentRef_.lock()->parentRef_.lock());
+        }
+        BOOST_ASSERT(impl);
         BOOST_LOG_TRIVIAL(warning) << "StateReader::start() impl.use_count():" << impl.use_count();
         impl->start();
     }
