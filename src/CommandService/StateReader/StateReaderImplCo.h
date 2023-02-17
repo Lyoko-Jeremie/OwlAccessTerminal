@@ -49,7 +49,7 @@ namespace OwlSerialController {
     public:
 
         void start() {
-            BOOST_LOG_TRIVIAL(warning) << "StateReaderImplCo start()";
+            BOOST_LOG_TRIVIAL(trace) << "StateReaderImplCo start()";
             if constexpr (true) {
                 BOOST_ASSERT(!weak_from_this().expired());
                 BOOST_ASSERT(!parentRef_.expired());
