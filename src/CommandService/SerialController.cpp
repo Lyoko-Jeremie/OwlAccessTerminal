@@ -540,12 +540,14 @@ namespace OwlSerialController {
             BOOST_ASSERT(!weak_from_this().expired());
             BOOST_LOG_TRIVIAL(trace) << "weak_from_this().lock().use_count() : " << weak_from_this().lock().use_count();
         }
+#ifndef DEBUG_DisableStateReader
         BOOST_ASSERT(!weak_from_this().expired());
         stateReader_ = std::make_shared<StateReader>(weak_from_this(), sp_);
         BOOST_ASSERT(!weak_from_this().expired());
         BOOST_LOG_TRIVIAL(trace) << "stateReader_.use_count() : " << stateReader_.use_count();
         BOOST_ASSERT(stateReader_.use_count() > 0);
         stateReader_->init();
+#endif // DEBUG_DisableStateReader
     }
 
     void PortController::sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState) {
