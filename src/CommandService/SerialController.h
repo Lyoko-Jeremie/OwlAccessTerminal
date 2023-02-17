@@ -8,6 +8,7 @@
 #include <boost/asio/read_until.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/core/ignore_unused.hpp>
+#include <boost/assert.hpp>
 #include <utility>
 #include "CmdSerialMail.h"
 #include "../ConfigLoader/ConfigLoader.h"
@@ -66,7 +67,7 @@ namespace OwlSerialController {
                 SettableSerialPortOption option,
                 boost::system::error_code &ec
         ) {
-            boost::asio::serial_port::baud_rate(0);
+            BOOST_ASSERT(sp_);
             sp_->set_option(option, ec);
             if (ec) {
                 BOOST_LOG_TRIVIAL(error) << "PortController set_option error: " << ec.what();
@@ -88,6 +89,7 @@ namespace OwlSerialController {
         );
 
         bool close() {
+            BOOST_ASSERT(sp_);
             BOOST_LOG_TRIVIAL(trace) << "PortController::close";
             if (sp_->is_open()) {
                 boost::system::error_code ec;

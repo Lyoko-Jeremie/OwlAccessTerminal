@@ -3,6 +3,7 @@
 #include "SerialController.h"
 #include "./StateReader.h"
 #include <boost/asio/read_until.hpp>
+#include <boost/assert.hpp>
 #include <array>
 #include <utility>
 #include <type_traits>
@@ -72,6 +73,9 @@ namespace OwlSerialController {
             OwlMailDefine::MailCmd2Serial data,
             OwlMailDefine::CmdSerialMailbox &mailbox
     ) {
+        BOOST_ASSERT(selfPtr);
+        BOOST_ASSERT(sendDataBuffer);
+        BOOST_ASSERT(data);
         // send it
         boost::asio::async_write(
                 *(selfPtr->airplanePortController->sp_),
@@ -81,6 +85,7 @@ namespace OwlSerialController {
                         const boost::system::error_code &ec,
                         size_t bytes_transferred
                 ) {
+                    BOOST_ASSERT(data);
                     boost::ignore_unused(bytes_transferred);
                     // make cmd result
                     auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
@@ -108,6 +113,8 @@ namespace OwlSerialController {
             OwlMailDefine::MailCmd2Serial data,
             OwlMailDefine::CmdSerialMailbox &mailbox
     ) {
+        BOOST_ASSERT(selfPtr);
+        BOOST_ASSERT(data);
         auto sendDataBuffer = std::make_shared<std::array<uint8_t, packageSize>>(dataInitList);
         // send it
         sendADataBuffer<packageSize>(
@@ -125,6 +132,7 @@ namespace OwlSerialController {
     }
 
     void SerialController::receiveMail(OwlMailDefine::MailCmd2Serial &&data, OwlMailDefine::CmdSerialMailbox &mailbox) {
+        BOOST_ASSERT(data);
         BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail "
                                  << to_underlying(data->additionCmd) << " additionCmd:"
                                  << OwlMailDefine::AdditionCmdNameLookupTable.at(data->additionCmd);
@@ -134,6 +142,7 @@ namespace OwlSerialController {
         }
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
+            BOOST_ASSERT(data);
             BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch ";
             if (!initOk && !initPort()) {
                 BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch initError";
@@ -227,6 +236,7 @@ namespace OwlSerialController {
                                                  << " (!data->aprilTagCmdPtr)";
                         return;
                     }
+                    BOOST_ASSERT(data->aprilTagCmdPtr);
 
                     auto pcx = static_cast<uint16_t>(data->aprilTagCmdPtr->imageX);
                     auto pcy = static_cast<uint16_t>(data->aprilTagCmdPtr->imageY);
@@ -239,6 +249,7 @@ namespace OwlSerialController {
                                                  << " (!center)";
                         return;
                     }
+                    BOOST_ASSERT(center);
                     auto x = center->cornerLTx - center->cornerLBx;
                     auto y = center->cornerLTy - center->cornerLBy;
                     auto r = atan2(y, x);
@@ -307,6 +318,7 @@ namespace OwlSerialController {
                         sendMail(std::move(data_r), mailbox);
                         return;
                     }
+                    BOOST_ASSERT(jcp);
                     constexpr uint8_t packageSize = 22;
                     makeADataBuffer<packageSize>(
                             std::array<uint8_t, packageSize>{
@@ -366,6 +378,7 @@ namespace OwlSerialController {
                         sendMail(std::move(data_r), mailbox);
                         return;
                     }
+                    BOOST_ASSERT(jcp);
                     constexpr uint8_t packageSize = 14;
                     makeADataBuffer<packageSize>(
                             std::array<uint8_t, packageSize>{
@@ -415,6 +428,7 @@ namespace OwlSerialController {
                         sendMail(std::move(data_r), mailbox);
                         return;
                     }
+                    BOOST_ASSERT(jcgp);
                     constexpr uint8_t packageSize = 12;
                     makeADataBuffer<packageSize>(
                             std::array<uint8_t, packageSize>{
@@ -462,6 +476,7 @@ namespace OwlSerialController {
 
 
     bool PortController::open(const std::string &deviceName, boost::system::error_code &ec) {
+        BOOST_ASSERT(sp_);
         BOOST_LOG_TRIVIAL(trace) << "PortController::open";
         if (sp_->is_open()) {
             close();
@@ -476,6 +491,7 @@ namespace OwlSerialController {
         BOOST_LOG_TRIVIAL(trace) << "PortController::open ok";
 #ifndef DEBUG_DisableStateReader
         BOOST_LOG_TRIVIAL(trace) << "PortController::open start stateReader_";
+        BOOST_ASSERT(stateReader_);
         stateReader_->start();
 #endif // DEBUG_DisableStateReader
         BOOST_LOG_TRIVIAL(trace) << "PortController::open true";
@@ -500,6 +516,7 @@ namespace OwlSerialController {
                                          << " parentRef_.lock() failed.";
                 return;
             }
+            BOOST_ASSERT(ptr);
             ptr->sendAirplaneState(airplaneState);
         });
     }
