@@ -152,10 +152,17 @@ namespace OwlSerialController {
             receiveMailGetAirplaneState(std::move(data), mailbox);
             return;
         }
+        if constexpr (true) {
+            BOOST_ASSERT(!weak_from_this().expired());
+        }
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
             BOOST_ASSERT(data);
             BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch ";
+            if constexpr (true) {
+                BOOST_ASSERT(!weak_from_this().expired());
+                BOOST_ASSERT(self.use_count() > 0);
+            }
             if (!initOk && !initPort()) {
                 BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch initError";
                 auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
