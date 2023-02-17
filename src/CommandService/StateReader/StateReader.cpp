@@ -19,6 +19,12 @@ namespace OwlSerialController {
     }
 
     void StateReader::init() {
+        if constexpr (true) {
+            BOOST_ASSERT(!weak_from_this().expired());
+            BOOST_ASSERT(!parentRef_.expired());
+            BOOST_ASSERT(!parentRef_.lock()->parentRef_.expired());
+            BOOST_ASSERT(parentRef_.lock()->parentRef_.lock());
+        }
         BOOST_ASSERT(!weak_from_this().expired());
         impl = std::make_shared<StateReaderImpl>(weak_from_this(), serialPort_);
         BOOST_ASSERT(!weak_from_this().expired());
