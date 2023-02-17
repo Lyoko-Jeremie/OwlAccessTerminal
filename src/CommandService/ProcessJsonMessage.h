@@ -210,6 +210,7 @@ namespace OwlProcessJsonMessage {
                     BOOST_LOG_TRIVIAL(info) << "land";
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::land;
+                    m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
                     m->callbackRunner = [self, cmdId, packageId](
                             const OwlMailDefine::MailSerial2Cmd &data
                     ) {
