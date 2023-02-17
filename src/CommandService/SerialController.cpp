@@ -11,6 +11,11 @@
 namespace OwlSerialController {
 
     bool SerialController::initPort() {
+        BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort";
+        if constexpr (true) {
+            BOOST_ASSERT(!weak_from_this().expired());
+        }
+        BOOST_ASSERT(airplanePortController);
         BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort close";
         airplanePortController->close();
         // set and open the airplanePortController
@@ -491,7 +496,13 @@ namespace OwlSerialController {
         BOOST_LOG_TRIVIAL(trace) << "PortController::open ok";
 #ifndef DEBUG_DisableStateReader
         BOOST_LOG_TRIVIAL(trace) << "PortController::open start stateReader_";
+        if constexpr (true) {
+            BOOST_ASSERT(!weak_from_this().expired());
+            BOOST_ASSERT(!parentRef_.expired());
+            BOOST_ASSERT(!parentRef_.lock());
+        }
         BOOST_ASSERT(stateReader_);
+        BOOST_LOG_TRIVIAL(trace) << "PortController::open stateReader_.use_count(): " << stateReader_.use_count();
         stateReader_->start();
 #endif // DEBUG_DisableStateReader
         BOOST_LOG_TRIVIAL(trace) << "PortController::open true";
