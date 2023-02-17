@@ -29,6 +29,10 @@ namespace OwlAsyncCallbackMailbox {
 #ifdef DEBUG_AsyncCallbackMailbox
         std::string debugTag_;
 
+        ~AsyncCallbackMailbox() {
+            BOOST_LOG_TRIVIAL(trace) << "~AsyncCallbackMailbox() " << debugTag_;
+        }
+
         AsyncCallbackMailbox(
                 boost::asio::io_context &ioc_a,
                 boost::asio::io_context &ioc_b,
@@ -36,6 +40,10 @@ namespace OwlAsyncCallbackMailbox {
         ) : ioc_a_(ioc_a), ioc_b_(ioc_b), debugTag_(std::move(debugTag)) {}
 
 #else // DEBUG_AsyncCallbackMailbox
+
+        ~AsyncCallbackMailbox() {
+            BOOST_LOG_TRIVIAL(trace) << "~AsyncCallbackMailbox()";
+        }
 
         AsyncCallbackMailbox(
                 boost::asio::io_context &ioc_a,

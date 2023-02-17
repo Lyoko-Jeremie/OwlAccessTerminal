@@ -137,6 +137,10 @@ namespace OwlConfigLoader {
     class ConfigLoader : public std::enable_shared_from_this<ConfigLoader> {
     public:
 
+        ~ConfigLoader() {
+            BOOST_LOG_TRIVIAL(trace) << "~ConfigLoader()";
+        }
+
         void print();
 
         void init(const std::string &filePath) {
