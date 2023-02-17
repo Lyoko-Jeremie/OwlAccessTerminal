@@ -22,6 +22,13 @@ namespace OwlSerialController {
         BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort open";
         BOOST_LOG_TRIVIAL(trace) << "config_->config().airplane_fly_serial_addr "
                                  << config_->config().airplane_fly_serial_addr;
+        if constexpr (true) {
+            BOOST_ASSERT(!weak_from_this().expired());
+            BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort weak_from_this().use_count(): "
+                                     << weak_from_this().use_count();
+            BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort shared_from_this().use_count(): "
+                                     << this->shared_from_this().use_count();
+        }
         initOk = airplanePortController->open(config_->config().airplane_fly_serial_addr);
         BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort open " << initOk;
         if (initOk) {

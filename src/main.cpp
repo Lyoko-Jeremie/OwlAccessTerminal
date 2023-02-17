@@ -349,6 +349,7 @@ int main(int argc, const char *argv[]) {
     tg.create_thread(ThreadCallee{ioc_keyboard, tg, "ioc_keyboard"});
 
 
+    BOOST_ASSERT(!serialControllerService->weak_from_this().expired());
     BOOST_LOG_TRIVIAL(info) << "boost::thread_group running";
     BOOST_LOG_TRIVIAL(info) << "boost::thread_group size : " << tg.size();
     tg.join_all();
