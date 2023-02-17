@@ -127,6 +127,8 @@ namespace OwlSerialController {
             BOOST_ASSERT(!weak_from_this().expired());
             airplanePortController = std::make_shared<PortController>(ioc_, weak_from_this());
             BOOST_ASSERT(!weak_from_this().expired());
+            BOOST_LOG_TRIVIAL(trace) << "airplanePortController.use_count() : " << airplanePortController.use_count();
+            BOOST_ASSERT(airplanePortController.use_count() > 0);
             airplanePortController->init();
         }
 

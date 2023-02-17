@@ -536,6 +536,8 @@ namespace OwlSerialController {
         BOOST_ASSERT(!weak_from_this().expired());
         stateReader_ = std::make_shared<StateReader>(weak_from_this(), sp_);
         BOOST_ASSERT(!weak_from_this().expired());
+        BOOST_LOG_TRIVIAL(trace) << "stateReader_.use_count() : " << stateReader_.use_count();
+        BOOST_ASSERT(stateReader_.use_count() > 0);
         stateReader_->init();
     }
 
