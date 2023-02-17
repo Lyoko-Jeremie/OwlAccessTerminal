@@ -226,6 +226,7 @@ int main(int argc, const char *argv[]) {
                     mailbox_cmd_http->shared_from_this()
             }
     );
+    serialControllerService->init();
 
 
     boost::asio::io_context ioc_time;

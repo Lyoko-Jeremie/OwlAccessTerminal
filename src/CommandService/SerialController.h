@@ -114,15 +114,17 @@ namespace OwlSerialController {
                 std::vector<OwlMailDefine::CmdSerialMailbox> &&mailbox_list
         ) : ioc_(ioc), config_(std::move(config)), mailbox_list_(std::move(mailbox_list)) {
 
-            BOOST_ASSERT(!weak_from_this().expired());
-            airplanePortController = std::make_shared<PortController>(ioc, weak_from_this());
-            BOOST_ASSERT(!weak_from_this().expired());
-
             for (auto &m: mailbox_list_) {
                 m->receiveA2B = [this, &m](OwlMailDefine::MailCmd2Serial &&data) {
                     receiveMail(std::move(data), m);
                 };
             }
+        }
+
+        void init() {
+            BOOST_ASSERT(!weak_from_this().expired());
+            airplanePortController = std::make_shared<PortController>(ioc_, weak_from_this());
+            BOOST_ASSERT(!weak_from_this().expired());
         }
 
         ~SerialController() {
