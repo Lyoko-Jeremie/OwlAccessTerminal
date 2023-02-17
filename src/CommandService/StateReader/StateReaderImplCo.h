@@ -46,6 +46,10 @@ namespace OwlSerialController {
 
         void start() {
             BOOST_LOG_TRIVIAL(warning) << "StateReaderImplCo start()";
+            BOOST_ASSERT(!parentRef_.expired());
+            BOOST_ASSERT(!parentRef_.lock()->parentRef_.expired());
+            BOOST_ASSERT(!parentRef_.lock()->parentRef_.lock()->parentRef_.expired());
+            BOOST_ASSERT(parentRef_.lock()->parentRef_.lock()->parentRef_.lock());
             start_next_read();
         }
 
