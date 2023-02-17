@@ -16,6 +16,7 @@ namespace OwlSerialController {
 
     void StateReaderImplCo::start_next_read() {
         BOOST_LOG_TRIVIAL(warning) << "StateReaderImplCo start_next_read()";
+        BOOST_ASSERT(!weak_from_this().expired());
         auto selfPtr = shared_from_this();
         boost::ignore_unused(selfPtr);
         BOOST_LOG_TRIVIAL(warning) << "StateReaderImplCo start_next_read() co_spawn";
