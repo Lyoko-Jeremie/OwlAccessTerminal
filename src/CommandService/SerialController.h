@@ -30,6 +30,7 @@ namespace OwlSerialController {
         );
 
         ~PortController() {
+            BOOST_LOG_TRIVIAL(trace) << "~SerialController()";
             close();
         }
 
@@ -123,6 +124,7 @@ namespace OwlSerialController {
         }
 
         ~SerialController() {
+            BOOST_LOG_TRIVIAL(trace) << "~SerialController()";
             for (auto &m: mailbox_list_) {
                 m->receiveA2B = nullptr;
             }
