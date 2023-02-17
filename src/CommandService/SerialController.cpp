@@ -514,7 +514,7 @@ namespace OwlSerialController {
             BOOST_ASSERT(!weak_from_this().expired());
             BOOST_LOG_TRIVIAL(trace) << "PortController::open parentRef_.use_count(): " << parentRef_.use_count();
             BOOST_ASSERT(!parentRef_.expired());
-            BOOST_ASSERT(!parentRef_.lock());
+            BOOST_ASSERT(parentRef_.lock());
         }
         BOOST_ASSERT(stateReader_);
         BOOST_LOG_TRIVIAL(trace) << "PortController::open stateReader_.use_count(): " << stateReader_.use_count();
