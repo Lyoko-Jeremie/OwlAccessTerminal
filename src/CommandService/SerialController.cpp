@@ -530,7 +530,13 @@ namespace OwlSerialController {
             std::weak_ptr<SerialController> &&parentRef)
             : sp_(std::make_shared<boost::asio::serial_port>(boost::asio::make_strand(ioc))),
               parentRef_(std::move(parentRef)) {
+    }
+
+    void PortController::init() {
+        BOOST_ASSERT(!weak_from_this().expired());
         stateReader_ = std::make_shared<StateReader>(weak_from_this(), sp_);
+        BOOST_ASSERT(!weak_from_this().expired());
+        stateReader_->init();
     }
 
     void PortController::sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState) {

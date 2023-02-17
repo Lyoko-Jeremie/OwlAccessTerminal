@@ -16,7 +16,12 @@ namespace OwlSerialController {
                              std::shared_ptr<boost::asio::serial_port> serialPort)
             : parentRef_(std::move(parentRef)),
               serialPort_(std::move(serialPort)) {
+    }
+
+    void StateReader::init() {
+        BOOST_ASSERT(!weak_from_this().expired());
         impl = std::make_shared<StateReaderImpl>(weak_from_this(), serialPort_);
+        BOOST_ASSERT(!weak_from_this().expired());
     }
 
     void StateReader::start() {

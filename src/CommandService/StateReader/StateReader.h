@@ -35,6 +35,8 @@ namespace OwlSerialController {
                 std::shared_ptr<boost::asio::serial_port> serialPort
         );
 
+        void init();
+
         ~StateReader() {
             BOOST_LOG_TRIVIAL(trace) << "~StateReader()";
         }

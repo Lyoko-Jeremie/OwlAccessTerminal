@@ -29,6 +29,8 @@ namespace OwlSerialController {
                 std::weak_ptr<SerialController> &&parentRef
         );
 
+        void init();
+
         ~PortController() {
             BOOST_LOG_TRIVIAL(trace) << "~SerialController()";
             close();
@@ -125,6 +127,7 @@ namespace OwlSerialController {
             BOOST_ASSERT(!weak_from_this().expired());
             airplanePortController = std::make_shared<PortController>(ioc_, weak_from_this());
             BOOST_ASSERT(!weak_from_this().expired());
+            airplanePortController->init();
         }
 
         ~SerialController() {
