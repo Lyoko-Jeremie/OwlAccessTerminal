@@ -567,6 +567,22 @@ namespace OwlSerialController {
     void SerialController::sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState) {
         boost::asio::dispatch(ioc_, [this, self = shared_from_this(), airplaneState]() {
             newestAirplaneState = airplaneState;
+            if (newestAirplaneState) {
+                BOOST_ASSERT(newestAirplaneState);
+                BOOST_LOG_TRIVIAL(trace)
+                    << "new airplaneState come:"
+                    << "\n\tstateFly: " << newestAirplaneState->stateFly
+                    << "\n\tpitch: " << newestAirplaneState->pitch
+                    << "\n\troll: " << newestAirplaneState->roll
+                    << "\n\tyaw: " << newestAirplaneState->yaw
+                    << "\n\tvx: " << newestAirplaneState->vx
+                    << "\n\tvy: " << newestAirplaneState->vy
+                    << "\n\tvz: " << newestAirplaneState->vz
+                    << "\n\thigh: " << newestAirplaneState->high
+                    << "\n\tvoltage: " << newestAirplaneState->voltage
+                    << "\n\ttimestamp: " << newestAirplaneState->timestamp
+                    << "";
+            }
         });
     }
 
