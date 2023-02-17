@@ -11,6 +11,7 @@
 #include <boost/system/error_code.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/utility/string_view.hpp>
+#include <boost/assert.hpp>
 #include "CmdSerialMail.h"
 
 namespace OwlProcessJsonMessage {
@@ -52,9 +53,10 @@ namespace OwlProcessJsonMessage {
             boost::string_view jsv,
             boost::json::static_resource &json_storage_resource_,
             boost::json::parse_options &json_parse_options_,
-//            const std::shared_ptr<ProcessJsonMessageSelfTypeInterface> &self
-            const SelfPtrType &self
+//            const std::shared_ptr<ProcessJsonMessageSelfTypeInterface> &&self
+            SelfPtrType &&self
     ) {
+        BOOST_ASSERT(self);
         try {
             boost::system::error_code ec;
             // auto jsv = boost::string_view{receive_buffer_.data(), bytes_transferred};
@@ -156,6 +158,7 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
+                    BOOST_LOG_TRIVIAL(info) << "takeoff distance check ok";
                     bool good = true;
                     auto moveStepDistance = getFromJsonObject<int32_t>(json_o, "distance", good);
                     if (!good) {
@@ -169,6 +172,7 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
+                    BOOST_LOG_TRIVIAL(info) << "takeoff moveStepDistance get ok , :" << moveStepDistance;
                     if (moveStepDistance > 32767 || moveStepDistance < 0) {
                         BOOST_LOG_TRIVIAL(warning) << "(moveStepDistance > 32767 || moveStepDistance < 0)" << jsv;
                         self->send_back_json(
@@ -655,7 +659,8 @@ namespace OwlProcessJsonMessage {
                         return;
                     }
                     if (b < 0 || g < 0 || r < 0 || b > 255 || g > 255 || r > 255) {
-                        BOOST_LOG_TRIVIAL(warning) << "(b < 0 || g < 0 || r < 0 || b > 255 || g > 255 || r > 255)" << jsv;
+                        BOOST_LOG_TRIVIAL(warning) << "(b < 0 || g < 0 || r < 0 || b > 255 || g > 255 || r > 255)"
+                                                   << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},

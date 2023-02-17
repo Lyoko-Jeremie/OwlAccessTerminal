@@ -178,8 +178,8 @@ namespace OwlCommandServiceHttp {
                 boost::string_view,
                 boost::json::static_resource &,
                 boost::json::parse_options &,
-                // const std::shared_ptr<ProcessJsonMessageSelfTypeInterface> &self
-                const SelfPtrType &
+                // const std::shared_ptr<ProcessJsonMessageSelfTypeInterface> &&self
+                SelfPtrType &&
         );
 
         void send_back_json(const boost::json::value &json_value) override {
