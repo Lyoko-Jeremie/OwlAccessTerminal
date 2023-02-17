@@ -13,6 +13,7 @@
 #include <boost/asio/read_until.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/array.hpp>
+#include <boost/assert.hpp>
 #include "./SerialController.h"
 #include "./AirplaneState.h"
 #include "./LoadDataLittleEndian.h"
@@ -43,7 +44,7 @@ namespace OwlSerialController {
     public:
 
         void start() {
-
+            read_start();
         }
 
     private:
@@ -63,6 +64,28 @@ namespace OwlSerialController {
     private:
 
         void read_start() {
+            {
+                std::string s{
+                        (std::istreambuf_iterator<char>(&readBuffer_)),
+                        std::istreambuf_iterator<char>()
+                };
+                auto p = s.find(delimStart);
+                if (p == std::string::npos) {
+                    // ignore
+                    // BOOST_LOG_TRIVIAL(warning) << "StateReaderImplCo"
+                    //                            << " cannot find start delim, next loop";
+                } else {
+                    BOOST_LOG_TRIVIAL(trace) << "StateReaderImplNormal"
+                                             << " we find the start delim, next step";
+                    // we find the start delim
+                    // trim the other data before start delim
+                    readBuffer_.consume(p);
+                    // goto next step
+                    findAfterStart();
+                    return;
+                }
+            }
+            BOOST_ASSERT(serialPort_);
             boost::asio::async_read(
                     *serialPort_,
                     readBuffer_,
@@ -88,6 +111,7 @@ namespace OwlSerialController {
                                                          << " async_read strange";
                                 return;
                             }
+                            // retry
                             read_start();
                             return;
                         }
@@ -107,33 +131,37 @@ namespace OwlSerialController {
                             readBuffer_.consume(p);
                             // goto next step
                         }
+                        findAfterStart();
 
-                        // ======================== find next
-                        if (!std::string{
-                                (std::istreambuf_iterator<char>(&readBuffer_)),
-                                std::istreambuf_iterator<char>()
-                        }.starts_with(delimStart)) {
-                            BOOST_LOG_TRIVIAL(error) << "StateReaderImplNormal"
-                                                     << " check next start tag error, never go there !!!";
-                            BOOST_ASSERT_MSG(false,
-                                             "StateReaderImplNormal check next start tag error, never go there !!!");
-                            return;
-                        }
-                        // remove start tag
-                        readBuffer_.consume(delimStart.size());
-
-                        if (readBuffer_.size() < sizeof(typeof(dataSize_))) {
-                            ec_.clear();
-                            bytes_transferred_ = 0;
-
-                            loadSize();
-                            readDataLength();
-                            return;
-                        }
-
-                        loadSize();
-                        processData();
                     });
+        }
+
+        void findAfterStart() {
+            // ======================== find next
+            if (!std::string{
+                    (std::istreambuf_iterator<char>(&readBuffer_)),
+                    std::istreambuf_iterator<char>()
+            }.starts_with(delimStart)) {
+                BOOST_LOG_TRIVIAL(error) << "StateReaderImplNormal"
+                                         << " check next start tag error, never go there !!!";
+                BOOST_ASSERT_MSG(false,
+                                 "StateReaderImplNormal check next start tag error, never go there !!!");
+                return;
+            }
+            // remove start tag
+            readBuffer_.consume(delimStart.size());
+
+            if (readBuffer_.size() < sizeof(typeof(dataSize_))) {
+                ec_.clear();
+                bytes_transferred_ = 0;
+
+                loadSize();
+                readDataLength();
+                return;
+            }
+
+            loadSize();
+            processData();
         }
 
         void loadSize() {
@@ -155,6 +183,7 @@ namespace OwlSerialController {
 
         void readDataLength() {
 
+            BOOST_ASSERT(serialPort_);
             boost::asio::async_read(
                     *serialPort_,
                     readBuffer_,
@@ -195,6 +224,7 @@ namespace OwlSerialController {
             }
             // ======================================= process data
             airplaneState_ = std::make_shared<AirplaneState>();
+            BOOST_ASSERT(airplaneState_);
             {
                 if (dataSize_ != AirplaneStateDataSize) {
                     BOOST_LOG_TRIVIAL(error) << "StateReaderImplNormal"
