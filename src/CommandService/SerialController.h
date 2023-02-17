@@ -111,10 +111,9 @@ namespace OwlSerialController {
                 boost::asio::io_context &ioc,
                 std::shared_ptr<OwlConfigLoader::ConfigLoader> &&config,
                 std::vector<OwlMailDefine::CmdSerialMailbox> &&mailbox_list
-        ) : ioc_(ioc), config_(std::move(config)), mailbox_list_(std::move(mailbox_list)),
-            airplanePortController(
-                    std::make_shared<PortController>(ioc, weak_from_this())
-            ) {
+        ) : ioc_(ioc), config_(std::move(config)), mailbox_list_(std::move(mailbox_list)) {
+
+            airplanePortController = std::make_shared<PortController>(ioc, weak_from_this());
 
             for (auto &m: mailbox_list_) {
                 m->receiveA2B = [this, &m](OwlMailDefine::MailCmd2Serial &&data) {
