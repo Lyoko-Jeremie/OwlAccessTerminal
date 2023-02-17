@@ -15,8 +15,10 @@ using boost::asio::use_awaitable;
 namespace OwlSerialController {
 
     void StateReaderImplCo::start_next_read() {
-        BOOST_LOG_TRIVIAL(warning) << "StateReaderImplCo start_next_read() co_spawn";
+        BOOST_LOG_TRIVIAL(warning) << "StateReaderImplCo start_next_read()";
         auto selfPtr = shared_from_this();
+        boost::ignore_unused(selfPtr);
+        BOOST_LOG_TRIVIAL(warning) << "StateReaderImplCo start_next_read() co_spawn";
         boost::asio::co_spawn(
                 serialPort_->get_executor(),
                 // [this, self = shared_from_this()]() -> boost::asio::awaitable<bool> {
