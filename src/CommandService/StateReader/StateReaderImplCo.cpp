@@ -15,6 +15,7 @@ using boost::asio::use_awaitable;
 namespace OwlSerialController {
 
     void StateReaderImplCo::start_next_read() {
+        BOOST_LOG_TRIVIAL(warning) << "StateReaderImplCo start_next_read() co_spawn";
         auto selfPtr = shared_from_this();
         boost::asio::co_spawn(
                 serialPort_->get_executor(),
@@ -30,14 +31,17 @@ namespace OwlSerialController {
                     }
                     // https://stackoverflow.com/questions/14232814/how-do-i-make-a-call-to-what-on-stdexception-ptr
                     try { std::rethrow_exception(std::move(e)); }
-                    catch (const std::exception &e) { BOOST_LOG_TRIVIAL(error) << e.what(); }
-                    catch (const std::string &e) { BOOST_LOG_TRIVIAL(error) << e; }
-                    catch (const char *e) { BOOST_LOG_TRIVIAL(error) << e; }
+                    catch (const std::exception &e) {
+                        BOOST_LOG_TRIVIAL(error) << "co_spawn catch std::exception " << e.what();
+                    }
+                    catch (const std::string &e) { BOOST_LOG_TRIVIAL(error) << "co_spawn catch std::string " << e; }
+                    catch (const char *e) { BOOST_LOG_TRIVIAL(error) << "co_spawn catch char *e " << e; }
                     catch (...) { BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo co_spawn catch (...)"; }
                 });
     }
 
     boost::asio::awaitable<bool> StateReaderImplCo::next_read(std::shared_ptr<StateReaderImplCo> _ptr_) {
+        BOOST_LOG_TRIVIAL(warning) << "StateReaderImplCo next_read()";
         // https://www.boost.org/doc/libs/1_81_0/doc/html/boost_asio/example/cpp20/coroutines/echo_server.cpp
 
         boost::ignore_unused(_ptr_);

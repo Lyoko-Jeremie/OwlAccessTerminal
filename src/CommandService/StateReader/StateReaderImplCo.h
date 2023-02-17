@@ -45,6 +45,7 @@ namespace OwlSerialController {
     public:
 
         void start() {
+            BOOST_LOG_TRIVIAL(warning) << "StateReaderImplCo start()";
             start_next_read();
         }
 
