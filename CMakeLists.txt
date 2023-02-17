@@ -187,17 +187,18 @@ add_executable(${ProjectMainName}
         src/CommandService/ProcessJsonMessage.h
         src/Log/Log.cpp
         src/Log/Log.h
+        src/Log/BoostAssertionFailed.cpp
         src/TimeService/TimeServiceMail.h
         src/TimeService/TimeService.cpp
         src/TimeService/TimeService.h
         src/CommandService/StateReader.cpp
         src/CommandService/StateReader.h
-        src/CommandService/AirplaneState.cpp
-        src/CommandService/AirplaneState.h
         src/CommandService/StateReaderImplNormal.h
         src/CommandService/StateReaderImplCo.h
-        src/CommandService/LoadDataLittleEndian.h
-        src/Log/BoostAssertionFailed.cpp)
+        src/CommandService/StateReaderImplCo.cpp
+        src/CommandService/AirplaneState.cpp
+        src/CommandService/AirplaneState.h
+        src/CommandService/LoadDataLittleEndian.h)
 
 
 if (EnableWebStaticModule)
