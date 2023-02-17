@@ -18,7 +18,7 @@ namespace OwlSerialController {
 
     constexpr uint8_t AirplaneStateDataSize = 29;
 
-    struct AirplaneState : std::enable_shared_from_this<AirplaneState> {
+    struct AirplaneState : public std::enable_shared_from_this<AirplaneState> {
         uint8_t stateFly{0};    // StateFly
         int32_t pitch{0};       // raid*100
         int32_t roll{0};

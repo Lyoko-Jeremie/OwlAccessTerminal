@@ -22,7 +22,7 @@
 
 namespace OwlSerialController {
 
-    class StateReaderImplCo : std::enable_shared_from_this<StateReaderImplCo> {
+    class StateReaderImplCo : public std::enable_shared_from_this<StateReaderImplCo> {
     public:
         StateReaderImplCo(
                 std::weak_ptr<StateReader> parentRef,
