@@ -191,14 +191,14 @@ add_executable(${ProjectMainName}
         src/TimeService/TimeServiceMail.h
         src/TimeService/TimeService.cpp
         src/TimeService/TimeService.h
-        src/CommandService/StateReader.cpp
-        src/CommandService/StateReader.h
-        src/CommandService/StateReaderImplNormal.h
-        src/CommandService/StateReaderImplCo.h
-        src/CommandService/StateReaderImplCo.cpp
+        src/CommandService/StateReader/StateReader.cpp
+        src/CommandService/StateReader/StateReader.h
+        src/CommandService/StateReader/StateReaderImplNormal.h
+        src/CommandService/StateReader/StateReaderImplCo.h
+        src/CommandService/StateReader/StateReaderImplCo.cpp
+        src/CommandService/StateReader/LoadDataLittleEndian.h
         src/CommandService/AirplaneState.cpp
-        src/CommandService/AirplaneState.h
-        src/CommandService/LoadDataLittleEndian.h)
+        src/CommandService/AirplaneState.h)
 
 
 if (EnableWebStaticModule)

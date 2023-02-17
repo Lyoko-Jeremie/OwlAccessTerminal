@@ -16,8 +16,8 @@
 #include <boost/bind/bind.hpp>
 #include <boost/array.hpp>
 #include <boost/assert.hpp>
-#include "./SerialController.h"
-#include "./AirplaneState.h"
+#include "../SerialController.h"
+#include "../AirplaneState.h"
 #include "./LoadDataLittleEndian.h"
 
 namespace OwlSerialController {

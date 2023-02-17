@@ -1,7 +1,7 @@
 // jeremie
 
 #include "SerialController.h"
-#include "./StateReader.h"
+#include "StateReader/StateReader.h"
 #include <boost/asio/read_until.hpp>
 #include <boost/assert.hpp>
 #include <array>

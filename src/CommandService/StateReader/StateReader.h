@@ -9,8 +9,8 @@
 #include <boost/log/trivial.hpp>
 #include <boost/core/ignore_unused.hpp>
 #include <utility>
-#include "CmdSerialMail.h"
-#include "../ConfigLoader/ConfigLoader.h"
+#include "../CmdSerialMail.h"
+#include "../../ConfigLoader/ConfigLoader.h"
 
 namespace OwlSerialController {
 

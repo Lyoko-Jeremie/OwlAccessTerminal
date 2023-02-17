@@ -4,7 +4,7 @@
 #include <utility>
 #include <memory>
 #include <boost/assert.hpp>
-#include "./SerialController.h"
+#include "../SerialController.h"
 
 #include "./StateReaderImplCo.h"
 #include "./StateReaderImplNormal.h"
