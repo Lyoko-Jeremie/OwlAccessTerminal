@@ -81,5 +81,9 @@ namespace OwlLog {
         core->add_global_attribute("TimeStamp", boost::log::attributes::local_clock());
         // core->add_global_attribute("ProcessID", boost::log::attributes::current_process_id());
         // core->add_global_attribute("ProcessName", boost::log::attributes::current_process_name());
+
+        // https://stackoverflow.com/questions/69967084/how-to-set-the-severity-level-of-boost-log-library
+        // core->get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
+
     }
 } // OwlLog
