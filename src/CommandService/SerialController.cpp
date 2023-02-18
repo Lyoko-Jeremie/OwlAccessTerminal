@@ -49,7 +49,8 @@ namespace OwlSerialController {
             OwlMailDefine::CmdSerialMailbox &mailbox) {
         switch (data->additionCmd) {
             case OwlMailDefine::AdditionCmd::getAirplaneState: {
-                if (!newestAirplaneState) {
+                auto p = atomic_load(&newestAirplaneState);
+                if (!p) {
                     auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
                     data_r->runner = data->callbackRunner;
                     data_r->openError = true;
@@ -59,8 +60,8 @@ namespace OwlSerialController {
                 }
                 auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
                 data_r->runner = data->callbackRunner;
-                data_r->ok = newestAirplaneState.operator bool();
-                data_r->newestAirplaneState = newestAirplaneState->shared_from_this();
+                data_r->ok = p.operator bool();
+                data_r->newestAirplaneState = p->shared_from_this();
                 sendMail(std::move(data_r), mailbox);
                 return;
             }
@@ -566,23 +567,24 @@ namespace OwlSerialController {
 
     void SerialController::sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState) {
         boost::asio::dispatch(ioc_, [this, self = shared_from_this(), airplaneState]() {
-            newestAirplaneState = airplaneState;
-            if (newestAirplaneState) {
-                BOOST_ASSERT(newestAirplaneState);
+            auto p = airplaneState;
+            if (p) {
+                BOOST_ASSERT(p);
                 BOOST_LOG_TRIVIAL(trace)
                     << "new airplaneState come:"
-                    << "\n\tstateFly: " << newestAirplaneState->stateFly
-                    << "\n\tpitch: " << newestAirplaneState->pitch
-                    << "\n\troll: " << newestAirplaneState->roll
-                    << "\n\tyaw: " << newestAirplaneState->yaw
-                    << "\n\tvx: " << newestAirplaneState->vx
-                    << "\n\tvy: " << newestAirplaneState->vy
-                    << "\n\tvz: " << newestAirplaneState->vz
-                    << "\n\thigh: " << newestAirplaneState->high
-                    << "\n\tvoltage: " << newestAirplaneState->voltage
-                    << "\n\ttimestamp: " << newestAirplaneState->timestamp
+                    << "\n\tstateFly: " << p->stateFly
+                    << "\n\tpitch: " << p->pitch
+                    << "\n\troll: " << p->roll
+                    << "\n\tyaw: " << p->yaw
+                    << "\n\tvx: " << p->vx
+                    << "\n\tvy: " << p->vy
+                    << "\n\tvz: " << p->vz
+                    << "\n\thigh: " << p->high
+                    << "\n\tvoltage: " << p->voltage
+                    << "\n\ttimestamp: " << p->timestamp
                     << "";
             }
+            std::atomic_store(&newestAirplaneState, p);
         });
     }
 
