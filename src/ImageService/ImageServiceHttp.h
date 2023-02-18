@@ -96,6 +96,8 @@ namespace OwlImageServiceHttp {
 
         void create_get_response_time();
 
+        void create_get_response_time_now();
+
         // Construct a response message based on the program state.
         void create_get_response();
 
@@ -130,7 +132,7 @@ namespace OwlImageServiceHttp {
                             return;
                         }
                         if (ec) {
-                             BOOST_LOG_TRIVIAL(warning) << "ImageServiceHttpConnect check_deadline : " << ec.what();
+                            BOOST_LOG_TRIVIAL(warning) << "ImageServiceHttpConnect check_deadline : " << ec.what();
                             return;
                         }
                         // Close socket to cancel any outstanding operation.

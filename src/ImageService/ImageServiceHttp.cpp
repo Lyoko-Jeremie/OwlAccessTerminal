@@ -266,7 +266,7 @@ namespace OwlImageServiceHttp {
 
         if (!request_.target().starts_with("/time?")) {
             // inner error
-            internal_server_error("(!request_.target().starts_with(\"/set_camera_image_size?\"))");
+            internal_server_error("(!request_.target().starts_with(\"/time?\"))");
             return;
         }
 
@@ -331,6 +331,57 @@ namespace OwlImageServiceHttp {
 
         };
 
+        p->sendMailTime(std::move(data));
+
+    }
+
+    void ImageServiceHttpConnect::create_get_response_time_now() {
+
+        if (!request_.target().starts_with("/timeGet")) {
+            // inner error
+            internal_server_error("(!request_.target().starts_with(\"/timeGet?\"))");
+            return;
+        }
+
+        auto p = parents_.lock();
+        if (!p) {
+            // inner error
+            internal_server_error("(!parents_.lock())");
+            return;
+        }
+
+        auto data = std::make_shared<OwlMailDefine::Service2Time>();
+        data->cmd = OwlMailDefine::TimeServiceCmd::getSyncClock;
+
+        data->callbackRunner = [this, self = shared_from_this(), p](
+                const OwlMailDefine::MailTime2Service &data_r
+        ) {
+
+            auto js = boost::json::serialize(
+                    boost::json::value{
+                            {"syncClock", data_r->clockTimestampMs},
+                            {"steadyClock", std::chrono::time_point_cast<std::chrono::milliseconds>(
+                                    std::chrono::steady_clock::now()).time_since_epoch().count()},
+                            {"systemClock", std::chrono::time_point_cast<std::chrono::milliseconds>(
+                                    std::chrono::system_clock::now()).time_since_epoch().count()},
+                    }
+            );
+
+            auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+            response->version(request_.version());
+            response->keep_alive(false);
+
+            response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+
+            response->result(boost::beast::http::status::ok);
+            response->set(boost::beast::http::field::content_type, "text/json");
+            boost::beast::ostream(response->body()) << js << "\r\n";
+            response->content_length(response->body().size());
+            write_response(response);
+
+        };
+
+        p->sendMailTime(std::move(data));
 
     }
 
@@ -366,6 +417,10 @@ namespace OwlImageServiceHttp {
         }
         if (request_.target().starts_with("/time?")) {
             create_get_response_time();
+            return;
+        }
+        if (request_.target().starts_with("/timeGet")) {
+            create_get_response_time_now();
             return;
         }
 
