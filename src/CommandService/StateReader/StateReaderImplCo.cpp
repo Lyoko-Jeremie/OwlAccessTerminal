@@ -228,6 +228,8 @@ namespace OwlSerialController {
             BOOST_LOG_TRIVIAL(trace) << "StateReaderImplCo"
                                      << " do process data";
             airplaneState_ = std::make_shared<AirplaneState>();
+            BOOST_ASSERT(airplaneState_);
+            airplaneState_->initTimestamp();
             {
                 if (dataSize_ != AirplaneStateDataSize) {
                     BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"

@@ -29,8 +29,12 @@ namespace OwlSerialController {
         uint16_t high{0};       // cm
         uint16_t voltage{0};
 
-        int64_t timestamp{std::chrono::time_point_cast<std::chrono::milliseconds>(
-                std::chrono::steady_clock::now()).time_since_epoch().count()};
+        int64_t timestamp{0};
+
+        void initTimestamp() {
+            timestamp = std::chrono::time_point_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now()).time_since_epoch().count();
+        }
     };
 
 
