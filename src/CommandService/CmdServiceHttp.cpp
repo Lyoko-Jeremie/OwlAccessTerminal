@@ -170,6 +170,9 @@ namespace OwlCommandServiceHttp {
                             b.contains("dm") &&
                             b.contains("cX") &&
                             b.contains("cY") &&
+                            b.contains("cLTx") &&
+                            b.contains("cLTy") &&
+                            b.contains("cRTx") &&
                             b.contains("cRTy") &&
                             b.contains("cRBx") &&
                             b.contains("cRBy") &&
@@ -221,6 +224,31 @@ namespace OwlCommandServiceHttp {
                     return;
                 }
                 auto b = json_o.at("centerTag").as_object();
+                if (!(
+                        b.contains("id") &&
+                        b.contains("ham") &&
+                        b.contains("dm") &&
+                        b.contains("cX") &&
+                        b.contains("cY") &&
+                        b.contains("cLTx") &&
+                        b.contains("cLTy") &&
+                        b.contains("cRTx") &&
+                        b.contains("cRTy") &&
+                        b.contains("cRBx") &&
+                        b.contains("cRBy") &&
+                        b.contains("cLBx") &&
+                        b.contains("cLBy")
+                )) {
+                    BOOST_LOG_TRIVIAL(warning) << "invalid centerTag items" << jsonS;
+                    send_back_json(
+                            boost::json::value{
+                                    {"msg",    "error"},
+                                    {"error",  "invalid centerTag items"},
+                                    {"result", false},
+                            }
+                    );
+                    return;
+                }
                 aprilTagInfoCenter = std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type>(
                         OwlMailDefine::AprilTagInfo{
                                 .id=              static_cast<int>(b.at("id").get_int64()),
