@@ -323,7 +323,7 @@ namespace OwlImageServiceHttp {
                 response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
 
                 response->result(boost::beast::http::status::ok);
-                response->set(boost::beast::http::field::content_type, "text/plain");
+                response->set(boost::beast::http::field::content_type, "text/json");
                 boost::beast::ostream(response->body()) << js << "\r\n";
                 response->content_length(response->body().size());
                 write_response(response);
@@ -359,7 +359,7 @@ namespace OwlImageServiceHttp {
 
             auto js = boost::json::serialize(
                     boost::json::value{
-                            {"syncClock", data_r->clockTimestampMs},
+                            {"syncClock",   data_r->clockTimestampMs},
                             {"steadyClock", std::chrono::time_point_cast<std::chrono::milliseconds>(
                                     std::chrono::steady_clock::now()).time_since_epoch().count()},
                             {"systemClock", std::chrono::time_point_cast<std::chrono::milliseconds>(
@@ -433,8 +433,10 @@ namespace OwlImageServiceHttp {
         if (request_.target() == "/downCameraId") {
             response->result(boost::beast::http::status::ok);
             response->set(boost::beast::http::field::content_type, "text/json");
-            boost::beast::ostream(response->body()) << R"({"downCameraId": )" << config_->config().downCameraId.load()
-                                                    << R"( })";
+            boost::beast::ostream(response->body())
+                    << R"({"downCameraId": )"
+                    << config_->config().downCameraId.load()
+                    << R"( })";
             response->content_length(response->body().size());
             write_response(response);
             return;
@@ -442,8 +444,10 @@ namespace OwlImageServiceHttp {
         if (request_.target() == "/frontCameraId") {
             response->result(boost::beast::http::status::ok);
             response->set(boost::beast::http::field::content_type, "text/json");
-            boost::beast::ostream(response->body()) << R"({"downCameraId": )" << config_->config().frontCameraId.load()
-                                                    << R"( })";
+            boost::beast::ostream(response->body())
+                    << R"({"frontCameraId": )"
+                    << config_->config().frontCameraId.load()
+                    << R"( })";
             response->content_length(response->body().size());
             write_response(response);
             return;
