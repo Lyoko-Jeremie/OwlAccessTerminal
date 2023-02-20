@@ -189,6 +189,15 @@ namespace OwlSerialController {
                 BOOST_LOG_TRIVIAL(trace) << "StateReaderImplCo"
                                          << " dataSize_ : " << dataSize_;
             }
+            if (dataSize_ != AirplaneStateDataSize) {
+                BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
+                                         << " (dataSize_ != AirplaneStateDataSize) , ignore!!!";
+                // ignore this package and clean
+                dataSize_ = 0;
+                boost::ignore_unused(_ptr_);
+                start_next_read();
+                co_return true;
+            }
             // dataSize+len_tag+end_tag
             if (readBuffer_.size() < (dataSize_ + sizeof(uint32_t) + delimEnd.size())) {
                 BOOST_LOG_TRIVIAL(trace) << "StateReaderImplCo"
@@ -233,7 +242,7 @@ namespace OwlSerialController {
             {
                 if (dataSize_ != AirplaneStateDataSize) {
                     BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo"
-                                             << " (dataSize_ != AirplaneStateDataSize ) , ignore!!!";
+                                             << " (dataSize_ != AirplaneStateDataSize) , ignore!!!";
                     // ignore this package
                 } else {
                     BOOST_LOG_TRIVIAL(trace) << "StateReaderImplCo"
@@ -281,6 +290,7 @@ namespace OwlSerialController {
                     // we find the end delim
                     // trim the other data include end delim
                     readBuffer_.consume(p + delimEnd.size());
+                    dataSize_ = 0;
                     // goto next loop
                     BOOST_LOG_TRIVIAL(trace) << "StateReaderImplCo"
                                              << " goto next loop";
