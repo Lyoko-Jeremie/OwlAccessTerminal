@@ -493,6 +493,23 @@ namespace OwlSerialController {
                     );
                     return;
                 }
+                case OwlMailDefine::AdditionCmd::ping: {
+                    constexpr uint8_t packageSize = 3;
+                    makeADataBuffer<packageSize>(
+                            std::array<uint8_t, packageSize>{
+                                    // 0xAA
+                                    uint8_t(0xAA),
+                                    // AdditionCmd
+                                    uint8_t(to_underlying(data->additionCmd)),
+                                    // 0xBB
+                                    uint8_t(0xBB),
+                            },
+                            shared_from_this(),
+                            data,
+                            mailbox
+                    );
+                    return;
+                }
                 default: {
                     BOOST_LOG_TRIVIAL(error) << "SerialController"
                                              << " receiveMail"

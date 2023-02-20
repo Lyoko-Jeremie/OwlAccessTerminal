@@ -31,7 +31,9 @@ namespace OwlMailDefine {
         JoyConSimple = 112,
         JoyConGyro = 116,
 
-        getAirplaneState = 1000,
+        getAirplaneState = 180,
+
+        ping = 251,
     };
     extern const std::map<AdditionCmd, std::string> AdditionCmdNameLookupTable;
 
