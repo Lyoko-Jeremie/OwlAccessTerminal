@@ -11,6 +11,11 @@
 
 namespace OwlSerialController {
 
+#ifdef DEBUG_IF_CHECK_POINT
+    constexpr bool flag_DEBUG_IF_CHECK_POINT = true;
+#else
+    constexpr bool flag_DEBUG_IF_CHECK_POINT = false;
+#endif // DEBUG_IF_CHECK_POINT
 
     StateReader::StateReader(std::weak_ptr<PortController> parentRef,
                              std::shared_ptr<boost::asio::serial_port> serialPort)
@@ -19,7 +24,7 @@ namespace OwlSerialController {
     }
 
     void StateReader::init() {
-        if constexpr (true) {
+        if constexpr (flag_DEBUG_IF_CHECK_POINT) {
             BOOST_LOG_TRIVIAL(trace) << "weak_from_this().lock().use_count() : " << weak_from_this().lock().use_count();
             BOOST_ASSERT(!parentRef_.expired());
             BOOST_ASSERT(!parentRef_.lock()->parentRef_.expired());
@@ -33,7 +38,7 @@ namespace OwlSerialController {
 
     void StateReader::start() {
         BOOST_LOG_TRIVIAL(trace) << "StateReader::start()";
-        if constexpr (true) {
+        if constexpr (flag_DEBUG_IF_CHECK_POINT) {
             BOOST_ASSERT(!weak_from_this().expired());
             BOOST_ASSERT(!parentRef_.expired());
             BOOST_ASSERT(!parentRef_.lock()->parentRef_.expired());

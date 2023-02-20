@@ -49,8 +49,14 @@ namespace OwlSerialController {
     public:
 
         void start() {
+#ifdef DEBUG_IF_CHECK_POINT
+            constexpr bool flag_DEBUG_IF_CHECK_POINT = true;
+#else
+            constexpr bool flag_DEBUG_IF_CHECK_POINT = false;
+#endif // DEBUG_IF_CHECK_POINT
+
             BOOST_LOG_TRIVIAL(trace) << "StateReaderImplCo start()";
-            if constexpr (true) {
+            if constexpr (flag_DEBUG_IF_CHECK_POINT) {
                 BOOST_ASSERT(!weak_from_this().expired());
                 BOOST_ASSERT(!parentRef_.expired());
                 BOOST_ASSERT(!parentRef_.lock()->parentRef_.expired());

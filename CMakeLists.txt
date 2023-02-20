@@ -64,6 +64,10 @@ if (DEBUG_TAG_INFO)
     add_definitions(-DDEBUG_TAG_INFO)
 endif (DEBUG_TAG_INFO)
 
+if (DEBUG_IF_CHECK_POINT)
+    add_definitions(-DDEBUG_IF_CHECK_POINT)
+endif (DEBUG_IF_CHECK_POINT)
+
 if (DEBUG_Mailbox)
     add_definitions(-DDEBUG_AsyncCallbackMailbox)
 endif (DEBUG_Mailbox)

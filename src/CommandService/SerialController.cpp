@@ -10,9 +10,15 @@
 
 namespace OwlSerialController {
 
+#ifdef DEBUG_IF_CHECK_POINT
+    constexpr bool flag_DEBUG_IF_CHECK_POINT = true;
+#else
+    constexpr bool flag_DEBUG_IF_CHECK_POINT = false;
+#endif // DEBUG_IF_CHECK_POINT
+
     bool SerialController::initPort() {
         BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort";
-        if constexpr (true) {
+        if constexpr (flag_DEBUG_IF_CHECK_POINT) {
             BOOST_ASSERT(!weak_from_this().expired());
         }
         BOOST_ASSERT(airplanePortController);
@@ -22,7 +28,7 @@ namespace OwlSerialController {
         BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort open";
         BOOST_LOG_TRIVIAL(trace) << "config_->config().airplane_fly_serial_addr "
                                  << config_->config().airplane_fly_serial_addr;
-        if constexpr (true) {
+        if constexpr (flag_DEBUG_IF_CHECK_POINT) {
             BOOST_ASSERT(!weak_from_this().expired());
             BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort weak_from_this().use_count(): "
                                      << weak_from_this().use_count();
@@ -153,14 +159,14 @@ namespace OwlSerialController {
             receiveMailGetAirplaneState(std::move(data), mailbox);
             return;
         }
-        if constexpr (true) {
+        if constexpr (flag_DEBUG_IF_CHECK_POINT) {
             BOOST_ASSERT(!weak_from_this().expired());
         }
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
             BOOST_ASSERT(data);
             BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch ";
-            if constexpr (true) {
+            if constexpr (flag_DEBUG_IF_CHECK_POINT) {
                 BOOST_ASSERT(!weak_from_this().expired());
                 BOOST_ASSERT(self.use_count() > 0);
             }
@@ -511,7 +517,7 @@ namespace OwlSerialController {
         BOOST_LOG_TRIVIAL(trace) << "PortController::open ok";
 #ifndef DEBUG_DisableStateReader
         BOOST_LOG_TRIVIAL(trace) << "PortController::open start stateReader_";
-        if constexpr (true) {
+        if constexpr (flag_DEBUG_IF_CHECK_POINT) {
             BOOST_ASSERT(!weak_from_this().expired());
             BOOST_LOG_TRIVIAL(trace) << "PortController::open parentRef_.use_count(): " << parentRef_.use_count();
             BOOST_ASSERT(!parentRef_.expired());
@@ -534,7 +540,7 @@ namespace OwlSerialController {
     }
 
     void PortController::init() {
-        if constexpr (true) {
+        if constexpr (flag_DEBUG_IF_CHECK_POINT) {
             BOOST_LOG_TRIVIAL(trace) << "PortController::open parentRef_.use_count(): " << parentRef_.use_count();
             BOOST_ASSERT(!parentRef_.expired());
             BOOST_ASSERT(parentRef_.lock());
