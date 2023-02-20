@@ -1,0 +1,3 @@
+[submodule "src/ExternLib/quickjspp"]
+	path = src/ExternLib/quickjspp
+	url = ./quickjspp.git
