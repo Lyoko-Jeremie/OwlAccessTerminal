@@ -17,6 +17,7 @@
   "downCameraId": 2,
   "frontCameraId": 1,
   "cmd_bash_path": "/bin/bash",
+  "js_map_calc_file": "map_calc.js",
   "embedWebServer": {
     "doc_root": "./html",
     "index_file_of_root": "index.html",
