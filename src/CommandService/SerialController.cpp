@@ -345,7 +345,7 @@ namespace OwlSerialController {
                         return;
                     }
                     BOOST_ASSERT(jcp);
-                    constexpr uint8_t packageSize = 22;
+                    constexpr uint8_t packageSize = 26;
                     makeADataBuffer<packageSize>(
                             std::array<uint8_t, packageSize>{
                                     // 0xAA
@@ -356,10 +356,14 @@ namespace OwlSerialController {
                                     // data size
                                     uint8_t(packageSize - 4),
 
-                                    uint8_t(jcp->leftRockerX),
-                                    uint8_t(jcp->leftRockerY),
-                                    uint8_t(jcp->rightRockerX),
-                                    uint8_t(jcp->rightRockerY),
+                                    uint8_t(jcp->leftRockerX > 0 ? jcp->leftRockerX : 0),
+                                    uint8_t(jcp->leftRockerX < 0 ? -jcp->leftRockerX : 0),
+                                    uint8_t(jcp->leftRockerY > 0 ? jcp->leftRockerY : 0),
+                                    uint8_t(jcp->leftRockerY < 0 ? -jcp->leftRockerY : 0),
+                                    uint8_t(jcp->rightRockerX > 0 ? jcp->rightRockerX : 0),
+                                    uint8_t(jcp->rightRockerX < 0 ? -jcp->rightRockerX : 0),
+                                    uint8_t(jcp->rightRockerY > 0 ? jcp->rightRockerY : 0),
+                                    uint8_t(jcp->rightRockerY < 0 ? -jcp->rightRockerY : 0),
 
                                     uint8_t(jcp->leftBackTop),
                                     uint8_t(jcp->leftBackBottom),
@@ -405,7 +409,7 @@ namespace OwlSerialController {
                         return;
                     }
                     BOOST_ASSERT(jcp);
-                    constexpr uint8_t packageSize = 14;
+                    constexpr uint8_t packageSize = 18;
                     makeADataBuffer<packageSize>(
                             std::array<uint8_t, packageSize>{
                                     // 0xAA
@@ -416,10 +420,14 @@ namespace OwlSerialController {
                                     // data size
                                     uint8_t(packageSize - 4),
 
-                                    uint8_t(jcp->leftRockerX),
-                                    uint8_t(jcp->leftRockerY),
-                                    uint8_t(jcp->rightRockerX),
-                                    uint8_t(jcp->rightRockerY),
+                                    uint8_t(jcp->leftRockerX > 0 ? jcp->leftRockerX : 0),
+                                    uint8_t(jcp->leftRockerX < 0 ? -jcp->leftRockerX : 0),
+                                    uint8_t(jcp->leftRockerY > 0 ? jcp->leftRockerY : 0),
+                                    uint8_t(jcp->leftRockerY < 0 ? -jcp->leftRockerY : 0),
+                                    uint8_t(jcp->rightRockerX > 0 ? jcp->rightRockerX : 0),
+                                    uint8_t(jcp->rightRockerX < 0 ? -jcp->rightRockerX : 0),
+                                    uint8_t(jcp->rightRockerY > 0 ? jcp->rightRockerY : 0),
+                                    uint8_t(jcp->rightRockerY < 0 ? -jcp->rightRockerY : 0),
 
                                     uint8_t(jcp->leftBackTop),
                                     uint8_t(jcp->leftBackBottom),

@@ -77,25 +77,42 @@ namespace OwlMailDefine {
         int16_t d;
     };
     struct JoyCon {
-        int8_t leftRockerX{0};
-        int8_t leftRockerY{0};
-        int8_t rightRockerX{0};
-        int8_t rightRockerY{0};
+        // -127~+127
+        int16_t leftRockerX{0};
+        // -127~+127
+        int16_t leftRockerY{0};
+        // -127~+127
+        int16_t rightRockerX{0};
+        // -127~+127
+        int16_t rightRockerY{0};
+        // 0~+127(+127)
         int8_t leftBackTop{0};
+        // 0~+127(+127)
         int8_t leftBackBottom{0};
+        // 0~+127(+127)
         int8_t rightBackTop{0};
+        // 0~+127(+127)
         int8_t rightBackBottom{0};
 
+        // 0/+127
         int8_t CrossUp{0};
+        // 0/+127
         int8_t CrossDown{0};
+        // 0/+127
         int8_t CrossLeft{0};
+        // 0/+127
         int8_t CrossRight{0};
 
         int8_t A{0};
+        // 0/+127
         int8_t B{0};
+        // 0/+127
         int8_t X{0};
+        // 0/+127
         int8_t Y{0};
+        // 0/+127
         int8_t buttonAdd{0};
+        // 0/+127
         int8_t buttonReduce{0};
 
     };
