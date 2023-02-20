@@ -451,21 +451,21 @@ namespace OwlCommandServiceHttp {
             }
             send_back_json(
                     boost::json::value{
-                            {"result",       true},
-                            {"state",        {
-                                                     {"timestamp", state->timestamp},
-                                                     {"stateFly", state->stateFly},
-                                                     {"pitch", state->pitch},
-                                                     {"roll", state->roll},
-                                                     {"yaw", state->yaw},
-                                                     {"vx", state->vx},
-                                                     {"vy", state->vy},
-                                                     {"vz", state->vz},
-                                                     {"high", state->high},
-                                                     {"voltage", state->voltage},
-                                             }
+                            {"result",        true},
+                            {"state",         {
+                                                      {"timestamp", state->timestamp},
+                                                      {"stateFly", state->stateFly},
+                                                      {"pitch", state->pitch},
+                                                      {"roll", state->roll},
+                                                      {"yaw", state->yaw},
+                                                      {"vx", state->vx},
+                                                      {"vy", state->vy},
+                                                      {"vz", state->vz},
+                                                      {"high", state->high},
+                                                      {"voltage", state->voltage},
+                                              }
                             },
-                            {"nowTimestamp", std::chrono::time_point_cast<std::chrono::milliseconds>(
+                            {"nowTimestamp",  std::chrono::time_point_cast<std::chrono::milliseconds>(
                                     std::chrono::steady_clock::now()).time_since_epoch().count()},
                             {"nowTimestampC", std::chrono::time_point_cast<std::chrono::milliseconds>(
                                     std::chrono::system_clock::now()).time_since_epoch().count()},
