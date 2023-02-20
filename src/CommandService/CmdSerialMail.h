@@ -65,6 +65,9 @@ namespace OwlMailDefine {
 
         AprilTagListType aprilTagList;
         AprilTagCenterType aprilTagCenter;
+
+        int64_t timestamp{std::chrono::time_point_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now()).time_since_epoch().count()};
     };
 
     struct JoyConGyro {

@@ -272,6 +272,9 @@ namespace OwlSerialController {
                     }
                     BOOST_ASSERT(data->aprilTagCmdPtr);
 
+                    // save a copy for other use
+                    aprilTagCmdData = data->aprilTagCmdPtr;
+
                     auto pcx = static_cast<uint16_t>(data->aprilTagCmdPtr->imageX);
                     auto pcy = static_cast<uint16_t>(data->aprilTagCmdPtr->imageY);
 

@@ -164,6 +164,7 @@ namespace OwlSerialController {
     private:
 
         std::shared_ptr<AirplaneState> newestAirplaneState = std::make_shared<AirplaneState>();
+        std::shared_ptr<OwlMailDefine::AprilTagCmd> aprilTagCmdData = std::make_shared<OwlMailDefine::AprilTagCmd>();
 
     private:
         friend struct PortController;
