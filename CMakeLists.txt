@@ -81,6 +81,16 @@ endif (StateReaderImpl_UseNormal)
 add_definitions(-DBOOST_ENABLE_ASSERT_HANDLER)
 
 
+add_subdirectory(src/ExternLib/quickjspp/quickjs)
+add_library(quickjspp INTERFACE)
+target_link_libraries(quickjspp INTERFACE quickjs ${CMAKE_REQUIRED_LIBRARIES})
+target_compile_features(quickjspp INTERFACE cxx_std_17)
+target_include_directories(quickjspp INTERFACE src/ExternLib/quickjspp)
+set_target_properties(quickjspp PROPERTIES PUBLIC_HEADER quickjspp.hpp)
+# https://stackoverflow.com/questions/15053776/how-do-you-disable-the-unused-variable-warnings-coming-out-of-gcc-in-3rd-party-c
+target_compile_options(quickjspp INTERFACE -Wno-unused-variable)
+
+
 message(STATUS "PROTOBUFF_INCLUDE_DIRS: ${PROTOBUFF_INCLUDE_DIRS}")
 message(STATUS "PROTOBUFF_LIBS: ${PROTOBUFF_LIBS}")
 
@@ -198,12 +208,21 @@ add_executable(${ProjectMainName}
         src/CommandService/StateReader/StateReaderImplCo.cpp
         src/CommandService/StateReader/LoadDataLittleEndian.h
         src/CommandService/AirplaneState.cpp
-        src/CommandService/AirplaneState.h)
+        src/CommandService/AirplaneState.h
+        src/QuickJsWrapper/QuickJsWrapper.cpp
+        src/QuickJsWrapper/QuickJsWrapper.h
+        src/QuickJsWrapper/MathModule.cpp
+        src/QuickJsWrapper/MathModule.h
+        src/QuickJsWrapper/QuickJsWrapperImpl.cpp
+        src/QuickJsWrapper/QuickJsWrapperImpl.h
+        src/QuickJsWrapper/QuickJsH.h)
 
 
 if (EnableWebStaticModule)
     target_link_libraries(${ProjectMainName} ${WebStaticModuleFiles})
 endif (EnableWebStaticModule)
+
+target_link_libraries(${ProjectMainName} quickjspp)
 
 target_link_libraries(${ProjectMainName} ${CMAKE_THREAD_LIBS_INIT})
 

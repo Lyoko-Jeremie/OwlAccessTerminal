@@ -1,0 +1,8 @@
+// jeremie
+
+#ifndef OWLACCESSTERMINAL_QUICKJSH_H
+#define OWLACCESSTERMINAL_QUICKJSH_H
+
+#include "quickjspp.hpp"
+
+#endif //OWLACCESSTERMINAL_QUICKJSH_H
