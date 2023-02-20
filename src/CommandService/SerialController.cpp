@@ -134,7 +134,13 @@ namespace OwlSerialController {
     ) {
         BOOST_ASSERT(selfPtr);
         BOOST_ASSERT(data);
-        auto sendDataBuffer = std::make_shared<std::array<uint8_t, packageSize>>(dataInitList);
+        auto sendDataBuffer = std::make_shared<std::array<uint8_t, packageSize>>(std::move(dataInitList));
+        // add xor checksum
+        if (sendDataBuffer->size() > 5) {
+            for (size_t i = 3; i != packageSize - 2; ++i) {
+                sendDataBuffer->at(packageSize - 2) ^= sendDataBuffer->at(i);
+            }
+        }
         // send it
         sendADataBuffer<packageSize>(
                 selfPtr,
@@ -218,7 +224,7 @@ namespace OwlSerialController {
                         sendMail(std::move(data_r), mailbox);
                         return;
                     }
-                    constexpr uint8_t packageSize = 12;
+                    constexpr uint8_t packageSize = 13;
                     makeADataBuffer<packageSize>(
                             std::array<uint8_t, packageSize>{
                                     // 0xAA
@@ -227,7 +233,7 @@ namespace OwlSerialController {
                                     // AdditionCmd
                                     uint8_t(to_underlying(data->additionCmd)),
                                     // data size
-                                    uint8_t(packageSize - 4),
+                                    uint8_t(packageSize - 5),
 
                                     uint8_t(uint16_t(mcp->x) & 0xff),
                                     uint8_t(uint16_t(mcp->x) >> 8),
@@ -241,6 +247,8 @@ namespace OwlSerialController {
                                     uint8_t(uint16_t(mcp->cw) & 0xff),
                                     uint8_t(uint16_t(mcp->cw) >> 8),
 
+                                    // xor checksum byte
+                                    uint8_t(0),
                                     // 0xBB
                                     uint8_t(0xBB),
                             },
@@ -288,7 +296,7 @@ namespace OwlSerialController {
 
                     // send cmd to serial
                     // make send data
-                    constexpr uint8_t packageSize = 16;
+                    constexpr uint8_t packageSize = 17;
                     makeADataBuffer<packageSize>(
                             std::array<uint8_t, packageSize>{
                                     // 0xAA
@@ -297,7 +305,7 @@ namespace OwlSerialController {
                                     // AdditionCmd
                                     uint8_t(to_underlying(data->additionCmd)),
                                     // data size
-                                    uint8_t(packageSize - 4),
+                                    uint8_t(packageSize - 5),
 
                                     // image size
                                     uint8_t(uint16_t(pcx) & 0xff),
@@ -319,6 +327,8 @@ namespace OwlSerialController {
                                     uint8_t(uint16_t(id) & 0xff),
                                     uint8_t(uint16_t(id) >> 8),
 
+                                    // xor checksum byte
+                                    uint8_t(0),
                                     // 0xBB
                                     uint8_t(0xBB),
                             },
@@ -345,7 +355,7 @@ namespace OwlSerialController {
                         return;
                     }
                     BOOST_ASSERT(jcp);
-                    constexpr uint8_t packageSize = 26;
+                    constexpr uint8_t packageSize = 27;
                     makeADataBuffer<packageSize>(
                             std::array<uint8_t, packageSize>{
                                     // 0xAA
@@ -354,7 +364,7 @@ namespace OwlSerialController {
                                     // AdditionCmd
                                     uint8_t(to_underlying(data->additionCmd)),
                                     // data size
-                                    uint8_t(packageSize - 4),
+                                    uint8_t(packageSize - 5),
 
                                     uint8_t(jcp->leftRockerX > 0 ? jcp->leftRockerX : 0),
                                     uint8_t(jcp->leftRockerX < 0 ? -jcp->leftRockerX : 0),
@@ -383,6 +393,8 @@ namespace OwlSerialController {
                                     uint8_t(jcp->buttonAdd),
                                     uint8_t(jcp->buttonReduce),
 
+                                    // xor checksum byte
+                                    uint8_t(0),
                                     // 0xBB
                                     uint8_t(0xBB),
                             },
@@ -409,7 +421,7 @@ namespace OwlSerialController {
                         return;
                     }
                     BOOST_ASSERT(jcp);
-                    constexpr uint8_t packageSize = 18;
+                    constexpr uint8_t packageSize = 19;
                     makeADataBuffer<packageSize>(
                             std::array<uint8_t, packageSize>{
                                     // 0xAA
@@ -418,7 +430,7 @@ namespace OwlSerialController {
                                     // AdditionCmd
                                     uint8_t(to_underlying(data->additionCmd)),
                                     // data size
-                                    uint8_t(packageSize - 4),
+                                    uint8_t(packageSize - 5),
 
                                     uint8_t(jcp->leftRockerX > 0 ? jcp->leftRockerX : 0),
                                     uint8_t(jcp->leftRockerX < 0 ? -jcp->leftRockerX : 0),
@@ -437,6 +449,8 @@ namespace OwlSerialController {
                                     uint8_t(jcp->buttonAdd),
                                     uint8_t(jcp->buttonReduce),
 
+                                    // xor checksum byte
+                                    uint8_t(0),
                                     // 0xBB
                                     uint8_t(0xBB),
                             },
@@ -463,7 +477,7 @@ namespace OwlSerialController {
                         return;
                     }
                     BOOST_ASSERT(jcgp);
-                    constexpr uint8_t packageSize = 12;
+                    constexpr uint8_t packageSize = 13;
                     makeADataBuffer<packageSize>(
                             std::array<uint8_t, packageSize>{
                                     // 0xAA
@@ -472,7 +486,7 @@ namespace OwlSerialController {
                                     // AdditionCmd
                                     uint8_t(to_underlying(data->additionCmd)),
                                     // data size
-                                    uint8_t(packageSize - 4),
+                                    uint8_t(packageSize - 5),
 
                                     uint8_t(jcgp->A),
                                     uint8_t(jcgp->B),
@@ -484,6 +498,8 @@ namespace OwlSerialController {
                                     uint8_t(jcgp->X),
                                     uint8_t(jcgp->Y),
 
+                                    // xor checksum byte
+                                    uint8_t(0),
                                     // 0xBB
                                     uint8_t(0xBB),
                             },
@@ -494,13 +510,17 @@ namespace OwlSerialController {
                     return;
                 }
                 case OwlMailDefine::AdditionCmd::ping: {
-                    constexpr uint8_t packageSize = 3;
+                    constexpr uint8_t packageSize = 5;
                     makeADataBuffer<packageSize>(
                             std::array<uint8_t, packageSize>{
                                     // 0xAA
                                     uint8_t(0xAA),
                                     // AdditionCmd
                                     uint8_t(to_underlying(data->additionCmd)),
+                                    // data size
+                                    uint8_t(0),
+                                    // xor checksum byte
+                                    uint8_t(0),
                                     // 0xBB
                                     uint8_t(0xBB),
                             },
