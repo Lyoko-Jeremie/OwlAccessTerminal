@@ -219,7 +219,10 @@ add_executable(${ProjectMainName}
         src/QuickJsWrapper/MathModule.h
         src/QuickJsWrapper/QuickJsWrapperImpl.cpp
         src/QuickJsWrapper/QuickJsWrapperImpl.h
-        src/QuickJsWrapper/QuickJsH.h)
+        src/QuickJsWrapper/QuickJsH.h
+        src/MapCalc/MapCalc.cpp
+        src/MapCalc/MapCalc.h
+        src/MapCalc/MapCalcMail.h)
 
 
 if (EnableWebStaticModule)
