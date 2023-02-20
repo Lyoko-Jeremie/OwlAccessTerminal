@@ -71,4 +71,19 @@ namespace OwlQuickJsWrapper {
         return true;
     }
 
+    bool QuickJsWrapperImpl::loadCode(const std::string &filePath) {
+        try {
+            context_.evalFile(filePath.c_str());
+        }
+        catch (qjs::exception &) {
+            auto exc = context_.getException();
+            BOOST_LOG_TRIVIAL(error) << (std::string) exc;
+            if ((bool) exc["stack"]) {
+                BOOST_LOG_TRIVIAL(error) << (std::string) exc["stack"];
+            }
+            return false;
+        }
+        return true;
+    }
+
 } // OwlQuickJsWrapperImpl

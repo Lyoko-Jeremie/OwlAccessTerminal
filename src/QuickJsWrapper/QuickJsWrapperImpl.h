@@ -22,6 +22,8 @@ namespace OwlQuickJsWrapper {
 
         bool evalCode(const std::string &codeString);
 
+        bool loadCode(const std::string &filePath);
+
         template<typename FunctionT = void(const std::string &), typename RT = std::function<FunctionT> >
         RT getCallbackFunction(const std::string &functionName) {
             try {
@@ -36,6 +38,10 @@ namespace OwlQuickJsWrapper {
                 }
                 return {};
             }
+        }
+
+        qjs::Context &getContext() {
+            return context_;
         }
 
     private:

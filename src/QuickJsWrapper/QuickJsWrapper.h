@@ -17,14 +17,23 @@ namespace OwlQuickJsWrapper {
             impl_->init();
         }
 
-        void evalCode(const std::string &codeString) {
-            impl_->evalCode(codeString);
+        bool evalCode(const std::string &codeString) {
+            return impl_->evalCode(codeString);
+        }
+
+        bool loadCode(const std::string &filePath) {
+            return impl_->loadCode(filePath);
         }
 
         template<typename FunctionT = void(const std::string &), typename RT = std::function<FunctionT> >
         RT getCallbackFunction(const std::string &functionName) {
             return impl_->getCallbackFunction<FunctionT, RT>(functionName);
         }
+
+        qjs::Context &getContext() {
+            return impl_->getContext();
+        }
+
 
     private:
         std::shared_ptr<QuickJsWrapperImpl> impl_;
