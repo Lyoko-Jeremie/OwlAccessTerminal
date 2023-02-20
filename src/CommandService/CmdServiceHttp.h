@@ -15,6 +15,7 @@
 #include "CmdSerialMail.h"
 #include "ProcessJsonMessage.h"
 #include "../QueryPairsAnalyser/QueryPairsAnalyser.h"
+#include "../MapCalc/MapCalcMail.h"
 
 namespace OwlCommandServiceHttp {
 
@@ -198,7 +199,8 @@ namespace OwlCommandServiceHttp {
         CmdServiceHttp(
                 boost::asio::io_context &ioc,
                 const boost::asio::ip::tcp::endpoint &endpoint,
-                OwlMailDefine::CmdSerialMailbox &&mailbox
+                OwlMailDefine::CmdSerialMailbox &&mailbox,
+                OwlMailDefine::ServiceMapCalcMailbox &&mailbox_map
         );
 
         ~CmdServiceHttp() {
@@ -210,6 +212,7 @@ namespace OwlCommandServiceHttp {
         boost::asio::io_context &ioc_;
         boost::asio::ip::tcp::acceptor acceptor_;
         OwlMailDefine::CmdSerialMailbox mailbox_;
+        OwlMailDefine::ServiceMapCalcMailbox mailbox_map_;
     public:
         // Start accepting incoming connections
         void

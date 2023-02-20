@@ -439,38 +439,59 @@ namespace OwlCommandServiceHttp {
                 OwlMailDefine::MailSerial2Cmd data
         ) {
             auto state = data->newestAirplaneState;
-            if (!state) {
+            auto tags = data->aprilTagCmdData;
+            if (!state || !tags) {
                 send_back_json(
                         boost::json::value{
-                                {"msg",    "newestAirplaneState nullptr"},
+                                {"msg",    "newestAirplaneState || aprilTagCmdData nullptr"},
                                 {"error",  "nullptr"},
                                 {"result", false},
                         }
                 );
                 return;
             }
-            send_back_json(
-                    boost::json::value{
-                            {"result",        true},
-                            {"state",         {
-                                                      {"timestamp", state->timestamp},
-                                                      {"stateFly", state->stateFly},
-                                                      {"pitch", state->pitch},
-                                                      {"roll", state->roll},
-                                                      {"yaw", state->yaw},
-                                                      {"vx", state->vx},
-                                                      {"vy", state->vy},
-                                                      {"vz", state->vz},
-                                                      {"high", state->high},
-                                                      {"voltage", state->voltage},
-                                              }
-                            },
-                            {"nowTimestamp",  std::chrono::time_point_cast<std::chrono::milliseconds>(
-                                    std::chrono::steady_clock::now()).time_since_epoch().count()},
-                            {"nowTimestampC", std::chrono::time_point_cast<std::chrono::milliseconds>(
-                                    std::chrono::system_clock::now()).time_since_epoch().count()},
-                    }
-            );
+            auto mm = std::make_shared<OwlMailDefine::Service2MapCalc>();
+            mm->airplaneState = state;
+            mm->tagInfo = tags;
+            mm->callbackRunner = [this, self = shared_from_this(), state, tags, data_s = data](
+                    OwlMailDefine::MailMapCalc2Service data_m
+            ) {
+                if (!data_m->ok) {
+                    // TODO
+                }
+
+                send_back_json(
+                        boost::json::value{
+                                {"result",        true},
+                                {"state",
+                                                  {
+                                                          {"timestamp", state->timestamp},
+                                                          {"stateFly", state->stateFly},
+                                                          {"pitch", state->pitch},
+                                                          {"roll", state->roll},
+                                                          {"yaw", state->yaw},
+                                                          {"vx", state->vx},
+                                                          {"vy", state->vy},
+                                                          {"vz", state->vz},
+                                                          {"high", state->high},
+                                                          {"voltage", state->voltage},
+                                                  }
+                                },
+                                {"tag",
+                                                  {
+                                                          {"ok",        data_m->ok},
+                                                          {"x",        data_m->x},
+                                                          {"y",     data_m->y},
+                                                          {"z",    data_m->z},
+                                                  }
+                                },
+                                {"nowTimestamp",  std::chrono::time_point_cast<std::chrono::milliseconds>(
+                                        std::chrono::steady_clock::now()).time_since_epoch().count()},
+                                {"nowTimestampC", std::chrono::time_point_cast<std::chrono::milliseconds>(
+                                        std::chrono::system_clock::now()).time_since_epoch().count()},
+                        }
+                );
+            };
         };
         sendMail(std::move(m));
 
@@ -559,14 +580,22 @@ namespace OwlCommandServiceHttp {
         return p;
     }
 
-    CmdServiceHttp::CmdServiceHttp(boost::asio::io_context &ioc, const boost::asio::ip::tcp::endpoint &endpoint,
-                                   OwlMailDefine::CmdSerialMailbox &&mailbox) : ioc_(ioc),
-                                                                                acceptor_(
-                                                                                        boost::asio::make_strand(ioc)),
-                                                                                mailbox_(std::move(mailbox)) {
+    CmdServiceHttp::CmdServiceHttp(boost::asio::io_context &ioc,
+                                   const boost::asio::ip::tcp::endpoint &endpoint,
+                                   OwlMailDefine::CmdSerialMailbox &&mailbox,
+                                   OwlMailDefine::ServiceMapCalcMailbox &&mailbox_map
+    ) : ioc_(ioc),
+        acceptor_(boost::asio::make_strand(ioc)),
+        mailbox_(std::move(mailbox)),
+        mailbox_map_(mailbox_map) {
 
         mailbox_->receiveB2A = [this](OwlMailDefine::MailSerial2Cmd &&data) {
             receiveMail(std::move(data));
+        };
+        mailbox_map_->receiveB2A = [this](OwlMailDefine::MailMapCalc2Service &&data) {
+            boost::asio::dispatch(ioc_, [self = shared_from_this(), data]() {
+                data->runner(data);
+            });
         };
 
         boost::beast::error_code ec;

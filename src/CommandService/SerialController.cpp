@@ -55,8 +55,9 @@ namespace OwlSerialController {
             OwlMailDefine::CmdSerialMailbox &mailbox) {
         switch (data->additionCmd) {
             case OwlMailDefine::AdditionCmd::getAirplaneState: {
-                auto p = atomic_load(&newestAirplaneState);
-                if (!p) {
+                auto pn = atomic_load(&newestAirplaneState);
+                auto pa = atomic_load(&aprilTagCmdData);
+                if (!pn || !pa) {
                     auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
                     data_r->runner = data->callbackRunner;
                     data_r->openError = true;
@@ -66,8 +67,9 @@ namespace OwlSerialController {
                 }
                 auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
                 data_r->runner = data->callbackRunner;
-                data_r->ok = p.operator bool();
-                data_r->newestAirplaneState = p->shared_from_this();
+                data_r->ok = pn && pa;
+                data_r->newestAirplaneState = pn->shared_from_this();
+                data_r->aprilTagCmdData = pa->shared_from_this();
                 sendMail(std::move(data_r), mailbox);
                 return;
             }
@@ -273,7 +275,7 @@ namespace OwlSerialController {
                     BOOST_ASSERT(data->aprilTagCmdPtr);
 
                     // save a copy for other use
-                    aprilTagCmdData = data->aprilTagCmdPtr;
+                    atomic_store(&aprilTagCmdData, data->aprilTagCmdPtr);
 
                     auto pcx = static_cast<uint16_t>(data->aprilTagCmdPtr->imageX);
                     auto pcy = static_cast<uint16_t>(data->aprilTagCmdPtr->imageY);

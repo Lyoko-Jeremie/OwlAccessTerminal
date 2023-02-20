@@ -56,7 +56,7 @@ namespace OwlMailDefine {
         double cornerLBy;
     };
 
-    struct AprilTagCmd {
+    struct AprilTagCmd : public std::enable_shared_from_this<AprilTagCmd> {
         using AprilTagListType = std::shared_ptr<std::vector<OwlMailDefine::AprilTagInfo>>;
         using AprilTagCenterType = std::shared_ptr<OwlMailDefine::AprilTagInfo>;
 
@@ -153,6 +153,7 @@ namespace OwlMailDefine {
         bool openError = false;
 
         std::shared_ptr<OwlSerialController::AirplaneState> newestAirplaneState;
+        std::shared_ptr<OwlMailDefine::AprilTagCmd> aprilTagCmdData;
     };
     using CmdSerialMailbox =
             std::shared_ptr<

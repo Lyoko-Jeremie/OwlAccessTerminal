@@ -24,7 +24,11 @@ namespace OwlMapCalc {
             BOOST_LOG_TRIVIAL(error) << "MapCalc loadCalcJsCodeFile filePath not exists : " << filePath;
             return false;
         }
-        return qjw_->loadCode(filePath);
+        bool ok = qjw_->loadCode(filePath);
+        if (!ok) {
+            BOOST_LOG_TRIVIAL(error) << "MapCalc loadCalcJsCodeFile loadCode failed.";
+        }
+        return ok;
     }
 
     using MapCalcFunctionTrueType =

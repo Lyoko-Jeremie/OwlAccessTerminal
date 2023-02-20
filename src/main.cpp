@@ -19,6 +19,8 @@
 #include "ImageService/CameraReader.h"
 #include "ConfigLoader/ConfigLoader.h"
 #include "TimeService/TimeService.h"
+#include "MapCalc/MapCalcMail.h"
+#include "MapCalc/MapCalc.h"
 
 #include "ImageService/protobuf_test.h"
 
@@ -194,6 +196,16 @@ int main(int argc, const char *argv[]) {
     config->print();
 
     boost::asio::io_context ioc_cmd;
+    boost::asio::io_context ioc_map_calc;
+    auto mailbox_map_calc = std::make_shared<OwlMailDefine::ServiceMapCalcMailbox::element_type>(
+            ioc_cmd, ioc_map_calc, "mailbox_map_calc"
+    );
+    auto mapCalcService = std::make_shared<OwlMapCalc::MapCalc>(
+            ioc_map_calc,
+            mailbox_map_calc->shared_from_this()
+    );
+    mapCalcService->loadCalcJsCodeFile(config->config().js_map_calc_file);
+    mapCalcService->loadMapCalcFunction(config->config().js_map_calc_function_name);
     auto mailbox_cmd_udp = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
             ioc_cmd, ioc_cmd, "mailbox_cmd_udp"
     );
@@ -215,7 +227,8 @@ int main(int argc, const char *argv[]) {
                     boost::asio::ip::tcp::v4(),
                     config->config().CommandServiceHttpPort
             ),
-            mailbox_cmd_http->shared_from_this()
+            mailbox_cmd_http->shared_from_this(),
+            mailbox_map_calc->shared_from_this()
     );
     cmdHttpService->start();
     auto serialControllerService = std::make_shared<OwlSerialController::SerialController>(

@@ -120,6 +120,7 @@ namespace OwlConfigLoader {
         std::string cmd_bash_path = "/bin/bash";
 
         std::string js_map_calc_file = "map_calc.js";
+        std::string js_map_calc_function_name = "calc_map_position";
 
 #ifdef EnableWebStaticModule
         ConfigEmbedWebServer embedWebServer;

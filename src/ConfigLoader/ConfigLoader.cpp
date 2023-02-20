@@ -198,6 +198,7 @@ namespace OwlConfigLoader {
         config.cmd_bash_path = get(root, "cmd_bash_path", config.cmd_bash_path);
 
         config.js_map_calc_file = get(root, "js_map_calc_file", config.js_map_calc_file);
+        config.js_map_calc_function_name = get(root, "js_map_calc_function_name", config.js_map_calc_function_name);
 
 #ifdef EnableWebStaticModule
         if (root.contains("embedWebServer")) {
@@ -253,6 +254,7 @@ namespace OwlConfigLoader {
             << "\n" << "frontCameraId " << config.frontCameraId.load()
             << "\n" << "cmd_bash_path " << config.cmd_bash_path
             << "\n" << "js_map_calc_file " << config.js_map_calc_file
+            << "\n" << "js_map_calc_function_name " << config.js_map_calc_function_name
             #ifdef EnableWebStaticModule
             << "\n" << "ConfigEmbedWebServer :"
             << "\n" << "\t doc_root " << config.embedWebServer.doc_root
