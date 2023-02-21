@@ -83,17 +83,21 @@ namespace OwlMapCalc {
             inputData["tagInfo"].as_object().emplace("list", tagList);
 
             // airplaneState;
-            inputData.emplace("airplaneState", boost::json::value{
-                    {"timestamp", airplaneState->timestamp},
-                    {"voltage",   airplaneState->voltage},
-                    {"high",      airplaneState->high},
-                    {"pitch",     airplaneState->pitch},
-                    {"roll",      airplaneState->roll},
-                    {"yaw",       airplaneState->yaw},
-                    {"vx",        airplaneState->vx},
-                    {"vy",        airplaneState->vy},
-                    {"vz",        airplaneState->vz},
-            });
+            if (airplaneState) {
+                inputData.emplace("airplaneState", boost::json::value{
+                        {"timestamp", airplaneState->timestamp},
+                        {"voltage",   airplaneState->voltage},
+                        {"high",      airplaneState->high},
+                        {"pitch",     airplaneState->pitch},
+                        {"roll",      airplaneState->roll},
+                        {"yaw",       airplaneState->yaw},
+                        {"vx",        airplaneState->vx},
+                        {"vy",        airplaneState->vy},
+                        {"vz",        airplaneState->vz},
+                });
+            } else {
+                inputData.emplace("airplaneState", boost::json::value{});
+            }
 
             try {
                 auto rData = std::make_shared<std::array<double, 3>>();
@@ -146,7 +150,13 @@ namespace OwlMapCalc {
         airplaneState->initTimestamp();
         airplaneState->high = 50;
 
+        auto t1 = std::chrono::high_resolution_clock::now();
         auto r = calcMapPosition(tagInfo, airplaneState);
+        auto t2 = std::chrono::high_resolution_clock::now();
+        BOOST_LOG_TRIVIAL(trace)
+            << "MapCalc testMapCalcFunction test time: "
+            << "\n" << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " [nanoseconds]"
+            << "\n" << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " [microseconds]";
         if (r) {
             BOOST_LOG_TRIVIAL(info)
                 << "MapCalc testMapCalcFunction test ok : ["
