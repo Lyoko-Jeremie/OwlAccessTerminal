@@ -9,6 +9,7 @@
 #include <boost/log/trivial.hpp>
 #include <boost/core/ignore_unused.hpp>
 #include <boost/assert.hpp>
+#include <boost/bind/bind.hpp>
 #include <utility>
 #include "CmdSerialMail.h"
 #include "../ConfigLoader/ConfigLoader.h"
@@ -106,6 +107,10 @@ namespace OwlSerialController {
             return true;
         }
 
+        bool isOpened() {
+            return sp_->is_open();
+        }
+
     };
 
     class SerialController : public std::enable_shared_from_this<SerialController> {
@@ -114,13 +119,22 @@ namespace OwlSerialController {
                 boost::asio::io_context &ioc,
                 std::shared_ptr<OwlConfigLoader::ConfigLoader> &&config,
                 std::vector<OwlMailDefine::CmdSerialMailbox> &&mailbox_list
-        ) : ioc_(ioc), config_(std::move(config)), mailbox_list_(std::move(mailbox_list)) {
+        ) : ioc_(ioc), config_(std::move(config)), mailbox_list_(std::move(mailbox_list)),
+            ping_timer_(ioc_, std::chrono::milliseconds(1000)) {
+            ping_box_ = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
+                    ioc_, ioc_, "ping_box_"
+            );
+            ping_box_->receiveB2A = [](OwlMailDefine::MailSerial2Cmd &&data) {
+                data->runner(data);
+            };
+            mailbox_list_.push_back(ping_box_->shared_from_this());
 
             for (auto &m: mailbox_list_) {
                 m->receiveA2B = [this, &m](OwlMailDefine::MailCmd2Serial &&data) {
                     receiveMail(std::move(data), m);
                 };
             }
+
         }
 
         void init() {
@@ -131,6 +145,9 @@ namespace OwlSerialController {
             BOOST_LOG_TRIVIAL(trace) << "airplanePortController.use_count() : " << airplanePortController.use_count();
             BOOST_ASSERT(airplanePortController.use_count() > 0);
             airplanePortController->init();
+
+            // init ping
+            ping_timer_tick({}, shared_from_this());
         }
 
         ~SerialController() {
@@ -181,6 +198,35 @@ namespace OwlSerialController {
         }
 
         bool initPort();
+
+    private:
+
+        boost::asio::steady_timer ping_timer_;
+        OwlMailDefine::CmdSerialMailbox ping_box_;
+
+        void ping_timer_tick(const boost::system::error_code &ec, std::shared_ptr<SerialController> self) {
+            boost::ignore_unused(ec);
+            ping_timer_.cancel();
+            if (initOk && airplanePortController && airplanePortController->isOpened()) {
+                auto mm = std::make_shared<OwlMailDefine::MailCmd2Serial::element_type>();
+                mm->additionCmd = OwlMailDefine::AdditionCmd::ping;
+                mm->callbackRunner = [this, self = std::move(self)](OwlMailDefine::MailSerial2Cmd &&data) {
+                    boost::ignore_unused(data);
+                    ping_timer_.expires_after(std::chrono::milliseconds(1000));
+                    ping_timer_.async_wait(
+                            boost::bind(&SerialController::ping_timer_tick,
+                                        this, boost::asio::placeholders::error,
+                                        shared_from_this()));
+                };
+                ping_box_->sendA2B(std::move(mm));
+            } else {
+                ping_timer_.expires_after(std::chrono::milliseconds(1000));
+                ping_timer_.async_wait(
+                        boost::bind(&SerialController::ping_timer_tick,
+                                    this, boost::asio::placeholders::error,
+                                    shared_from_this()));
+            }
+        }
 
     };
 
