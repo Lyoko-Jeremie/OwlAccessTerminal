@@ -93,10 +93,14 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
     if (tagInfo.tagInfo.list.length < 2) {
         // type : calc by tag side size
     } else if (tagInfo.tagInfo.list.length === 2) {
-        // type : calc by 2 tag and it's direction
         const l = tagInfo.tagInfo.list;
-        const relation = calcTagRelation(l[0].id, l[1].id);
-        console.log("relation: ", relation);
+        if (l[0].id === l[1].id) {
+            // type : calc by tag side size
+        } else {
+            // type : calc by 2 tag and it's direction
+            const relation = calcTagRelation(l[0].id, l[1].id);
+            console.log("relation: ", relation);
+        }
     } else if (tagInfo.tagInfo.list.length >= 3) {
         if (checkIsAllInSameLine(tagInfo.tagInfo.list)) {
             // type : calc by max distance 2 tag direction
