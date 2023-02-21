@@ -53,6 +53,10 @@ declare module MathEx {
     function radToDeg(rad: number): number;
 
     function randomInt2(min: number, max: number): number;
+
+    function distance(p1x: number, p1y: number, p2x: number, p2y: number): number;
+
+    function distanceFast(p1x: number, p1y: number, p2x: number, p2y: number): number;
 }
 
 const calcTagPosition = (t: number): { x: number, y: number } => {
@@ -66,7 +70,8 @@ const calcTagRelation = (t1: number, t2: number): { distance: number, rad: numbe
     const p2 = calcTagPosition(t2);
     const d = Math.atan2(p1.y - p2.y, p1.x - p2.x);
     return {
-        distance: Math.sqrt(Math.pow(Math.abs(p1.x - p2.x), 2) + Math.pow(Math.abs(p1.y - p2.y), 2)),
+        // distance: Math.sqrt(Math.pow(Math.abs(p1.x - p2.x), 2) + Math.pow(Math.abs(p1.y - p2.y), 2)),
+        distance: MathEx.distance(p1.x, p1.y, p2.x, p2.y),
         rad: d,
         deg: MathEx.radToDeg(d),
     };
