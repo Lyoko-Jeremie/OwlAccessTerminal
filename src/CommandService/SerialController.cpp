@@ -289,8 +289,9 @@ namespace OwlSerialController {
                         return;
                     }
                     BOOST_ASSERT(center);
+                    // (0,0) at image left top
                     auto x = center->cornerLTx - center->cornerLBx;
-                    auto y = center->cornerLTy - center->cornerLBy;
+                    auto y = -(center->cornerLTy - center->cornerLBy);
                     auto r = atan2(y, x);
                     // rad(+PI ~ -PI) -> degree(+180 ~ -180) -> degree(+360 ~ 0)
                     auto d = static_cast<uint16_t>(((r / (M_PI / 180.0)) + 180));
