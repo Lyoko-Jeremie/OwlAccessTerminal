@@ -65,26 +65,34 @@ namespace OwlMapCalc {
                         {"cLBy",     t.cornerLBy},
                 };
             };
-            inputData.emplace("tagInfo", boost::json::object{
-                    {"center", tv(tagInfo->aprilTagCenter.operator*())},
-            });
+            if (tagInfo->aprilTagCenter) {
+                inputData.emplace("tagInfo", boost::json::object{
+                        {"center", tv(tagInfo->aprilTagCenter.operator*())},
+                });
+            } else {
+                inputData.emplace("tagInfo", boost::json::object{
+                        {"center", {}},
+                });
+            }
             boost::json::array tagList{};
-            for (const auto &a: tagInfo->aprilTagList.operator*()) {
-                tagList.push_back(tv(a));
+            if (tagInfo->aprilTagList) {
+                for (const auto &a: tagInfo->aprilTagList.operator*()) {
+                    tagList.push_back(tv(a));
+                }
             }
             inputData["tagInfo"].as_object().emplace("list", tagList);
 
             // airplaneState;
             inputData.emplace("airplaneState", boost::json::value{
                     {"timestamp", airplaneState->timestamp},
-                    {"voltage", airplaneState->voltage},
-                    {"high", airplaneState->high},
-                    {"pitch", airplaneState->pitch},
-                    {"roll", airplaneState->roll},
-                    {"yaw", airplaneState->yaw},
-                    {"vx", airplaneState->vx},
-                    {"vy", airplaneState->vy},
-                    {"vz", airplaneState->vz},
+                    {"voltage",   airplaneState->voltage},
+                    {"high",      airplaneState->high},
+                    {"pitch",     airplaneState->pitch},
+                    {"roll",      airplaneState->roll},
+                    {"yaw",       airplaneState->yaw},
+                    {"vx",        airplaneState->vx},
+                    {"vy",        airplaneState->vy},
+                    {"vz",        airplaneState->vz},
             });
 
             try {

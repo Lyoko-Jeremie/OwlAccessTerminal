@@ -21,6 +21,16 @@ namespace OwlCommandServiceHttp {
         }
     }
 
+    void CmdServiceHttpConnect::sendMail_map(OwlMailDefine::MailService2MapCalc &&data) {
+        // send cmd to serial
+        auto p = getParentRef();
+        if (p) {
+            p->mailbox_map_->sendA2B(std::move(data));
+        } else {
+            BOOST_LOG_TRIVIAL(error) << "CmdServiceHttpConnect::sendMail() " << "(!p)";
+        }
+    }
+
     void CmdServiceHttpConnect::process_request() {
 
         switch (request_.method()) {
@@ -492,6 +502,7 @@ namespace OwlCommandServiceHttp {
                         }
                 );
             };
+            sendMail_map(std::move(mm));
         };
         sendMail(std::move(m));
 

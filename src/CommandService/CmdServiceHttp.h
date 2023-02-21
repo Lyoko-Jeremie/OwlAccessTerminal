@@ -189,6 +189,8 @@ namespace OwlCommandServiceHttp {
 
         void sendMail(OwlMailDefine::MailCmd2Serial &&data) override;
 
+        void sendMail_map(OwlMailDefine::MailService2MapCalc &&data);
+
         std::shared_ptr<CmdServiceHttp> getParentRef();
 
     };
