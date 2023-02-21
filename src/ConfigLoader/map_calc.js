@@ -20,7 +20,8 @@ const calcTagRelation = (t1, t2) => {
     const p2 = calcTagPosition(t2);
     const d = Math.atan2(p1.y - p2.y, p1.x - p2.x);
     return {
-        distance: Math.sqrt(Math.pow(Math.abs(p1.x - p2.x), 2) + Math.pow(Math.abs(p1.y - p2.y), 2)),
+        // distance: Math.sqrt(Math.pow(Math.abs(p1.x - p2.x), 2) + Math.pow(Math.abs(p1.y - p2.y), 2)),
+        distance: MathEx.distance(p1.x, p1.y, p2.x, p2.y),
         rad: d,
         deg: MathEx.radToDeg(d),
     };
@@ -32,6 +33,55 @@ const checkIsAllInSameLine = (list) => {
         return n !== undefined;
     }
     return false;
+};
+const calcOuterRect = (listPos) => {
+    const s = {
+        xL: Number.MAX_SAFE_INTEGER, xU: Number.MIN_SAFE_INTEGER,
+        zL: Number.MAX_SAFE_INTEGER, zU: Number.MIN_SAFE_INTEGER
+    };
+    for (let i = 0; i < listPos.length; i++) {
+        const a = listPos[i];
+        if (a.x < s.xL) {
+            s.xL = a.x;
+        }
+        if (a.y < s.zL) {
+            s.zL = a.y;
+        }
+        if (a.x > s.xU) {
+            s.xU = a.x;
+        }
+        if (a.y > s.zU) {
+            s.zU = a.y;
+        }
+    }
+    return s;
+};
+const findOuterSide = (list) => {
+    const listPos = list.map(T => {
+        const n = calcTagPosition(T.id);
+        n.tag = T;
+        return n;
+    });
+    const outerRect = calcOuterRect(listPos);
+    // find out item
+    const oit = { xL: [], xU: [], zL: [], zU: [] };
+    for (let i = 0; i < listPos.length; i++) {
+        const n = listPos[i];
+        if (n.x === outerRect.xL) {
+            oit.xL.push(i);
+        }
+        if (n.x === outerRect.xU) {
+            oit.xU.push(i);
+        }
+        if (n.y === outerRect.zL) {
+            oit.zL.push(i);
+        }
+        if (n.y === outerRect.zU) {
+            oit.zU.push(i);
+        }
+    }
+    const center = { x: (outerRect.xU + outerRect.xL) / 2, y: (outerRect.zU + outerRect.zL) / 2 };
+    return [];
 };
 function calc_map_position(tagInfo) {
     console.log("tagInfo:\n", JSON.stringify(tagInfo, undefined, 4));
@@ -50,8 +100,11 @@ function calc_map_position(tagInfo) {
         }
     }
     else if (tagInfo.tagInfo.list.length >= 3) {
-        if (checkIsAllInSameLine(tagInfo.tagInfo.list)) {
+        const l = tagInfo.tagInfo.list;
+        if (checkIsAllInSameLine(l)) {
             // type : calc by max distance 2 tag direction
+            const relation = calcTagRelation(l[0].id, l[1].id);
+            console.log("relation: ", relation);
         }
         else {
             // type : to find last triangle
