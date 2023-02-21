@@ -45,8 +45,12 @@ void installMathModule(qjs::Context &context) {
     module.function<&::log1p>("log1p");
     module.function<&::log10>("log10");
     module.function<&::log2>("log2");
-//    module.function("max", );
-//    module.function("min", );
+    module.function("max", [](const qjs::rest<double> &l) -> double {
+        return *std::max_element(l.begin(), l.end());
+    });
+    module.function("min", [](const qjs::rest<double> &l) -> double {
+        return *std::min_element(l.begin(), l.end());
+    });
     module.function<static_cast<double (*)(double, double)>(&::pow)>("pow");
     module.function("random", []() -> double {
         auto a = MathRandom::distribReal(MathRandom::gen);
