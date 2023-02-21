@@ -332,6 +332,7 @@ int main(int argc, const char *argv[]) {
             case SIGTERM: {
                 // stop all service on there
                 BOOST_LOG_TRIVIAL(info) << "stopping all service. ";
+                ioc_map_calc.stop();
                 ioc_cmd.stop();
                 ioc_time.stop();
                 ioc_imageWeb.stop();
@@ -352,6 +353,7 @@ int main(int argc, const char *argv[]) {
     BOOST_LOG_TRIVIAL(info) << "processor_count: " << processor_count;
 
     boost::thread_group tg;
+    tg.create_thread(ThreadCallee{ioc_map_calc, tg, "ioc_map_calc"});
     tg.create_thread(ThreadCallee{ioc_cmd, tg, "ioc_cmd"});
     tg.create_thread(ThreadCallee{ioc_time, tg, "ioc_time"});
     tg.create_thread(ThreadCallee{ioc_imageWeb, tg, "ioc_imageWeb"});
