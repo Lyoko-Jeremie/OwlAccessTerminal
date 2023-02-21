@@ -3,22 +3,29 @@
 #include "QuickJsWrapperImpl.h"
 #include <boost/log/trivial.hpp>
 
+#include <sstream>
 #include "./QuickJsH.h"
 
 #include "./MathModule.h"
 
 namespace OwlQuickJsWrapper {
 
-    void logConsole(const std::string &s) {
-        BOOST_LOG_TRIVIAL(info) << s;
+    void logConsole(const qjs::rest<std::string>& args) {
+        std::stringstream ss;
+        for (auto const &arg: args) ss << arg;
+        BOOST_LOG_TRIVIAL(info) << ss.str();
     }
 
-    void warningConsole(const std::string &s) {
-        BOOST_LOG_TRIVIAL(warning) << s;
+    void warningConsole(const qjs::rest<std::string>& args) {
+        std::stringstream ss;
+        for (auto const &arg: args) ss << arg;
+        BOOST_LOG_TRIVIAL(warning) << ss.str();
     }
 
-    void errorConsole(const std::string &s) {
-        BOOST_LOG_TRIVIAL(error) << s;
+    void errorConsole(const qjs::rest<std::string>& args) {
+        std::stringstream ss;
+        for (auto const &arg: args) ss << arg;
+        BOOST_LOG_TRIVIAL(error) << ss.str();
     }
 
 
@@ -42,8 +49,8 @@ namespace OwlQuickJsWrapper {
             module.function<&warningConsole>("warning");
             module.function<&errorConsole>("error");
             context_.eval(R"xxx(
-                import * as console from 'console';
-                globalThis.console = console;
+                import * as consoleC from 'console';
+                globalThis.console = consoleC;
                 )xxx", "<import>", JS_EVAL_TYPE_MODULE);
         }
         catch (qjs::exception &) {
