@@ -46,7 +46,10 @@ namespace OwlMapCalc {
                         std::shared_ptr<OwlSerialController::AirplaneState> airplaneState
                 ) -> std::shared_ptr<std::array<double, 3>> {
 
-            boost::json::object inputData{};
+            boost::json::object inputData{
+                    {"imageX", tagInfo->imageX},
+                    {"imageY", tagInfo->imageY},
+            };
             // tagInfo;
             auto tv = [](const OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type &t) {
                 return boost::json::value{
