@@ -153,6 +153,8 @@ namespace OwlMapCalc {
         tagInfo->aprilTagCenter->cornerLBy = 300;
         tagInfo->aprilTagList = std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type>();
         tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
+        tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
+        tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
         auto airplaneState = std::make_shared<OwlSerialController::AirplaneState>();
         airplaneState->initTimestamp();
         airplaneState->high = 50;
@@ -163,7 +165,8 @@ namespace OwlMapCalc {
         BOOST_LOG_TRIVIAL(trace)
             << "MapCalc testMapCalcFunction test time: "
             << "\n" << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " [nanoseconds]"
-            << "\n" << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " [microseconds]";
+            << "\n" << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " [microseconds]"
+            << "\n" << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << " [milliseconds]";
         if (r) {
             BOOST_LOG_TRIVIAL(info)
                 << "MapCalc testMapCalcFunction test ok : ["
