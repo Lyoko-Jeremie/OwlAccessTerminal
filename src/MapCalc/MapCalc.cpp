@@ -67,7 +67,8 @@ namespace OwlMapCalc {
                 auto exc = qjw_->getContext().getException();
                 BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction qjs::exception " << (std::string) exc;
                 if ((bool) exc["stack"]) {
-                    BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction qjs::exception " << (std::string) exc["stack"];
+                    BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction qjs::exception "
+                                             << (std::string) exc["stack"];
                 }
                 // failed
                 return {};
@@ -75,6 +76,40 @@ namespace OwlMapCalc {
 
         };
         return true;
+    }
+
+    bool MapCalc::testMapCalcFunction() {
+        auto tagInfo = std::make_shared<OwlMailDefine::AprilTagCmd>();
+        tagInfo->imageX = 800;
+        tagInfo->imageY = 600;
+        tagInfo->aprilTagCenter = std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type>();
+        tagInfo->aprilTagCenter->id = 0;
+        // (0,0) at image left top
+        tagInfo->aprilTagCenter->centerX = 400;
+        tagInfo->aprilTagCenter->centerY = 300;
+        tagInfo->aprilTagCenter->cornerLTx = 0;
+        tagInfo->aprilTagCenter->cornerLTy = 0;
+        tagInfo->aprilTagCenter->cornerRTx = 400;
+        tagInfo->aprilTagCenter->cornerRTy = 0;
+        tagInfo->aprilTagCenter->cornerRBx = 400;
+        tagInfo->aprilTagCenter->cornerRBy = 300;
+        tagInfo->aprilTagCenter->cornerLBx = 0;
+        tagInfo->aprilTagCenter->cornerLBy = 300;
+        tagInfo->aprilTagList = std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type>();
+        tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
+        auto airplaneState = std::make_shared<OwlSerialController::AirplaneState>();
+        airplaneState->initTimestamp();
+        airplaneState->high = 50;
+
+        auto r = calcMapPosition(tagInfo, airplaneState);
+        if (r) {
+            BOOST_LOG_TRIVIAL(info)
+                << "MapCalc testMapCalcFunction test ok : ["
+                << r->at(0) << "," << r->at(1) << "," << r->at(2) << "]";
+            return true;
+        }
+        BOOST_LOG_TRIVIAL(error) << "MapCalc testMapCalcFunction test failed.";
+        return false;
     }
 
 } // OwlMapCalc

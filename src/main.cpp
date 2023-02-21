@@ -206,6 +206,8 @@ int main(int argc, const char *argv[]) {
     );
     mapCalcService->loadCalcJsCodeFile(config->config().js_map_calc_file);
     mapCalcService->loadMapCalcFunction(config->config().js_map_calc_function_name);
+    mapCalcService->testMapCalcFunction();
+
     auto mailbox_cmd_udp = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
             ioc_cmd, ioc_cmd, "mailbox_cmd_udp"
     );

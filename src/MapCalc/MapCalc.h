@@ -51,6 +51,8 @@ namespace OwlMapCalc {
 
         bool loadMapCalcFunction(const std::string &functionName);
 
+        bool testMapCalcFunction();
+
         std::shared_ptr<std::array<double, 3>> calcMapPosition(
                 std::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
                 std::shared_ptr<OwlSerialController::AirplaneState> airplaneState
