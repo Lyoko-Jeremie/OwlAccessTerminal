@@ -45,11 +45,12 @@ namespace OwlQuickJsWrapper {
                 import * as console from 'console';
                 globalThis.console = console;
                 )xxx", "<import>", JS_EVAL_TYPE_MODULE);
-        } catch (qjs::exception &) {
+        }
+        catch (qjs::exception &) {
             auto exc = context_.getException();
-            BOOST_LOG_TRIVIAL(error) << (std::string) exc;
+            BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl init qjs::exception " << (std::string) exc;
             if ((bool) exc["stack"]) {
-                BOOST_LOG_TRIVIAL(error) << (std::string) exc["stack"];
+                BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl init qjs::exception " << (std::string) exc["stack"];
             }
             return false;
         }
@@ -62,9 +63,9 @@ namespace OwlQuickJsWrapper {
         }
         catch (qjs::exception &) {
             auto exc = context_.getException();
-            BOOST_LOG_TRIVIAL(error) << (std::string) exc;
+            BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl evalCode qjs::exception " << (std::string) exc;
             if ((bool) exc["stack"]) {
-                BOOST_LOG_TRIVIAL(error) << (std::string) exc["stack"];
+                BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl evalCode qjs::exception " << (std::string) exc["stack"];
             }
             return false;
         }
@@ -77,9 +78,9 @@ namespace OwlQuickJsWrapper {
         }
         catch (qjs::exception &) {
             auto exc = context_.getException();
-            BOOST_LOG_TRIVIAL(error) << (std::string) exc;
+            BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl loadCode qjs::exception " << (std::string) exc;
             if ((bool) exc["stack"]) {
-                BOOST_LOG_TRIVIAL(error) << (std::string) exc["stack"];
+                BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl loadCode qjs::exception " << (std::string) exc["stack"];
             }
             return false;
         }

@@ -32,9 +32,9 @@ namespace OwlQuickJsWrapper {
             }
             catch (qjs::exception &) {
                 auto exc = context_.getException();
-                BOOST_LOG_TRIVIAL(error) << (std::string) exc;
+                BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl getCallbackFunction qjs::exception " << (std::string) exc;
                 if ((bool) exc["stack"]) {
-                    BOOST_LOG_TRIVIAL(error) << (std::string) exc["stack"];
+                    BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl getCallbackFunction qjs::exception " << (std::string) exc["stack"];
                 }
                 return {};
             }

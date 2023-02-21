@@ -65,9 +65,9 @@ namespace OwlMapCalc {
             }
             catch (qjs::exception &) {
                 auto exc = qjw_->getContext().getException();
-                BOOST_LOG_TRIVIAL(error) << "loadMapCalcFunction qjs::exception " << (std::string) exc;
+                BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction qjs::exception " << (std::string) exc;
                 if ((bool) exc["stack"]) {
-                    BOOST_LOG_TRIVIAL(error) << (std::string) exc["stack"];
+                    BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction qjs::exception " << (std::string) exc["stack"];
                 }
                 // failed
                 return {};
