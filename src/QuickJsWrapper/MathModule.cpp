@@ -2,6 +2,7 @@
 
 #include "MathModule.h"
 #include <cmath>
+#include <limits>
 #include <random>
 
 namespace MathRandom {
@@ -57,7 +58,9 @@ void installMathModule(qjs::Context &context) {
         return a;
     });
     module.function<static_cast<double (*)(double)>(&::round)>("round");
-//    module.function<static_cast<double (*)(double)>(&::sign)>("sign");
+    module.function("sign", [](double n) -> double {
+        return n < 0 ? -1 : (n > 0 ? 1 : (n == 0 ? 0 : std::numeric_limits<double>::quiet_NaN()));
+    });
     module.function<static_cast<double (*)(double)>(&::sin)>("sin");
     module.function<static_cast<double (*)(double)>(&::sinh)>("sinh");
     module.function<static_cast<double (*)(double)>(&::sqrt)>("sqrt");
