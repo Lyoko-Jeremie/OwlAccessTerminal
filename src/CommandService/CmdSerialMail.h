@@ -25,6 +25,9 @@ namespace OwlMailDefine {
         led = 14,
         gotoPosition = 15,
         flyMode = 16,
+
+        calibrate = 90,
+
         AprilTag = 100,
 
         JoyCon = 111,

@@ -120,6 +120,28 @@ namespace OwlProcessJsonMessage {
                             }
                     );
                     break;
+                case 90: {
+                    // calibrate
+                    BOOST_LOG_TRIVIAL(info) << "calibrate";
+                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    m->additionCmd = OwlMailDefine::AdditionCmd::calibrate;
+                    m->callbackRunner = [self, cmdId, packageId](
+                            const OwlMailDefine::MailSerial2Cmd &data
+                    ) {
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "calibrate"},
+                                        // {"result",    true},
+                                        {"result",    data->ok},
+                                        {"openError", data->openError},
+                                }
+                        );
+                    };
+                    self->sendMail(std::move(m));
+                    break;
+                }
                 case 10: {
                     // break
                     BOOST_LOG_TRIVIAL(info) << "break";

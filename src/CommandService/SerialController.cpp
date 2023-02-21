@@ -210,6 +210,7 @@ namespace OwlSerialController {
                 case OwlMailDefine::AdditionCmd::speed:
                 case OwlMailDefine::AdditionCmd::flyMode:
                 case OwlMailDefine::AdditionCmd::gotoPosition:
+                case OwlMailDefine::AdditionCmd::calibrate:
                 case OwlMailDefine::AdditionCmd::led: {
                     BOOST_LOG_TRIVIAL(trace) << "SerialController"
                                              << " receiveMail"

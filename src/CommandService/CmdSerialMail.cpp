@@ -4,26 +4,31 @@
 
 namespace OwlMailDefine {
     const std::map<AdditionCmd, std::string> AdditionCmdNameLookupTable{
-            {AdditionCmd::ignore, "ignore"},
+            {AdditionCmd::ignore,           "ignore"},
 
-            {AdditionCmd::takeoff, "takeoff"},
-            {AdditionCmd::land, "land"},
-            {AdditionCmd::stop, "stop"},
-            {AdditionCmd::keep, "keep"},
-            {AdditionCmd::move, "move"},
-            {AdditionCmd::rotate, "rotate"},
-            {AdditionCmd::high, "high"},
-            {AdditionCmd::speed, "speed"},
-            {AdditionCmd::led, "led"},
+            {AdditionCmd::takeoff,          "takeoff"},
+            {AdditionCmd::land,             "land"},
+            {AdditionCmd::stop,             "stop"},
+            {AdditionCmd::keep,             "keep"},
+            {AdditionCmd::move,             "move"},
+            {AdditionCmd::rotate,           "rotate"},
+            {AdditionCmd::high,             "high"},
+            {AdditionCmd::speed,            "speed"},
+            {AdditionCmd::led,              "led"},
 
-            {AdditionCmd::gotoPosition, "gotoPosition"},
-            {AdditionCmd::flyMode, "flyMode"},
-            {AdditionCmd::AprilTag, "AprilTag"},
+            {AdditionCmd::gotoPosition,     "gotoPosition"},
+            {AdditionCmd::flyMode,          "flyMode"},
 
-            {AdditionCmd::JoyCon, "JoyCon"},
-            {AdditionCmd::JoyConSimple, "JoyConSimple"},
-            {AdditionCmd::JoyConGyro, "JoyConGyro"},
+            {AdditionCmd::calibrate,        "calibrate"},
+
+            {AdditionCmd::AprilTag,         "AprilTag"},
+
+            {AdditionCmd::JoyCon,           "JoyCon"},
+            {AdditionCmd::JoyConSimple,     "JoyConSimple"},
+            {AdditionCmd::JoyConGyro,       "JoyConGyro"},
 
             {AdditionCmd::getAirplaneState, "getAirplaneState"},
+
+            {AdditionCmd::ping,             "ping"},
     };
 }
