@@ -46,10 +46,14 @@ namespace OwlMapCalc {
                         std::shared_ptr<OwlSerialController::AirplaneState> airplaneState
                 ) -> std::shared_ptr<std::array<double, 3>> {
 
-            boost::json::object inputData{
-                    {"imageX", tagInfo->imageX},
-                    {"imageY", tagInfo->imageY},
-            };
+            boost::json::object inputData{};
+            if (tagInfo) {
+                inputData.emplace("imageX", tagInfo->imageX);
+                inputData.emplace("imageY", tagInfo->imageY);
+            } else {
+                inputData.emplace("imageX", 0);
+                inputData.emplace("imageY", 0);
+            }
             // tagInfo;
             auto tv = [](const OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type &t) {
                 return boost::json::value{
@@ -68,7 +72,7 @@ namespace OwlMapCalc {
                         {"cLBy",     t.cornerLBy},
                 };
             };
-            if (tagInfo->aprilTagCenter) {
+            if (tagInfo && tagInfo->aprilTagCenter) {
                 inputData.emplace("tagInfo", boost::json::object{
                         {"center", tv(tagInfo->aprilTagCenter.operator*())},
                 });
@@ -78,7 +82,7 @@ namespace OwlMapCalc {
                 });
             }
             boost::json::array tagList{};
-            if (tagInfo->aprilTagList) {
+            if (tagInfo && tagInfo->aprilTagList) {
                 for (const auto &a: tagInfo->aprilTagList.operator*()) {
                     tagList.push_back(tv(a));
                 }
