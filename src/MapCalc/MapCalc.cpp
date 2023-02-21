@@ -45,10 +45,47 @@ namespace OwlMapCalc {
                         std::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
                         std::shared_ptr<OwlSerialController::AirplaneState> airplaneState
                 ) -> std::shared_ptr<std::array<double, 3>> {
-            // TODO
-            boost::json::value inputData{};
-            tagInfo;
-            airplaneState;
+
+            boost::json::object inputData{};
+            // tagInfo;
+            auto tv = [](const OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type &t) {
+                return boost::json::value{
+                        {"id",       t.id},
+                        {"dec_marg", t.decision_margin},
+                        {"ham",      t.hamming},
+                        {"cX",       t.centerX},
+                        {"cY",       t.centerY},
+                        {"cLTx",     t.cornerLTx},
+                        {"cLTy",     t.cornerLTy},
+                        {"cRTx",     t.cornerRTx},
+                        {"cRTy",     t.cornerRTy},
+                        {"cRBx",     t.cornerRBx},
+                        {"cRBy",     t.cornerRBy},
+                        {"cLBx",     t.cornerLBx},
+                        {"cLBy",     t.cornerLBy},
+                };
+            };
+            inputData.emplace("tagInfo", boost::json::object{
+                    {"center", tv(tagInfo->aprilTagCenter.operator*())},
+            });
+            boost::json::array tagList{};
+            for (const auto &a: tagInfo->aprilTagList.operator*()) {
+                tagList.push_back(tv(a));
+            }
+            inputData["tagInfo"].as_object().emplace("list", tagList);
+
+            // airplaneState;
+            inputData.emplace("airplaneState", boost::json::value{
+                    {"timestamp", airplaneState->timestamp},
+                    {"voltage", airplaneState->voltage},
+                    {"high", airplaneState->high},
+                    {"pitch", airplaneState->pitch},
+                    {"roll", airplaneState->roll},
+                    {"yaw", airplaneState->yaw},
+                    {"vx", airplaneState->vx},
+                    {"vy", airplaneState->vy},
+                    {"vz", airplaneState->vz},
+            });
 
             try {
                 auto rData = std::make_shared<std::array<double, 3>>();
