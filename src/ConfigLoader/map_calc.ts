@@ -13,6 +13,26 @@ type TagType = {
     cLBx: number,
     cLBy: number,
 };
+const checkTagType = (t_: TagType | {}): boolean => {
+    if (!t_) {
+        return false;
+    }
+    const t = t_ as TagType;
+    return t
+        && t.id !== undefined
+        && t.dec_marg !== undefined
+        && t.ham !== undefined
+        && t.cX !== undefined
+        && t.cY !== undefined
+        && t.cLTx !== undefined
+        && t.cLTy !== undefined
+        && t.cRTx !== undefined
+        && t.cRTy !== undefined
+        && t.cRBx !== undefined
+        && t.cRBy !== undefined
+        && t.cLBx !== undefined
+        && t.cLBy !== undefined;
+};
 type AirplaneStateType = {
     timestamp: number,
     voltage: number,
@@ -24,6 +44,22 @@ type AirplaneStateType = {
     vy: number,
     vz: number,
 };
+const checkAirplaneStateType = (t_: AirplaneStateType | {}): boolean => {
+    if (!t_) {
+        return false;
+    }
+    const t = t_ as AirplaneStateType;
+    return t
+        && t.timestamp !== undefined
+        && t.voltage !== undefined
+        && t.high !== undefined
+        && t.pitch !== undefined
+        && t.roll !== undefined
+        && t.yaw !== undefined
+        && t.vx !== undefined
+        && t.vy !== undefined
+        && t.vz !== undefined;
+};
 type TagInfoType = {
     imageX: number | 0,
     imageY: number | 0,
@@ -32,6 +68,15 @@ type TagInfoType = {
         list: TagType[],
     },
     airplaneState: AirplaneStateType | {},
+};
+const checkTagInfoType = (t: TagInfoType): boolean => {
+    return t
+        && t.imageX !== 0
+        && t.imageY !== 0
+        && t.tagInfo !== undefined
+        && t.tagInfo.center !== undefined
+        && t.tagInfo.list !== undefined
+        && t.airplaneState !== undefined;
 };
 
 // ============ map info ============
@@ -146,6 +191,18 @@ type ResultOutputReturnType = [
 
 function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
     console.log("tagInfo:\n", JSON.stringify(tagInfo, undefined, 4));
+    if (
+        !checkTagInfoType(tagInfo) ||
+        !checkAirplaneStateType(tagInfo.airplaneState) ||
+        !checkTagType(tagInfo.tagInfo.center)
+    ) {
+        return [false, 0, 0, 0];
+    }
+    if (
+        !tagInfo.tagInfo.list.find(T => checkTagType(T))
+    ) {
+        return [false, 0, 0, 0];
+    }
     if (tagInfo.tagInfo.list.length < 2) {
         // type : calc by tag side size
     } else if (tagInfo.tagInfo.list.length === 2) {

@@ -1,4 +1,49 @@
 "use strict";
+const checkTagType = (t_) => {
+    if (!t_) {
+        return false;
+    }
+    const t = t_;
+    return t
+        && t.id !== undefined
+        && t.dec_marg !== undefined
+        && t.ham !== undefined
+        && t.cX !== undefined
+        && t.cY !== undefined
+        && t.cLTx !== undefined
+        && t.cLTy !== undefined
+        && t.cRTx !== undefined
+        && t.cRTy !== undefined
+        && t.cRBx !== undefined
+        && t.cRBy !== undefined
+        && t.cLBx !== undefined
+        && t.cLBy !== undefined;
+};
+const checkAirplaneStateType = (t_) => {
+    if (!t_) {
+        return false;
+    }
+    const t = t_;
+    return t
+        && t.timestamp !== undefined
+        && t.voltage !== undefined
+        && t.high !== undefined
+        && t.pitch !== undefined
+        && t.roll !== undefined
+        && t.yaw !== undefined
+        && t.vx !== undefined
+        && t.vy !== undefined
+        && t.vz !== undefined;
+};
+const checkTagInfoType = (t) => {
+    return t
+        && t.imageX !== 0
+        && t.imageY !== 0
+        && t.tagInfo !== undefined
+        && t.tagInfo.center !== undefined
+        && t.tagInfo.list !== undefined
+        && t.airplaneState !== undefined;
+};
 // ============ map info ============
 const MapX = 10;
 const MapZ = 20;
@@ -85,6 +130,14 @@ const findOuterSide = (list) => {
 };
 function calc_map_position(tagInfo) {
     console.log("tagInfo:\n", JSON.stringify(tagInfo, undefined, 4));
+    if (!checkTagInfoType(tagInfo) ||
+        !checkAirplaneStateType(tagInfo.airplaneState) ||
+        !checkTagType(tagInfo.tagInfo.center)) {
+        return [false, 0, 0, 0];
+    }
+    if (!tagInfo.tagInfo.list.find(T => checkTagType(T))) {
+        return [false, 0, 0, 0];
+    }
     if (tagInfo.tagInfo.list.length < 2) {
         // type : calc by tag side size
     }
