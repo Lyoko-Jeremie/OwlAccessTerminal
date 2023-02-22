@@ -23,7 +23,12 @@ void installMathModule(qjs::Context &context) {
     module.add("PI", M_PI);
     module.add("SQRT1_2", M_SQRT1_2);
     module.add("SQRT2", M_SQRT2);
-    module.function<static_cast<double (*)(double)>(&::abs)>("abs");
+    module.function("abs", [](double a) -> double {
+        if (a < 0) {
+            return -a;
+        }
+        return a;
+    });
     module.function<static_cast<double (*)(double)>(&::acos)>("acos");
     module.function<static_cast<double (*)(double)>(&::acosh)>("acosh");
     module.function<static_cast<double (*)(double)>(&::asin)>("asin");
