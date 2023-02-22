@@ -126,7 +126,16 @@ const findOuterSide = (list) => {
         }
     }
     const center = { x: (outerRect.xU + outerRect.xL) / 2, y: (outerRect.zU + outerRect.zL) / 2 };
+    // TODO
     return [];
+};
+// translate image (0,0) from LT to LB
+const y2y = (imageY, y) => {
+    return imageY - y;
+};
+const calcImageCenterInPlane = (imageX, imageY, planeInfo) => {
+    // TODO re-calc to update planeInfo P-P-pair
+    return planeInfo;
 };
 function calc_map_position(tagInfo) {
     console.log("tagInfo:\n", JSON.stringify(tagInfo, undefined, 4));
@@ -140,16 +149,19 @@ function calc_map_position(tagInfo) {
     }
     if (tagInfo.tagInfo.list.length < 2) {
         // type : calc by tag side size
+        // TODO 1
     }
     else if (tagInfo.tagInfo.list.length === 2) {
         const l = tagInfo.tagInfo.list;
         if (l[0].id === l[1].id) {
             // type : calc by tag side size
+            // TODO 1
         }
         else {
             // type : calc by 2 tag and it's direction
             const relation = calcTagRelation(l[0].id, l[1].id);
             console.log("relation: ", relation);
+            // TODO 2
         }
     }
     else if (tagInfo.tagInfo.list.length >= 3) {
@@ -158,9 +170,11 @@ function calc_map_position(tagInfo) {
             // type : calc by max distance 2 tag direction
             const relation = calcTagRelation(l[0].id, l[1].id);
             console.log("relation: ", relation);
+            // TODO 2
         }
         else {
             // type : to find last triangle
+            // TODO 3 findOuterSide
         }
     }
     return [true, 0, 1, 2];
