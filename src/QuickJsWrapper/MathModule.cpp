@@ -23,12 +23,15 @@ void installMathModule(qjs::Context &context) {
     module.add("PI", M_PI);
     module.add("SQRT1_2", M_SQRT1_2);
     module.add("SQRT2", M_SQRT2);
-    module.function("abs", [](double a) -> double {
-        if (a < 0) {
-            return -a;
-        }
-        return a;
-    });
+    // https://stackoverflow.com/questions/9772348/get-absolute-value-without-using-abs-function-nor-if-statement
+    // https://stackoverflow.com/questions/2878076/what-is-different-about-c-math-h-abs-compared-to-my-abs
+//    module.function("abs", [](double a) -> double {
+//        if (a < 0) {
+//            return 0 - a;
+//        }
+//        return a;
+//    });
+    module.function<static_cast<double (*)(double)>(&std::abs)>("abs");
     module.function<static_cast<double (*)(double)>(&::acos)>("acos");
     module.function<static_cast<double (*)(double)>(&::acosh)>("acosh");
     module.function<static_cast<double (*)(double)>(&::asin)>("asin");
