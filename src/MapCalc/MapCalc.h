@@ -38,7 +38,7 @@ namespace OwlMapCalc {
                 );
 
     private:
-        boost::asio::io_context &ioc_;
+        boost::asio::strand<boost::asio::io_context::executor_type> ioc_;
         OwlMailDefine::ServiceMapCalcMailbox mailbox_;
 
         std::shared_ptr<OwlQuickJsWrapper::QuickJsWrapper> qjw_;
