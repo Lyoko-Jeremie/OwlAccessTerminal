@@ -12,6 +12,12 @@ namespace MathRandom {
     std::uniform_real_distribution<> distribReal(0, 1);
 }
 
+// https://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
+template<typename T>
+int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
 void installMathModule(qjs::Context &context) {
     auto & module = context.addModule("Math");
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math
@@ -67,7 +73,8 @@ void installMathModule(qjs::Context &context) {
     });
     module.function<static_cast<double (*)(double)>(&::round)>("round");
     module.function("sign", [](double n) -> double {
-        return n < 0 ? -1 : (n > 0 ? 1 : (n == 0 ? 0 : std::numeric_limits<double>::quiet_NaN()));
+//        return n < 0 ? -1 : (n > 0 ? 1 : (n == 0 ? 0 : std::numeric_limits<double>::quiet_NaN()));
+        return sgn(n);
     });
     module.function<static_cast<double (*)(double)>(&::sin)>("sin");
     module.function<static_cast<double (*)(double)>(&::sinh)>("sinh");
