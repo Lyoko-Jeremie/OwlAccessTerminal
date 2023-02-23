@@ -37,6 +37,8 @@ namespace OwlMailDefine {
         getAirplaneState = 180,
 
         ping = 251,
+        emergencyStop = 252,
+        unlock = 253,
     };
     extern const std::map<AdditionCmd, std::string> AdditionCmdNameLookupTable;
 

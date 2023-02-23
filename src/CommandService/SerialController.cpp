@@ -516,6 +516,8 @@ namespace OwlSerialController {
                     );
                     return;
                 }
+                case OwlMailDefine::AdditionCmd::emergencyStop:
+                case OwlMailDefine::AdditionCmd::unlock:
                 case OwlMailDefine::AdditionCmd::ping: {
                     constexpr uint8_t packageSize = 5;
                     makeADataBuffer<packageSize>(
