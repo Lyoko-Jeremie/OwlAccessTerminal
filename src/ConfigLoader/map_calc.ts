@@ -102,6 +102,8 @@ declare module MathEx {
     function distance(p1x: number, p1y: number, p2x: number, p2y: number): number;
 
     function distanceFast(p1x: number, p1y: number, p2x: number, p2y: number): number;
+
+    function pythagoreanDistance(x: number, y: number): number;
 }
 
 const calcTagPosition = (t: number): { x: number, y: number } => {
@@ -200,16 +202,26 @@ interface Point2 {
 }
 
 interface PlaneInfo {
+    // the vector of plane X axis in image
     xDirect: Vec2;
+    // the vector of plane Z axis in image
     zDirect: Vec2;
     // Point 2 Point pair
+    // cm XZ
     PlaneP: Point2;
+    // pixel XY
     ImageP: Point2;
     // Plane scale of image on Plane XZ Direct
+    // imgPixel[px]/planeDistance[1m]
     ScaleXZ: Vec2;
     // Plane scale in image XY Direct
+    // planeDistance[mm]/imgPixel[1px]
     ScaleXY: Vec2;
 }
+
+const calcVectorLineScale = (va: Vec2, vb: Vec2) => {
+    return MathEx.pythagoreanDistance(va.x, va.y) / MathEx.pythagoreanDistance(vb.x, vb.y);
+};
 
 const calcImageCenterInPlane = (imageX: number, imageY: number, planeInfo: PlaneInfo) => {
     // TODO re-calc to update planeInfo P-P-pair
