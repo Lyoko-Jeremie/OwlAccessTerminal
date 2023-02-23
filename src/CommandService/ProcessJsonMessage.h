@@ -192,6 +192,43 @@ namespace OwlProcessJsonMessage {
         }
     }
 
+    enum class OwlCmdEnum {
+        ping = 0,
+        emergencyStop = 120,
+        unlock = 92,
+
+        calibrate = 90,
+        breakCmd = 10,
+        takeoff = 11,
+        land = 12,
+        move = 13,
+        rotate = 14,
+        keep = 15,
+        gotoCmd = 16,
+
+        led = 17,
+        high = 18,
+        speed = 19,
+        flyMode = 20,
+
+        joyCon = 60,
+        joyConSimple = 61,
+        joyConGyro = 62,
+
+    };
+    enum class OwlCmdRotateEnum {
+        cw = 1,
+        ccw = 2,
+    };
+    enum class OwlCmdMoveEnum {
+        up = 1,
+        down = 2,
+        left = 3,
+        right = 4,
+        forward = 5,
+        back = 6,
+    };
+
     /**
      *
      * @tparam SelfType : must impl `send_back_json(const boost::json::value &json_value)`
@@ -262,7 +299,7 @@ namespace OwlProcessJsonMessage {
                 return;
             }
             switch (cmdId) {
-                case 0:
+                case static_cast<int>(OwlCmdEnum::ping):
                     // ping-pong
                     BOOST_LOG_TRIVIAL(info) << "ping-pong";
                     self->send_back_json(
@@ -274,7 +311,7 @@ namespace OwlProcessJsonMessage {
                             }
                     );
                     break;
-                case 90: {
+                case static_cast<int>(OwlCmdEnum::calibrate): {
                     // calibrate
                     BOOST_LOG_TRIVIAL(info) << "calibrate";
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
@@ -296,7 +333,7 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
-                case 120: {
+                case static_cast<int>(OwlCmdEnum::emergencyStop): {
                     // emergencyStop
                     BOOST_LOG_TRIVIAL(info) << "emergencyStop";
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
@@ -318,7 +355,7 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
-                case 92: {
+                case static_cast<int>(OwlCmdEnum::unlock): {
                     // unlock
                     BOOST_LOG_TRIVIAL(info) << "unlock";
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
@@ -340,7 +377,7 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
-                case 10: {
+                case static_cast<int>(OwlCmdEnum::breakCmd): {
                     // break
                     BOOST_LOG_TRIVIAL(info) << "break";
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
@@ -362,7 +399,7 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
-                case 11: {
+                case static_cast<int>(OwlCmdEnum::takeoff): {
                     // takeoff
                     BOOST_LOG_TRIVIAL(info) << "takeoff";
                     if (!json_o.contains("distance")) {
@@ -425,7 +462,7 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
-                case 12: {
+                case static_cast<int>(OwlCmdEnum::land): {
                     // land
                     BOOST_LOG_TRIVIAL(info) << "land";
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
@@ -448,7 +485,7 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
-                case 13:
+                case static_cast<int>(OwlCmdEnum::move):
                     // move step
                     BOOST_LOG_TRIVIAL(info) << "move step";
                     {
@@ -491,7 +528,7 @@ namespace OwlProcessJsonMessage {
                             return;
                         }
                         switch (moveStepForward) {
-                            case 1: {
+                            case static_cast<int>(OwlCmdMoveEnum::up): {
                                 // up
                                 BOOST_LOG_TRIVIAL(info) << "move up " << moveStepDistance;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
@@ -515,7 +552,7 @@ namespace OwlProcessJsonMessage {
                                 self->sendMail(std::move(m));
                                 break;
                             }
-                            case 2: {
+                            case static_cast<int>(OwlCmdMoveEnum::down): {
                                 // down
                                 BOOST_LOG_TRIVIAL(info) << "move down " << moveStepDistance;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
@@ -539,7 +576,7 @@ namespace OwlProcessJsonMessage {
                                 self->sendMail(std::move(m));
                                 break;
                             }
-                            case 3: {
+                            case static_cast<int>(OwlCmdMoveEnum::left): {
                                 // left
                                 BOOST_LOG_TRIVIAL(info) << "move left " << moveStepDistance;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
@@ -563,7 +600,7 @@ namespace OwlProcessJsonMessage {
                                 self->sendMail(std::move(m));
                                 break;
                             }
-                            case 4: {
+                            case static_cast<int>(OwlCmdMoveEnum::right): {
                                 // right
                                 BOOST_LOG_TRIVIAL(info) << "move right " << moveStepDistance;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
@@ -587,7 +624,7 @@ namespace OwlProcessJsonMessage {
                                 self->sendMail(std::move(m));
                                 break;
                             }
-                            case 5: {
+                            case static_cast<int>(OwlCmdMoveEnum::forward): {
                                 // forward
                                 BOOST_LOG_TRIVIAL(info) << "move forward " << moveStepDistance;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
@@ -611,7 +648,7 @@ namespace OwlProcessJsonMessage {
                                 self->sendMail(std::move(m));
                                 break;
                             }
-                            case 6: {
+                            case static_cast<int>(OwlCmdMoveEnum::back): {
                                 // back
                                 BOOST_LOG_TRIVIAL(info) << "move back " << moveStepDistance;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
@@ -650,7 +687,7 @@ namespace OwlProcessJsonMessage {
                         }
                     }
                     break;
-                case 14:
+                case static_cast<int>(OwlCmdEnum::rotate):
                     // rotate
                     BOOST_LOG_TRIVIAL(info) << "rotate ";
                     {
@@ -693,7 +730,7 @@ namespace OwlProcessJsonMessage {
                             return;
                         }
                         switch (rotate) {
-                            case 1: {
+                            case static_cast<int>(OwlCmdRotateEnum::cw): {
                                 // cw
                                 BOOST_LOG_TRIVIAL(info) << "rotate cw " << rote;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
@@ -717,7 +754,7 @@ namespace OwlProcessJsonMessage {
                                 self->sendMail(std::move(m));
                                 break;
                             }
-                            case 2: {
+                            case static_cast<int>(OwlCmdRotateEnum::ccw): {
                                 // ccw
                                 BOOST_LOG_TRIVIAL(info) << "rotate ccw " << rote;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
@@ -756,7 +793,7 @@ namespace OwlProcessJsonMessage {
                         }
                     }
                     break;
-                case 15: {
+                case static_cast<int>(OwlCmdEnum::keep): {
                     // keep position
                     BOOST_LOG_TRIVIAL(info) << "keep";
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
@@ -778,7 +815,7 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
-                case 16: {
+                case static_cast<int>(OwlCmdEnum::gotoCmd): {
                     // goto position
                     BOOST_LOG_TRIVIAL(info) << "gotoPosition";
                     if (!json_o.contains("x") && !json_o.contains("y") && !json_o.contains("h")) {
@@ -809,7 +846,6 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
-                    // TODO
                     if (x < 0 || y < 0 || h < 0) {
                         BOOST_LOG_TRIVIAL(warning) << "(x < 0 || y < 0 || h < 0)" << jsv;
                         self->send_back_json(
@@ -855,7 +891,7 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
-                case 17: {
+                case static_cast<int>(OwlCmdEnum::led): {
                     // led
                     BOOST_LOG_TRIVIAL(info) << "led";
                     if (!json_o.contains("ledMode")
@@ -925,7 +961,7 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
-                case 18: {
+                case static_cast<int>(OwlCmdEnum::high): {
                     // high
                     BOOST_LOG_TRIVIAL(info) << "high";
                     if (!json_o.contains("high")) {
@@ -986,7 +1022,7 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
-                case 19: {
+                case static_cast<int>(OwlCmdEnum::speed): {
                     // speed
                     BOOST_LOG_TRIVIAL(info) << "speed";
                     if (!json_o.contains("speed")) {
@@ -1047,7 +1083,7 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
-                case 20: {
+                case static_cast<int>(OwlCmdEnum::flyMode): {
                     // flyMode
                     BOOST_LOG_TRIVIAL(info) << "flyMode";
                     if (!json_o.contains("flyMode")) {
@@ -1097,7 +1133,7 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
-                case 60: {
+                case static_cast<int>(OwlCmdEnum::joyCon): {
                     // joystick
                     BOOST_LOG_TRIVIAL(info) << "JoyCon";
                     if (!json_o.contains("JoyCon")) {
@@ -1129,7 +1165,7 @@ namespace OwlProcessJsonMessage {
                     analysisJoyCon(self, joyConObj.as_object(), cmdId, packageId);
                     break;
                 }
-                case 61: {
+                case static_cast<int>(OwlCmdEnum::joyConSimple): {
                     // joystick
                     BOOST_LOG_TRIVIAL(info) << "JoyConSimple";
                     if (!json_o.contains("JoyConSimple")) {
@@ -1161,7 +1197,7 @@ namespace OwlProcessJsonMessage {
                     analysisJoyConSimple(self, joyConSimpleObj.as_object(), cmdId, packageId);
                     break;
                 }
-                case 62: {
+                case static_cast<int>(OwlCmdEnum::joyConGyro): {
                     // joystick
                     BOOST_LOG_TRIVIAL(info) << "JoyConGyro";
                     if (!json_o.contains("JoyConGyro")) {
