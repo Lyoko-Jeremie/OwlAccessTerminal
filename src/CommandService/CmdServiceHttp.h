@@ -183,6 +183,30 @@ namespace OwlCommandServiceHttp {
                 SelfPtrType &&
         );
 
+        template<typename SelfType, typename SelfPtrType>
+        friend void OwlProcessJsonMessage::analysisJoyCon(
+                SelfPtrType self,
+                boost::json::object &joyCon,
+                int cmdId,
+                int packageId
+        );
+
+        template<typename SelfType, typename SelfPtrType>
+        friend void OwlProcessJsonMessage::analysisJoyConSimple(
+                SelfPtrType self,
+                boost::json::object &joyCon,
+                int cmdId,
+                int packageId
+        );
+
+        template<typename SelfType, typename SelfPtrType>
+        friend void OwlProcessJsonMessage::analysisJoyConGyro(
+                SelfPtrType self,
+                boost::json::object &joyCon,
+                int cmdId,
+                int packageId
+        );
+
         void send_back_json(const boost::json::value &json_value) override {
             send_back(boost::json::serialize(json_value));
         }

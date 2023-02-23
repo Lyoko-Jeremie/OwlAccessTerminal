@@ -38,6 +38,160 @@ namespace OwlProcessJsonMessage {
         virtual void sendMail(OwlMailDefine::MailCmd2Serial &&data) = 0;
     };
 
+
+    template<typename SelfType = ProcessJsonMessageSelfTypeInterface, typename SelfPtrType = std::shared_ptr<SelfType> >
+    void analysisJoyConGyro(
+            SelfPtrType self,
+            boost::json::object &joyConGyro,
+            int cmdId,
+            int packageId
+    ) {
+        try {
+            auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+            m->additionCmd = OwlMailDefine::AdditionCmd::JoyConGyro;
+            m->joyConGyroPtr = std::make_shared<OwlMailDefine::JoyConGyro>();
+            // TODO
+            m->callbackRunner = [self, cmdId, packageId](
+                    OwlMailDefine::MailSerial2Cmd data
+            ) {
+                self->send_back_json(
+                        boost::json::value{
+                                {"cmdId",     cmdId},
+                                {"packageId", packageId},
+                                {"msg",       "keep"},
+                                // {"result",    true},
+                                {"result",    data->ok},
+                                {"openError", data->openError},
+                        }
+                );
+            };
+            self->sendMail(std::move(m));
+        } catch (std::exception &e) {
+            BOOST_LOG_TRIVIAL(error) << "CommandService::analysisJoyConSimple";
+            // ignore
+            self->send_back_json(
+                    boost::json::value{
+                            {"msg",    "exception"},
+                            {"error",  e.what()},
+                            {"result", false},
+                    }
+            );
+            return;
+        } catch (...) {
+            // ignore
+            self->send_back_json(
+                    boost::json::value{
+                            {"msg",    "exception"},
+                            {"error",  "(...)"},
+                            {"result", false},
+                    }
+            );
+            return;
+        }
+    }
+
+    template<typename SelfType = ProcessJsonMessageSelfTypeInterface, typename SelfPtrType = std::shared_ptr<SelfType> >
+    void analysisJoyConSimple(
+            SelfPtrType self,
+            boost::json::object &joyConSimple,
+            int cmdId,
+            int packageId
+    ) {
+        try {
+            auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+            m->additionCmd = OwlMailDefine::AdditionCmd::JoyConSimple;
+            m->joyConPtr = std::make_shared<OwlMailDefine::JoyCon>();
+            // TODO
+            m->callbackRunner = [self, cmdId, packageId](
+                    OwlMailDefine::MailSerial2Cmd data
+            ) {
+                self->send_back_json(
+                        boost::json::value{
+                                {"cmdId",     cmdId},
+                                {"packageId", packageId},
+                                {"msg",       "keep"},
+                                // {"result",    true},
+                                {"result",    data->ok},
+                                {"openError", data->openError},
+                        }
+                );
+            };
+            self->sendMail(std::move(m));
+        } catch (std::exception &e) {
+            BOOST_LOG_TRIVIAL(error) << "CommandService::analysisJoyConSimple";
+            // ignore
+            self->send_back_json(
+                    boost::json::value{
+                            {"msg",    "exception"},
+                            {"error",  e.what()},
+                            {"result", false},
+                    }
+            );
+            return;
+        } catch (...) {
+            // ignore
+            self->send_back_json(
+                    boost::json::value{
+                            {"msg",    "exception"},
+                            {"error",  "(...)"},
+                            {"result", false},
+                    }
+            );
+            return;
+        }
+    }
+
+    template<typename SelfType = ProcessJsonMessageSelfTypeInterface, typename SelfPtrType = std::shared_ptr<SelfType> >
+    void analysisJoyCon(
+            SelfPtrType self,
+            boost::json::object &joyCon,
+            int cmdId,
+            int packageId
+    ) {
+        try {
+            auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+            m->additionCmd = OwlMailDefine::AdditionCmd::JoyCon;
+            m->joyConPtr = std::make_shared<OwlMailDefine::JoyCon>();
+            // TODO
+            m->callbackRunner = [self, cmdId, packageId](
+                    OwlMailDefine::MailSerial2Cmd data
+            ) {
+                self->send_back_json(
+                        boost::json::value{
+                                {"cmdId",     cmdId},
+                                {"packageId", packageId},
+                                {"msg",       "keep"},
+                                // {"result",    true},
+                                {"result",    data->ok},
+                                {"openError", data->openError},
+                        }
+                );
+            };
+            self->sendMail(std::move(m));
+        } catch (std::exception &e) {
+            BOOST_LOG_TRIVIAL(error) << "CommandService::analysisJoyCon";
+            // ignore
+            self->send_back_json(
+                    boost::json::value{
+                            {"msg",    "exception"},
+                            {"error",  e.what()},
+                            {"result", false},
+                    }
+            );
+            return;
+        } catch (...) {
+            // ignore
+            self->send_back_json(
+                    boost::json::value{
+                            {"msg",    "exception"},
+                            {"error",  "(...)"},
+                            {"result", false},
+                    }
+            );
+            return;
+        }
+    }
+
     /**
      *
      * @tparam SelfType : must impl `send_back_json(const boost::json::value &json_value)`
@@ -125,6 +279,50 @@ namespace OwlProcessJsonMessage {
                     BOOST_LOG_TRIVIAL(info) << "calibrate";
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::calibrate;
+                    m->callbackRunner = [self, cmdId, packageId](
+                            const OwlMailDefine::MailSerial2Cmd &data
+                    ) {
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "calibrate"},
+                                        // {"result",    true},
+                                        {"result",    data->ok},
+                                        {"openError", data->openError},
+                                }
+                        );
+                    };
+                    self->sendMail(std::move(m));
+                    break;
+                }
+                case 120: {
+                    // emergencyStop
+                    BOOST_LOG_TRIVIAL(info) << "emergencyStop";
+                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    m->additionCmd = OwlMailDefine::AdditionCmd::emergencyStop;
+                    m->callbackRunner = [self, cmdId, packageId](
+                            const OwlMailDefine::MailSerial2Cmd &data
+                    ) {
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "calibrate"},
+                                        // {"result",    true},
+                                        {"result",    data->ok},
+                                        {"openError", data->openError},
+                                }
+                        );
+                    };
+                    self->sendMail(std::move(m));
+                    break;
+                }
+                case 92: {
+                    // unlock
+                    BOOST_LOG_TRIVIAL(info) << "unlock";
+                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    m->additionCmd = OwlMailDefine::AdditionCmd::unlock;
                     m->callbackRunner = [self, cmdId, packageId](
                             const OwlMailDefine::MailSerial2Cmd &data
                     ) {
@@ -859,7 +1057,7 @@ namespace OwlProcessJsonMessage {
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
                                         {"msg",       "error"},
-                                        {"error",     "speed (flyMode) not find"},
+                                        {"error",     "flyMode (flyMode) not find"},
                                         {"result",    false},
                                 }
                         );
@@ -899,6 +1097,102 @@ namespace OwlProcessJsonMessage {
                     self->sendMail(std::move(m));
                     break;
                 }
+                case 60: {
+                    // joystick
+                    BOOST_LOG_TRIVIAL(info) << "JoyCon";
+                    if (!json_o.contains("JoyCon")) {
+                        BOOST_LOG_TRIVIAL(warning) << "JoyCon contains fail " << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "error"},
+                                        {"error",     "JoyCon (JoyCon) not find"},
+                                        {"result",    false},
+                                }
+                        );
+                        return;
+                    }
+                    bool good = true;
+                    auto joyConObj = json_o.at("JoyCon");
+                    if (!joyConObj.is_object()) {
+                        BOOST_LOG_TRIVIAL(warning) << "joyConObj (!JoyCon.is_object())" << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(!JoyCon.is_object())"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    analysisJoyCon(self, joyConObj.as_object(), cmdId, packageId);
+                    break;
+                }
+                case 61: {
+                    // joystick
+                    BOOST_LOG_TRIVIAL(info) << "JoyConSimple";
+                    if (!json_o.contains("JoyConSimple")) {
+                        BOOST_LOG_TRIVIAL(warning) << "JoyConSimple contains fail " << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "error"},
+                                        {"error",     "JoyConSimple (JoyConSimple) not find"},
+                                        {"result",    false},
+                                }
+                        );
+                        return;
+                    }
+                    bool good = true;
+                    auto joyConSimpleObj = json_o.at("JoyConSimple");
+                    if (!joyConSimpleObj.is_object()) {
+                        BOOST_LOG_TRIVIAL(warning) << "joyConSimpleObj (!JoyConSimple.is_object())" << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(!JoyConSimple.is_object())"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    analysisJoyConSimple(self, joyConSimpleObj.as_object(), cmdId, packageId);
+                    break;
+                }
+                case 62: {
+                    // joystick
+                    BOOST_LOG_TRIVIAL(info) << "JoyConGyro";
+                    if (!json_o.contains("JoyConGyro")) {
+                        BOOST_LOG_TRIVIAL(warning) << "JoyConGyro contains fail " << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"cmdId",     cmdId},
+                                        {"packageId", packageId},
+                                        {"msg",       "error"},
+                                        {"error",     "JoyConGyro (JoyConGyro) not find"},
+                                        {"result",    false},
+                                }
+                        );
+                        return;
+                    }
+                    bool good = true;
+                    auto joyConGyroObj = json_o.at("JoyConGyro");
+                    if (!joyConGyroObj.is_object()) {
+                        BOOST_LOG_TRIVIAL(warning) << "joyConGyroObj (!JoyConGyro.is_object())" << jsv;
+                        self->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(!JoyConGyro.is_object())"},
+                                        {"result", false},
+                                }
+                        );
+                        return;
+                    }
+                    analysisJoyConGyro(self, joyConGyroObj.as_object(), cmdId, packageId);
+                    break;
+                }
                 default:
                     // ignore
                     BOOST_LOG_TRIVIAL(warning) << "ignore " << jsv;
@@ -914,8 +1208,7 @@ namespace OwlProcessJsonMessage {
             }
             return;
         } catch (std::exception &e) {
-//            std::cerr << "CommandService::process_message \n" << e.what();
-            BOOST_LOG_TRIVIAL(error) << "CommandService::process_message \n" << e.what();
+            BOOST_LOG_TRIVIAL(error) << "CommandService::process_message";
             // ignore
             self->send_back_json(
                     boost::json::value{
@@ -937,6 +1230,7 @@ namespace OwlProcessJsonMessage {
             return;
         }
     }
+
 }
 
 #endif //OWLACCESSTERMINAL_PROCESSJSONMESSAGE_H
