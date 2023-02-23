@@ -108,6 +108,9 @@ void installMathModuleExtend(qjs::Context &context, const std::string &moduleNam
     module.function("pythagoreanDistance", [](double x, double y) -> double {
         return (pow(x, 2) + pow(y, 2));
     });
+    module.function("maxIndex", [](const qjs::rest<double> &l) -> long long {
+        return (std::max_element(l.begin(), l.end()) - l.begin());
+    });
 }
 
 
