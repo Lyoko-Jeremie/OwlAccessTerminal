@@ -4,25 +4,26 @@
 #include <boost/log/trivial.hpp>
 
 #include <sstream>
+#include <opencv2/opencv.hpp>
 #include "./QuickJsH.h"
 
 #include "./MathModule.h"
 
 namespace OwlQuickJsWrapper {
 
-    void logConsole(const qjs::rest<std::string>& args) {
+    void logConsole(const qjs::rest<std::string> &args) {
         std::stringstream ss;
         for (auto const &arg: args) ss << arg;
         BOOST_LOG_TRIVIAL(info) << ss.str();
     }
 
-    void warningConsole(const qjs::rest<std::string>& args) {
+    void warningConsole(const qjs::rest<std::string> &args) {
         std::stringstream ss;
         for (auto const &arg: args) ss << arg;
         BOOST_LOG_TRIVIAL(warning) << ss.str();
     }
 
-    void errorConsole(const qjs::rest<std::string>& args) {
+    void errorConsole(const qjs::rest<std::string> &args) {
         std::stringstream ss;
         for (auto const &arg: args) ss << arg;
         BOOST_LOG_TRIVIAL(error) << ss.str();
@@ -61,6 +62,10 @@ namespace OwlQuickJsWrapper {
                 BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl init qjs::exception " << (std::string) exc["stack"];
             }
             return false;
+        } catch (cv::Exception &e) {
+            BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl init cv::exception :"
+                                     << e.what();
+            return false;
         }
         return true;
     }
@@ -76,6 +81,10 @@ namespace OwlQuickJsWrapper {
                 BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl evalCode qjs::exception " << (std::string) exc["stack"];
             }
             return false;
+        } catch (cv::Exception &e) {
+            BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl evalCode cv::exception :"
+                                     << e.what();
+            return false;
         }
         return true;
     }
@@ -90,6 +99,10 @@ namespace OwlQuickJsWrapper {
             if ((bool) exc["stack"]) {
                 BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl loadCode qjs::exception " << (std::string) exc["stack"];
             }
+            return false;
+        } catch (cv::Exception &e) {
+            BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl loadCode cv::exception :"
+                                     << e.what();
             return false;
         }
         return true;

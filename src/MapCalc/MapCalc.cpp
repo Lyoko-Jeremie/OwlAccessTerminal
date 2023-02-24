@@ -3,6 +3,7 @@
 #include "MapCalc.h"
 #include <boost/filesystem.hpp>
 #include <boost/json.hpp>
+#include <opencv2/opencv.hpp>
 #include "../QuickJsWrapper/QuickJsWrapper.h"
 
 namespace OwlMapCalc {
@@ -127,6 +128,10 @@ namespace OwlMapCalc {
                                              << (std::string) exc["stack"];
                 }
                 // failed
+                return {};
+            } catch (cv::Exception &e) {
+                BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction cv::exception :"
+                                         << e.what();
                 return {};
             }
 
