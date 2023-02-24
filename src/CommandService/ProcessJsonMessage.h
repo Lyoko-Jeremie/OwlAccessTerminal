@@ -128,14 +128,6 @@ namespace OwlProcessJsonMessage {
             m->joyConPtr->leftBackBottom = getFromJsonObject<int8_t>(joyConSimple, "leftBackBottom", good);
             m->joyConPtr->rightBackTop = getFromJsonObject<int8_t>(joyConSimple, "rightBackTop", good);
             m->joyConPtr->rightBackBottom = getFromJsonObject<int8_t>(joyConSimple, "rightBackBottom", good);
-            m->joyConPtr->CrossUp = getFromJsonObject<int8_t>(joyConSimple, "CrossUp", good);
-            m->joyConPtr->CrossDown = getFromJsonObject<int8_t>(joyConSimple, "CrossDown", good);
-            m->joyConPtr->CrossLeft = getFromJsonObject<int8_t>(joyConSimple, "CrossLeft", good);
-            m->joyConPtr->CrossRight = getFromJsonObject<int8_t>(joyConSimple, "CrossRight", good);
-            m->joyConPtr->A = getFromJsonObject<int8_t>(joyConSimple, "A", good);
-            m->joyConPtr->B = getFromJsonObject<int8_t>(joyConSimple, "B", good);
-            m->joyConPtr->X = getFromJsonObject<int8_t>(joyConSimple, "X", good);
-            m->joyConPtr->Y = getFromJsonObject<int8_t>(joyConSimple, "Y", good);
             m->joyConPtr->buttonAdd = getFromJsonObject<int8_t>(joyConSimple, "buttonAdd", good);
             m->joyConPtr->buttonReduce = getFromJsonObject<int8_t>(joyConSimple, "buttonReduce", good);
             if (!good) {
