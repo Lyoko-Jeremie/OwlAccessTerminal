@@ -290,7 +290,17 @@ const findOuterSide = (list: TagType[]): TagType[] => {
 
     if (pI.length > 3) {
         const pL = pI.map(I => list[I]);
-        // TODO
+        const pm = new Set(pL);
+        while (true) {
+            if (pm.size >= 3) {
+                break;
+            }
+            const n = pL[MathEx.randomInt2(0, pL.length)];
+            if (!pm.has(n)) {
+                pm.add(n);
+            }
+        }
+        return Array.from(pm.values())
     } else {
         return pI.map(I => list[I]);
     }
