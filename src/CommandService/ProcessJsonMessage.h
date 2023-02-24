@@ -50,7 +50,25 @@ namespace OwlProcessJsonMessage {
             auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
             m->additionCmd = OwlMailDefine::AdditionCmd::JoyConGyro;
             m->joyConGyroPtr = std::make_shared<OwlMailDefine::JoyConGyro>();
-            // TODO
+            bool good = true;
+            m->joyConGyroPtr->x = getFromJsonObject<int16_t>(joyConGyro, "x", good);
+            m->joyConGyroPtr->y = getFromJsonObject<int16_t>(joyConGyro, "y", good);
+            m->joyConGyroPtr->z = getFromJsonObject<int16_t>(joyConGyro, "z", good);
+            m->joyConGyroPtr->a = getFromJsonObject<int16_t>(joyConGyro, "a", good);
+            m->joyConGyroPtr->b = getFromJsonObject<int16_t>(joyConGyro, "b", good);
+            m->joyConGyroPtr->c = getFromJsonObject<int16_t>(joyConGyro, "c", good);
+            m->joyConGyroPtr->d = getFromJsonObject<int16_t>(joyConGyro, "d", good);
+            if (!good) {
+                BOOST_LOG_TRIVIAL(warning) << "analysisJoyConGyro getFromJsonObject fail " << joyConGyro;
+                self->send_back_json(
+                        boost::json::value{
+                                {"msg",    "error"},
+                                {"error",  "analysisJoyConGyro getFromJsonObject fail"},
+                                {"result", false},
+                        }
+                );
+                return;
+            }
             m->callbackRunner = [self, cmdId, packageId](
                     OwlMailDefine::MailSerial2Cmd data
             ) {
@@ -101,7 +119,36 @@ namespace OwlProcessJsonMessage {
             auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
             m->additionCmd = OwlMailDefine::AdditionCmd::JoyConSimple;
             m->joyConPtr = std::make_shared<OwlMailDefine::JoyCon>();
-            // TODO
+            bool good = true;
+            m->joyConPtr->leftRockerX = getFromJsonObject<int16_t>(joyConSimple, "leftRockerX", good);
+            m->joyConPtr->leftRockerY = getFromJsonObject<int16_t>(joyConSimple, "leftRockerY", good);
+            m->joyConPtr->rightRockerX = getFromJsonObject<int16_t>(joyConSimple, "rightRockerX", good);
+            m->joyConPtr->rightRockerY = getFromJsonObject<int16_t>(joyConSimple, "rightRockerY", good);
+            m->joyConPtr->leftBackTop = getFromJsonObject<int8_t>(joyConSimple, "leftBackTop", good);
+            m->joyConPtr->leftBackBottom = getFromJsonObject<int8_t>(joyConSimple, "leftBackBottom", good);
+            m->joyConPtr->rightBackTop = getFromJsonObject<int8_t>(joyConSimple, "rightBackTop", good);
+            m->joyConPtr->rightBackBottom = getFromJsonObject<int8_t>(joyConSimple, "rightBackBottom", good);
+            m->joyConPtr->CrossUp = getFromJsonObject<int8_t>(joyConSimple, "CrossUp", good);
+            m->joyConPtr->CrossDown = getFromJsonObject<int8_t>(joyConSimple, "CrossDown", good);
+            m->joyConPtr->CrossLeft = getFromJsonObject<int8_t>(joyConSimple, "CrossLeft", good);
+            m->joyConPtr->CrossRight = getFromJsonObject<int8_t>(joyConSimple, "CrossRight", good);
+            m->joyConPtr->A = getFromJsonObject<int8_t>(joyConSimple, "A", good);
+            m->joyConPtr->B = getFromJsonObject<int8_t>(joyConSimple, "B", good);
+            m->joyConPtr->X = getFromJsonObject<int8_t>(joyConSimple, "X", good);
+            m->joyConPtr->Y = getFromJsonObject<int8_t>(joyConSimple, "Y", good);
+            m->joyConPtr->buttonAdd = getFromJsonObject<int8_t>(joyConSimple, "buttonAdd", good);
+            m->joyConPtr->buttonReduce = getFromJsonObject<int8_t>(joyConSimple, "buttonReduce", good);
+            if (!good) {
+                BOOST_LOG_TRIVIAL(warning) << "analysisJoyConSimple getFromJsonObject fail " << joyConSimple;
+                self->send_back_json(
+                        boost::json::value{
+                                {"msg",    "error"},
+                                {"error",  "analysisJoyConSimple getFromJsonObject fail"},
+                                {"result", false},
+                        }
+                );
+                return;
+            }
             m->callbackRunner = [self, cmdId, packageId](
                     OwlMailDefine::MailSerial2Cmd data
             ) {
@@ -152,7 +199,36 @@ namespace OwlProcessJsonMessage {
             auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
             m->additionCmd = OwlMailDefine::AdditionCmd::JoyCon;
             m->joyConPtr = std::make_shared<OwlMailDefine::JoyCon>();
-            // TODO
+            bool good = true;
+            m->joyConPtr->leftRockerX = getFromJsonObject<int16_t>(joyCon, "leftRockerX", good);
+            m->joyConPtr->leftRockerY = getFromJsonObject<int16_t>(joyCon, "leftRockerY", good);
+            m->joyConPtr->rightRockerX = getFromJsonObject<int16_t>(joyCon, "rightRockerX", good);
+            m->joyConPtr->rightRockerY = getFromJsonObject<int16_t>(joyCon, "rightRockerY", good);
+            m->joyConPtr->leftBackTop = getFromJsonObject<int8_t>(joyCon, "leftBackTop", good);
+            m->joyConPtr->leftBackBottom = getFromJsonObject<int8_t>(joyCon, "leftBackBottom", good);
+            m->joyConPtr->rightBackTop = getFromJsonObject<int8_t>(joyCon, "rightBackTop", good);
+            m->joyConPtr->rightBackBottom = getFromJsonObject<int8_t>(joyCon, "rightBackBottom", good);
+            m->joyConPtr->CrossUp = getFromJsonObject<int8_t>(joyCon, "CrossUp", good);
+            m->joyConPtr->CrossDown = getFromJsonObject<int8_t>(joyCon, "CrossDown", good);
+            m->joyConPtr->CrossLeft = getFromJsonObject<int8_t>(joyCon, "CrossLeft", good);
+            m->joyConPtr->CrossRight = getFromJsonObject<int8_t>(joyCon, "CrossRight", good);
+            m->joyConPtr->A = getFromJsonObject<int8_t>(joyCon, "A", good);
+            m->joyConPtr->B = getFromJsonObject<int8_t>(joyCon, "B", good);
+            m->joyConPtr->X = getFromJsonObject<int8_t>(joyCon, "X", good);
+            m->joyConPtr->Y = getFromJsonObject<int8_t>(joyCon, "Y", good);
+            m->joyConPtr->buttonAdd = getFromJsonObject<int8_t>(joyCon, "buttonAdd", good);
+            m->joyConPtr->buttonReduce = getFromJsonObject<int8_t>(joyCon, "buttonReduce", good);
+            if (!good) {
+                BOOST_LOG_TRIVIAL(warning) << "analysisJoyCon getFromJsonObject fail " << joyCon;
+                self->send_back_json(
+                        boost::json::value{
+                                {"msg",    "error"},
+                                {"error",  "analysisJoyCon getFromJsonObject fail"},
+                                {"result", false},
+                        }
+                );
+                return;
+            }
             m->callbackRunner = [self, cmdId, packageId](
                     OwlMailDefine::MailSerial2Cmd data
             ) {
