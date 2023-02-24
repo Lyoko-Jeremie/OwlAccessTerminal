@@ -156,12 +156,26 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
         };
     });
     module.function("invertAffineTransform", [](
-            std::vector<double> mIn
+            const std::vector<double>& mIn
     ) -> std::vector<double> {
         cv::Mat m{mIn, true};
         m = m.reshape(3, 2);
         cv::Mat mOut;
         cv::invertAffineTransform(m, mOut);
+        return std::vector<double>{
+                mOut.begin<double>(), mOut.end<double>()
+        };
+    });
+    module.function("transform", [](
+            const std::vector<double>& pArray,
+            const std::vector<double>& mIn
+    ) -> std::vector<double> {
+        cv::Mat m{mIn, true};
+        m = m.reshape(3, 2);
+        cv::Mat ps{pArray, true};
+        ps = ps.reshape(2);
+        cv::Mat mOut;
+        cv::transform(ps, mOut, m);
         return std::vector<double>{
                 mOut.begin<double>(), mOut.end<double>()
         };
