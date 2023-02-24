@@ -210,7 +210,6 @@ namespace OwlSerialController {
                 case OwlMailDefine::AdditionCmd::speed:
                 case OwlMailDefine::AdditionCmd::flyMode:
                 case OwlMailDefine::AdditionCmd::gotoPosition:
-                case OwlMailDefine::AdditionCmd::calibrate:
                 case OwlMailDefine::AdditionCmd::led: {
                     BOOST_LOG_TRIVIAL(trace) << "SerialController"
                                              << " receiveMail"
@@ -518,6 +517,7 @@ namespace OwlSerialController {
                 }
                 case OwlMailDefine::AdditionCmd::emergencyStop:
                 case OwlMailDefine::AdditionCmd::unlock:
+                case OwlMailDefine::AdditionCmd::calibrate:
                 case OwlMailDefine::AdditionCmd::ping: {
                     constexpr uint8_t packageSize = 5;
                     makeADataBuffer<packageSize>(
