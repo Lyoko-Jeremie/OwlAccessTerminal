@@ -170,6 +170,42 @@ declare module MathExOpenCV {
      */
     function convexHull(pArray: number[]): number[];
 
+    /**
+     * cv::minEnclosingCircle
+     * @param pArray [2xn] Point2f list
+     * @return [center.x, center.y, radius]
+     */
+    function minEnclosingCircle(pArray: number[]): number[];
+
+    /**
+     * cv::boundingRect
+     * @param pArray [2xn] Point2f list
+     * @return [rect.x, rect.y, rect.width, rect.height]
+     */
+    function boundingRect(pArray: number[]): number[];
+
+    /**
+     * cv::minAreaRect
+     * @param pArray [2xn] Point2f list
+     * @return       [ rect.center.x, rect.center.y,
+     *                 rect.size.width, rect.size.height,
+     *                 rect.angle]
+     */
+    function minAreaRect(pArray: number[]): number[];
+
+    /**
+     * cv::minAreaRect_boxPoints
+     * @param pArray [2xn] Point2f list
+     * @return       [ p.at(0).x, p.at(0).y,
+     *                 p.at(1).x, p.at(1).y,
+     *                 p.at(2).x, p.at(2).y,
+     *                 p.at(3).x, p.at(3).y,
+     *                 rect.center.x, rect.center.y,
+     *                 rect.size.width, rect.size.height,
+     *                 rect.angle]
+     */
+    function minAreaRect_boxPoints(pArray: number[]): number[];
+
 }
 
 const calcTagPosition = (t: number): { x: number, y: number } => {
