@@ -113,6 +113,7 @@ namespace OwlMailDefine {
         // 0/+127
         int8_t CrossRight{0};
 
+        // 0/+127
         int8_t A{0};
         // 0/+127
         int8_t B{0};
