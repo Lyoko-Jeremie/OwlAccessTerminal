@@ -203,6 +203,70 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
                 pIndexOut.begin<double>(), pIndexOut.end<double>()
         };
     });
+    module.function("minEnclosingCircle", [](
+            const std::vector<double> &pArray
+    ) -> std::vector<double> {
+        if (pArray.size() % 2 != 0) {
+            return {};
+        }
+        cv::Mat ps{pArray, true};
+        ps = ps.reshape(2);
+        cv::Point2f center;
+        float radius;
+        cv::minEnclosingCircle(ps, center, radius);
+        return std::vector<double>{
+                center.x, center.y, radius,
+        };
+    });
+    module.function("boundingRect", [](
+            const std::vector<double> &pArray
+    ) -> std::vector<int> {
+        if (pArray.size() % 2 != 0) {
+            return {};
+        }
+        cv::Mat ps{pArray, true};
+        ps = ps.reshape(2);
+        auto rect = cv::boundingRect(ps);
+        return std::vector<int>{
+                rect.x, rect.y, rect.width, rect.height,
+        };
+    });
+    module.function("minAreaRect", [](
+            const std::vector<double> &pArray
+    ) -> std::vector<double> {
+        if (pArray.size() % 2 != 0) {
+            return {};
+        }
+        cv::Mat ps{pArray, true};
+        ps = ps.reshape(2);
+        auto rect = cv::minAreaRect(ps);
+        return std::vector<double>{
+                rect.center.x, rect.center.y,
+                rect.size.width, rect.size.height,
+                rect.angle,
+        };
+    });
+    module.function("minAreaRect_boxPoints", [](
+            const std::vector<double> &pArray
+    ) -> std::vector<double> {
+        if (pArray.size() % 2 != 0) {
+            return {};
+        }
+        cv::Mat ps{pArray, true};
+        ps = ps.reshape(2);
+        auto rect = cv::minAreaRect(ps);
+        std::vector<cv::Point2f> p;
+        cv::boxPoints(rect, p);
+        return std::vector<double>{
+                p.at(0).x, p.at(0).y,
+                p.at(1).x, p.at(1).y,
+                p.at(2).x, p.at(2).y,
+                p.at(3).x, p.at(3).y,
+                rect.center.x, rect.center.y,
+                rect.size.width, rect.size.height,
+                rect.angle,
+        };
+    });
 }
 
 
