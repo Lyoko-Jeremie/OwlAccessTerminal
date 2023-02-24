@@ -56,6 +56,10 @@ if (DEFAULT_CONFIG)
     # ===================== ^^^^^^ config segment ^^^^^^ =================================
 endif (DEFAULT_CONFIG)
 
+#set(DEBUG_BOOST_ASIO ON)
+#set(DEBUG_IF_CHECK_POINT ON)
+#set(DEBUG_Mailbox ON)
+
 if (DEBUG_BOOST_ASIO)
     add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
 endif (DEBUG_BOOST_ASIO)
