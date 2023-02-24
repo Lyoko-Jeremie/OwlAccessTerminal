@@ -30,5 +30,8 @@ namespace OwlMailDefine {
             {AdditionCmd::getAirplaneState, "getAirplaneState"},
 
             {AdditionCmd::ping,             "ping"},
+            {AdditionCmd::calibrate,        "calibrate"},
+            {AdditionCmd::emergencyStop,    "emergencyStop"},
+            {AdditionCmd::unlock,           "unlock"},
     };
 }
