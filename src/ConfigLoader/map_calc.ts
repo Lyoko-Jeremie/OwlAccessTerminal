@@ -301,15 +301,43 @@ const calcK = (v: Vec2) => {
 };
 
 
-const calcPlaneInfo3 = (pla: Point2[], img: Point2[]): Pick<PlaneInfo, 'xDirect' | 'zDirect' | 'ImageP' | 'PlaneP'> => {
+const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number):
+    Pick<PlaneInfo, 'xDirect' | 'zDirect' | 'ImageP' | 'PlaneP'> => {
     const info = {} as Pick<PlaneInfo, 'xDirect' | 'zDirect' | 'ImageP' | 'PlaneP'>;
 
     if (pla.length !== 3 || img.length !== 3) {
         throw Error("calcPlaneInfo3 (pla.length !== 3 || img.length !== 3)");
     }
 
+    const mInPla = MathExOpenCV.getAffineTransform(
+        img[0].x, img[0].y,
+        img[1].x, img[1].y,
+        img[2].x, img[2].y,
+        pla[0].x, pla[0].y,
+        pla[1].x, pla[1].y,
+        pla[2].x, pla[2].y,
+    );
+    const mInImg = MathExOpenCV.getAffineTransform(
+        pla[0].x, pla[0].y,
+        pla[1].x, pla[1].y,
+        pla[2].x, pla[2].y,
+        img[0].x, img[0].y,
+        img[1].x, img[1].y,
+        img[2].x, img[2].y,
+    );
+
+    const pImgInPla = MathExOpenCV.transform(
+        [
+            imgX / 2, imgY / 2,
+            0, 0,
+            imgX, 0,
+            0, imgY,
+            imgX, imgY,
+        ],
+        mInPla,
+    );
     // TODO
-    ;
+
 
     return info;
 };
@@ -344,6 +372,7 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
     if (tagInfo.tagInfo.list.length < 2) {
         // type : calc by tag side size
         // TODO 1
+        //      calcPlaneInfo
     } else if (tagInfo.tagInfo.list.length === 2) {
         const l = tagInfo.tagInfo.list;
         if (l[0].id === l[1].id) {
@@ -363,8 +392,14 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
             console.log("relation: ", relation);
             // TODO 2
         } else {
+            if (tagInfo.tagInfo.list.length === 3) {
+                // type : calc use 3 point
+                // TODO 3
+                //      calcPlaneInfo
+            }
             // type : to find last triangle
             // TODO 3 findOuterSide
+            //      convexHull
         }
     }
     return [true, 0, 1, 2];
