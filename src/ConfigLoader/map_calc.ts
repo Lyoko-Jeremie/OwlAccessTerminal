@@ -276,29 +276,24 @@ const findOuterSide = (list: TagType[]): TagType[] => {
         n.tag = T;
         return n;
     });
-    const outerRect = calcOuterRect(listPos);
-    // find out item
-    const oit: { xL: number [], xU: number[], zL: number[], zU: number[] } = {xL: [], xU: [], zL: [], zU: []};
-    for (let i = 0; i < listPos.length; i++) {
-        const n = listPos[i];
-        if (n.x === outerRect.xL) {
-            oit.xL.push(i);
-        }
-        if (n.x === outerRect.xU) {
-            oit.xU.push(i);
-        }
-        if (n.y === outerRect.zL) {
-            oit.zL.push(i);
-        }
-        if (n.y === outerRect.zU) {
-            oit.zU.push(i);
-        }
+
+    const pArray = [];
+    for (const p of listPos) {
+        pArray.push(p.x);
+        pArray.push(p.y);
     }
-    const center = {x: (outerRect.xU + outerRect.xL) / 2, y: (outerRect.zU + outerRect.zL) / 2};
+    const [cX, cY, r, ...pList] = MathExOpenCV.minEnclosingCircle(pArray);
+    const pI = MathExOpenCV.circleBorderPoints(
+        cX, cY, r,
+        pList,
+    );
 
-    // TODO
-
-    return [];
+    if (pI.length > 3) {
+        const pL = pI.map(I => list[I]);
+        // TODO
+    } else {
+        return pI.map(I => list[I]);
+    }
 };
 
 // translate image (0,0) from LT to LB
@@ -375,15 +370,29 @@ const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number)
         img[2].x, img[2].y,
     );
 
+    const centerImgPoint: Point2 = {x: imgX / 2, y: imgY / 2,};
+    info.ImageP = centerImgPoint;
     const pImgInPla = MathExOpenCV.transform(
         [
-            imgX / 2, imgY / 2,
+            centerImgPoint.x, centerImgPoint.y,
             0, 0,
             imgX, 0,
             0, imgY,
             imgX, imgY,
         ],
         mInPla,
+    );
+    const centerPlanPoint: Point2 = {x: pImgInPla[0], y: pImgInPla[1]};
+    info.PlaneP = centerPlanPoint;
+    const pPlaInImg = MathExOpenCV.transform(
+        [
+            centerPlanPoint.x + 100, centerPlanPoint.y,
+            centerPlanPoint.x, centerPlanPoint.y + 100,
+            centerPlanPoint.x - 100, centerPlanPoint.y,
+            centerPlanPoint.x, centerPlanPoint.y - 100,
+            centerPlanPoint.x + 100, centerPlanPoint.y + 100,
+        ],
+        mInImg,
     );
     // TODO
 
