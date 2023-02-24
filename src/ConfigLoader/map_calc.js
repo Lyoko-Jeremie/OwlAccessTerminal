@@ -133,6 +133,27 @@ const findOuterSide = (list) => {
 const y2y = (imageY, y) => {
     return imageY - y;
 };
+const calcVectorLineScale = (va, vb) => {
+    return MathEx.pythagoreanDistance(va.x, va.y) / MathEx.pythagoreanDistance(vb.x, vb.y);
+};
+const calcVec = (a, b) => {
+    return {
+        x: a.x - b.x,
+        y: a.y - b.y,
+    };
+};
+const calcK = (v) => {
+    return v.y / v.x;
+};
+const calcPlaneInfo3 = (pla, img) => {
+    const info = {};
+    if (pla.length !== 3 || img.length !== 3) {
+        throw Error("calcPlaneInfo3 (pla.length !== 3 || img.length !== 3)");
+    }
+    // TODO
+    ;
+    return info;
+};
 const calcImageCenterInPlane = (imageX, imageY, planeInfo) => {
     // TODO re-calc to update planeInfo P-P-pair
     return planeInfo;

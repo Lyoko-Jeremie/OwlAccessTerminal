@@ -104,6 +104,64 @@ declare module MathEx {
     function distanceFast(p1x: number, p1y: number, p2x: number, p2y: number): number;
 
     function pythagoreanDistance(x: number, y: number): number;
+
+    function maxIndex(...n: number[]): number;
+}
+
+declare module MathExOpenCV {
+
+    /**
+     * cv::getRotationMatrix2D
+     * @param px
+     * @param py
+     * @param angle
+     * @param scale
+     * @return [2x3] AffineTransformMatrix
+     */
+    function getRotationMatrix2D(
+        px: number, py: number,
+        angle: number, scale: number,
+    ): number[];
+
+    /**
+     * cv::getAffineTransform
+     * @param p1xSrc
+     * @param p1ySrc
+     * @param p2xSrc
+     * @param p2ySrc
+     * @param p3xSrc
+     * @param p3ySrc
+     * @param p1xDst
+     * @param p1yDst
+     * @param p2xDst
+     * @param p2yDst
+     * @param p3xDst
+     * @param p3yDst
+     * @return [2x3] AffineTransformMatrix
+     */
+    function getAffineTransform(
+        p1xSrc: number, p1ySrc: number,
+        p2xSrc: number, p2ySrc: number,
+        p3xSrc: number, p3ySrc: number,
+        p1xDst: number, p1yDst: number,
+        p2xDst: number, p2yDst: number,
+        p3xDst: number, p3yDst: number,
+    ): number[];
+
+    /**
+     * cv::invertAffineTransform
+     * @param m [2x3] AffineTransformMatrix
+     * @return [2x3] AffineTransformMatrix
+     */
+    function invertAffineTransform(m: number[]): number[];
+
+    /**
+     * cv::transform
+     * @param pArray [2xn] Point2f list
+     * @param m [2x3] AffineTransform
+     * @return [2xn] Point2f list
+     */
+    function transform(pArray: number[], m: number[]): number[];
 }
 
 const calcTagPosition = (t: number): { x: number, y: number } => {
@@ -222,6 +280,32 @@ interface PlaneInfo {
 const calcVectorLineScale = (va: Vec2, vb: Vec2) => {
     return MathEx.pythagoreanDistance(va.x, va.y) / MathEx.pythagoreanDistance(vb.x, vb.y);
 };
+
+const calcVec = (a: Point2, b: Point2): Vec2 => {
+    return {
+        x: a.x - b.x,
+        y: a.y - b.y,
+    };
+};
+
+const calcK = (v: Vec2) => {
+    return v.y / v.x;
+};
+
+
+const calcPlaneInfo3 = (pla: Point2[], img: Point2[]): Pick<PlaneInfo, 'xDirect' | 'zDirect' | 'ImageP' | 'PlaneP'> => {
+    const info = {} as Pick<PlaneInfo, 'xDirect' | 'zDirect' | 'ImageP' | 'PlaneP'>;
+
+    if (pla.length !== 3 || img.length !== 3) {
+        throw Error("calcPlaneInfo3 (pla.length !== 3 || img.length !== 3)");
+    }
+
+    // TODO
+    ;
+
+    return info;
+};
+
 
 const calcImageCenterInPlane = (imageX: number, imageY: number, planeInfo: PlaneInfo) => {
     // TODO re-calc to update planeInfo P-P-pair
