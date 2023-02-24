@@ -156,8 +156,11 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
         };
     });
     module.function("invertAffineTransform", [](
-            const std::vector<double>& mIn
+            const std::vector<double> &mIn
     ) -> std::vector<double> {
+        if (mIn.size() % 2 != 0) {
+            return {};
+        }
         cv::Mat m{mIn, true};
         m = m.reshape(3, 2);
         cv::Mat mOut;
@@ -167,9 +170,15 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
         };
     });
     module.function("transform", [](
-            const std::vector<double>& pArray,
-            const std::vector<double>& mIn
+            const std::vector<double> &pArray,
+            const std::vector<double> &mIn
     ) -> std::vector<double> {
+        if (pArray.size() % 2 != 0) {
+            return {};
+        }
+        if (mIn.size() % 2 != 0) {
+            return {};
+        }
         cv::Mat m{mIn, true};
         m = m.reshape(3, 2);
         cv::Mat ps{pArray, true};
@@ -181,8 +190,11 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
         };
     });
     module.function("convexHull", [](
-            const std::vector<double>& pArray
+            const std::vector<double> &pArray
     ) -> std::vector<double> {
+        if (pArray.size() % 2 != 0) {
+            return {};
+        }
         cv::Mat ps{pArray, true};
         ps = ps.reshape(2);
         cv::Mat pIndexOut;
