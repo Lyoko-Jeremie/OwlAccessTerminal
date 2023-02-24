@@ -166,7 +166,7 @@ declare module MathExOpenCV {
     /**
      * cv::convexHull
      * @param pArray [2xn] Point2f list
-     * @return [n] pArray index list
+     * @return pArray index list
      */
     function convexHull(pArray: number[]): number[];
 
@@ -176,6 +176,19 @@ declare module MathExOpenCV {
      * @return [center.x, center.y, radius]
      */
     function minEnclosingCircle(pArray: number[]): number[];
+
+    /**
+     *
+     * @param centerX
+     * @param centerY
+     * @param radius
+     * @param pArray [2xn] Point2f list
+     * @return pArray index list
+     */
+    function circleBorderPoints(
+        centerX: number, centerY: number, radius: number,
+        pArray: number[]
+    ): number[];
 
     /**
      * cv::boundingRect

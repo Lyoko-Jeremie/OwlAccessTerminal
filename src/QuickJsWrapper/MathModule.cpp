@@ -218,6 +218,38 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
                 center.x, center.y, radius,
         };
     });
+    module.function("circleBorderPoints", [](
+            double centerX, double centerY, double radius,
+            const std::vector<double> &pArray
+    ) -> std::vector<double> {
+        if (pArray.size() % 2 != 0) {
+            return {};
+        }
+        cv::Mat pX{cv::Size{static_cast<int>(pArray.size() / 2), 1}, CV_32FC1, cv::Scalar{0}};
+        cv::Mat pY{cv::Size{static_cast<int>(pArray.size() / 2), 1}, CV_32FC1, cv::Scalar{0}};
+        for (int i = 0; i < pArray.size(); ++i) {
+            if (i % 2 == 0) {
+                pX.at<double>(std::floor(i / 2)) = pArray.at(i);
+            } else {
+                pY.at<double>(std::floor(i / 2)) = pArray.at(i);
+            }
+        }
+        auto d = pX * pX + pY * pY;
+        d = radius - d;
+        cv::Mat pD = d;
+        cv::threshold(pD, pD, 0.001, 1, cv::ThresholdTypes::THRESH_BINARY);
+        std::vector<int> pI;
+        pI.reserve(pArray.size() / 2);
+        for (int i = 0; i < pD.cols; ++i) {
+            if (pD.at<double>(i) == 0) {
+                pI.push_back(i);
+            }
+        }
+
+        return std::vector<double>{
+                pI.begin(), pI.end()
+        };
+    });
     module.function("boundingRect", [](
             const std::vector<double> &pArray
     ) -> std::vector<int> {
