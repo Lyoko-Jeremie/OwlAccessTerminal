@@ -39,6 +39,7 @@ namespace OwlQuickJsWrapper {
         try {
             installMathModule(context_);
             installMathModuleExtend(context_);
+            installMathExOpenCVModule(context_);
             context_.eval(R"xxx(
                 import * as Math from 'Math';
                 globalThis.Math = Math;

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <limits>
 #include <random>
+#include <opencv2/opencv.hpp>
 
 namespace MathRandom {
     // https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution
@@ -56,10 +57,10 @@ void installMathModule(qjs::Context &context) {
 //    module.function<static_cast<double (*)(double)>(&::fround)>("fround");
     module.function<static_cast<double (*)(double, double)>(&::hypot)>("hypot");
 //    module.function<static_cast<double (*)(double)>(&::imul)>("imul");
-    module.function<&::log>("log");
-    module.function<&::log1p>("log1p");
-    module.function<&::log10>("log10");
-    module.function<&::log2>("log2");
+    module.function<static_cast<double (*)(double)>(&std::log)>("log");
+    module.function<static_cast<double (*)(double)>(&std::log1p)>("log1p");
+    module.function<static_cast<double (*)(double)>(&std::log10)>("log10");
+    module.function<static_cast<double (*)(double)>(&std::log2)>("log2");
     module.function("max", [](const qjs::rest<double> &l) -> double {
         return *std::max_element(l.begin(), l.end());
     });
@@ -110,6 +111,60 @@ void installMathModuleExtend(qjs::Context &context, const std::string &moduleNam
     });
     module.function("maxIndex", [](const qjs::rest<double> &l) -> long long {
         return (std::max_element(l.begin(), l.end()) - l.begin());
+    });
+}
+
+
+void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleName /*= "MathExOpenCV"*/) {
+    auto & module = context.addModule(moduleName.c_str());
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math
+
+    module.function("getRotationMatrix2D", [](
+            double px, double py,
+            double angle, double scale
+    ) -> std::vector<double> {
+        auto m = cv::getRotationMatrix2D(
+                cv::Point2f{static_cast<float>(px), static_cast<float>(py)},
+                angle, scale
+        );
+        return std::vector<double>{
+                m.begin<double>(), m.end<double>()
+        };
+    });
+    module.function("getAffineTransform", [](
+            double p1xSrc, double p1ySrc,
+            double p2xSrc, double p2ySrc,
+            double p3xSrc, double p3ySrc,
+            double p1xDst, double p1yDst,
+            double p2xDst, double p2yDst,
+            double p3xDst, double p3yDst
+    ) -> std::vector<double> {
+        auto m = cv::getAffineTransform(
+                std::vector<cv::Point2f>{
+                        cv::Point2f{static_cast<float>(p1xSrc), static_cast<float>(p1ySrc)},
+                        cv::Point2f{static_cast<float>(p2xSrc), static_cast<float>(p2ySrc)},
+                        cv::Point2f{static_cast<float>(p3xSrc), static_cast<float>(p3ySrc)},
+                },
+                std::vector<cv::Point2f>{
+                        cv::Point2f{static_cast<float>(p1xDst), static_cast<float>(p1yDst)},
+                        cv::Point2f{static_cast<float>(p2xDst), static_cast<float>(p2yDst)},
+                        cv::Point2f{static_cast<float>(p3xDst), static_cast<float>(p3yDst)},
+                }
+        );
+        return std::vector<double>{
+                m.begin<double>(), m.end<double>()
+        };
+    });
+    module.function("invertAffineTransform", [](
+            std::vector<double> mIn
+    ) -> std::vector<double> {
+        cv::Mat m{mIn, true};
+        m = m.reshape(3, 2);
+        cv::Mat mOut;
+        cv::invertAffineTransform(m, mOut);
+        return std::vector<double>{
+                mOut.begin<double>(), mOut.end<double>()
+        };
     });
 }
 
