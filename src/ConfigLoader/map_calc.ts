@@ -162,6 +162,14 @@ declare module MathExOpenCV {
      * @return [2xn] Point2f list
      */
     function transform(pArray: number[], m: number[]): number[];
+
+    /**
+     * cv::convexHull
+     * @param pArray [2xn] Point2f list
+     * @return [n] pArray index list
+     */
+    function convexHull(pArray: number[]): number[];
+
 }
 
 const calcTagPosition = (t: number): { x: number, y: number } => {

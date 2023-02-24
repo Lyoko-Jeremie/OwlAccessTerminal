@@ -180,6 +180,17 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
                 mOut.begin<double>(), mOut.end<double>()
         };
     });
+    module.function("convexHull", [](
+            const std::vector<double>& pArray
+    ) -> std::vector<double> {
+        cv::Mat ps{pArray, true};
+        ps = ps.reshape(2);
+        cv::Mat pIndexOut;
+        cv::convexHull(ps, pIndexOut);
+        return std::vector<double>{
+                pIndexOut.begin<double>(), pIndexOut.end<double>()
+        };
+    });
 }
 
 
