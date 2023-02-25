@@ -43,7 +43,11 @@ namespace OwlQuickJsWrapper {
             installMathExOpenCVModule(context_);
             context_.eval(R"xxx(
                 import * as Math from 'Math';
+                import * as MathEx from 'MathEx';
+                import * as MathExOpenCV from 'MathExOpenCV';
                 globalThis.Math = Math;
+                globalThis.MathEx = MathEx;
+                globalThis.MathExOpenCV = MathExOpenCV;
                 )xxx", "<import>", JS_EVAL_TYPE_MODULE);
 
             auto & module = context_.addModule("console");
