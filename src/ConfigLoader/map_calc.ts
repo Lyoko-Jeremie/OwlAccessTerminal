@@ -106,6 +106,8 @@ declare module MathEx {
     function pythagoreanDistance(x: number, y: number): number;
 
     function maxIndex(...n: number[]): number;
+
+    function atan2Deg(y: number, x: number): number;
 }
 
 declare module MathExOpenCV {
@@ -322,10 +324,10 @@ interface Point2 {
 }
 
 interface PlaneInfo {
-    // the vector of plane X axis in image
-    xDirect: Vec2;
-    // the vector of plane Z axis in image
-    zDirect: Vec2;
+    // the deg of plane X axis in image
+    xDirectDeg: number;
+    // the deg of plane Z axis in image
+    zDirectDeg: number;
     // Point 2 Point pair
     // cm XZ
     PlaneP: Point2;
@@ -355,14 +357,14 @@ const calcK = (v: Vec2) => {
 };
 
 
-const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number):
-    Pick<PlaneInfo, 'xDirect' | 'zDirect' | 'ImageP' | 'PlaneP'> => {
-    const info = {} as Pick<PlaneInfo, 'xDirect' | 'zDirect' | 'ImageP' | 'PlaneP'>;
+const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number) => {
+    const info = {} as PlaneInfo;
 
     if (pla.length !== 3 || img.length !== 3) {
         throw Error("calcPlaneInfo3 (pla.length !== 3 || img.length !== 3)");
     }
 
+    // 图像到平面的变换矩阵
     const mInPla = MathExOpenCV.getAffineTransform(
         img[0].x, img[0].y,
         img[1].x, img[1].y,
@@ -371,6 +373,7 @@ const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number)
         pla[1].x, pla[1].y,
         pla[2].x, pla[2].y,
     );
+    // 平面到图像的变换矩阵
     const mInImg = MathExOpenCV.getAffineTransform(
         pla[0].x, pla[0].y,
         pla[1].x, pla[1].y,
@@ -380,31 +383,56 @@ const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number)
         img[2].x, img[2].y,
     );
 
+    // 图片中心像素点xy
     const centerImgPoint: Point2 = {x: imgX / 2, y: imgY / 2,};
     info.ImageP = centerImgPoint;
     const pImgInPla = MathExOpenCV.transform(
         [
+            // center
             centerImgPoint.x, centerImgPoint.y,
+            // lt
             0, 0,
+            // rt
             imgX, 0,
+            // lb
             0, imgY,
+            // rb
             imgX, imgY,
         ],
         mInPla,
     );
+    // 图像中心点对应的平面上的点的坐标
     const centerPlanPoint: Point2 = {x: pImgInPla[0], y: pImgInPla[1]};
     info.PlaneP = centerPlanPoint;
     const pPlaInImg = MathExOpenCV.transform(
         [
+            // r
             centerPlanPoint.x + 100, centerPlanPoint.y,
+            // u
             centerPlanPoint.x, centerPlanPoint.y + 100,
+            // l
             centerPlanPoint.x - 100, centerPlanPoint.y,
+            // d
             centerPlanPoint.x, centerPlanPoint.y - 100,
+            // rt
             centerPlanPoint.x + 100, centerPlanPoint.y + 100,
         ],
         mInImg,
     );
-    // TODO
+    // 开始计算平面的右(x)向量相对于图像的旋转角度(从x轴正方向逆时针0~360)
+    const imgR: Point2 = {
+        x: pPlaInImg[0],
+        y: pPlaInImg[1],
+    };
+    info.xDirectDeg = MathEx.atan2Deg(imgR.y, imgR.x);
+
+    // 开始计算平面的上(z)向量相对于图像的旋转角度(从x轴正方向逆时针0~360)
+    const imgU: Point2 = {
+        x: pPlaInImg[0 + 1],
+        y: pPlaInImg[1 + 1],
+    };
+    info.zDirectDeg = MathEx.atan2Deg(imgU.y, imgU.x);
+
 
 
     return info;

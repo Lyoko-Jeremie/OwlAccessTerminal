@@ -107,27 +107,30 @@ const findOuterSide = (list) => {
         n.tag = T;
         return n;
     });
-    const outerRect = calcOuterRect(listPos);
-    // find out item
-    const oit = { xL: [], xU: [], zL: [], zU: [] };
-    for (let i = 0; i < listPos.length; i++) {
-        const n = listPos[i];
-        if (n.x === outerRect.xL) {
-            oit.xL.push(i);
-        }
-        if (n.x === outerRect.xU) {
-            oit.xU.push(i);
-        }
-        if (n.y === outerRect.zL) {
-            oit.zL.push(i);
-        }
-        if (n.y === outerRect.zU) {
-            oit.zU.push(i);
-        }
+    const pArray = [];
+    for (const p of listPos) {
+        pArray.push(p.x);
+        pArray.push(p.y);
     }
-    const center = { x: (outerRect.xU + outerRect.xL) / 2, y: (outerRect.zU + outerRect.zL) / 2 };
-    // TODO
-    return [];
+    const [cX, cY, r, ...pList] = MathExOpenCV.minEnclosingCircle(pArray);
+    const pI = MathExOpenCV.circleBorderPoints(cX, cY, r, pList);
+    if (pI.length > 3) {
+        const pL = pI.map(I => list[I]);
+        const pm = new Set(pL);
+        while (true) {
+            if (pm.size >= 3) {
+                break;
+            }
+            const n = pL[MathEx.randomInt2(0, pL.length)];
+            if (!pm.has(n)) {
+                pm.add(n);
+            }
+        }
+        return Array.from(pm.values());
+    }
+    else {
+        return pI.map(I => list[I]);
+    }
 };
 // translate image (0,0) from LT to LB
 const y2y = (imageY, y) => {
@@ -145,13 +148,57 @@ const calcVec = (a, b) => {
 const calcK = (v) => {
     return v.y / v.x;
 };
-const calcPlaneInfo3 = (pla, img) => {
+const calcPlaneInfo = (pla, img, imgX, imgY) => {
     const info = {};
     if (pla.length !== 3 || img.length !== 3) {
         throw Error("calcPlaneInfo3 (pla.length !== 3 || img.length !== 3)");
     }
-    // TODO
-    ;
+    // 图像到平面的变换矩阵
+    const mInPla = MathExOpenCV.getAffineTransform(img[0].x, img[0].y, img[1].x, img[1].y, img[2].x, img[2].y, pla[0].x, pla[0].y, pla[1].x, pla[1].y, pla[2].x, pla[2].y);
+    // 平面到图像的变换矩阵
+    const mInImg = MathExOpenCV.getAffineTransform(pla[0].x, pla[0].y, pla[1].x, pla[1].y, pla[2].x, pla[2].y, img[0].x, img[0].y, img[1].x, img[1].y, img[2].x, img[2].y);
+    // 图片中心像素点xy
+    const centerImgPoint = { x: imgX / 2, y: imgY / 2, };
+    info.ImageP = centerImgPoint;
+    const pImgInPla = MathExOpenCV.transform([
+        // center
+        centerImgPoint.x, centerImgPoint.y,
+        // lt
+        0, 0,
+        // rt
+        imgX, 0,
+        // lb
+        0, imgY,
+        // rb
+        imgX, imgY,
+    ], mInPla);
+    // 图像中心点对应的平面上的点的坐标
+    const centerPlanPoint = { x: pImgInPla[0], y: pImgInPla[1] };
+    info.PlaneP = centerPlanPoint;
+    const pPlaInImg = MathExOpenCV.transform([
+        // r
+        centerPlanPoint.x + 100, centerPlanPoint.y,
+        // u
+        centerPlanPoint.x, centerPlanPoint.y + 100,
+        // l
+        centerPlanPoint.x - 100, centerPlanPoint.y,
+        // d
+        centerPlanPoint.x, centerPlanPoint.y - 100,
+        // rt
+        centerPlanPoint.x + 100, centerPlanPoint.y + 100,
+    ], mInImg);
+    // 开始计算平面的右(x)向量相对于图像的旋转角度(从x轴正方向逆时针0~360)
+    const imgR = {
+        x: pPlaInImg[0],
+        y: pPlaInImg[1],
+    };
+    info.xDirectDeg = MathEx.atan2Deg(imgR.y, imgR.x);
+    // 开始计算平面的上(z)向量相对于图像的旋转角度(从x轴正方向逆时针0~360)
+    const imgU = {
+        x: pPlaInImg[0 + 1],
+        y: pPlaInImg[1 + 1],
+    };
+    info.zDirectDeg = MathEx.atan2Deg(imgU.y, imgU.x);
     return info;
 };
 const calcImageCenterInPlane = (imageX, imageY, planeInfo) => {
@@ -171,6 +218,7 @@ function calc_map_position(tagInfo) {
     if (tagInfo.tagInfo.list.length < 2) {
         // type : calc by tag side size
         // TODO 1
+        //      calcPlaneInfo
     }
     else if (tagInfo.tagInfo.list.length === 2) {
         const l = tagInfo.tagInfo.list;
@@ -194,8 +242,14 @@ function calc_map_position(tagInfo) {
             // TODO 2
         }
         else {
+            if (tagInfo.tagInfo.list.length === 3) {
+                // type : calc use 3 point
+                // TODO 3
+                //      calcPlaneInfo
+            }
             // type : to find last triangle
             // TODO 3 findOuterSide
+            //      convexHull
         }
     }
     return [true, 0, 1, 2];
