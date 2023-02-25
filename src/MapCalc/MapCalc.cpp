@@ -8,6 +8,22 @@
 
 namespace OwlMapCalc {
 
+    void installOpenCVExt(qjs::Context &ctx) {
+        auto &module=  ctx.addModule("OpenCVExt");
+        module.function("calcPlaneInfo", [](
+                double p1xPla, double p1yPla,
+                double p2xPla, double p2yPla,
+                double p3xPla, double p3yPla,
+                double p1xImg, double p1yImg,
+                double p2xImg, double p2yImg,
+                double p3xImg, double p3yImg,
+                double imgX, double imgY
+        ) {
+            // TODO
+        });
+
+    }
+
     MapCalc::MapCalc(
             boost::asio::io_context &ioc,
             OwlMailDefine::ServiceMapCalcMailbox &&mailbox
@@ -18,7 +34,9 @@ namespace OwlMapCalc {
         };
         qjw_ = std::make_shared<OwlQuickJsWrapper::QuickJsWrapper>();
         qjw_->init();
+        installOpenCVExt(qjw_->getContext());
     }
+
 
     bool MapCalc::loadCalcJsCodeFile(const std::string &filePath) {
         if (!boost::filesystem::exists(filePath)) {
@@ -148,18 +166,18 @@ namespace OwlMapCalc {
         // (0,0) at image left top
         tagInfo->aprilTagCenter->centerX = 400;
         tagInfo->aprilTagCenter->centerY = 300;
-        tagInfo->aprilTagCenter->cornerLTx = 0;
-        tagInfo->aprilTagCenter->cornerLTy = 0;
-        tagInfo->aprilTagCenter->cornerRTx = 400;
-        tagInfo->aprilTagCenter->cornerRTy = 0;
+        tagInfo->aprilTagCenter->cornerLTx = 400;
+        tagInfo->aprilTagCenter->cornerLTy = 300 - 300;
+        tagInfo->aprilTagCenter->cornerRTx = 400 + 300;
+        tagInfo->aprilTagCenter->cornerRTy = 300;
         tagInfo->aprilTagCenter->cornerRBx = 400;
-        tagInfo->aprilTagCenter->cornerRBy = 300;
-        tagInfo->aprilTagCenter->cornerLBx = 0;
+        tagInfo->aprilTagCenter->cornerRBy = 300 + 300;
+        tagInfo->aprilTagCenter->cornerLBx = 400 - 300;
         tagInfo->aprilTagCenter->cornerLBy = 300;
         tagInfo->aprilTagList = std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type>();
         tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
-        tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
-        tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
+//        tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
+//        tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
         auto airplaneState = std::make_shared<OwlSerialController::AirplaneState>();
         airplaneState->initTimestamp();
         airplaneState->high = 50;
