@@ -299,9 +299,11 @@ namespace OwlSerialController {
                     auto x = center->cornerLTx - center->cornerLBx;
                     auto y = -(center->cornerLTy - center->cornerLBy);
                     auto r = atan2(y, x);
-                    // rad(0 ~ +PI=-PI ~ 0) -> degree(0 ~ +180=-180 ~ 0) -> degree(0 ~ +180 ~ +360)
                     r = r / (M_PI / 180.0);
-                    auto d = static_cast<uint16_t>(r >= 0 ? r : r + 180);
+                    // rad(0 ~ +PI=-PI ~ 0) -> degree(0 ~ +180=-180 ~ 0) -> degree(0 ~ +180 ~ +360)
+                    // auto d = static_cast<uint16_t>(r >= 0 ? r : r + 180);
+                    // rad(0 ~ +PI=-PI ~ 0) -> degree(-180 ~ 0 ~ +180) -> degree(0 ~ +180 ~ +360)
+                    auto d = static_cast<uint16_t>(r + 180);
 
                     auto id = static_cast<uint16_t>(center->id);
                     auto cx = static_cast<uint16_t>(center->centerX);
