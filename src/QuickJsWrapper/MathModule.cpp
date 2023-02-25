@@ -112,6 +112,7 @@ void installMathModuleExtend(qjs::Context &context, const std::string &moduleNam
     module.function("maxIndex", [](const qjs::rest<double> &l) -> long long {
         return (std::max_element(l.begin(), l.end()) - l.begin());
     });
+    module.function("atan2Deg", [](double y, double x) -> double {
 }
 
 
