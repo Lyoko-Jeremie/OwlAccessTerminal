@@ -113,6 +113,14 @@ void installMathModuleExtend(qjs::Context &context, const std::string &moduleNam
         return (std::max_element(l.begin(), l.end()) - l.begin());
     });
     module.function("atan2Deg", [](double y, double x) -> double {
+        auto r = std::atan2(y, x);
+        r = r / (M_PI / 180.0);
+        if (r >= 0) {
+            return r;
+        } else {
+            return r + 180;
+        }
+    });
 }
 
 
