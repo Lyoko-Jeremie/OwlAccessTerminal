@@ -234,6 +234,8 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
                 pY.at<double>(std::floor(i / 2)) = pArray.at(i);
             }
         }
+        pX -= centerX;
+        pY -= centerY;
         auto d = pX * pX + pY * pY;
         d = radius - d;
         cv::Mat pD = d;
