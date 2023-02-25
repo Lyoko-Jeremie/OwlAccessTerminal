@@ -191,7 +191,7 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
         cv::Mat m{mIn, true};
         m = m.reshape(3, 2);
         cv::Mat ps{pArray, true};
-        ps = ps.reshape(2);
+        ps = ps.reshape(1, pArray.size() / 2);
         cv::Mat mOut;
         cv::transform(ps, mOut, m);
         return std::vector<double>{
@@ -205,7 +205,7 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
             return {};
         }
         cv::Mat ps{pArray, true};
-        ps = ps.reshape(2);
+        ps = ps.reshape(1, pArray.size() / 2);
         cv::Mat pIndexOut;
         cv::convexHull(ps, pIndexOut);
         return std::vector<double>{
@@ -219,7 +219,7 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
             return {};
         }
         cv::Mat ps{pArray, true};
-        ps = ps.reshape(2);
+        ps = ps.reshape(1, pArray.size() / 2);
         cv::Point2f center;
         float radius;
         cv::minEnclosingCircle(ps, center, radius);
@@ -268,7 +268,7 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
             return {};
         }
         cv::Mat ps{pArray, true};
-        ps = ps.reshape(2);
+        ps = ps.reshape(1, pArray.size() / 2);
         auto rect = cv::boundingRect(ps);
         return std::vector<int>{
                 rect.x, rect.y, rect.width, rect.height,
@@ -281,7 +281,7 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
             return {};
         }
         cv::Mat ps{pArray, true};
-        ps = ps.reshape(2);
+        ps = ps.reshape(1, pArray.size() / 2);
         auto rect = cv::minAreaRect(ps);
         return std::vector<double>{
                 rect.center.x, rect.center.y,
@@ -296,7 +296,7 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
             return {};
         }
         cv::Mat ps{pArray, true};
-        ps = ps.reshape(2);
+        ps = ps.reshape(1, pArray.size() / 2);
         auto rect = cv::minAreaRect(ps);
         std::vector<cv::Point2f> p;
         cv::boxPoints(rect, p);
