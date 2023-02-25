@@ -167,7 +167,7 @@ namespace OwlSerialController {
                                      << n->second;
         } else {
             BOOST_LOG_TRIVIAL(warning) << "SerialController::receiveMail unknown additionCmd : "
-                                     << to_underlying(data->additionCmd);
+                                       << to_underlying(data->additionCmd);
         }
         if (data->additionCmd == OwlMailDefine::AdditionCmd::getAirplaneState) {
             receiveMailGetAirplaneState(std::move(data), mailbox);
@@ -299,8 +299,9 @@ namespace OwlSerialController {
                     auto x = center->cornerLTx - center->cornerLBx;
                     auto y = -(center->cornerLTy - center->cornerLBy);
                     auto r = atan2(y, x);
-                    // rad(+PI ~ -PI) -> degree(+180 ~ -180) -> degree(+360 ~ 0)
-                    auto d = static_cast<uint16_t>(((r / (M_PI / 180.0)) + 180));
+                    // rad(0 ~ +PI=-PI ~ 0) -> degree(0 ~ +180=-180 ~ 0) -> degree(0 ~ +180 ~ +360)
+                    r = r / (M_PI / 180.0);
+                    auto d = static_cast<uint16_t>(r >= 0 ? r : r + 180);
 
                     auto id = static_cast<uint16_t>(center->id);
                     auto cx = static_cast<uint16_t>(center->centerX);
