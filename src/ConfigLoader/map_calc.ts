@@ -362,6 +362,8 @@ interface PlaneInfo {
     xDirectDeg: number;
     // the deg of plane Z axis in image
     zDirectDeg: number;
+    // the deg of plane XZ axis (45deg) in image
+    xzDirectDeg: number;
     // Point 2 Point pair
     // cm XZ
     PlaneP: Point2;
@@ -511,15 +513,17 @@ const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number)
     // console.log("imgU :\n", JSON.stringify(imgU, undefined, 4));
     info.zDirectDeg = MathEx.atan2Deg(imgU.y, imgU.x);
 
+    // 开始计算平面的上(xz)向量(45deg)相对于图像的旋转角度(从x轴正方向逆时针0~360)
+    const imgRU: Point2 = {
+        x: pPlaInImg[0 + 2 * 4],
+        y: pPlaInImg[1 + 2 * 4],
+    };
+    // console.log("imgU :\n", JSON.stringify(imgRU, undefined, 4));
+    info.xzDirectDeg = MathEx.atan2Deg(imgRU.y, imgRU.x);
+
     // TODO Scale
 
     return info;
-};
-
-
-const calcImageCenterInPlane = (imageX: number, imageY: number, planeInfo: PlaneInfo) => {
-    // TODO re-calc to update planeInfo P-P-pair
-    return planeInfo;
 };
 
 type ResultOutputReturnType = [

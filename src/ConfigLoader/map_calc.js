@@ -264,12 +264,15 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
     };
     // console.log("imgU :\n", JSON.stringify(imgU, undefined, 4));
     info.zDirectDeg = MathEx.atan2Deg(imgU.y, imgU.x);
+    // 开始计算平面的上(xz)向量(45deg)相对于图像的旋转角度(从x轴正方向逆时针0~360)
+    const imgRU = {
+        x: pPlaInImg[0 + 2 * 4],
+        y: pPlaInImg[1 + 2 * 4],
+    };
+    // console.log("imgU :\n", JSON.stringify(imgRU, undefined, 4));
+    info.xzDirectDeg = MathEx.atan2Deg(imgRU.y, imgRU.x);
     // TODO Scale
     return info;
-};
-const calcImageCenterInPlane = (imageX, imageY, planeInfo) => {
-    // TODO re-calc to update planeInfo P-P-pair
-    return planeInfo;
 };
 function calc_map_position(tagInfo) {
     console.log("tagInfo:\n", JSON.stringify(tagInfo, undefined, 4));
