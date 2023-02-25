@@ -118,11 +118,13 @@ void installMathModuleExtend(qjs::Context &context, const std::string &moduleNam
 //        BOOST_LOG_TRIVIAL(trace) << "atan2Deg r 1 :" << r;
         r = r / (M_PI / 180.0);
 //        BOOST_LOG_TRIVIAL(trace) << "atan2Deg r 2 :" << r;
-        if (r >= 0) {
-            return r;
-        } else {
-            return r + 180;
-        }
+//        if (r >= 0) {
+//            return r;
+//        } else {
+//            return r + 180;
+//        }
+//        return r + 180;
+        return r;
     });
 }
 
