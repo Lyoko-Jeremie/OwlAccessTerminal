@@ -303,6 +303,7 @@ namespace OwlSerialController {
                     // rad(0 ~ +PI=-PI ~ 0) -> degree(0 ~ +180=-180 ~ 0) -> degree(0 ~ +180 ~ +360)
                     // auto d = static_cast<uint16_t>(r >= 0 ? r : r + 180);
                     // rad(0 ~ +PI=-PI ~ 0) -> degree(-180 ~ 0 ~ +180) -> degree(0 ~ +180 ~ +360)
+                    // add 180 to avoid sign
                     auto d = static_cast<uint16_t>(r + 180);
 
                     auto id = static_cast<uint16_t>(center->id);
