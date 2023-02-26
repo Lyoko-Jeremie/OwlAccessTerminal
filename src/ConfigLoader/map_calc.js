@@ -48,13 +48,13 @@ const AlgorithmMultiScale = 10;
 // ============ map info ============
 const MapX = 10;
 const MapZ = 20;
-// cm
+// cm * AlgorithmMultiScale
 const DistanceX = 50 * AlgorithmMultiScale;
-// cm
+// cm * AlgorithmMultiScale
 const DistanceZ = 50 * AlgorithmMultiScale;
-// cm
+// cm * AlgorithmMultiScale
 const SizeX = 10 * AlgorithmMultiScale;
-// cm
+// cm * AlgorithmMultiScale
 const SizeZ = 10 * AlgorithmMultiScale;
 const SizeXHalf = SizeX / 2;
 const SizeZHalf = SizeZ / 2;
@@ -205,6 +205,10 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
         0, imgY,
         // rb
         imgX, imgY,
+        // U
+        centerImgPoint.x, centerImgPoint.y - 100,
+        // R
+        centerImgPoint.x + 100, centerImgPoint.y,
     ], mInPla);
     // console.log("pImgInPla [] :\n", JSON.stringify([
     //     // center
@@ -235,6 +239,10 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
         centerPlanPoint.x, centerPlanPoint.y - offsetLen,
         // rt
         centerPlanPoint.x + offsetLen, centerPlanPoint.y + offsetLen,
+        // U
+        centerPlanPoint.x, centerPlanPoint.y + SizeXHalf,
+        // R
+        centerPlanPoint.x + SizeXHalf, centerPlanPoint.y,
     ], mInImg);
     // console.log("pPlaInImg :\n", JSON.stringify(
     //     [
@@ -271,7 +279,19 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
     };
     // console.log("imgU :\n", JSON.stringify(imgRU, undefined, 4));
     info.xzDirectDeg = MathEx.atan2Deg(imgRU.y, imgRU.x);
-    // TODO Scale
+    // Scale
+    const scalePlaInImg = {
+        x: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 6], pPlaInImg[0 + 2 * 6]) / SizeXHalf * 2 / AlgorithmMultiScale,
+        y: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 5], pPlaInImg[1 + 2 * 5]) / SizeXHalf * 2 / AlgorithmMultiScale,
+    };
+    console.log("scalePlaInImg :\n", JSON.stringify(scalePlaInImg, undefined, 4));
+    console.log("scalePlaInImg :\n", MathEx.pythagoreanDistance(scalePlaInImg.x, scalePlaInImg.y));
+    const scaleImgInPla = {
+        x: MathEx.pythagoreanDistance(pImgInPla[0 + 2 * 6], pImgInPla[1 + 2 * 6]) / 100,
+        y: MathEx.pythagoreanDistance(pImgInPla[0 + 2 * 5], pImgInPla[1 + 2 * 5]) / 100,
+    };
+    console.log("scaleImgInPla :\n", JSON.stringify(scaleImgInPla, undefined, 4));
+    console.log("scaleImgInPla :\n", MathEx.pythagoreanDistance(scaleImgInPla.x, scaleImgInPla.y));
     return info;
 };
 function calc_map_position(tagInfo) {

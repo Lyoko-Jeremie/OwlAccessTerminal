@@ -164,16 +164,32 @@ namespace OwlMapCalc {
         tagInfo->aprilTagCenter = std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type>();
         tagInfo->aprilTagCenter->id = 0;
         // (0,0) at image left top
-        tagInfo->aprilTagCenter->centerX = 400;
-        tagInfo->aprilTagCenter->centerY = 300;
-        tagInfo->aprilTagCenter->cornerLTx = 400;
-        tagInfo->aprilTagCenter->cornerLTy = 300 - 300;
-        tagInfo->aprilTagCenter->cornerRTx = 400 + 300;
-        tagInfo->aprilTagCenter->cornerRTy = 300;
-        tagInfo->aprilTagCenter->cornerRBx = 400;
-        tagInfo->aprilTagCenter->cornerRBy = 300 + 300;
-        tagInfo->aprilTagCenter->cornerLBx = 400 - 300;
-        tagInfo->aprilTagCenter->cornerLBy = 300;
+//        tagInfo->aprilTagCenter->centerX = 400;
+//        tagInfo->aprilTagCenter->centerY = 300;
+//        tagInfo->aprilTagCenter->cornerLTx = 400;
+//        tagInfo->aprilTagCenter->cornerLTy = 300 - 300;
+//        tagInfo->aprilTagCenter->cornerRTx = 400 + 300;
+//        tagInfo->aprilTagCenter->cornerRTy = 300;
+//        tagInfo->aprilTagCenter->cornerRBx = 400;
+//        tagInfo->aprilTagCenter->cornerRBy = 300 + 300;
+//        tagInfo->aprilTagCenter->cornerLBx = 400 - 300;
+//        tagInfo->aprilTagCenter->cornerLBy = 300;
+        double x = 400;
+        double y = 300;
+        tagInfo->aprilTagCenter->centerX = x;
+        tagInfo->aprilTagCenter->centerY = y;
+
+        tagInfo->aprilTagCenter->cornerLTx = x;
+        tagInfo->aprilTagCenter->cornerLTy = y - 10;
+
+        tagInfo->aprilTagCenter->cornerRTx = x + 10;
+        tagInfo->aprilTagCenter->cornerRTy = y;
+
+        tagInfo->aprilTagCenter->cornerRBx = x;
+        tagInfo->aprilTagCenter->cornerRBy = y + 10;
+
+        tagInfo->aprilTagCenter->cornerLBx = x - 10;
+        tagInfo->aprilTagCenter->cornerLBy = y;
         tagInfo->aprilTagList = std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type>();
         tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
 //        tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
