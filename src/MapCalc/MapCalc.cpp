@@ -8,21 +8,21 @@
 
 namespace OwlMapCalc {
 
-    void installOpenCVExt(qjs::Context &ctx) {
-        auto &module=  ctx.addModule("OpenCVExt");
-        module.function("calcPlaneInfo", [](
-                double p1xPla, double p1yPla,
-                double p2xPla, double p2yPla,
-                double p3xPla, double p3yPla,
-                double p1xImg, double p1yImg,
-                double p2xImg, double p2yImg,
-                double p3xImg, double p3yImg,
-                double imgX, double imgY
-        ) {
-            // TODO
-        });
-
-    }
+//    void installOpenCVExt(qjs::Context &ctx) {
+//        auto &module=  ctx.addModule("OpenCVExt");
+//        module.function("calcPlaneInfo", [](
+//                double p1xPla, double p1yPla,
+//                double p2xPla, double p2yPla,
+//                double p3xPla, double p3yPla,
+//                double p1xImg, double p1yImg,
+//                double p2xImg, double p2yImg,
+//                double p3xImg, double p3yImg,
+//                double imgX, double imgY
+//        ) {
+//            // TODO
+//        });
+//
+//    }
 
     MapCalc::MapCalc(
             boost::asio::io_context &ioc,
@@ -34,7 +34,7 @@ namespace OwlMapCalc {
         };
         qjw_ = std::make_shared<OwlQuickJsWrapper::QuickJsWrapper>();
         qjw_->init();
-        installOpenCVExt(qjw_->getContext());
+//        installOpenCVExt(qjw_->getContext());
     }
 
 
