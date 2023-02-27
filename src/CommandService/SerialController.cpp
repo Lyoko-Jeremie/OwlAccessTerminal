@@ -168,6 +168,15 @@ namespace OwlSerialController {
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
             package_record_->mail->callbackRunner = data->callbackRunner;
+            if (auto n = OwlMailDefine::AdditionCmdNameLookupTable.find(package_record_->mail->additionCmd);
+                    n != OwlMailDefine::AdditionCmdNameLookupTable.end()) {
+                BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMailRepeat "
+                                         << to_underlying(package_record_->mail->additionCmd) << " additionCmd:"
+                                         << n->second;
+            } else {
+                BOOST_LOG_TRIVIAL(warning) << "SerialController::receiveMailRepeat unknown additionCmd : "
+                                           << to_underlying(package_record_->mail->additionCmd);
+            }
             sendData2Serial(package_record_->mail, mailbox, package_record_->id.load(), true, false);
         });
     }
