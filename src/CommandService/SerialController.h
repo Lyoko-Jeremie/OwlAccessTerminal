@@ -115,7 +115,7 @@ namespace OwlSerialController {
 
     struct SerialControllerCmdPackageRecord : public std::enable_shared_from_this<SerialControllerCmdPackageRecord> {
     private:
-        std::atomic_uint16_t packageId = 0;
+        std::atomic_uint16_t packageId = 1;
         std::shared_ptr<OwlMailDefine::Cmd2Serial> mail_;
 
         uint16_t nextId() {
