@@ -113,6 +113,26 @@ namespace OwlSerialController {
 
     };
 
+    struct SerialControllerCmdPackageRecord : public std::enable_shared_from_this<SerialControllerCmdPackageRecord> {
+        std::atomic_uint16_t id = 0;
+        std::shared_ptr<OwlMailDefine::Cmd2Serial> mail;
+
+        uint16_t nextId() {
+            if (id < 62766 && id > 0) {
+                ++id;
+            } else {
+                id.store(1);
+            }
+            return id.load();
+        }
+
+        void setNewMail(OwlMailDefine::MailCmd2Serial data) {
+            BOOST_ASSERT(data);
+            BOOST_ASSERT(!data->callbackRunner);
+            atomic_store(&mail, data);
+        }
+    };
+
     class SerialController : public std::enable_shared_from_this<SerialController> {
     public:
         explicit SerialController(
@@ -120,14 +140,32 @@ namespace OwlSerialController {
                 std::shared_ptr<OwlConfigLoader::ConfigLoader> &&config,
                 std::vector<OwlMailDefine::CmdSerialMailbox> &&mailbox_list
         ) : ioc_(ioc), config_(std::move(config)), mailbox_list_(std::move(mailbox_list)),
-            ping_timer_(ioc_, std::chrono::milliseconds(1000)) {
+            ping_timer_(ioc_, std::chrono::milliseconds(1000)),
+            package_repeater_timer_(ioc_, std::chrono::milliseconds(1000)) {
+
+            package_record_ = std::make_shared<SerialControllerCmdPackageRecord>();
+
             ping_box_ = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
                     ioc_, ioc_, "ping_box_"
+            );
+            package_repeater_box_ = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
+                    ioc_, ioc_, "package_repeater_box_"
             );
             ping_box_->receiveB2A = [](OwlMailDefine::MailSerial2Cmd &&data) {
                 data->runner(data);
             };
+            package_repeater_box_->receiveB2A = [](OwlMailDefine::MailSerial2Cmd &&data) {
+                data->runner(data);
+            };
             mailbox_list_.push_back(ping_box_->shared_from_this());
+            mailbox_list_.push_back(package_repeater_box_->shared_from_this());
+
+            ping_box_->receiveA2B = [this](OwlMailDefine::MailCmd2Serial &&data) {
+                receiveMail(std::move(data), ping_box_);
+            };
+            package_repeater_box_->receiveA2B = [this](OwlMailDefine::MailCmd2Serial &&data) {
+                receiveMailRepeat(std::move(data), package_repeater_box_);
+            };
 
             for (auto &m: mailbox_list_) {
                 m->receiveA2B = [this, &m](OwlMailDefine::MailCmd2Serial &&data) {
@@ -148,6 +186,8 @@ namespace OwlSerialController {
 
             // init ping
             ping_timer_tick({}, shared_from_this());
+            // init repeater
+            package_repeater({}, shared_from_this());
         }
 
         ~SerialController() {
@@ -174,6 +214,8 @@ namespace OwlSerialController {
                 OwlMailDefine::CmdSerialMailbox &mailbox
         );
 
+        std::shared_ptr<SerialControllerCmdPackageRecord> package_record_;
+
     public:
 
         void sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState);
@@ -187,6 +229,15 @@ namespace OwlSerialController {
         friend struct PortController;
 
         void receiveMail(OwlMailDefine::MailCmd2Serial &&data, OwlMailDefine::CmdSerialMailbox &mailbox);
+
+        void receiveMailRepeat(OwlMailDefine::MailCmd2Serial &&data, OwlMailDefine::CmdSerialMailbox &mailbox);
+
+        void sendData2Serial(
+                OwlMailDefine::MailCmd2Serial data,
+                OwlMailDefine::CmdSerialMailbox &mailbox,
+                uint16_t id,
+                bool repeating,
+                bool needRepeat);
 
         void receiveMailGetAirplaneState(
                 OwlMailDefine::MailCmd2Serial &&data,
@@ -223,6 +274,33 @@ namespace OwlSerialController {
                 ping_timer_.expires_after(std::chrono::milliseconds(1000));
                 ping_timer_.async_wait(
                         boost::bind(&SerialController::ping_timer_tick,
+                                    this, boost::asio::placeholders::error,
+                                    shared_from_this()));
+            }
+        }
+
+        boost::asio::steady_timer package_repeater_timer_;
+        OwlMailDefine::CmdSerialMailbox package_repeater_box_;
+
+        void package_repeater(const boost::system::error_code &ec, std::shared_ptr<SerialController> self) {
+            boost::ignore_unused(ec);
+            package_repeater_timer_.cancel();
+            if (initOk && airplanePortController && airplanePortController->isOpened()) {
+                auto mm = std::make_shared<OwlMailDefine::MailCmd2Serial::element_type>();
+                mm->additionCmd = OwlMailDefine::AdditionCmd::ignore;
+                mm->callbackRunner = [this, self = std::move(self)](OwlMailDefine::MailSerial2Cmd &&data) {
+                    boost::ignore_unused(data);
+                    package_repeater_timer_.expires_after(std::chrono::milliseconds(200));
+                    package_repeater_timer_.async_wait(
+                            boost::bind(&SerialController::package_repeater,
+                                        this, boost::asio::placeholders::error,
+                                        shared_from_this()));
+                };
+                package_repeater_box_->sendA2B(std::move(mm));
+            } else {
+                package_repeater_timer_.expires_after(std::chrono::milliseconds(200));
+                package_repeater_timer_.async_wait(
+                        boost::bind(&SerialController::package_repeater,
                                     this, boost::asio::placeholders::error,
                                     shared_from_this()));
             }

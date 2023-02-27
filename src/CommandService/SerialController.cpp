@@ -158,6 +158,20 @@ namespace OwlSerialController {
         return static_cast<std::underlying_type_t<E>>(e);
     }
 
+
+    void SerialController::receiveMailRepeat(OwlMailDefine::MailCmd2Serial &&data,
+                                             OwlMailDefine::CmdSerialMailbox &mailbox) {
+        BOOST_ASSERT(data);
+        if constexpr (flag_DEBUG_IF_CHECK_POINT) {
+            BOOST_ASSERT(!weak_from_this().expired());
+        }
+        boost::asio::dispatch(ioc_, [
+                this, self = shared_from_this(), data, &mailbox]() {
+            package_record_->mail->callbackRunner = data->callbackRunner;
+            sendData2Serial(package_record_->mail, mailbox, package_record_->id.load(), true, false);
+        });
+    }
+
     void SerialController::receiveMail(OwlMailDefine::MailCmd2Serial &&data, OwlMailDefine::CmdSerialMailbox &mailbox) {
         BOOST_ASSERT(data);
         if (auto n = OwlMailDefine::AdditionCmdNameLookupTable.find(data->additionCmd);
@@ -180,38 +194,10 @@ namespace OwlSerialController {
         }
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
-            BOOST_ASSERT(data);
-            if (data->additionCmd != OwlMailDefine::AdditionCmd::ping) {
-                BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch ";
-            }
-            if constexpr (flag_DEBUG_IF_CHECK_POINT) {
-                BOOST_ASSERT(!weak_from_this().expired());
-                BOOST_ASSERT(self.use_count() > 0);
-            }
-            if (!initOk && !initPort()) {
-                BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch initError";
-                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
-                data_r->runner = data->callbackRunner;
-                data_r->openError = true;
-                data_r->ok = true;
-                sendMail(std::move(data_r), mailbox);
-                return;
-            }
             if (data->additionCmd != OwlMailDefine::AdditionCmd::ping) {
                 BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch initOk";
             }
             switch (data->additionCmd) {
-                case OwlMailDefine::AdditionCmd::ignore: {
-                    BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                             << " receiveMail"
-                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::ignore";
-                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
-                    data_r->runner = data->callbackRunner;
-                    data_r->openError = true;
-                    data_r->ok = false;
-                    sendMail(std::move(data_r), mailbox);
-                    return;
-                }
                 case OwlMailDefine::AdditionCmd::takeoff:
                 case OwlMailDefine::AdditionCmd::land:
                 case OwlMailDefine::AdditionCmd::stop:
@@ -222,352 +208,533 @@ namespace OwlSerialController {
                 case OwlMailDefine::AdditionCmd::speed:
                 case OwlMailDefine::AdditionCmd::flyMode:
                 case OwlMailDefine::AdditionCmd::gotoPosition:
-                case OwlMailDefine::AdditionCmd::led: {
-                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
-                                             << " receiveMail"
-                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::* move class";
-                    auto mcp = data->moveCmdPtr;
-                    if (!mcp) {
-                        BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                 << " receiveMail"
-                                                 << " OwlMailDefine::AdditionCmd::* move class nullptr";
-                        auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
-                        data_r->runner = data->callbackRunner;
-                        data_r->openError = false;
-                        data_r->ok = false;
-                        sendMail(std::move(data_r), mailbox);
-                        return;
-                    }
-                    constexpr uint8_t packageSize = 13;
-                    makeADataBuffer<packageSize>(
-                            std::array<uint8_t, packageSize>{
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(to_underlying(data->additionCmd)),
-                                    // data size
-                                    uint8_t(packageSize - 5),
-
-                                    uint8_t(uint16_t(mcp->x) & 0xff),
-                                    uint8_t(uint16_t(mcp->x) >> 8),
-
-                                    uint8_t(uint16_t(mcp->y) & 0xff),
-                                    uint8_t(uint16_t(mcp->y) >> 8),
-
-                                    uint8_t(uint16_t(mcp->z) & 0xff),
-                                    uint8_t(uint16_t(mcp->z) >> 8),
-
-                                    uint8_t(uint16_t(mcp->cw) & 0xff),
-                                    uint8_t(uint16_t(mcp->cw) >> 8),
-
-                                    // xor checksum byte
-                                    uint8_t(0),
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
-                case OwlMailDefine::AdditionCmd::AprilTag: {
-                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
-                                             << " receiveMail"
-                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag";
-
-                    if (!data->aprilTagCmdPtr) {
-                        BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                 << " receiveMail"
-                                                 << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag"
-                                                 << " (!data->aprilTagCmdPtr)";
-                        return;
-                    }
-                    BOOST_ASSERT(data->aprilTagCmdPtr);
-
-                    // save a copy for other use
-                    atomic_store(&aprilTagCmdData, data->aprilTagCmdPtr);
-
-                    auto pcx = static_cast<uint16_t>(data->aprilTagCmdPtr->imageX);
-                    auto pcy = static_cast<uint16_t>(data->aprilTagCmdPtr->imageY);
-
-                    auto center = data->aprilTagCmdPtr->aprilTagCenter;
-                    if (!center) {
-                        BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                 << " receiveMail"
-                                                 << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag"
-                                                 << " (!center)";
-                        return;
-                    }
-                    BOOST_ASSERT(center);
-                    // (0,0) at image left top
-                    auto x = center->cornerLTx - center->cornerLBx;
-                    auto y = -(center->cornerLTy - center->cornerLBy);
-                    auto r = atan2(y, x);
-                    r = r / (M_PI / 180.0);
-                    // rad(0 ~ +PI=-PI ~ 0) -> degree(0 ~ +180=-180 ~ 0) -> degree(0 ~ +180 ~ +360)
-                    // auto d = static_cast<uint16_t>(r >= 0 ? r : r + 180);
-                    // rad(0 ~ +PI=-PI ~ 0) -> degree(-180 ~ 0 ~ +180) -> degree(0 ~ +180 ~ +360)
-                    // add 180 to avoid sign
-                    auto d = static_cast<uint16_t>(r + 180);
-
-                    auto id = static_cast<uint16_t>(center->id);
-                    auto cx = static_cast<uint16_t>(center->centerX);
-                    auto cy = static_cast<uint16_t>(center->centerY);
-
-                    // send cmd to serial
-                    // make send data
-                    constexpr uint8_t packageSize = 17;
-                    makeADataBuffer<packageSize>(
-                            std::array<uint8_t, packageSize>{
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(to_underlying(data->additionCmd)),
-                                    // data size
-                                    uint8_t(packageSize - 5),
-
-                                    // image size
-                                    uint8_t(uint16_t(pcx) & 0xff),
-                                    uint8_t(uint16_t(pcx) >> 8),
-                                    uint8_t(uint16_t(pcy) & 0xff),
-                                    uint8_t(uint16_t(pcy) >> 8),
-
-                                    // tag center
-                                    uint8_t(uint16_t(cx) & 0xff),
-                                    uint8_t(uint16_t(cx) >> 8),
-                                    uint8_t(uint16_t(cy) & 0xff),
-                                    uint8_t(uint16_t(cy) >> 8),
-
-                                    // tag degree
-                                    uint8_t(uint16_t(d) & 0xff),
-                                    uint8_t(uint16_t(d) >> 8),
-
-                                    // tag id
-                                    uint8_t(uint16_t(id) & 0xff),
-                                    uint8_t(uint16_t(id) >> 8),
-
-                                    // xor checksum byte
-                                    uint8_t(0),
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
-                case OwlMailDefine::AdditionCmd::JoyCon: {
-                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
-                                             << " receiveMail"
-                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::JoyCon";
-                    auto jcp = data->joyConPtr;
-                    if (!jcp) {
-                        BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                 << " receiveMail"
-                                                 << " OwlMailDefine::AdditionCmd::JoyCon nullptr";
-                        auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
-                        data_r->runner = data->callbackRunner;
-                        data_r->openError = false;
-                        data_r->ok = false;
-                        sendMail(std::move(data_r), mailbox);
-                        return;
-                    }
-                    BOOST_ASSERT(jcp);
-                    constexpr uint8_t packageSize = 27;
-                    makeADataBuffer<packageSize>(
-                            std::array<uint8_t, packageSize>{
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(to_underlying(data->additionCmd)),
-                                    // data size
-                                    uint8_t(packageSize - 5),
-
-                                    uint8_t(jcp->leftRockerX > 0 ? jcp->leftRockerX : 0),
-                                    uint8_t(jcp->leftRockerX < 0 ? -jcp->leftRockerX : 0),
-                                    uint8_t(jcp->leftRockerY > 0 ? jcp->leftRockerY : 0),
-                                    uint8_t(jcp->leftRockerY < 0 ? -jcp->leftRockerY : 0),
-                                    uint8_t(jcp->rightRockerX > 0 ? jcp->rightRockerX : 0),
-                                    uint8_t(jcp->rightRockerX < 0 ? -jcp->rightRockerX : 0),
-                                    uint8_t(jcp->rightRockerY > 0 ? jcp->rightRockerY : 0),
-                                    uint8_t(jcp->rightRockerY < 0 ? -jcp->rightRockerY : 0),
-
-                                    uint8_t(jcp->leftBackTop),
-                                    uint8_t(jcp->leftBackBottom),
-                                    uint8_t(jcp->rightBackTop),
-                                    uint8_t(jcp->rightBackBottom),
-
-                                    uint8_t(jcp->CrossUp),
-                                    uint8_t(jcp->CrossDown),
-                                    uint8_t(jcp->CrossLeft),
-                                    uint8_t(jcp->CrossRight),
-
-                                    uint8_t(jcp->A),
-                                    uint8_t(jcp->B),
-                                    uint8_t(jcp->X),
-                                    uint8_t(jcp->Y),
-
-                                    uint8_t(jcp->buttonAdd),
-                                    uint8_t(jcp->buttonReduce),
-
-                                    // xor checksum byte
-                                    uint8_t(0),
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
-                case OwlMailDefine::AdditionCmd::JoyConSimple: {
-                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
-                                             << " receiveMail"
-                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::JoyConSimple";
-                    auto jcp = data->joyConPtr;
-                    if (!jcp) {
-                        BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                 << " receiveMail"
-                                                 << " OwlMailDefine::AdditionCmd::JoyConSimple nullptr";
-                        auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
-                        data_r->runner = data->callbackRunner;
-                        data_r->openError = false;
-                        data_r->ok = false;
-                        sendMail(std::move(data_r), mailbox);
-                        return;
-                    }
-                    BOOST_ASSERT(jcp);
-                    constexpr uint8_t packageSize = 19;
-                    makeADataBuffer<packageSize>(
-                            std::array<uint8_t, packageSize>{
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(to_underlying(data->additionCmd)),
-                                    // data size
-                                    uint8_t(packageSize - 5),
-
-                                    uint8_t(jcp->leftRockerX > 0 ? jcp->leftRockerX : 0),
-                                    uint8_t(jcp->leftRockerX < 0 ? -jcp->leftRockerX : 0),
-                                    uint8_t(jcp->leftRockerY > 0 ? jcp->leftRockerY : 0),
-                                    uint8_t(jcp->leftRockerY < 0 ? -jcp->leftRockerY : 0),
-                                    uint8_t(jcp->rightRockerX > 0 ? jcp->rightRockerX : 0),
-                                    uint8_t(jcp->rightRockerX < 0 ? -jcp->rightRockerX : 0),
-                                    uint8_t(jcp->rightRockerY > 0 ? jcp->rightRockerY : 0),
-                                    uint8_t(jcp->rightRockerY < 0 ? -jcp->rightRockerY : 0),
-
-                                    uint8_t(jcp->leftBackTop),
-                                    uint8_t(jcp->leftBackBottom),
-                                    uint8_t(jcp->rightBackTop),
-                                    uint8_t(jcp->rightBackBottom),
-
-                                    uint8_t(jcp->buttonAdd),
-                                    uint8_t(jcp->buttonReduce),
-
-                                    // xor checksum byte
-                                    uint8_t(0),
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
-                case OwlMailDefine::AdditionCmd::JoyConGyro: {
-                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
-                                             << " receiveMail"
-                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::JoyConGyro";
-                    auto jcgp = data->joyConPtr;
-                    if (!jcgp) {
-                        BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                                 << " receiveMail"
-                                                 << " OwlMailDefine::AdditionCmd::JoyConGyro nullptr";
-                        auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
-                        data_r->runner = data->callbackRunner;
-                        data_r->openError = false;
-                        data_r->ok = false;
-                        sendMail(std::move(data_r), mailbox);
-                        return;
-                    }
-                    BOOST_ASSERT(jcgp);
-                    constexpr uint8_t packageSize = 13;
-                    makeADataBuffer<packageSize>(
-                            std::array<uint8_t, packageSize>{
-                                    // 0xAA
-                                    uint8_t(0xAA),
-
-                                    // AdditionCmd
-                                    uint8_t(to_underlying(data->additionCmd)),
-                                    // data size
-                                    uint8_t(packageSize - 5),
-
-                                    uint8_t(jcgp->A),
-                                    uint8_t(jcgp->B),
-                                    uint8_t(jcgp->X),
-                                    uint8_t(jcgp->Y),
-
-                                    uint8_t(jcgp->A),
-                                    uint8_t(jcgp->B),
-                                    uint8_t(jcgp->X),
-                                    uint8_t(jcgp->Y),
-
-                                    // xor checksum byte
-                                    uint8_t(0),
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
+                case OwlMailDefine::AdditionCmd::led:
                 case OwlMailDefine::AdditionCmd::emergencyStop:
                 case OwlMailDefine::AdditionCmd::unlock:
                 case OwlMailDefine::AdditionCmd::calibrate:
-                case OwlMailDefine::AdditionCmd::ping: {
-                    constexpr uint8_t packageSize = 5;
-                    makeADataBuffer<packageSize>(
-                            std::array<uint8_t, packageSize>{
-                                    // 0xAA
-                                    uint8_t(0xAA),
-                                    // AdditionCmd
-                                    uint8_t(to_underlying(data->additionCmd)),
-                                    // data size
-                                    uint8_t(0),
-                                    // xor checksum byte
-                                    uint8_t(0),
-                                    // 0xBB
-                                    uint8_t(0xBB),
-                            },
-                            shared_from_this(),
-                            data,
-                            mailbox
-                    );
-                    return;
-                }
-                default: {
+                    // need repeat
+
+                    // // clone a package without callback to recorder
+                    // atomic_store(&package_record_->mail, data->repeat());
+                    // // send package with origin callback
+                    // sendData2Serial(data, mailbox, package_record_->nextId(), false);
+
+                    // above logic moved to `sendData2Serial`
+                    sendData2Serial(data, mailbox, 0, false, true);
+                    break;
+                case OwlMailDefine::AdditionCmd::ignore:
+                case OwlMailDefine::AdditionCmd::ping:
+                case OwlMailDefine::AdditionCmd::AprilTag:
+                case OwlMailDefine::AdditionCmd::JoyCon:
+                case OwlMailDefine::AdditionCmd::JoyConSimple:
+                case OwlMailDefine::AdditionCmd::JoyConGyro:
+                    // no repeat
+                    sendData2Serial(data, mailbox, 0, false, false);
+                    break;
+                case OwlMailDefine::AdditionCmd::getAirplaneState:
+                    BOOST_ASSERT_MSG(false, (std::string{"receiveMail boost::asio::dispatch"} +
+                                             std::string{" case OwlMailDefine::AdditionCmd::getAirplaneState"} +
+                                             std::string{" never go there!!!"}).c_str());
+                    break;
+                default:
+                    // if we go there, ill program !!!
+                    sendData2Serial(data, mailbox, 0, false, false);
+                    break;
+            }
+        });
+    }
+
+    void SerialController::sendData2Serial(
+            OwlMailDefine::MailCmd2Serial data,
+            OwlMailDefine::CmdSerialMailbox &mailbox,
+            uint16_t packageId,
+            bool repeating,
+            bool needRepeat) {
+        // warning: this function must call inside `this.ioc_`
+        //      and, must keep data alive
+
+        BOOST_ASSERT(data);
+        if (data->additionCmd != OwlMailDefine::AdditionCmd::ping) {
+            BOOST_LOG_TRIVIAL(trace) << "SerialController::sendData2Serial " << "dispatch ";
+        }
+        if constexpr (flag_DEBUG_IF_CHECK_POINT) {
+            BOOST_ASSERT(!weak_from_this().expired());
+            BOOST_ASSERT(this->weak_from_this().use_count() > 0);
+        }
+        if (!initOk && !initPort()) {
+            BOOST_LOG_TRIVIAL(trace) << "SerialController::sendData2Serial " << "dispatch initError";
+            auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+            data_r->runner = data->callbackRunner;
+            data_r->openError = true;
+            data_r->ok = true;
+            sendMail(std::move(data_r), mailbox);
+            return;
+        }
+        switch (data->additionCmd) {
+            case OwlMailDefine::AdditionCmd::ignore: {
+                BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                         << " sendData2Serial"
+                                         << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::ignore";
+                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                data_r->runner = data->callbackRunner;
+                data_r->openError = true;
+                data_r->ok = false;
+                sendMail(std::move(data_r), mailbox);
+                return;
+            }
+            case OwlMailDefine::AdditionCmd::takeoff:
+            case OwlMailDefine::AdditionCmd::land:
+            case OwlMailDefine::AdditionCmd::stop:
+            case OwlMailDefine::AdditionCmd::move:
+            case OwlMailDefine::AdditionCmd::rotate:
+            case OwlMailDefine::AdditionCmd::keep:
+            case OwlMailDefine::AdditionCmd::high:
+            case OwlMailDefine::AdditionCmd::speed:
+            case OwlMailDefine::AdditionCmd::flyMode:
+            case OwlMailDefine::AdditionCmd::gotoPosition:
+            case OwlMailDefine::AdditionCmd::led: {
+                if (!repeating)
+                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                                             << " sendData2Serial"
+                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::* move class";
+                auto mcp = data->moveCmdPtr;
+                if (!mcp) {
                     BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                             << " receiveMail"
-                                             << " switch (data->additionCmd) default";
+                                             << " sendData2Serial"
+                                             << " OwlMailDefine::AdditionCmd::* move class nullptr";
                     auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
                     data_r->runner = data->callbackRunner;
-                    data_r->openError = true;
+                    data_r->openError = false;
                     data_r->ok = false;
                     sendMail(std::move(data_r), mailbox);
                     return;
                 }
+                if (needRepeat) {
+                    // ok, this package is safe, now to remember this package
+
+                    // clone a package without callback to recorder
+                    atomic_store(&package_record_->mail, data->repeat());
+                    packageId = package_record_->nextId();
+                }
+                constexpr uint8_t packageSize = 15;
+                makeADataBuffer<packageSize>(
+                        std::array<uint8_t, packageSize>{
+                                // 0xAA
+                                uint8_t(0xAA),
+
+                                // AdditionCmd
+                                uint8_t(to_underlying(data->additionCmd)),
+                                // data size
+                                uint8_t(packageSize - 5),
+
+                                uint8_t(uint16_t(mcp->x) & 0xff),
+                                uint8_t(uint16_t(mcp->x) >> 8),
+
+                                uint8_t(uint16_t(mcp->y) & 0xff),
+                                uint8_t(uint16_t(mcp->y) >> 8),
+
+                                uint8_t(uint16_t(mcp->z) & 0xff),
+                                uint8_t(uint16_t(mcp->z) >> 8),
+
+                                uint8_t(uint16_t(mcp->cw) & 0xff),
+                                uint8_t(uint16_t(mcp->cw) >> 8),
+
+                                // serial ID
+                                uint8_t(packageId & 0xff),
+                                uint8_t(packageId >> 8),
+                                // xor checksum byte
+                                uint8_t(0),
+                                // 0xBB
+                                uint8_t(0xBB),
+                        },
+                        shared_from_this(),
+                        data,
+                        mailbox
+                );
+                return;
             }
-        });
+            case OwlMailDefine::AdditionCmd::AprilTag: {
+                if (!repeating)
+                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                                             << " sendData2Serial"
+                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag";
+
+                if (!data->aprilTagCmdPtr) {
+                    BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                             << " sendData2Serial"
+                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag"
+                                             << " (!data->aprilTagCmdPtr)";
+                    return;
+                }
+                BOOST_ASSERT(data->aprilTagCmdPtr);
+
+                if (!repeating) {
+                    // save a copy for other use
+                    atomic_store(&aprilTagCmdData, data->aprilTagCmdPtr);
+                }
+
+                auto pcx = static_cast<uint16_t>(data->aprilTagCmdPtr->imageX);
+                auto pcy = static_cast<uint16_t>(data->aprilTagCmdPtr->imageY);
+
+                auto center = data->aprilTagCmdPtr->aprilTagCenter;
+                if (!center) {
+                    BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                             << " sendData2Serial"
+                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag"
+                                             << " (!center)";
+                    return;
+                }
+                BOOST_ASSERT(center);
+                // (0,0) at image left top
+                auto x = center->cornerLTx - center->cornerLBx;
+                auto y = -(center->cornerLTy - center->cornerLBy);
+                auto r = atan2(y, x);
+                r = r / (M_PI / 180.0);
+                // rad(0 ~ +PI=-PI ~ 0) -> degree(0 ~ +180=-180 ~ 0) -> degree(0 ~ +180 ~ +360)
+                // auto d = static_cast<uint16_t>(r >= 0 ? r : r + 180);
+                // rad(0 ~ +PI=-PI ~ 0) -> degree(-180 ~ 0 ~ +180) -> degree(0 ~ +180 ~ +360)
+                // add 180 to avoid sign
+                auto d = static_cast<uint16_t>(r + 180);
+
+                auto id = static_cast<uint16_t>(center->id);
+                auto cx = static_cast<uint16_t>(center->centerX);
+                auto cy = static_cast<uint16_t>(center->centerY);
+
+                if (needRepeat) {
+                    // ok, this package is safe, now to remember this package
+
+                    // clone a package without callback to recorder
+                    atomic_store(&package_record_->mail, data->repeat());
+                    packageId = package_record_->nextId();
+                }
+
+                // send cmd to serial
+                // make send data
+                constexpr uint8_t packageSize = 19;
+                makeADataBuffer<packageSize>(
+                        std::array<uint8_t, packageSize>{
+                                // 0xAA
+                                uint8_t(0xAA),
+
+                                // AdditionCmd
+                                uint8_t(to_underlying(data->additionCmd)),
+                                // data size
+                                uint8_t(packageSize - 5),
+
+                                // image size
+                                uint8_t(uint16_t(pcx) & 0xff),
+                                uint8_t(uint16_t(pcx) >> 8),
+                                uint8_t(uint16_t(pcy) & 0xff),
+                                uint8_t(uint16_t(pcy) >> 8),
+
+                                // tag center
+                                uint8_t(uint16_t(cx) & 0xff),
+                                uint8_t(uint16_t(cx) >> 8),
+                                uint8_t(uint16_t(cy) & 0xff),
+                                uint8_t(uint16_t(cy) >> 8),
+
+                                // tag degree
+                                uint8_t(uint16_t(d) & 0xff),
+                                uint8_t(uint16_t(d) >> 8),
+
+                                // tag id
+                                uint8_t(uint16_t(id) & 0xff),
+                                uint8_t(uint16_t(id) >> 8),
+
+                                // serial ID
+                                uint8_t(0),
+                                uint8_t(0),
+                                // xor checksum byte
+                                uint8_t(0),
+                                // 0xBB
+                                uint8_t(0xBB),
+                        },
+                        shared_from_this(),
+                        data,
+                        mailbox
+                );
+                return;
+            }
+            case OwlMailDefine::AdditionCmd::JoyCon: {
+                if (!repeating)
+                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                                             << " sendData2Serial"
+                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::JoyCon";
+                auto jcp = data->joyConPtr;
+                if (!jcp) {
+                    BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                             << " sendData2Serial"
+                                             << " OwlMailDefine::AdditionCmd::JoyCon nullptr";
+                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    data_r->runner = data->callbackRunner;
+                    data_r->openError = false;
+                    data_r->ok = false;
+                    sendMail(std::move(data_r), mailbox);
+                    return;
+                }
+                BOOST_ASSERT(jcp);
+                if (needRepeat) {
+                    // ok, this package is safe, now to remember this package
+
+                    // clone a package without callback to recorder
+                    atomic_store(&package_record_->mail, data->repeat());
+                    packageId = package_record_->nextId();
+                }
+                constexpr uint8_t packageSize = 29;
+                makeADataBuffer<packageSize>(
+                        std::array<uint8_t, packageSize>{
+                                // 0xAA
+                                uint8_t(0xAA),
+
+                                // AdditionCmd
+                                uint8_t(to_underlying(data->additionCmd)),
+                                // data size
+                                uint8_t(packageSize - 5),
+
+                                uint8_t(jcp->leftRockerX > 0 ? jcp->leftRockerX : 0),
+                                uint8_t(jcp->leftRockerX < 0 ? -jcp->leftRockerX : 0),
+                                uint8_t(jcp->leftRockerY > 0 ? jcp->leftRockerY : 0),
+                                uint8_t(jcp->leftRockerY < 0 ? -jcp->leftRockerY : 0),
+                                uint8_t(jcp->rightRockerX > 0 ? jcp->rightRockerX : 0),
+                                uint8_t(jcp->rightRockerX < 0 ? -jcp->rightRockerX : 0),
+                                uint8_t(jcp->rightRockerY > 0 ? jcp->rightRockerY : 0),
+                                uint8_t(jcp->rightRockerY < 0 ? -jcp->rightRockerY : 0),
+
+                                uint8_t(jcp->leftBackTop),
+                                uint8_t(jcp->leftBackBottom),
+                                uint8_t(jcp->rightBackTop),
+                                uint8_t(jcp->rightBackBottom),
+
+                                uint8_t(jcp->CrossUp),
+                                uint8_t(jcp->CrossDown),
+                                uint8_t(jcp->CrossLeft),
+                                uint8_t(jcp->CrossRight),
+
+                                uint8_t(jcp->A),
+                                uint8_t(jcp->B),
+                                uint8_t(jcp->X),
+                                uint8_t(jcp->Y),
+
+                                uint8_t(jcp->buttonAdd),
+                                uint8_t(jcp->buttonReduce),
+
+                                // serial ID
+                                uint8_t(0),
+                                uint8_t(0),
+                                // xor checksum byte
+                                uint8_t(0),
+                                // 0xBB
+                                uint8_t(0xBB),
+                        },
+                        shared_from_this(),
+                        data,
+                        mailbox
+                );
+                return;
+            }
+            case OwlMailDefine::AdditionCmd::JoyConSimple: {
+                if (!repeating)
+                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                                             << " sendData2Serial"
+                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::JoyConSimple";
+                auto jcp = data->joyConPtr;
+                if (!jcp) {
+                    BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                             << " sendData2Serial"
+                                             << " OwlMailDefine::AdditionCmd::JoyConSimple nullptr";
+                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    data_r->runner = data->callbackRunner;
+                    data_r->openError = false;
+                    data_r->ok = false;
+                    sendMail(std::move(data_r), mailbox);
+                    return;
+                }
+                BOOST_ASSERT(jcp);
+                if (needRepeat) {
+                    // ok, this package is safe, now to remember this package
+
+                    // clone a package without callback to recorder
+                    atomic_store(&package_record_->mail, data->repeat());
+                    packageId = package_record_->nextId();
+                }
+                constexpr uint8_t packageSize = 21;
+                makeADataBuffer<packageSize>(
+                        std::array<uint8_t, packageSize>{
+                                // 0xAA
+                                uint8_t(0xAA),
+
+                                // AdditionCmd
+                                uint8_t(to_underlying(data->additionCmd)),
+                                // data size
+                                uint8_t(packageSize - 5),
+
+                                uint8_t(jcp->leftRockerX > 0 ? jcp->leftRockerX : 0),
+                                uint8_t(jcp->leftRockerX < 0 ? -jcp->leftRockerX : 0),
+                                uint8_t(jcp->leftRockerY > 0 ? jcp->leftRockerY : 0),
+                                uint8_t(jcp->leftRockerY < 0 ? -jcp->leftRockerY : 0),
+                                uint8_t(jcp->rightRockerX > 0 ? jcp->rightRockerX : 0),
+                                uint8_t(jcp->rightRockerX < 0 ? -jcp->rightRockerX : 0),
+                                uint8_t(jcp->rightRockerY > 0 ? jcp->rightRockerY : 0),
+                                uint8_t(jcp->rightRockerY < 0 ? -jcp->rightRockerY : 0),
+
+                                uint8_t(jcp->leftBackTop),
+                                uint8_t(jcp->leftBackBottom),
+                                uint8_t(jcp->rightBackTop),
+                                uint8_t(jcp->rightBackBottom),
+
+                                uint8_t(jcp->buttonAdd),
+                                uint8_t(jcp->buttonReduce),
+
+                                // serial ID
+                                uint8_t(0),
+                                uint8_t(0),
+                                // xor checksum byte
+                                uint8_t(0),
+                                // 0xBB
+                                uint8_t(0xBB),
+                        },
+                        shared_from_this(),
+                        data,
+                        mailbox
+                );
+                return;
+            }
+            case OwlMailDefine::AdditionCmd::JoyConGyro: {
+                if (!repeating)
+                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                                             << " sendData2Serial"
+                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::JoyConGyro";
+                auto jcgp = data->joyConPtr;
+                if (!jcgp) {
+                    BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                             << " sendData2Serial"
+                                             << " OwlMailDefine::AdditionCmd::JoyConGyro nullptr";
+                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    data_r->runner = data->callbackRunner;
+                    data_r->openError = false;
+                    data_r->ok = false;
+                    sendMail(std::move(data_r), mailbox);
+                    return;
+                }
+                BOOST_ASSERT(jcgp);
+                if (needRepeat) {
+                    // ok, this package is safe, now to remember this package
+
+                    // clone a package without callback to recorder
+                    atomic_store(&package_record_->mail, data->repeat());
+                    packageId = package_record_->nextId();
+                }
+                constexpr uint8_t packageSize = 15;
+                makeADataBuffer<packageSize>(
+                        std::array<uint8_t, packageSize>{
+                                // 0xAA
+                                uint8_t(0xAA),
+
+                                // AdditionCmd
+                                uint8_t(to_underlying(data->additionCmd)),
+                                // data size
+                                uint8_t(packageSize - 5),
+
+                                uint8_t(jcgp->A),
+                                uint8_t(jcgp->B),
+                                uint8_t(jcgp->X),
+                                uint8_t(jcgp->Y),
+
+                                uint8_t(jcgp->A),
+                                uint8_t(jcgp->B),
+                                uint8_t(jcgp->X),
+                                uint8_t(jcgp->Y),
+
+                                // serial ID
+                                uint8_t(0),
+                                uint8_t(0),
+                                // xor checksum byte
+                                uint8_t(0),
+                                // 0xBB
+                                uint8_t(0xBB),
+                        },
+                        shared_from_this(),
+                        data,
+                        mailbox
+                );
+                return;
+            }
+            case OwlMailDefine::AdditionCmd::emergencyStop:
+            case OwlMailDefine::AdditionCmd::unlock:
+            case OwlMailDefine::AdditionCmd::calibrate: {
+                if (needRepeat) {
+                    // ok, this package is safe, now to remember this package
+
+                    // clone a package without callback to recorder
+                    atomic_store(&package_record_->mail, data->repeat());
+                    packageId = package_record_->nextId();
+                }
+                constexpr uint8_t packageSize = 7;
+                makeADataBuffer<packageSize>(
+                        std::array<uint8_t, packageSize>{
+                                // 0xAA
+                                uint8_t(0xAA),
+                                // AdditionCmd
+                                uint8_t(to_underlying(data->additionCmd)),
+                                // data size
+                                uint8_t(0),
+                                // serial ID
+                                uint8_t(packageId & 0xff),
+                                uint8_t(packageId >> 8),
+                                // xor checksum byte
+                                uint8_t(0),
+                                // 0xBB
+                                uint8_t(0xBB),
+                        },
+                        shared_from_this(),
+                        data,
+                        mailbox
+                );
+                return;
+            }
+            case OwlMailDefine::AdditionCmd::ping: {
+                if (needRepeat) {
+                    // ok, this package is safe, now to remember this package
+
+                    // clone a package without callback to recorder
+                    atomic_store(&package_record_->mail, data->repeat());
+                    packageId = package_record_->nextId();
+                }
+                constexpr uint8_t packageSize = 7;
+                makeADataBuffer<packageSize>(
+                        std::array<uint8_t, packageSize>{
+                                // 0xAA
+                                uint8_t(0xAA),
+                                // AdditionCmd
+                                uint8_t(to_underlying(data->additionCmd)),
+                                // data size
+                                uint8_t(0),
+                                // serial ID
+                                uint8_t(0),
+                                uint8_t(0),
+                                // xor checksum byte
+                                uint8_t(0),
+                                // 0xBB
+                                uint8_t(0xBB),
+                        },
+                        shared_from_this(),
+                        data,
+                        mailbox
+                );
+                return;
+            }
+            default: {
+                BOOST_LOG_TRIVIAL(error) << "SerialController"
+                                         << " sendData2Serial"
+                                         << " switch (data->additionCmd) default";
+                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                data_r->runner = data->callbackRunner;
+                data_r->openError = true;
+                data_r->ok = false;
+                sendMail(std::move(data_r), mailbox);
+                return;
+            }
+        }
     }
 
 

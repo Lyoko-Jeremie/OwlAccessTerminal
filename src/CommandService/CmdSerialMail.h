@@ -13,6 +13,7 @@
 namespace OwlMailDefine {
 
     enum class AdditionCmd {
+        // uint8_t
         ignore = 0,
         takeoff = 1,
         land = 2,
@@ -140,7 +141,8 @@ namespace OwlMailDefine {
     };
 
     struct Serial2Cmd;
-    struct Cmd2Serial {
+
+    struct Cmd2Serial : public std::enable_shared_from_this<Cmd2Serial> {
 
         // AdditionCmd
         AdditionCmd additionCmd = AdditionCmd::ignore;
@@ -152,7 +154,18 @@ namespace OwlMailDefine {
 
         // Serial2Cmd.runner = Cmd2Serial.callbackRunner
         std::function<void(std::shared_ptr<Serial2Cmd>)> callbackRunner;
+
+        std::shared_ptr<Cmd2Serial> repeat() const {
+            auto o = std::make_shared<Cmd2Serial>();
+            o->additionCmd = additionCmd;
+            o->moveCmdPtr = moveCmdPtr;
+            o->aprilTagCmdPtr = aprilTagCmdPtr;
+            o->joyConPtr = joyConPtr;
+            o->joyConGyroPtr = joyConGyroPtr;
+            return o;
+        }
     };
+
     struct Serial2Cmd {
         std::function<void(std::shared_ptr<Serial2Cmd>)> runner;
         bool ok = false;
