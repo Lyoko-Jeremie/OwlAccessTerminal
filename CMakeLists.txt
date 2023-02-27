@@ -72,6 +72,10 @@ if (DEBUG_IF_CHECK_POINT)
     add_definitions(-DDEBUG_IF_CHECK_POINT)
 endif (DEBUG_IF_CHECK_POINT)
 
+if (DEBUG_ReceiveMailRepeat)
+    add_definitions(-DDEBUG_ReceiveMailRepeat)
+endif (DEBUG_ReceiveMailRepeat)
+
 if (DEBUG_Mailbox)
     add_definitions(-DDEBUG_AsyncCallbackMailbox)
 endif (DEBUG_Mailbox)

@@ -168,23 +168,23 @@ namespace OwlSerialController {
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
             package_record_->mail()->callbackRunner = data->callbackRunner;
-            if (false) {
-                if (auto n = OwlMailDefine::AdditionCmdNameLookupTable.find(package_record_->mail()->additionCmd);
-                        n != OwlMailDefine::AdditionCmdNameLookupTable.end()) {
-                    BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMailRepeat package_record "
-                                             << " lastUpdateTime " << package_record_->lastUpdateTime
-                                             << " id " << package_record_->id()
-                                             << " additionCmd " << to_underlying(package_record_->mail()->additionCmd)
-                                             << " additionCmd " << n->second;
-                } else {
-                    BOOST_LOG_TRIVIAL(warning) << "SerialController::receiveMailRepeat package_record "
-                                               << " lastUpdateTime " << package_record_->lastUpdateTime
-                                               << " id " << package_record_->id()
-                                               << " additionCmd unknown "
-                                               << " additionCmd "
-                                               << to_underlying(package_record_->mail()->additionCmd);
-                }
+#ifdef DEBUG_ReceiveMailRepeat
+            if (auto n = OwlMailDefine::AdditionCmdNameLookupTable.find(package_record_->mail()->additionCmd);
+                    n != OwlMailDefine::AdditionCmdNameLookupTable.end()) {
+                BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMailRepeat package_record "
+                                         << " lastUpdateTime " << package_record_->lastUpdateTime
+                                         << " id " << package_record_->id()
+                                         << " additionCmd " << to_underlying(package_record_->mail()->additionCmd)
+                                         << " additionCmd " << n->second;
+            } else {
+                BOOST_LOG_TRIVIAL(warning) << "SerialController::receiveMailRepeat package_record "
+                                           << " lastUpdateTime " << package_record_->lastUpdateTime
+                                           << " id " << package_record_->id()
+                                           << " additionCmd unknown "
+                                           << " additionCmd "
+                                           << to_underlying(package_record_->mail()->additionCmd);
             }
+#endif // DEBUG_ReceiveMailRepeat
             sendData2Serial(package_record_->mail(), mailbox, package_record_->id(), true, false);
         });
     }
