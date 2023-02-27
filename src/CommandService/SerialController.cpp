@@ -167,19 +167,19 @@ namespace OwlSerialController {
         }
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
-            package_record_->mail->callbackRunner = data->callbackRunner;
+            package_record_->mail()->callbackRunner = data->callbackRunner;
             if (false) {
-                if (auto n = OwlMailDefine::AdditionCmdNameLookupTable.find(package_record_->mail->additionCmd);
+                if (auto n = OwlMailDefine::AdditionCmdNameLookupTable.find(package_record_->mail()->additionCmd);
                         n != OwlMailDefine::AdditionCmdNameLookupTable.end()) {
                     BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMailRepeat "
-                                             << to_underlying(package_record_->mail->additionCmd) << " additionCmd:"
+                                             << to_underlying(package_record_->mail()->additionCmd) << " additionCmd:"
                                              << n->second;
                 } else {
                     BOOST_LOG_TRIVIAL(warning) << "SerialController::receiveMailRepeat unknown additionCmd : "
-                                               << to_underlying(package_record_->mail->additionCmd);
+                                               << to_underlying(package_record_->mail()->additionCmd);
                 }
             }
-            sendData2Serial(package_record_->mail, mailbox, package_record_->id.load(), true, false);
+            sendData2Serial(package_record_->mail(), mailbox, package_record_->id(), true, false);
         });
     }
 
@@ -267,8 +267,8 @@ namespace OwlSerialController {
         //      and, must keep data alive
 
         BOOST_ASSERT(data);
-        if (data->additionCmd != OwlMailDefine::AdditionCmd::ping) {
-            BOOST_LOG_TRIVIAL(trace) << "SerialController::sendData2Serial " << "dispatch ";
+        if (data->additionCmd != OwlMailDefine::AdditionCmd::ping && !repeating) {
+            BOOST_LOG_TRIVIAL(trace) << "SerialController::sendData2Serial " << "dispatch";
         }
         if constexpr (flag_DEBUG_IF_CHECK_POINT) {
             BOOST_ASSERT(!weak_from_this().expired());
@@ -327,7 +327,7 @@ namespace OwlSerialController {
                     // ok, this package is safe, now to remember this package
 
                     // clone a package without callback to recorder
-                    atomic_store(&package_record_->mail, data->repeat());
+                    package_record_->setNewMail(data->repeat());
                     packageId = package_record_->nextId();
                 }
                 constexpr uint8_t packageSize = 15;
@@ -414,13 +414,13 @@ namespace OwlSerialController {
                 auto cx = static_cast<uint16_t>(center->centerX);
                 auto cy = static_cast<uint16_t>(center->centerY);
 
-                if (needRepeat) {
-                    // ok, this package is safe, now to remember this package
-
-                    // clone a package without callback to recorder
-                    atomic_store(&package_record_->mail, data->repeat());
-                    packageId = package_record_->nextId();
-                }
+                // if (needRepeat) {
+                //     // ok, this package is safe, now to remember this package
+                // 
+                //     // clone a package without callback to recorder
+                //     package_record_->setNewMail(data->repeat());
+                //     packageId = package_record_->nextId();
+                // }
 
                 // send cmd to serial
                 // make send data
@@ -487,13 +487,13 @@ namespace OwlSerialController {
                     return;
                 }
                 BOOST_ASSERT(jcp);
-                if (needRepeat) {
-                    // ok, this package is safe, now to remember this package
-
-                    // clone a package without callback to recorder
-                    atomic_store(&package_record_->mail, data->repeat());
-                    packageId = package_record_->nextId();
-                }
+                // if (needRepeat) {
+                //     // ok, this package is safe, now to remember this package
+                //
+                //     // clone a package without callback to recorder
+                //     package_record_->setNewMail(data->repeat());
+                //     packageId = package_record_->nextId();
+                // }
                 constexpr uint8_t packageSize = 29;
                 makeADataBuffer<packageSize>(
                         std::array<uint8_t, packageSize>{
@@ -564,13 +564,13 @@ namespace OwlSerialController {
                     return;
                 }
                 BOOST_ASSERT(jcp);
-                if (needRepeat) {
-                    // ok, this package is safe, now to remember this package
-
-                    // clone a package without callback to recorder
-                    atomic_store(&package_record_->mail, data->repeat());
-                    packageId = package_record_->nextId();
-                }
+                // if (needRepeat) {
+                //     // ok, this package is safe, now to remember this package
+                //
+                //     // clone a package without callback to recorder
+                //     package_record_->setNewMail(data->repeat());
+                //     packageId = package_record_->nextId();
+                // }
                 constexpr uint8_t packageSize = 21;
                 makeADataBuffer<packageSize>(
                         std::array<uint8_t, packageSize>{
@@ -631,13 +631,13 @@ namespace OwlSerialController {
                     return;
                 }
                 BOOST_ASSERT(jcgp);
-                if (needRepeat) {
-                    // ok, this package is safe, now to remember this package
-
-                    // clone a package without callback to recorder
-                    atomic_store(&package_record_->mail, data->repeat());
-                    packageId = package_record_->nextId();
-                }
+                // if (needRepeat) {
+                //     // ok, this package is safe, now to remember this package
+                // 
+                //     // clone a package without callback to recorder
+                //     package_record_->setNewMail(data->repeat());
+                //     packageId = package_record_->nextId();
+                // }
                 constexpr uint8_t packageSize = 15;
                 makeADataBuffer<packageSize>(
                         std::array<uint8_t, packageSize>{
@@ -680,7 +680,7 @@ namespace OwlSerialController {
                     // ok, this package is safe, now to remember this package
 
                     // clone a package without callback to recorder
-                    atomic_store(&package_record_->mail, data->repeat());
+                    package_record_->setNewMail(data->repeat());
                     packageId = package_record_->nextId();
                 }
                 constexpr uint8_t packageSize = 7;
@@ -707,13 +707,13 @@ namespace OwlSerialController {
                 return;
             }
             case OwlMailDefine::AdditionCmd::ping: {
-                if (needRepeat) {
-                    // ok, this package is safe, now to remember this package
-
-                    // clone a package without callback to recorder
-                    atomic_store(&package_record_->mail, data->repeat());
-                    packageId = package_record_->nextId();
-                }
+                // if (needRepeat) {
+                //     // ok, this package is safe, now to remember this package
+                //
+                //     // clone a package without callback to recorder
+                //     package_record_->setNewMail(data->repeat());
+                //     packageId = package_record_->nextId();
+                // }
                 constexpr uint8_t packageSize = 7;
                 makeADataBuffer<packageSize>(
                         std::array<uint8_t, packageSize>{

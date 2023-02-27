@@ -114,22 +114,32 @@ namespace OwlSerialController {
     };
 
     struct SerialControllerCmdPackageRecord : public std::enable_shared_from_this<SerialControllerCmdPackageRecord> {
-        std::atomic_uint16_t id = 0;
-        std::shared_ptr<OwlMailDefine::Cmd2Serial> mail;
+    private:
+        std::atomic_uint16_t packageId = 0;
+        std::shared_ptr<OwlMailDefine::Cmd2Serial> mail_;
+    public:
 
         uint16_t nextId() {
-            if (id < 62766 && id > 0) {
-                ++id;
+            if (packageId < 62766 && packageId > 0) {
+                ++packageId;
             } else {
-                id.store(1);
+                packageId.store(1);
             }
-            return id.load();
+            return packageId.load();
+        }
+
+        std::shared_ptr<OwlMailDefine::Cmd2Serial> mail() {
+            return mail_;
+        }
+
+        uint16_t id() {
+            return packageId.load();
         }
 
         void setNewMail(OwlMailDefine::MailCmd2Serial data) {
             BOOST_ASSERT(data);
             BOOST_ASSERT(!data->callbackRunner);
-            atomic_store(&mail, data);
+            atomic_store(&mail_, data);
         }
     };
 
