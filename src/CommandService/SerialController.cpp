@@ -168,7 +168,7 @@ namespace OwlSerialController {
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
             package_record_->mail()->callbackRunner = data->callbackRunner;
-            if (true) {
+            if (false) {
                 if (auto n = OwlMailDefine::AdditionCmdNameLookupTable.find(package_record_->mail()->additionCmd);
                         n != OwlMailDefine::AdditionCmdNameLookupTable.end()) {
                     BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMailRepeat package_record "
