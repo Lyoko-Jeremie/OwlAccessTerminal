@@ -192,11 +192,13 @@ namespace OwlSerialController {
         if constexpr (flag_DEBUG_IF_CHECK_POINT) {
             BOOST_ASSERT(!weak_from_this().expired());
         }
+        BOOST_ASSERT(data->additionCmd != OwlMailDefine::AdditionCmd::ignore);
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
             if (data->additionCmd != OwlMailDefine::AdditionCmd::ping) {
                 BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch initOk";
             }
+            BOOST_ASSERT(data->additionCmd != OwlMailDefine::AdditionCmd::ignore);
             switch (data->additionCmd) {
                 case OwlMailDefine::AdditionCmd::takeoff:
                 case OwlMailDefine::AdditionCmd::land:
@@ -270,6 +272,7 @@ namespace OwlSerialController {
             sendMail(std::move(data_r), mailbox);
             return;
         }
+        BOOST_ASSERT(data->additionCmd != OwlMailDefine::AdditionCmd::ignore);
         switch (data->additionCmd) {
             case OwlMailDefine::AdditionCmd::ignore: {
                 BOOST_LOG_TRIVIAL(error) << "SerialController"
