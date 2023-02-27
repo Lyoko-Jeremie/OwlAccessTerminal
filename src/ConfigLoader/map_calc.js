@@ -257,7 +257,7 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
     //         // rt
     //         centerPlanPoint.x + 100, centerPlanPoint.y + 100,
     //     ], undefined, 4));
-    // console.log("pPlaInImg :\n", JSON.stringify(pPlaInImg, undefined, 4));
+    console.log("pPlaInImg :\n", JSON.stringify(pPlaInImg, undefined, 4));
     // 开始计算平面的右(x)向量相对于图像的旋转角度(从x轴正方向逆时针0~360)
     const imgR = {
         x: pPlaInImg[0],
@@ -283,10 +283,11 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
     // pixel per cm
     // ????
     const scalePlaInImg = {
-        x: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 6], pPlaInImg[0 + 2 * 6]) / (SizeX * 1000) * AlgorithmMultiScale,
+        x: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 6], pPlaInImg[1 + 2 * 6]) / (SizeX * 1000) * AlgorithmMultiScale,
         y: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 5], pPlaInImg[1 + 2 * 5]) / (SizeZ * 1000) * AlgorithmMultiScale,
     };
-    console.log("scalePlaInImg :\n", [pPlaInImg[0 + 2 * 6], pPlaInImg[0 + 2 * 6]]);
+    console.log("scalePlaInImg :\n", [pPlaInImg[0 + 2 * 6], pPlaInImg[1 + 2 * 6]]);
+    console.log("scalePlaInImg :\n", [pPlaInImg[0 + 2 * 5], pPlaInImg[1 + 2 * 5]]);
     console.log("scalePlaInImg :\n", [SizeXHalf, 2, AlgorithmMultiScale]);
     console.log("scalePlaInImg :\n", JSON.stringify(scalePlaInImg, undefined, 4));
     // console.log("scalePlaInImg :\n", MathEx.pythagoreanDistance(scalePlaInImg.x, scalePlaInImg.y));
