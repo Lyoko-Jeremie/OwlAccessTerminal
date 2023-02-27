@@ -157,8 +157,6 @@ namespace OwlSerialController {
             package_repeater_box_->receiveB2A = [](OwlMailDefine::MailSerial2Cmd &&data) {
                 data->runner(data);
             };
-            mailbox_list_.push_back(ping_box_->shared_from_this());
-            mailbox_list_.push_back(package_repeater_box_->shared_from_this());
 
             ping_box_->receiveA2B = [this](OwlMailDefine::MailCmd2Serial &&data) {
                 receiveMail(std::move(data), ping_box_);
