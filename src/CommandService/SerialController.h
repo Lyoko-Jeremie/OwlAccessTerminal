@@ -129,6 +129,8 @@ namespace OwlSerialController {
 
     public:
 
+        long long lastUpdateTime = 0;
+
         std::shared_ptr<OwlMailDefine::Cmd2Serial> mail() {
             return mail_;
         }
@@ -141,6 +143,9 @@ namespace OwlSerialController {
             BOOST_ASSERT(data);
             BOOST_ASSERT(!data->callbackRunner);
             atomic_store(&mail_, data);
+            lastUpdateTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::system_clock::now().time_since_epoch()
+            ).count();
             return nextId();
         }
     };
