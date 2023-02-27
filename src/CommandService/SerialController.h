@@ -117,7 +117,6 @@ namespace OwlSerialController {
     private:
         std::atomic_uint16_t packageId = 0;
         std::shared_ptr<OwlMailDefine::Cmd2Serial> mail_;
-    public:
 
         uint16_t nextId() {
             if (packageId < 62766 && packageId > 0) {
@@ -128,6 +127,8 @@ namespace OwlSerialController {
             return packageId.load();
         }
 
+    public:
+
         std::shared_ptr<OwlMailDefine::Cmd2Serial> mail() {
             return mail_;
         }
@@ -136,10 +137,11 @@ namespace OwlSerialController {
             return packageId.load();
         }
 
-        void setNewMail(OwlMailDefine::MailCmd2Serial data) {
+        uint16_t setNewMail(OwlMailDefine::MailCmd2Serial data) {
             BOOST_ASSERT(data);
             BOOST_ASSERT(!data->callbackRunner);
             atomic_store(&mail_, data);
+            return nextId();
         }
     };
 

@@ -327,8 +327,7 @@ namespace OwlSerialController {
                     // ok, this package is safe, now to remember this package
 
                     // clone a package without callback to recorder
-                    package_record_->setNewMail(data->repeat());
-                    packageId = package_record_->nextId();
+                    packageId = package_record_->setNewMail(data->repeat());
                 }
                 constexpr uint8_t packageSize = 15;
                 makeADataBuffer<packageSize>(
@@ -418,8 +417,7 @@ namespace OwlSerialController {
                 //     // ok, this package is safe, now to remember this package
                 // 
                 //     // clone a package without callback to recorder
-                //     package_record_->setNewMail(data->repeat());
-                //     packageId = package_record_->nextId();
+                //     packageId = package_record_->setNewMail(data->repeat());
                 // }
 
                 // send cmd to serial
@@ -491,8 +489,7 @@ namespace OwlSerialController {
                 //     // ok, this package is safe, now to remember this package
                 //
                 //     // clone a package without callback to recorder
-                //     package_record_->setNewMail(data->repeat());
-                //     packageId = package_record_->nextId();
+                //     packageId = package_record_->setNewMail(data->repeat());
                 // }
                 constexpr uint8_t packageSize = 29;
                 makeADataBuffer<packageSize>(
@@ -568,8 +565,7 @@ namespace OwlSerialController {
                 //     // ok, this package is safe, now to remember this package
                 //
                 //     // clone a package without callback to recorder
-                //     package_record_->setNewMail(data->repeat());
-                //     packageId = package_record_->nextId();
+                //     packageId = package_record_->setNewMail(data->repeat());
                 // }
                 constexpr uint8_t packageSize = 21;
                 makeADataBuffer<packageSize>(
@@ -635,8 +631,7 @@ namespace OwlSerialController {
                 //     // ok, this package is safe, now to remember this package
                 // 
                 //     // clone a package without callback to recorder
-                //     package_record_->setNewMail(data->repeat());
-                //     packageId = package_record_->nextId();
+                //     packageId = package_record_->setNewMail(data->repeat());
                 // }
                 constexpr uint8_t packageSize = 15;
                 makeADataBuffer<packageSize>(
@@ -680,8 +675,7 @@ namespace OwlSerialController {
                     // ok, this package is safe, now to remember this package
 
                     // clone a package without callback to recorder
-                    package_record_->setNewMail(data->repeat());
-                    packageId = package_record_->nextId();
+                    packageId = package_record_->setNewMail(data->repeat());
                 }
                 constexpr uint8_t packageSize = 7;
                 makeADataBuffer<packageSize>(
@@ -711,8 +705,7 @@ namespace OwlSerialController {
                 //     // ok, this package is safe, now to remember this package
                 //
                 //     // clone a package without callback to recorder
-                //     package_record_->setNewMail(data->repeat());
-                //     packageId = package_record_->nextId();
+                //     packageId = package_record_->setNewMail(data->repeat());
                 // }
                 constexpr uint8_t packageSize = 7;
                 makeADataBuffer<packageSize>(
