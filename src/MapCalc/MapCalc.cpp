@@ -63,7 +63,7 @@ namespace OwlMapCalc {
                 (
                         std::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
                         std::shared_ptr<OwlSerialController::AirplaneState> airplaneState
-                ) -> std::shared_ptr<std::array<double, 3>> {
+                ) -> MapCalcFunctionType::result_type {
 
             boost::json::object inputData{};
             if (tagInfo) {
@@ -126,16 +126,37 @@ namespace OwlMapCalc {
             }
 
             try {
-                auto rData = std::make_shared<std::array<double, 3>>();
+                auto rData = std::make_shared<MapCalcPlaneInfoType>();
                 auto r = calcF(qjw_->getContext().fromJSON(boost::json::serialize(inputData)));
-                bool ok = r[0].as<bool>();
+                bool ok = r["ok"].as<bool>();
                 if (!ok) {
                     // failed
                     return {};
                 }
-                rData->at(0) = r[1].as<double>();
-                rData->at(1) = r[2].as<double>();
-                rData->at(2) = r[3].as<double>();
+                auto info = r["info"].as<qjs::Value>();
+                rData->xDirectDeg = info["xDirectDeg"].as<double>();
+                rData->zDirectDeg = info["zDirectDeg"].as<double>();
+                rData->xzDirectDeg = info["xzDirectDeg"].as<double>();
+                {
+                    auto n = r["PlaneP"].as<qjs::Value>();
+                    rData->PlaneP.x = n["x"].as<double>();
+                    rData->PlaneP.y = n["y"].as<double>();
+                }
+                {
+                    auto n = r["ImageP"].as<qjs::Value>();
+                    rData->ImageP.x = n["x"].as<double>();
+                    rData->ImageP.y = n["y"].as<double>();
+                }
+                {
+                    auto n = r["ScaleXZ"].as<qjs::Value>();
+                    rData->ScaleXZ.x = n["x"].as<double>();
+                    rData->ScaleXZ.y = n["y"].as<double>();
+                }
+                {
+                    auto n = r["ScaleXY"].as<qjs::Value>();
+                    rData->ScaleXY.x = n["x"].as<double>();
+                    rData->ScaleXY.y = n["y"].as<double>();
+                }
                 return rData;
             }
             catch (qjs::exception &) {
@@ -210,8 +231,8 @@ namespace OwlMapCalc {
             << "\n" << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << " [milliseconds]";
         if (r) {
             BOOST_LOG_TRIVIAL(info)
-                << "MapCalc testMapCalcFunction test ok : ["
-                << r->at(0) << "," << r->at(1) << "," << r->at(2) << "]";
+                << "MapCalc testMapCalcFunction test ok :"
+                << boost::json::serialize(MapCalcPlaneInfoType2JsonObject(r));
             return true;
         }
         BOOST_LOG_TRIVIAL(error) << "MapCalc testMapCalcFunction test failed.";

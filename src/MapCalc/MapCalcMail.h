@@ -6,6 +6,7 @@
 #include <memory>
 #include <functional>
 #include <chrono>
+#include "MapCalcPlaneInfoType.h"
 #include "../AsyncCallbackMailbox/AsyncCallbackMailbox.h"
 #include "../CommandService/CmdSerialMail.h"
 #include "../CommandService/AirplaneState.h"
@@ -23,9 +24,7 @@ namespace OwlMailDefine {
     };
     struct MapCalc2Service {
 
-        double x{0};
-        double y{0};
-        double z{0};
+        std::shared_ptr<OwlMapCalc::MapCalcPlaneInfoType> info;
 
         bool ok{false};
 

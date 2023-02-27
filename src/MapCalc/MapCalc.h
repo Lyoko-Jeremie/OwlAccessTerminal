@@ -10,6 +10,7 @@
 #include <boost/log/trivial.hpp>
 #include <utility>
 #include "MapCalcMail.h"
+#include "MapCalcPlaneInfoType.h"
 #include "../CommandService/CmdSerialMail.h"
 #include "../CommandService/AirplaneState.h"
 
@@ -31,11 +32,11 @@ namespace OwlMapCalc {
             mailbox_->receiveB2A = nullptr;
         }
 
-        using MapCalcFunctionType =
-                std::shared_ptr<std::array<double, 3>>(
+        using MapCalcFunctionType = std::function<
+                std::shared_ptr<MapCalcPlaneInfoType>(
                         std::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
                         std::shared_ptr<OwlSerialController::AirplaneState> airplaneState
-                );
+                )>;
 
     private:
         boost::asio::strand<boost::asio::io_context::executor_type> ioc_;
@@ -43,7 +44,7 @@ namespace OwlMapCalc {
 
         std::shared_ptr<OwlQuickJsWrapper::QuickJsWrapper> qjw_;
 
-        std::function<MapCalcFunctionType> calc_;
+        MapCalcFunctionType calc_;
 
     public:
 
@@ -53,7 +54,7 @@ namespace OwlMapCalc {
 
         bool testMapCalcFunction();
 
-        std::shared_ptr<std::array<double, 3>> calcMapPosition(
+        MapCalcFunctionType::result_type calcMapPosition(
                 std::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
                 std::shared_ptr<OwlSerialController::AirplaneState> airplaneState
         ) {
@@ -80,9 +81,7 @@ namespace OwlMapCalc {
                     return sendMail(std::move(mail));
                 }
                 mail->ok = true;
-                mail->x = r->at(0);
-                mail->y = r->at(1);
-                mail->z = r->at(2);
+                mail->info = r;
                 return sendMail(std::move(mail));
             });
         }

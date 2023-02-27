@@ -490,9 +490,9 @@ namespace OwlCommandServiceHttp {
                                 {"tag",
                                                   {
                                                           {"ok",        data_m->ok},
-                                                          {"x",        data_m->x},
-                                                          {"y",     data_m->y},
-                                                          {"z",    data_m->z},
+                                                          {"info",     OwlMapCalc::MapCalcPlaneInfoType2JsonObject(
+                                                                  data_m->info)
+                                                          },
                                                   }
                                 },
                                 {"nowTimestamp",  std::chrono::time_point_cast<std::chrono::milliseconds>(
