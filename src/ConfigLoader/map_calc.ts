@@ -370,10 +370,10 @@ interface PlaneInfo {
     // pixel XY
     ImageP: Point2;
     // Plane scale of image on Plane XZ Direct
-    // imgPixel[px]/planeDistance[1m]
+    // imgPixel[px]/planeDistance[1cm(SizeXY base size)]
     ScaleXZ: Vec2;
     // Plane scale in image XY Direct
-    // planeDistance[mm]/imgPixel[1px]
+    // planeDistance[cm(SizeXY base size)]/imgPixel[1px]
     ScaleXY: Vec2;
 }
 
@@ -404,7 +404,7 @@ declare module OpenCVExt {
     ): PlaneInfo;
 }
 
-const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number) => {
+const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number): PlaneInfo => {
     const info = {} as PlaneInfo;
 
     if (pla.length !== 3 || img.length !== 3) {
@@ -533,12 +533,13 @@ const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number)
     // pixel per cm
     // ????
     const scalePlaInImg = {
-        x: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 6], pPlaInImg[0 + 2 * 6]) / (SizeX * 1000) * AlgorithmMultiScale,
+        x: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 6], pPlaInImg[1 + 2 * 6]) / (SizeX * 1000) * AlgorithmMultiScale,
         y: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 5], pPlaInImg[1 + 2 * 5]) / (SizeZ * 1000) * AlgorithmMultiScale,
     };
-    console.log("scalePlaInImg :\n", [pPlaInImg[0 + 2 * 6], pPlaInImg[0 + 2 * 6]]);
-    console.log("scalePlaInImg :\n", [SizeXHalf, 2, AlgorithmMultiScale]);
-    console.log("scalePlaInImg :\n", JSON.stringify(scalePlaInImg, undefined, 4));
+    // console.log("scalePlaInImg :\n", [pPlaInImg[0 + 2 * 6], pPlaInImg[1 + 2 * 6]]);
+    // console.log("scalePlaInImg :\n", [pPlaInImg[0 + 2 * 5], pPlaInImg[1 + 2 * 5]]);
+    // console.log("scalePlaInImg :\n", [SizeXHalf, 2, AlgorithmMultiScale]);
+    // console.log("scalePlaInImg :\n", JSON.stringify(scalePlaInImg, undefined, 4));
     // console.log("scalePlaInImg :\n", MathEx.pythagoreanDistance(scalePlaInImg.x, scalePlaInImg.y));
     // console.log("scalePlaInImg :\n", MathEx.atan2Deg(scalePlaInImg.y, scalePlaInImg.x));
     // cm per pixel
@@ -547,20 +548,21 @@ const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number)
         x: MathEx.pythagoreanDistance(pImgInPla[0 + 2 * 6], pImgInPla[1 + 2 * 6]) / 10000 / AlgorithmMultiScale,
         y: MathEx.pythagoreanDistance(pImgInPla[0 + 2 * 5], pImgInPla[1 + 2 * 5]) / 10000 / AlgorithmMultiScale,
     };
-    console.log("scaleImgInPla :\n", [pImgInPla[0 + 2 * 6], pImgInPla[1 + 2 * 6]]);
-    console.log("scaleImgInPla :\n", JSON.stringify(scaleImgInPla, undefined, 4));
+    // console.log("scaleImgInPla :\n", [pImgInPla[0 + 2 * 6], pImgInPla[1 + 2 * 6]]);
+    // console.log("scaleImgInPla :\n", JSON.stringify(scaleImgInPla, undefined, 4));
     // console.log("scaleImgInPla :\n", MathEx.pythagoreanDistance(scaleImgInPla.x, scaleImgInPla.y));
     // console.log("scaleImgInPla :\n", MathEx.atan2Deg(scaleImgInPla.y, scaleImgInPla.x));
+
+    info.ScaleXY = scaleImgInPla;
+    info.ScaleXZ = scalePlaInImg;
 
     return info;
 };
 
-type ResultOutputReturnType = [
-    // ok ?
-    boolean,
-    // x, y, z. (y means h)
-    number, number, number,
-];
+type ResultOutputReturnType = {
+    ok: boolean,
+    info?: PlaneInfo,
+};
 
 function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
     console.log("tagInfo:\n", JSON.stringify(tagInfo, undefined, 4));
@@ -569,18 +571,18 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
         !checkAirplaneStateType(tagInfo.airplaneState) ||
         !checkTagType(tagInfo.tagInfo.center)
     ) {
-        return [false, 0, 0, 0];
+        return {ok: false};
     }
     if (
         !tagInfo.tagInfo.list.find(T => checkTagType(T))
     ) {
-        return [false, 0, 0, 0];
+        return {ok: false};
     }
     if (tagInfo.tagInfo.list.length < 2) {
         // type : calc by tag side size
         //      1
         //      calcPlaneInfo
-        console.log("calcTagCenterPosition :\n", JSON.stringify(calcTagCenterPosition(tagInfo.tagInfo.list[0].id), undefined, 4));
+        // console.log("calcTagCenterPosition :\n", JSON.stringify(calcTagCenterPosition(tagInfo.tagInfo.list[0].id), undefined, 4));
         const j = calcPlaneInfo(
             [
                 // LT
@@ -598,7 +600,7 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
             tagInfo.imageY
         );
         console.log("j:\n", JSON.stringify(j, undefined, 4));
-        // TODO return
+        return {ok: true, info: j};
     } else if (tagInfo.tagInfo.list.length === 2) {
         const l = tagInfo.tagInfo.list;
         if (l[0].id === l[1].id) {
@@ -620,11 +622,11 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
                 tagInfo.imageY
             );
             console.log("j:\n", JSON.stringify(j, undefined, 4));
-            // TODO return
+            return {ok: true, info: j};
         } else {
             // type : calc by 2 tag, and it's direction
-            const relation = calcTagRelation(l[0].id, l[1].id);
-            console.log("relation: ", relation);
+            // const relation = calcTagRelation(l[0].id, l[1].id);
+            // console.log("relation: ", relation);
             //      way 2: calc by center tag
             const j = calcPlaneInfo(
                 [
@@ -643,14 +645,14 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
                 tagInfo.imageY
             );
             console.log("j:\n", JSON.stringify(j, undefined, 4));
-            // TODO return
+            return {ok: true, info: j};
         }
     } else if (tagInfo.tagInfo.list.length >= 3) {
         const l = tagInfo.tagInfo.list;
         if (checkIsAllInSameLine(l)) {
             // type : calc by max distance 2 tag direction
-            const relation = calcTagRelation(l[0].id, l[1].id);
-            console.log("relation: ", relation);
+            // const relation = calcTagRelation(l[0].id, l[1].id);
+            // console.log("relation: ", relation);
             //      way 2: calc by center tag
             const j = calcPlaneInfo(
                 [
@@ -669,7 +671,7 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
                 tagInfo.imageY
             );
             console.log("j:\n", JSON.stringify(j, undefined, 4));
-            // TODO return
+            return {ok: true, info: j};
         } else {
             if (tagInfo.tagInfo.list.length === 3) {
                 // type : calc use 3 point
@@ -689,7 +691,7 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
                     tagInfo.imageY
                 );
                 console.log("j:\n", JSON.stringify(j, undefined, 4));
-                // TODO return
+                return {ok: true, info: j};
             }
             // type : to find last triangle
             //  3 findOuterSide
@@ -710,8 +712,8 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
                 tagInfo.imageY
             );
             console.log("j:\n", JSON.stringify(j, undefined, 4));
-            // TODO return
+            return {ok: true, info: j};
         }
     }
-    return [true, 0, 1, 2];
+    return {ok: false};
 }
