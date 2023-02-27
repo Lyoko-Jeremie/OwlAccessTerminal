@@ -162,9 +162,11 @@ namespace OwlSerialController {
         BOOST_ASSERT(data);
         if (auto n = OwlMailDefine::AdditionCmdNameLookupTable.find(data->additionCmd);
                 n != OwlMailDefine::AdditionCmdNameLookupTable.end()) {
-            BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail "
-                                     << to_underlying(data->additionCmd) << " additionCmd:"
-                                     << n->second;
+            if (data->additionCmd != OwlMailDefine::AdditionCmd::ping) {
+                BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail "
+                                         << to_underlying(data->additionCmd) << " additionCmd:"
+                                         << n->second;
+            }
         } else {
             BOOST_LOG_TRIVIAL(warning) << "SerialController::receiveMail unknown additionCmd : "
                                        << to_underlying(data->additionCmd);
@@ -179,7 +181,9 @@ namespace OwlSerialController {
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
             BOOST_ASSERT(data);
-            BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch ";
+            if (data->additionCmd != OwlMailDefine::AdditionCmd::ping) {
+                BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch ";
+            }
             if constexpr (flag_DEBUG_IF_CHECK_POINT) {
                 BOOST_ASSERT(!weak_from_this().expired());
                 BOOST_ASSERT(self.use_count() > 0);
@@ -193,7 +197,9 @@ namespace OwlSerialController {
                 sendMail(std::move(data_r), mailbox);
                 return;
             }
-            BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch initOk";
+            if (data->additionCmd != OwlMailDefine::AdditionCmd::ping) {
+                BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch initOk";
+            }
             switch (data->additionCmd) {
                 case OwlMailDefine::AdditionCmd::ignore: {
                     BOOST_LOG_TRIVIAL(error) << "SerialController"
