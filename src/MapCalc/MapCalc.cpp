@@ -156,47 +156,52 @@ namespace OwlMapCalc {
             }
             try {
                 auto rData = std::make_shared<MapCalcPlaneInfoType>();
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc calc_ before calcF";
                 auto r = calcF(qjw_->getContext().fromJSON(boost::json::serialize(inputData)));
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc calc_ after calcF";
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc calc_ calcF " << r.toJSON();
                 bool ok = r["ok"].as<bool>();
                 if (!ok) {
+                    BOOST_LOG_TRIVIAL(trace) << "MapCalc calc_ (!ok)";
                     // failed
                     return {};
                 }
                 auto info = r["info"].as<qjs::Value>();
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc calc_ rData DirectDeg";
                 rData->xDirectDeg = info["xDirectDeg"].as<double>();
                 rData->zDirectDeg = info["zDirectDeg"].as<double>();
                 rData->xzDirectDeg = info["xzDirectDeg"].as<double>();
-//                BOOST_LOG_TRIVIAL(trace) << "read rData->xDirectDeg " << rData->xDirectDeg;
-//                BOOST_LOG_TRIVIAL(trace) << "read rData->zDirectDeg " << rData->zDirectDeg;
-//                BOOST_LOG_TRIVIAL(trace) << "read rData->xzDirectDeg " << rData->xzDirectDeg;
-//                BOOST_LOG_TRIVIAL(trace) << " start read ";
+                BOOST_LOG_TRIVIAL(trace) << "read rData->xDirectDeg " << rData->xDirectDeg;
+                BOOST_LOG_TRIVIAL(trace) << "read rData->zDirectDeg " << rData->zDirectDeg;
+                BOOST_LOG_TRIVIAL(trace) << "read rData->xzDirectDeg " << rData->xzDirectDeg;
+                BOOST_LOG_TRIVIAL(trace) << " start read ";
                 {
                     auto n = info["PlaneP"].as<qjs::Value>();
                     rData->PlaneP.x = n["x"].as<double>();
                     rData->PlaneP.y = n["y"].as<double>();
-//                    BOOST_LOG_TRIVIAL(trace) << "read PlaneP ok";
+                    BOOST_LOG_TRIVIAL(trace) << "read PlaneP ok";
                 }
                 {
                     auto n = info["ImageP"].as<qjs::Value>();
                     rData->ImageP.x = n["x"].as<double>();
                     rData->ImageP.y = n["y"].as<double>();
-//                    BOOST_LOG_TRIVIAL(trace) << "read ImageP ok";
+                    BOOST_LOG_TRIVIAL(trace) << "read ImageP ok";
                 }
                 {
                     auto n = info["ScaleXZ"].as<qjs::Value>();
                     rData->ScaleXZ.x = n["x"].as<double>();
                     rData->ScaleXZ.y = n["y"].as<double>();
-//                    BOOST_LOG_TRIVIAL(trace) << "read ScaleXZ ok";
+                    BOOST_LOG_TRIVIAL(trace) << "read ScaleXZ ok";
                 }
                 {
                     auto n = info["ScaleXY"].as<qjs::Value>();
                     rData->ScaleXY.x = n["x"].as<double>();
                     rData->ScaleXY.y = n["y"].as<double>();
-//                    BOOST_LOG_TRIVIAL(trace) << "read ScaleXY ok";
+                    BOOST_LOG_TRIVIAL(trace) << "read ScaleXY ok";
                 }
-//                BOOST_LOG_TRIVIAL(trace)
-//                    << "MapCalc loadMapCalcFunction ok :"
-//                    << boost::json::serialize(MapCalcPlaneInfoType2JsonObject(rData));
+                BOOST_LOG_TRIVIAL(trace)
+                    << "MapCalc calc_ rData ok :"
+                    << boost::json::serialize(MapCalcPlaneInfoType2JsonObject(rData));
                 return rData;
             } catch (qjs::exception &) {
                 auto exc = qjw_->getContext().getException();

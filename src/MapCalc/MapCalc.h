@@ -60,7 +60,9 @@ namespace OwlMapCalc {
         ) {
             BOOST_LOG_TRIVIAL(trace) << "MapCalc::calcMapPosition";
             if (calc_) {
-                return calc_(std::move(tagInfo), std::move(airplaneState));
+                auto r = calc_(std::move(tagInfo), std::move(airplaneState));
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc::calcMapPosition return r";
+                return r;
             }
             BOOST_LOG_TRIVIAL(trace) << "MapCalc::calcMapPosition return {}";
             return {};
