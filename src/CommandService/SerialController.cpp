@@ -418,12 +418,6 @@ namespace OwlSerialController {
                 }
                 BOOST_ASSERT(data->aprilTagCmdPtr->mapCalcPlaneInfoType);
 
-                // TODO debug
-                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
-                data_r->runner = data->callbackRunner;
-                data_r->openError = false;
-                data_r->ok = false;
-                sendMail(std::move(data_r), mailbox);
 
                 if (!repeating) {
                     // save a copy for other use
@@ -432,30 +426,17 @@ namespace OwlSerialController {
 
                 auto &info = *data->aprilTagCmdPtr->mapCalcPlaneInfoType;
 
-//                auto xDirectDeg = int16_t(std::round(info.xDirectDeg));
-//                auto zDirectDeg = int16_t(std::round(info.zDirectDeg));
-//                auto xzDirectDeg = int16_t(std::round(info.xzDirectDeg));
-//                auto ImageP_x = int16_t(std::round(info.ImageP.x));
-//                auto ImageP_y = int16_t(std::round(info.ImageP.y));
-//                auto PlaneP_x = int16_t(std::round(info.PlaneP.x));
-//                auto PlaneP_y = int16_t(std::round(info.PlaneP.y));
-//                auto ScaleXY_x = int16_t(std::round(info.ScaleXY.x));
-//                auto ScaleXY_y = int16_t(std::round(info.ScaleXY.y));
-//                auto ScaleXZ_x = int16_t(std::round(info.ScaleXZ.x));
-//                auto ScaleXZ_y = int16_t(std::round(info.ScaleXZ.y));
-
-                // TODO debug
-                auto xDirectDeg = int16_t(0);
-                auto zDirectDeg = int16_t(0);
-                auto xzDirectDeg = int16_t(0);
-                auto ImageP_x = int16_t(0);
-                auto ImageP_y = int16_t(0);
-                auto PlaneP_x = int16_t(0);
-                auto PlaneP_y = int16_t(0);
-                auto ScaleXY_x = int16_t(0);
-                auto ScaleXY_y = int16_t(0);
-                auto ScaleXZ_x = int16_t(0);
-                auto ScaleXZ_y = int16_t(0);
+                auto xDirectDeg = int16_t(std::round(info.xDirectDeg));
+                auto zDirectDeg = int16_t(std::round(info.zDirectDeg));
+                auto xzDirectDeg = int16_t(std::round(info.xzDirectDeg));
+                auto ImageP_x = int16_t(std::round(info.ImageP.x));
+                auto ImageP_y = int16_t(std::round(info.ImageP.y));
+                auto PlaneP_x = int16_t(std::round(info.PlaneP.x));
+                auto PlaneP_y = int16_t(std::round(info.PlaneP.y));
+                auto ScaleXY_x = int16_t(std::round(info.ScaleXY.x));
+                auto ScaleXY_y = int16_t(std::round(info.ScaleXY.y));
+                auto ScaleXZ_x = int16_t(std::round(info.ScaleXZ.x));
+                auto ScaleXZ_y = int16_t(std::round(info.ScaleXZ.y));
 
                 // if (needRepeat) {
                 //     // ok, this package is safe, now to remember this package
