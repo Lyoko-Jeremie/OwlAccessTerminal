@@ -82,7 +82,7 @@ const checkTagInfoType = (t: TagInfoType): boolean => {
 
 const AlgorithmMultiScale = 100;
 // ============ map info ============
-const MapX = 10;
+const MapX = 20;
 const MapZ = 20;
 // cm * AlgorithmMultiScale
 const DistanceX = 50 * AlgorithmMultiScale;
