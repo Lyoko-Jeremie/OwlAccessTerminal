@@ -13,6 +13,11 @@
 
 namespace OwlMailDefine {
 
+    enum class FlyMode {
+        CommonMode = 1,
+        MapMode = 2,
+    };
+
     enum class AdditionCmd {
         // uint8_t
         ignore = 0,
@@ -26,6 +31,7 @@ namespace OwlMailDefine {
         speed = 13,
         led = 14,
         gotoPosition = 15,
+        // FlyMode
         flyMode = 16,
 
         calibrate = 90,
