@@ -509,7 +509,7 @@ const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number)
     // 开始计算平面的右(x)向量相对于图像的旋转角度(从x轴正方向逆时针0~360)
     const imgR: Point2 = {
         x: pPlaInImg[0],
-        y: pPlaInImg[1],
+        y: y2y(imgY, pPlaInImg[1]),
     };
     // console.log("imgR :\n", JSON.stringify(imgR, undefined, 4));
     info.xDirectDeg = MathEx.atan2Deg(imgR.y, imgR.x);
@@ -517,7 +517,7 @@ const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number)
     // 开始计算平面的上(z)向量相对于图像的旋转角度(从x轴正方向逆时针0~360)
     const imgU: Point2 = {
         x: pPlaInImg[0 + 2 * 1],
-        y: pPlaInImg[1 + 2 * 1],
+        y: y2y(imgY, pPlaInImg[1 + 2 * 1]),
     };
     // console.log("imgU :\n", JSON.stringify(imgU, undefined, 4));
     info.zDirectDeg = MathEx.atan2Deg(imgU.y, imgU.x);
@@ -525,7 +525,7 @@ const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number)
     // 开始计算平面的上(xz)向量(45deg)相对于图像的旋转角度(从x轴正方向逆时针0~360)
     const imgRU: Point2 = {
         x: pPlaInImg[0 + 2 * 4],
-        y: pPlaInImg[1 + 2 * 4],
+        y: y2y(imgY, pPlaInImg[1 + 2 * 4]),
     };
     // console.log("imgU :\n", JSON.stringify(imgRU, undefined, 4));
     info.xzDirectDeg = MathEx.atan2Deg(imgRU.y, imgRU.x);
