@@ -394,8 +394,32 @@ namespace OwlCommandServiceHttp {
                     BOOST_ASSERT(data);
                     BOOST_ASSERT(self);
                     BOOST_ASSERT(self.use_count() > 0);
-                    if (!data->ok) {
-                        // ignore
+                    boost::asio::dispatch(socket_.get_executor(), [
+                            this, self = shared_from_this(),
+                            aprilTagCmd, data
+                    ]() {
+                        BOOST_LOG_TRIVIAL(trace)
+                            << "CmdServiceHttpConnect::process_tag_info back mc newestAirplaneState dispatch";
+                        BOOST_ASSERT(data);
+                        BOOST_ASSERT(self);
+                        BOOST_ASSERT(self.use_count() > 0);
+                        if (!data->ok) {
+                            // ignore
+                            send_back_json(
+                                    boost::json::value{
+                                            {"msg",       "MapCalc"},
+                                            {"result",    data->ok},
+                                            {"openError", false},
+                                    }
+                            );
+                            return;
+                        }
+                        BOOST_ASSERT(aprilTagCmd);
+                        aprilTagCmd->mapCalcPlaneInfoType = data->info;
+                        BOOST_ASSERT(aprilTagCmd->aprilTagList);
+                        BOOST_ASSERT(aprilTagCmd->aprilTagCenter);
+
+                        // TODO debug
                         send_back_json(
                                 boost::json::value{
                                         {"msg",       "MapCalc"},
@@ -404,51 +428,54 @@ namespace OwlCommandServiceHttp {
                                 }
                         );
                         return;
-                    }
-                    BOOST_ASSERT(aprilTagCmd);
-                    aprilTagCmd->mapCalcPlaneInfoType = data->info;
-                    BOOST_ASSERT(aprilTagCmd->aprilTagList);
-                    BOOST_ASSERT(aprilTagCmd->aprilTagCenter);
 
-                    // TODO debug
-                    send_back_json(
-                            boost::json::value{
-                                    {"msg",       "MapCalc"},
-                                    {"result",    data->ok},
-                                    {"openError", false},
-                            }
-                    );
-                    return;
+                        auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                        m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;
+                        m->aprilTagCmdPtr = aprilTagCmd;
+                        BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info to m AprilTag";
+                        m->callbackRunner = [
+                                this, self = shared_from_this(),
+                                aprilTagCmd
+                        ](
+                                OwlMailDefine::MailSerial2Cmd data
+                        ) {
+                            BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info back m AprilTag";
+                            BOOST_ASSERT(aprilTagCmd);
+                            BOOST_ASSERT(aprilTagCmd.use_count() > 0);
+                            BOOST_LOG_TRIVIAL(trace)
+                                << "CmdServiceHttpConnect::process_tag_info aprilTagCmd.use_count() "
+                                << aprilTagCmd.use_count();
+                            BOOST_ASSERT(data);
+                            BOOST_ASSERT(self);
+                            BOOST_ASSERT(self.use_count() > 0);
 
-                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
-                    m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;
-                    m->aprilTagCmdPtr = aprilTagCmd;
-                    BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info to m AprilTag";
-                    m->callbackRunner = [
-                            this, self = shared_from_this(),
-                            aprilTagCmd
-                    ](
-                            OwlMailDefine::MailSerial2Cmd data
-                    ) {
-                        BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info back m AprilTag";
-                        BOOST_ASSERT(aprilTagCmd);
-                        BOOST_ASSERT(aprilTagCmd.use_count() > 0);
-                        BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info aprilTagCmd.use_count() "
-                                                 << aprilTagCmd.use_count();
-                        BOOST_ASSERT(data);
-                        BOOST_ASSERT(self);
-                        BOOST_ASSERT(self.use_count() > 0);
-                        send_back_json(
-                                boost::json::value{
-                                        {"msg",       "AprilTag"},
-                                        {"result",    data->ok},
-                                        {"openError", data->openError},
-                                }
-                        );
-                        BOOST_LOG_TRIVIAL(trace)
-                            << "CmdServiceHttpConnect::process_tag_info back m AprilTag send_back_json end";
-                    };
-                    sendMail(std::move(m));
+                            boost::asio::dispatch(socket_.get_executor(), [
+                                    this, self = shared_from_this(),
+                                    aprilTagCmd, data
+                            ]() {
+                                BOOST_LOG_TRIVIAL(trace)
+                                    << "CmdServiceHttpConnect::process_tag_info back m AprilTag dispatch";
+                                BOOST_ASSERT(aprilTagCmd);
+                                BOOST_ASSERT(aprilTagCmd.use_count() > 0);
+                                BOOST_LOG_TRIVIAL(trace)
+                                    << "CmdServiceHttpConnect::process_tag_info aprilTagCmd.use_count() "
+                                    << aprilTagCmd.use_count();
+                                BOOST_ASSERT(data);
+                                BOOST_ASSERT(self);
+                                BOOST_ASSERT(self.use_count() > 0);
+                                send_back_json(
+                                        boost::json::value{
+                                                {"msg",       "AprilTag"},
+                                                {"result",    data->ok},
+                                                {"openError", data->openError},
+                                        }
+                                );
+                                BOOST_LOG_TRIVIAL(trace)
+                                    << "CmdServiceHttpConnect::process_tag_info back m AprilTag send_back_json end";
+                            });
+                        };
+                        sendMail(std::move(m));
+                    });
                 };
                 sendMail_map(std::move(mc));
             };
