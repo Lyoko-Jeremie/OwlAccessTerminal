@@ -27,8 +27,10 @@ namespace OwlMapCalc {
 
     MapCalc::MapCalc(
             boost::asio::io_context &ioc,
+            std::shared_ptr<OwlConfigLoader::ConfigLoader> config,
             OwlMailDefine::ServiceMapCalcMailbox &&mailbox
     ) : ioc_(boost::asio::make_strand(ioc)),
+        config_(config),
         mailbox_(mailbox) {
         mailbox_->receiveA2B([this](OwlMailDefine::MailService2MapCalc &&data) {
             receiveMail(std::move(data));

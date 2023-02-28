@@ -11,6 +11,7 @@
 #include <utility>
 #include "MapCalcMail.h"
 #include "MapCalcPlaneInfoType.h"
+#include "../ConfigLoader/ConfigLoader.h"
 #include "../CommandService/CmdSerialMail.h"
 #include "../CommandService/AirplaneState.h"
 
@@ -24,6 +25,7 @@ namespace OwlMapCalc {
     public:
         MapCalc(
                 boost::asio::io_context &ioc,
+                std::shared_ptr<OwlConfigLoader::ConfigLoader> config,
                 OwlMailDefine::ServiceMapCalcMailbox &&mailbox
         );
 
@@ -40,6 +42,7 @@ namespace OwlMapCalc {
 
     private:
         boost::asio::strand<boost::asio::io_context::executor_type> ioc_;
+        std::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
         OwlMailDefine::ServiceMapCalcMailbox mailbox_;
 
         std::shared_ptr<OwlQuickJsWrapper::QuickJsWrapper> qjw_;
@@ -48,6 +51,17 @@ namespace OwlMapCalc {
 
     public:
 
+        void init() {
+            boost::asio::dispatch(ioc_, [
+                    this, self = shared_from_this()
+            ]() {
+                loadCalcJsCodeFile(config_->config().js_map_calc_file);
+                loadMapCalcFunction(config_->config().js_map_calc_function_name);
+                testMapCalcFunction();
+            });
+        }
+
+    private:
         bool loadCalcJsCodeFile(const std::string &filePath);
 
         bool loadMapCalcFunction(const std::string &functionName);

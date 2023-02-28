@@ -67,7 +67,8 @@ struct ThreadCallee {
             tg.interrupt_all();
             // https://www.boost.org/doc/libs/1_81_0/libs/exception/doc/current_exception_diagnostic_information.html
             BOOST_LOG_TRIVIAL(error) << "ThreadCallee catch (...) exception"
-                                     << "\n diagnostic" << boost::current_exception_diagnostic_information();
+                                     << "\n current_exception_diagnostic_information : "
+                                     << boost::current_exception_diagnostic_information();
             return -1;
         }
         return 0;
@@ -211,11 +212,10 @@ int main(int argc, const char *argv[]) {
     );
     auto mapCalcService = std::make_shared<OwlMapCalc::MapCalc>(
             ioc_map_calc,
+            config->shared_from_this(),
             mailbox_map_calc->shared_from_this()
     );
-    mapCalcService->loadCalcJsCodeFile(config->config().js_map_calc_file);
-    mapCalcService->loadMapCalcFunction(config->config().js_map_calc_function_name);
-    mapCalcService->testMapCalcFunction();
+    mapCalcService->init();
 
     auto mailbox_cmd_udp = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
             ioc_cmd, ioc_cmd, "mailbox_cmd_udp"
