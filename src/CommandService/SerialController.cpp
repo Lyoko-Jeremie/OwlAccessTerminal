@@ -410,6 +410,13 @@ namespace OwlSerialController {
                 }
                 BOOST_ASSERT(data->aprilTagCmdPtr->mapCalcPlaneInfoType);
 
+                // TODO debug
+                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                data_r->runner = data->callbackRunner;
+                data_r->openError = false;
+                data_r->ok = false;
+                sendMail(std::move(data_r), mailbox);
+
                 if (!repeating) {
                     // save a copy for other use
                     atomic_store(&aprilTagCmdData, data->aprilTagCmdPtr);
