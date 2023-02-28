@@ -383,6 +383,11 @@ namespace OwlSerialController {
                                              << " sendData2Serial"
                                              << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag"
                                              << " (!data->aprilTagCmdPtr)";
+                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    data_r->runner = data->callbackRunner;
+                    data_r->openError = false;
+                    data_r->ok = false;
+                    sendMail(std::move(data_r), mailbox);
                     return;
                 }
                 BOOST_ASSERT(data->aprilTagCmdPtr);
@@ -396,6 +401,11 @@ namespace OwlSerialController {
                         << " sendData2Serial"
                         << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag"
                         << " (!data->aprilTagCmdPtr->mapCalcPlaneInfoType)";
+                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    data_r->runner = data->callbackRunner;
+                    data_r->openError = false;
+                    data_r->ok = false;
+                    sendMail(std::move(data_r), mailbox);
                     return;
                 }
                 BOOST_ASSERT(data->aprilTagCmdPtr->mapCalcPlaneInfoType);
