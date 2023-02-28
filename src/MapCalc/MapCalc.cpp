@@ -65,67 +65,95 @@ namespace OwlMapCalc {
                         std::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
                         std::shared_ptr<OwlSerialController::AirplaneState> airplaneState
                 ) -> MapCalcFunctionType::result_type {
+            BOOST_LOG_TRIVIAL(trace) << "MapCalc calc_ start";
 
             boost::json::object inputData{};
-            if (tagInfo) {
-                inputData.emplace("imageX", tagInfo->imageX);
-                inputData.emplace("imageY", tagInfo->imageY);
-            } else {
-                inputData.emplace("imageX", 0);
-                inputData.emplace("imageY", 0);
-            }
-            // tagInfo;
-            auto tv = [](const OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type &t) {
-                return boost::json::value{
-                        {"id",       t.id},
-                        {"dec_marg", t.decision_margin},
-                        {"ham",      t.hamming},
-                        {"cX",       t.centerX},
-                        {"cY",       t.centerY},
-                        {"cLTx",     t.cornerLTx},
-                        {"cLTy",     t.cornerLTy},
-                        {"cRTx",     t.cornerRTx},
-                        {"cRTy",     t.cornerRTy},
-                        {"cRBx",     t.cornerRBx},
-                        {"cRBy",     t.cornerRBy},
-                        {"cLBx",     t.cornerLBx},
-                        {"cLBy",     t.cornerLBy},
-                };
-            };
-            if (tagInfo && tagInfo->aprilTagCenter) {
-                inputData.emplace("tagInfo", boost::json::object{
-                        {"center", tv(tagInfo->aprilTagCenter.operator*())},
-                });
-            } else {
-                inputData.emplace("tagInfo", boost::json::object{
-                        {"center", {}},
-                });
-            }
-            boost::json::array tagList{};
-            if (tagInfo && tagInfo->aprilTagList) {
-                for (const auto &a: tagInfo->aprilTagList.operator*()) {
-                    tagList.push_back(tv(a));
+            try {
+                if (tagInfo) {
+                    inputData.emplace("imageX", tagInfo->imageX);
+                    inputData.emplace("imageY", tagInfo->imageY);
+                } else {
+                    inputData.emplace("imageX", 0);
+                    inputData.emplace("imageY", 0);
                 }
-            }
-            inputData["tagInfo"].as_object().emplace("list", tagList);
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc calc_ (tagInfo) ok";
+                // tagInfo;
+                auto tv = [](const OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type &t) {
+                    return boost::json::value{
+                            {"id",       t.id},
+                            {"dec_marg", t.decision_margin},
+                            {"ham",      t.hamming},
+                            {"cX",       t.centerX},
+                            {"cY",       t.centerY},
+                            {"cLTx",     t.cornerLTx},
+                            {"cLTy",     t.cornerLTy},
+                            {"cRTx",     t.cornerRTx},
+                            {"cRTy",     t.cornerRTy},
+                            {"cRBx",     t.cornerRBx},
+                            {"cRBy",     t.cornerRBy},
+                            {"cLBx",     t.cornerLBx},
+                            {"cLBy",     t.cornerLBy},
+                    };
+                };
+                boost::json::object tagInfoJson{};
+                if (tagInfo && tagInfo->aprilTagCenter) {
+                    tagInfoJson.emplace("center", tv(tagInfo->aprilTagCenter.operator*()));
+//                    inputData.emplace("tagInfo", boost::json::object{
+//                            {"center", tv(tagInfo->aprilTagCenter.operator*())},
+//                    });
+                } else {
+                    tagInfoJson.emplace("center", boost::json::object{});
+//                    inputData.emplace("tagInfo", boost::json::object{
+//                            {"center", {}},
+//                    });
+                }
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc calc_ (tagInfo && tagInfo->aprilTagCenter) ok";
+                boost::json::array tagList{};
+                if (tagInfo && tagInfo->aprilTagList) {
+                    for (const auto &a: tagInfo->aprilTagList.operator*()) {
+                        tagList.push_back(tv(a));
+                    }
+                }
+                tagInfoJson.emplace("list", tagList);
+//                inputData["tagInfo"].as_object().emplace("list", tagList);
+                inputData.emplace("tagInfo", tagInfoJson);
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc calc_ (tagInfo && tagInfo->aprilTagList) ok";
 
-            // airplaneState;
-            if (airplaneState) {
-                inputData.emplace("airplaneState", boost::json::value{
-                        {"timestamp", airplaneState->timestamp},
-                        {"voltage",   airplaneState->voltage},
-                        {"high",      airplaneState->high},
-                        {"pitch",     airplaneState->pitch},
-                        {"roll",      airplaneState->roll},
-                        {"yaw",       airplaneState->yaw},
-                        {"vx",        airplaneState->vx},
-                        {"vy",        airplaneState->vy},
-                        {"vz",        airplaneState->vz},
-                });
-            } else {
-                inputData.emplace("airplaneState", boost::json::value{});
+                // airplaneState;
+                if (airplaneState) {
+                    inputData.emplace("airplaneState", boost::json::value{
+                            {"timestamp", airplaneState->timestamp},
+                            {"voltage",   airplaneState->voltage},
+                            {"high",      airplaneState->high},
+                            {"pitch",     airplaneState->pitch},
+                            {"roll",      airplaneState->roll},
+                            {"yaw",       airplaneState->yaw},
+                            {"vx",        airplaneState->vx},
+                            {"vy",        airplaneState->vy},
+                            {"vz",        airplaneState->vz},
+                    });
+                } else {
+                    inputData.emplace("airplaneState", boost::json::value{});
+                }
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc calc_ inputData (airplaneState) ok";
+            } catch (boost::exception &e) {
+                std::string diag = boost::diagnostic_information(e);
+                BOOST_LOG_TRIVIAL(error) << "MapCalc calc_ inputData std::exception :"
+                                         << "\n diag: " << diag
+                                         << "\n what: " << dynamic_cast<std::exception const &>(e).what();
+                throw;
+                return {};
+            } catch (std::exception &e) {
+                BOOST_LOG_TRIVIAL(error) << "MapCalc calc_ inputData std::exception :"
+                                         << e.what();
+                throw;
+                return {};
+            } catch (...) {
+                BOOST_LOG_TRIVIAL(error) << "MapCalc calc_ inputData catch (...) "
+                                         << "\n" << boost::current_exception_diagnostic_information();
+                throw;
+                return {};
             }
-
             try {
                 auto rData = std::make_shared<MapCalcPlaneInfoType>();
                 auto r = calcF(qjw_->getContext().fromJSON(boost::json::serialize(inputData)));
@@ -172,7 +200,7 @@ namespace OwlMapCalc {
                 return rData;
             } catch (qjs::exception &) {
                 auto exc = qjw_->getContext().getException();
-                BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction qjs::exception " << (std::string) exc;
+                BOOST_LOG_TRIVIAL(error) << "MapCalc calc_ calcF qjs::exception " << (std::string) exc;
                 if ((bool) exc["stack"]) {
                     BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction qjs::exception "
                                              << (std::string) exc["stack"];
@@ -180,21 +208,21 @@ namespace OwlMapCalc {
                 // failed
                 return {};
             } catch (cv::Exception &e) {
-                BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction cv::exception :"
+                BOOST_LOG_TRIVIAL(error) << "MapCalc calc_ calcF cv::exception :"
                                          << e.what();
                 return {};
             } catch (boost::exception &e) {
                 std::string diag = boost::diagnostic_information(e);
-                BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction std::exception :"
+                BOOST_LOG_TRIVIAL(error) << "MapCalc calc_ calcF std::exception :"
                                          << "\n diag: " << diag
                                          << "\n what: " << dynamic_cast<std::exception const &>(e).what();
                 return {};
             } catch (std::exception &e) {
-                BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction std::exception :"
+                BOOST_LOG_TRIVIAL(error) << "MapCalc calc_ calcF std::exception :"
                                          << e.what();
                 return {};
             } catch (...) {
-                BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction catch (...) "
+                BOOST_LOG_TRIVIAL(error) << "MapCalc calc_ calcF catch (...) "
                                          << "\n" << boost::current_exception_diagnostic_information();
                 return {};
             }

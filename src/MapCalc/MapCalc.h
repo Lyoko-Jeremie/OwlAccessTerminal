@@ -58,9 +58,11 @@ namespace OwlMapCalc {
                 std::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
                 std::shared_ptr<OwlSerialController::AirplaneState> airplaneState
         ) {
+            BOOST_LOG_TRIVIAL(trace) << "MapCalc::calcMapPosition";
             if (calc_) {
                 return calc_(std::move(tagInfo), std::move(airplaneState));
             }
+            BOOST_LOG_TRIVIAL(trace) << "MapCalc::calcMapPosition return {}";
             return {};
         }
 
