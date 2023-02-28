@@ -361,6 +361,13 @@ namespace OwlCommandServiceHttp {
             ) {
                 if (!data->ok) {
                     // ignore
+                    send_back_json(
+                            boost::json::value{
+                                    {"msg",       "getAirplaneState"},
+                                    {"result",    data->ok},
+                                    {"openError", data->openError},
+                            }
+                    );
                     return;
                 }
                 if (!data->newestAirplaneState) {
@@ -378,10 +385,17 @@ namespace OwlCommandServiceHttp {
                 ) {
                     if (!data->ok) {
                         // ignore
+                        send_back_json(
+                                boost::json::value{
+                                        {"msg",       "MapCalc"},
+                                        {"result",    data->ok},
+                                        {"openError", false},
+                                }
+                        );
                         return;
                     }
-                    aprilTagCmd->mapCalcPlaneInfoType = data->info;
                     BOOST_ASSERT(aprilTagCmd);
+                    aprilTagCmd->mapCalcPlaneInfoType = data->info;
                     BOOST_ASSERT(aprilTagCmd->aprilTagList);
                     BOOST_ASSERT(aprilTagCmd->aprilTagCenter);
 
