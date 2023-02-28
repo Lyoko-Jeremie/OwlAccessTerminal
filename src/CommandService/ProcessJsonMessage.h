@@ -12,6 +12,7 @@
 #include <boost/log/trivial.hpp>
 #include <boost/utility/string_view.hpp>
 #include <boost/assert.hpp>
+#include <boost/exception/diagnostic_information.hpp>
 #include "CmdSerialMail.h"
 
 namespace OwlProcessJsonMessage {
@@ -85,7 +86,7 @@ namespace OwlProcessJsonMessage {
             };
             self->sendMail(std::move(m));
         } catch (std::exception &e) {
-            BOOST_LOG_TRIVIAL(error) << "CommandService::analysisJoyConSimple";
+            BOOST_LOG_TRIVIAL(error) << "CommandService::analysisJoyConGyro";
             // ignore
             self->send_back_json(
                     boost::json::value{
@@ -96,6 +97,8 @@ namespace OwlProcessJsonMessage {
             );
             return;
         } catch (...) {
+            BOOST_LOG_TRIVIAL(error) << "CommandService::analysisJoyConGyro catch (...) exception"
+                                     << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             self->send_back_json(
                     boost::json::value{
@@ -168,6 +171,8 @@ namespace OwlProcessJsonMessage {
             );
             return;
         } catch (...) {
+            BOOST_LOG_TRIVIAL(error) << "CommandService::analysisJoyConSimple catch (...) exception"
+                                     << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             self->send_back_json(
                     boost::json::value{
@@ -248,6 +253,8 @@ namespace OwlProcessJsonMessage {
             );
             return;
         } catch (...) {
+            BOOST_LOG_TRIVIAL(error) << "CommandService::analysisJoyCon catch (...) exception"
+                                     << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             self->send_back_json(
                     boost::json::value{
@@ -1323,6 +1330,8 @@ namespace OwlProcessJsonMessage {
             );
             return;
         } catch (...) {
+            BOOST_LOG_TRIVIAL(error) << "CommandService::process_message catch (...) exception"
+                                     << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             self->send_back_json(
                     boost::json::value{

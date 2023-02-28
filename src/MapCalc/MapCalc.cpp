@@ -194,7 +194,8 @@ namespace OwlMapCalc {
                                          << e.what();
                 return {};
             } catch (...) {
-                BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction catch (...) ";
+                BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction catch (...) "
+                                         << "\n" << boost::current_exception_diagnostic_information();
                 return {};
             }
 

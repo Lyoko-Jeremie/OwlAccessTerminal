@@ -4,6 +4,7 @@
 #include "./AirplaneState.h"
 #include "../MapCalc/MapCalcMail.h"
 #include "../MapCalc/MapCalcPlaneInfoType.h"
+#include <boost/exception/diagnostic_information.hpp>
 
 namespace OwlCommandServiceHttp {
 
@@ -450,6 +451,8 @@ namespace OwlCommandServiceHttp {
             write_response(response);
             return;
         } catch (...) {
+            BOOST_LOG_TRIVIAL(error) << "CmdServiceHttpConnect::process_tag_info catch (...) exception"
+                                     << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             send_back_json(
                     boost::json::value{

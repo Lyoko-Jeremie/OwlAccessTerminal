@@ -2,6 +2,7 @@
 
 #include "ImageService.h"
 
+#include <boost/exception/diagnostic_information.hpp>
 #include <opencv2/opencv.hpp>
 
 namespace OwlImageService {
@@ -332,7 +333,8 @@ namespace OwlImageService {
                                      << " e: " << e.what();
             return;
         } catch (...) {
-            BOOST_LOG_TRIVIAL(error) << "do_process_request catch unknown exception on " << ir->DebugString();
+            BOOST_LOG_TRIVIAL(error) << "do_process_request catch unknown exception on " << ir->DebugString()
+                                     << "\n" << boost::current_exception_diagnostic_information();
             return;
         }
     }

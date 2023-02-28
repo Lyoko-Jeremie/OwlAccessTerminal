@@ -39,7 +39,10 @@ namespace OwlSerialController {
                     }
                     catch (const std::string &e) { BOOST_LOG_TRIVIAL(error) << "co_spawn catch std::string " << e; }
                     catch (const char *e) { BOOST_LOG_TRIVIAL(error) << "co_spawn catch char *e " << e; }
-                    catch (...) { BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo co_spawn catch (...)"; }
+                    catch (...) {
+                        BOOST_LOG_TRIVIAL(error) << "StateReaderImplCo co_spawn catch (...)"
+                                                 << "\n" << boost::current_exception_diagnostic_information();
+                    }
                 });
     }
 
