@@ -515,16 +515,11 @@ namespace OwlCommandServiceHttp {
                 );
                 return;
             }
-            auto mm = std::make_shared<OwlMailDefine::Service2MapCalc>();
-            mm->airplaneState = state;
-            mm->tagInfo = tags;
-            mm->callbackRunner = [this, self = shared_from_this(), state, tags, data_s = data](
-                    OwlMailDefine::MailMapCalc2Service data_m
+            auto send_back_data = [
+                    this, self = shared_from_this(), state
+            ](
+                    std::shared_ptr<OwlMapCalc::MapCalcPlaneInfoType> tags, bool ok
             ) {
-                if (!data_m->ok) {
-                    // TODO
-                }
-
                 send_back_json(
                         boost::json::value{
                                 {"result",        true},
@@ -544,10 +539,9 @@ namespace OwlCommandServiceHttp {
                                 },
                                 {"tag",
                                                   {
-                                                          {"ok",        data_m->ok},
-                                                          {"info",     OwlMapCalc::MapCalcPlaneInfoType2JsonObject(
-                                                                  data_m->info)
-                                                          },
+                                                          {"ok",        ok},
+                                                          {"info",     OwlMapCalc::
+                                                                       MapCalcPlaneInfoType2JsonObject(tags)},
                                                   }
                                 },
                                 {"nowTimestamp",  std::chrono::time_point_cast<std::chrono::milliseconds>(
@@ -556,6 +550,27 @@ namespace OwlCommandServiceHttp {
                                         std::chrono::system_clock::now()).time_since_epoch().count()},
                         }
                 );
+            };
+            if (tags->mapCalcPlaneInfoType) {
+                send_back_data(tags->mapCalcPlaneInfoType, true);
+                return;
+            }
+            auto mm = std::make_shared<OwlMailDefine::Service2MapCalc>();
+            mm->airplaneState = state;
+            mm->tagInfo = tags;
+            mm->callbackRunner = [
+                    this, self = shared_from_this(),
+                    state, tags,
+                    data_s = data,
+                    send_back_data = std::move(send_back_data)
+            ](
+                    OwlMailDefine::MailMapCalc2Service data_m
+            ) {
+                if (!data_m->ok) {
+                    // TODO
+                }
+                send_back_data(data_m->info, data_m->ok);
+                return;
             };
             sendMail_map(std::move(mm));
         };

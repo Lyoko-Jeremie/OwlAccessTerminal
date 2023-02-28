@@ -386,40 +386,38 @@ namespace OwlSerialController {
                     return;
                 }
                 BOOST_ASSERT(data->aprilTagCmdPtr);
-                // TODO
-                data->aprilTagCmdPtr->mapCalcPlaneInfoType;
+
+                auto pcx = static_cast<uint16_t>(data->aprilTagCmdPtr->imageX);
+                auto pcy = static_cast<uint16_t>(data->aprilTagCmdPtr->imageY);
+
+                if (!data->aprilTagCmdPtr->mapCalcPlaneInfoType) {
+                    BOOST_LOG_TRIVIAL(error)
+                        << "SerialController"
+                        << " sendData2Serial"
+                        << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag"
+                        << " (!data->aprilTagCmdPtr->mapCalcPlaneInfoType)";
+                    return;
+                }
+                BOOST_ASSERT(data->aprilTagCmdPtr->mapCalcPlaneInfoType);
 
                 if (!repeating) {
                     // save a copy for other use
                     atomic_store(&aprilTagCmdData, data->aprilTagCmdPtr);
                 }
 
-                auto pcx = static_cast<uint16_t>(data->aprilTagCmdPtr->imageX);
-                auto pcy = static_cast<uint16_t>(data->aprilTagCmdPtr->imageY);
+                auto &info = *data->aprilTagCmdPtr->mapCalcPlaneInfoType;
 
-                auto center = data->aprilTagCmdPtr->aprilTagCenter;
-                if (!center) {
-                    BOOST_LOG_TRIVIAL(error) << "SerialController"
-                                             << " sendData2Serial"
-                                             << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag"
-                                             << " (!center)";
-                    return;
-                }
-                BOOST_ASSERT(center);
-                // (0,0) at image left top
-                auto x = center->cornerLTx - center->cornerLBx;
-                auto y = -(center->cornerLTy - center->cornerLBy);
-                auto r = atan2(y, x);
-                r = r / (M_PI / 180.0);
-                // rad(0 ~ +PI=-PI ~ 0) -> degree(0 ~ +180=-180 ~ 0) -> degree(0 ~ +180 ~ +360)
-                // auto d = static_cast<uint16_t>(r >= 0 ? r : r + 180);
-                // rad(0 ~ +PI=-PI ~ 0) -> degree(-180 ~ 0 ~ +180) -> degree(0 ~ +180 ~ +360)
-                // add 180 to avoid sign
-                auto d = static_cast<uint16_t>(r + 180);
-
-                auto id = static_cast<uint16_t>(center->id);
-                auto cx = static_cast<uint16_t>(center->centerX);
-                auto cy = static_cast<uint16_t>(center->centerY);
+                auto xDirectDeg = int16_t(std::round(info.xDirectDeg));
+                auto zDirectDeg = int16_t(std::round(info.zDirectDeg));
+                auto xzDirectDeg = int16_t(std::round(info.xzDirectDeg));
+                auto ImageP_x = int16_t(std::round(info.ImageP.x));
+                auto ImageP_y = int16_t(std::round(info.ImageP.y));
+                auto PlaneP_x = int16_t(std::round(info.PlaneP.x));
+                auto PlaneP_y = int16_t(std::round(info.PlaneP.y));
+                auto ScaleXY_x = int16_t(std::round(info.ScaleXY.x));
+                auto ScaleXY_y = int16_t(std::round(info.ScaleXY.y));
+                auto ScaleXZ_x = int16_t(std::round(info.ScaleXZ.x));
+                auto ScaleXZ_y = int16_t(std::round(info.ScaleXZ.y));
 
                 // if (needRepeat) {
                 //     // ok, this package is safe, now to remember this package
@@ -430,7 +428,7 @@ namespace OwlSerialController {
 
                 // send cmd to serial
                 // make send data
-                constexpr uint8_t packageSize = 19;
+                constexpr uint8_t packageSize = 33;
                 makeADataBuffer<packageSize>(
                         std::array<uint8_t, packageSize>{
                                 // 0xAA
@@ -447,19 +445,37 @@ namespace OwlSerialController {
                                 uint8_t(uint16_t(pcy) & 0xff),
                                 uint8_t(uint16_t(pcy) >> 8),
 
-                                // tag center
-                                uint8_t(uint16_t(cx) & 0xff),
-                                uint8_t(uint16_t(cx) >> 8),
-                                uint8_t(uint16_t(cy) & 0xff),
-                                uint8_t(uint16_t(cy) >> 8),
+                                // https://stackoverflow.com/questions/2711522/what-happens-if-i-assign-a-negative-value-to-an-unsigned-variable
 
-                                // tag degree
-                                uint8_t(uint16_t(d) & 0xff),
-                                uint8_t(uint16_t(d) >> 8),
+                                uint8_t(uint16_t(xDirectDeg & 0xff)),
+                                uint8_t(uint16_t(xDirectDeg & 0xff00) >> 8),
 
-                                // tag id
-                                uint8_t(uint16_t(id) & 0xff),
-                                uint8_t(uint16_t(id) >> 8),
+                                uint8_t(uint16_t(zDirectDeg & 0xff)),
+                                uint8_t(uint16_t(zDirectDeg & 0xff00) >> 8),
+
+                                uint8_t(uint16_t(xzDirectDeg & 0xff)),
+                                uint8_t(uint16_t(xzDirectDeg & 0xff00) >> 8),
+
+                                uint8_t(uint16_t(ImageP_x & 0xff)),
+                                uint8_t(uint16_t(ImageP_x & 0xff00) >> 8),
+                                uint8_t(uint16_t(ImageP_y & 0xff)),
+                                uint8_t(uint16_t(ImageP_y & 0xff00) >> 8),
+
+                                uint8_t(uint16_t(PlaneP_x & 0xff)),
+                                uint8_t(uint16_t(PlaneP_x & 0xff00) >> 8),
+                                uint8_t(uint16_t(PlaneP_y & 0xff)),
+                                uint8_t(uint16_t(PlaneP_y & 0xff00) >> 8),
+
+                                uint8_t(uint16_t(ScaleXY_x & 0xff)),
+                                uint8_t(uint16_t(ScaleXY_x & 0xff00) >> 8),
+                                uint8_t(uint16_t(ScaleXY_y & 0xff)),
+                                uint8_t(uint16_t(ScaleXY_y & 0xff00) >> 8),
+
+                                uint8_t(uint16_t(ScaleXZ_x & 0xff)),
+                                uint8_t(uint16_t(ScaleXZ_x & 0xff00) >> 8),
+                                uint8_t(uint16_t(ScaleXZ_y & 0xff)),
+                                uint8_t(uint16_t(ScaleXZ_y & 0xff00) >> 8),
+
 
                                 // serial ID
                                 uint8_t(0),

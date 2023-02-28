@@ -31,9 +31,11 @@ namespace OwlMapCalc {
         Point2 ImageP;
         // Plane scale of image on Plane XZ Direct
         // imgPixel[px]/planeDistance[1cm(SizeXY base size)]
+        // scalePlaInImg
         Vec2 ScaleXZ;
         // Plane scale in image XY Direct
         // planeDistance[cm(SizeXY base size)]/imgPixel[1px]
+        // scaleImgInPla
         Vec2 ScaleXY;
     };
 
