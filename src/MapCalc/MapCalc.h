@@ -67,8 +67,22 @@ namespace OwlMapCalc {
     private:
 
         void receiveMail(OwlMailDefine::MailService2MapCalc &&data) {
+#ifdef DEBUG_IF_CHECK_POINT
+            constexpr bool flag_DEBUG_IF_CHECK_POINT = true;
+#else
+            constexpr bool flag_DEBUG_IF_CHECK_POINT = false;
+#endif // DEBUG_IF_CHECK_POINT
+
             BOOST_LOG_TRIVIAL(trace) << "MapCalc::receiveMail start";
+            if constexpr (flag_DEBUG_IF_CHECK_POINT) {
+                BOOST_ASSERT(!weak_from_this().expired());
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc::receiveMail weak_from_this().use_count(): "
+                                         << weak_from_this().use_count();
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc::receiveMail shared_from_this().use_count(): "
+                                         << this->shared_from_this().use_count();
+            }
             boost::asio::dispatch(ioc_, [this, self = shared_from_this(), data]() {
+                BOOST_ASSERT(self);
                 BOOST_LOG_TRIVIAL(trace) << "MapCalc::receiveMail dispatch";
                 auto mail = std::make_shared<OwlMailDefine::MapCalc2Service>();
                 mail->runner = data->callbackRunner;
