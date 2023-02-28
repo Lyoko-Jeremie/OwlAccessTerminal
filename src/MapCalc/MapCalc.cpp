@@ -35,9 +35,32 @@ namespace OwlMapCalc {
         mailbox_->receiveA2B([this](OwlMailDefine::MailService2MapCalc &&data) {
             receiveMail(std::move(data));
         });
-        qjw_ = std::make_shared<OwlQuickJsWrapper::QuickJsWrapper>();
-        qjw_->init();
-//        installOpenCVExt(qjw_->getContext());
+    }
+
+    void MapCalc::init() {
+        BOOST_LOG_TRIVIAL(trace) << "MapCalc::init()";
+        boost::asio::post(ioc_, [
+                this, self = shared_from_this()
+        ]() {
+            BOOST_LOG_TRIVIAL(trace) << "MapCalc::init() dispatch";
+            qjw_ = std::make_shared<OwlQuickJsWrapper::QuickJsWrapper>();
+            BOOST_LOG_TRIVIAL(trace) << "MapCalc::init() qjw_ create ok";
+            qjw_->init();
+            BOOST_LOG_TRIVIAL(trace) << "MapCalc::init() qjw_->init() ok";
+            BOOST_LOG_TRIVIAL(trace)
+                << "MapCalc::init() loadCalcJsCodeFile "
+                <<
+                loadCalcJsCodeFile(config_->config().js_map_calc_file);
+            BOOST_LOG_TRIVIAL(trace)
+                << "MapCalc::init() loadMapCalcFunction "
+                <<
+                loadMapCalcFunction(config_->config().js_map_calc_function_name);
+            BOOST_LOG_TRIVIAL(trace)
+                << "MapCalc::init() testMapCalcFunction "
+                <<
+                testMapCalcFunction();
+            BOOST_LOG_TRIVIAL(trace) << "MapCalc::init() ok";
+        });
     }
 
 
@@ -46,7 +69,9 @@ namespace OwlMapCalc {
             BOOST_LOG_TRIVIAL(error) << "MapCalc loadCalcJsCodeFile filePath not exists : " << filePath;
             return false;
         }
+        BOOST_LOG_TRIVIAL(trace) << "MapCalc loadCalcJsCodeFile qjw_->loadCode(filePath) begin";
         bool ok = qjw_->loadCode(filePath);
+        BOOST_LOG_TRIVIAL(trace) << "MapCalc loadCalcJsCodeFile qjw_->loadCode(filePath) end";
         if (!ok) {
             BOOST_LOG_TRIVIAL(error) << "MapCalc loadCalcJsCodeFile loadCode failed.";
         }
@@ -205,12 +230,18 @@ namespace OwlMapCalc {
                     << "MapCalc calc_ rData ok :"
                     << boost::json::serialize(MapCalcPlaneInfoType2JsonObject(rData));
                 return rData;
-            } catch (qjs::exception &) {
-                auto exc = qjw_->getContext().getException();
-                BOOST_LOG_TRIVIAL(error) << "MapCalc calc_ calcF qjs::exception " << (std::string) exc;
-                if ((bool) exc["stack"]) {
-                    BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction qjs::exception "
-                                             << (std::string) exc["stack"];
+            } catch (qjs::exception &e) {
+                try {
+                    auto exc = qjw_->getContext().getException();
+                    BOOST_LOG_TRIVIAL(error) << "MapCalc calc_ calcF qjs::exception " << (std::string) exc;
+                    if ((bool) exc["stack"]) {
+                        BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction qjs::exception "
+                                                 << (std::string) exc["stack"];
+                    }
+                } catch (...) {
+                    BOOST_LOG_TRIVIAL(error) << "MapCalc calc_ qjs::exception&e catch (...) exception"
+                                             << "\n current_exception_diagnostic_information : "
+                                             << boost::current_exception_diagnostic_information();
                 }
                 // failed
                 return {};
