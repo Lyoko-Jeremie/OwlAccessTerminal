@@ -132,7 +132,7 @@ namespace OwlSerialController {
         long long lastUpdateTime = 0;
 
         std::shared_ptr<OwlMailDefine::Cmd2Serial> mail() {
-            return mail_;
+            return atomic_load(&mail_);
         }
 
         uint16_t id() {
