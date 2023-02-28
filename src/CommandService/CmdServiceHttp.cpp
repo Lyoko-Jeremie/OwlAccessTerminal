@@ -410,6 +410,16 @@ namespace OwlCommandServiceHttp {
                     BOOST_ASSERT(aprilTagCmd->aprilTagList);
                     BOOST_ASSERT(aprilTagCmd->aprilTagCenter);
 
+                    // TODO debug
+                    send_back_json(
+                            boost::json::value{
+                                    {"msg",       "MapCalc"},
+                                    {"result",    data->ok},
+                                    {"openError", false},
+                            }
+                    );
+                    return;
+
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;
                     m->aprilTagCmdPtr = aprilTagCmd;
