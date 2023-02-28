@@ -137,29 +137,39 @@ namespace OwlMapCalc {
                 rData->xDirectDeg = info["xDirectDeg"].as<double>();
                 rData->zDirectDeg = info["zDirectDeg"].as<double>();
                 rData->xzDirectDeg = info["xzDirectDeg"].as<double>();
+//                BOOST_LOG_TRIVIAL(trace) << "read rData->xDirectDeg " << rData->xDirectDeg;
+//                BOOST_LOG_TRIVIAL(trace) << "read rData->zDirectDeg " << rData->zDirectDeg;
+//                BOOST_LOG_TRIVIAL(trace) << "read rData->xzDirectDeg " << rData->xzDirectDeg;
+//                BOOST_LOG_TRIVIAL(trace) << " start read ";
                 {
-                    auto n = r["PlaneP"].as<qjs::Value>();
+                    auto n = info["PlaneP"].as<qjs::Value>();
                     rData->PlaneP.x = n["x"].as<double>();
                     rData->PlaneP.y = n["y"].as<double>();
+//                    BOOST_LOG_TRIVIAL(trace) << "read PlaneP ok";
                 }
                 {
-                    auto n = r["ImageP"].as<qjs::Value>();
+                    auto n = info["ImageP"].as<qjs::Value>();
                     rData->ImageP.x = n["x"].as<double>();
                     rData->ImageP.y = n["y"].as<double>();
+//                    BOOST_LOG_TRIVIAL(trace) << "read ImageP ok";
                 }
                 {
-                    auto n = r["ScaleXZ"].as<qjs::Value>();
+                    auto n = info["ScaleXZ"].as<qjs::Value>();
                     rData->ScaleXZ.x = n["x"].as<double>();
                     rData->ScaleXZ.y = n["y"].as<double>();
+//                    BOOST_LOG_TRIVIAL(trace) << "read ScaleXZ ok";
                 }
                 {
-                    auto n = r["ScaleXY"].as<qjs::Value>();
+                    auto n = info["ScaleXY"].as<qjs::Value>();
                     rData->ScaleXY.x = n["x"].as<double>();
                     rData->ScaleXY.y = n["y"].as<double>();
+//                    BOOST_LOG_TRIVIAL(trace) << "read ScaleXY ok";
                 }
+//                BOOST_LOG_TRIVIAL(trace)
+//                    << "MapCalc loadMapCalcFunction ok :"
+//                    << boost::json::serialize(MapCalcPlaneInfoType2JsonObject(rData));
                 return rData;
-            }
-            catch (qjs::exception &) {
+            } catch (qjs::exception &) {
                 auto exc = qjw_->getContext().getException();
                 BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction qjs::exception " << (std::string) exc;
                 if ((bool) exc["stack"]) {
@@ -171,6 +181,13 @@ namespace OwlMapCalc {
             } catch (cv::Exception &e) {
                 BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction cv::exception :"
                                          << e.what();
+                return {};
+            } catch (std::exception &e) {
+                BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction std::exception :"
+                                         << e.what();
+                return {};
+            } catch (...) {
+                BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction catch (...) ";
                 return {};
             }
 
