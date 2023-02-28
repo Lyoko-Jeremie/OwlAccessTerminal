@@ -41,6 +41,6 @@ namespace OwlMapCalc {
                                 }
                 },
         };
-        return 0;
+        return o;
     }
 }
