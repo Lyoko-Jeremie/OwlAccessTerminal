@@ -52,12 +52,24 @@ namespace OwlMapCalc {
     public:
 
         void init() {
-            boost::asio::dispatch(ioc_, [
+            BOOST_LOG_TRIVIAL(trace) << "MapCalc::init()";
+            boost::asio::post(ioc_, [
                     this, self = shared_from_this()
             ]() {
-                loadCalcJsCodeFile(config_->config().js_map_calc_file);
-                loadMapCalcFunction(config_->config().js_map_calc_function_name);
-                testMapCalcFunction();
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc::init() dispatch";
+                BOOST_LOG_TRIVIAL(trace)
+                    << "MapCalc::init() loadCalcJsCodeFile "
+                    <<
+                    loadCalcJsCodeFile(config_->config().js_map_calc_file);
+                BOOST_LOG_TRIVIAL(trace)
+                    << "MapCalc::init() loadMapCalcFunction "
+                    <<
+                    loadMapCalcFunction(config_->config().js_map_calc_function_name);
+                BOOST_LOG_TRIVIAL(trace)
+                    << "MapCalc::init() testMapCalcFunction "
+                    <<
+                    testMapCalcFunction();
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc::init() ok";
             });
         }
 
