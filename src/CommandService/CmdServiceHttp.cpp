@@ -382,7 +382,7 @@ namespace OwlCommandServiceHttp {
 
                 auto mc = std::make_shared<OwlMailDefine::Service2MapCalc>();
                 mc->airplaneState = data->newestAirplaneState;
-                mc->tagInfo = aprilTagCmd;
+                mc->tagInfo = aprilTagCmd->shared_from_this();
                 BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info to mc newestAirplaneState";
                 mc->callbackRunner = [
                         this, self = shared_from_this(),
@@ -414,10 +414,17 @@ namespace OwlCommandServiceHttp {
                     m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;
                     m->aprilTagCmdPtr = aprilTagCmd;
                     BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info to m AprilTag";
-                    m->callbackRunner = [this, self = shared_from_this()](
+                    m->callbackRunner = [
+                            this, self = shared_from_this(),
+                            aprilTagCmd
+                    ](
                             OwlMailDefine::MailSerial2Cmd data
                     ) {
                         BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info back m AprilTag";
+                        BOOST_ASSERT(aprilTagCmd);
+                        BOOST_ASSERT(aprilTagCmd.use_count() > 0);
+                        BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info aprilTagCmd.use_count() "
+                                                 << aprilTagCmd.use_count();
                         BOOST_ASSERT(data);
                         BOOST_ASSERT(self);
                         BOOST_ASSERT(self.use_count() > 0);
