@@ -568,7 +568,7 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
     console.log("tagInfo:\n", JSON.stringify(tagInfo, undefined, 4));
     if (
         !checkTagInfoType(tagInfo) ||
-        !checkAirplaneStateType(tagInfo.airplaneState) ||
+        // !checkAirplaneStateType(tagInfo.airplaneState) ||
         !checkTagType(tagInfo.tagInfo.center)
     ) {
         return {ok: false};
