@@ -50,24 +50,24 @@ struct ThreadCallee {
             BOOST_LOG_TRIVIAL(warning) << "ThreadCallee ioc exit. thread: " << OwlLog::threadName;
         } catch (int e) {
             tg.interrupt_all();
-            BOOST_LOG_TRIVIAL(error) << "catch (int) exception: " << e;
+            BOOST_LOG_TRIVIAL(error) << "ThreadCallee catch (int) exception: " << e;
             return -1;
         } catch (boost::exception &e) {
             tg.interrupt_all();
             // https://www.boost.org/doc/libs/1_81_0/libs/exception/doc/diagnostic_information.html
-            BOOST_LOG_TRIVIAL(error) << "catch std::exception :"
+            BOOST_LOG_TRIVIAL(error) << "ThreadCallee catch std::exception :"
                                      << "\n diag: " << boost::diagnostic_information(e)
                                      << "\n what: " << dynamic_cast<std::exception const &>(e).what();
             return -1;
         } catch (const std::exception &e) {
             tg.interrupt_all();
-            BOOST_LOG_TRIVIAL(error) << "catch std::exception: " << e.what();
+            BOOST_LOG_TRIVIAL(error) << "ThreadCallee catch std::exception: " << e.what();
             return -1;
         } catch (...) {
             tg.interrupt_all();
             // https://www.boost.org/doc/libs/1_81_0/libs/exception/doc/current_exception_diagnostic_information.html
-            BOOST_LOG_TRIVIAL(error) << "catch (...) exception"
-                                     << "\n" << boost::current_exception_diagnostic_information();
+            BOOST_LOG_TRIVIAL(error) << "ThreadCallee catch (...) exception"
+                                     << "\n diagnostic" << boost::current_exception_diagnostic_information();
             return -1;
         }
         return 0;
