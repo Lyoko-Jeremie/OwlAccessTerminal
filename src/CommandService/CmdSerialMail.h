@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include "../AsyncCallbackMailbox/AsyncCallbackMailbox.h"
+#include "../MapCalc/MapCalcPlaneInfoType.h"
 #include "./AirplaneState.h"
 
 namespace OwlMailDefine {
@@ -71,6 +72,7 @@ namespace OwlMailDefine {
 
         AprilTagListType aprilTagList;
         AprilTagCenterType aprilTagCenter;
+        std::shared_ptr<OwlMapCalc::MapCalcPlaneInfoType> mapCalcPlaneInfoType;
 
         int64_t timestamp{std::chrono::time_point_cast<std::chrono::milliseconds>(
                 std::chrono::steady_clock::now()).time_since_epoch().count()};

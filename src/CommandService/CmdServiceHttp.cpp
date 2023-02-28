@@ -2,6 +2,8 @@
 
 #include "CmdServiceHttp.h"
 #include "./AirplaneState.h"
+#include "../MapCalc/MapCalcMail.h"
+#include "../MapCalc/MapCalcPlaneInfoType.h"
 
 namespace OwlCommandServiceHttp {
 
@@ -348,21 +350,60 @@ namespace OwlCommandServiceHttp {
             aprilTagCmd->imageX = imageX;
             aprilTagCmd->imageY = imageY;
 
-            auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
-            m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;
-            m->aprilTagCmdPtr = aprilTagCmd;
-            m->callbackRunner = [this, self = shared_from_this()](
+            // get newestAirplaneState
+            auto getASm = std::make_shared<OwlMailDefine::Cmd2Serial>();
+            getASm->additionCmd = OwlMailDefine::AdditionCmd::getAirplaneState;
+            getASm->callbackRunner = [
+                    this, self = shared_from_this(),
+                    aprilTagCmd
+            ](
                     OwlMailDefine::MailSerial2Cmd data
             ) {
-                send_back_json(
-                        boost::json::value{
-                                {"msg",       "AprilTag"},
-                                {"result",    data->ok},
-                                {"openError", data->openError},
-                        }
-                );
+                if (!data->ok) {
+                    // ignore
+                    return;
+                }
+                if (!data->newestAirplaneState) {
+                    // TODO
+                }
+
+                auto mc = std::make_shared<OwlMailDefine::Service2MapCalc>();
+                mc->airplaneState = data->newestAirplaneState;
+                mc->tagInfo = aprilTagCmd;
+                mc->callbackRunner = [
+                        this, self = shared_from_this(),
+                        aprilTagCmd
+                ](
+                        OwlMailDefine::MailMapCalc2Service data
+                ) {
+                    if (!data->ok) {
+                        // ignore
+                        return;
+                    }
+                    aprilTagCmd->mapCalcPlaneInfoType = data->info;
+                    BOOST_ASSERT(aprilTagCmd);
+                    BOOST_ASSERT(aprilTagCmd->aprilTagList);
+                    BOOST_ASSERT(aprilTagCmd->aprilTagCenter);
+
+                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;
+                    m->aprilTagCmdPtr = aprilTagCmd;
+                    m->callbackRunner = [this, self = shared_from_this()](
+                            OwlMailDefine::MailSerial2Cmd data
+                    ) {
+                        send_back_json(
+                                boost::json::value{
+                                        {"msg",       "AprilTag"},
+                                        {"result",    data->ok},
+                                        {"openError", data->openError},
+                                }
+                        );
+                    };
+                    sendMail(std::move(m));
+                };
+                sendMail_map(std::move(mc));
             };
-            sendMail(std::move(m));
+            sendMail(std::move(getASm));
             return;
 
         } catch (std::exception &e) {

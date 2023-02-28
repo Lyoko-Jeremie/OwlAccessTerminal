@@ -386,6 +386,8 @@ namespace OwlSerialController {
                     return;
                 }
                 BOOST_ASSERT(data->aprilTagCmdPtr);
+                // TODO
+                data->aprilTagCmdPtr->mapCalcPlaneInfoType;
 
                 if (!repeating) {
                     // save a copy for other use
