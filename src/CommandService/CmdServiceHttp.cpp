@@ -353,12 +353,14 @@ namespace OwlCommandServiceHttp {
             // get newestAirplaneState
             auto getASm = std::make_shared<OwlMailDefine::Cmd2Serial>();
             getASm->additionCmd = OwlMailDefine::AdditionCmd::getAirplaneState;
+            BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttp::process_tag_info to getASm";
             getASm->callbackRunner = [
                     this, self = shared_from_this(),
                     aprilTagCmd
             ](
                     OwlMailDefine::MailSerial2Cmd data
             ) {
+                BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttp::process_tag_info back getASm";
                 if (!data->ok) {
                     // ignore
                     send_back_json(
@@ -377,12 +379,14 @@ namespace OwlCommandServiceHttp {
                 auto mc = std::make_shared<OwlMailDefine::Service2MapCalc>();
                 mc->airplaneState = data->newestAirplaneState;
                 mc->tagInfo = aprilTagCmd;
+                BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttp::process_tag_info to mc newestAirplaneState";
                 mc->callbackRunner = [
                         this, self = shared_from_this(),
                         aprilTagCmd
                 ](
                         OwlMailDefine::MailMapCalc2Service data
                 ) {
+                    BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttp::process_tag_info back mc newestAirplaneState";
                     if (!data->ok) {
                         // ignore
                         send_back_json(
@@ -402,9 +406,11 @@ namespace OwlCommandServiceHttp {
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;
                     m->aprilTagCmdPtr = aprilTagCmd;
+                    BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttp::process_tag_info to m AprilTag";
                     m->callbackRunner = [this, self = shared_from_this()](
                             OwlMailDefine::MailSerial2Cmd data
                     ) {
+                        BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttp::process_tag_info back m AprilTag";
                         send_back_json(
                                 boost::json::value{
                                         {"msg",       "AprilTag"},
@@ -674,7 +680,9 @@ namespace OwlCommandServiceHttp {
             receiveMail(std::move(data));
         });
         mailbox_map_->receiveB2A([this](OwlMailDefine::MailMapCalc2Service &&data) {
+            BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttp::receiveMail mailbox_map_->receiveB2A";
             boost::asio::dispatch(ioc_, [self = shared_from_this(), data]() {
+                BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttp::receiveMail mailbox_map_->receiveB2A dispatch";
                 data->runner(data);
             });
         });

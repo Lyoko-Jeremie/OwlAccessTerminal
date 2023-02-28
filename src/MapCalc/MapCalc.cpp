@@ -3,6 +3,7 @@
 #include "MapCalc.h"
 #include <boost/filesystem.hpp>
 #include <boost/json.hpp>
+#include <boost/exception/diagnostic_information.hpp>
 #include <opencv2/opencv.hpp>
 #include "../QuickJsWrapper/QuickJsWrapper.h"
 
@@ -181,6 +182,12 @@ namespace OwlMapCalc {
             } catch (cv::Exception &e) {
                 BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction cv::exception :"
                                          << e.what();
+                return {};
+            } catch (boost::exception &e) {
+                std::string diag = boost::diagnostic_information(e);
+                BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction std::exception :"
+                                         << "\n diag: " << diag
+                                         << "\n what: " << dynamic_cast<std::exception const &>(e).what();
                 return {};
             } catch (std::exception &e) {
                 BOOST_LOG_TRIVIAL(error) << "MapCalc loadMapCalcFunction std::exception :"

@@ -78,10 +78,12 @@ namespace OwlMapCalc {
                         data->airplaneState
                 );
                 if (!r) {
+                    BOOST_LOG_TRIVIAL(trace) << "MapCalc::receiveMail mail (!r) send back";
                     return sendMail(std::move(mail));
                 }
                 mail->ok = true;
                 mail->info = r;
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc::receiveMail mail ok send back";
                 return sendMail(std::move(mail));
             });
         }
