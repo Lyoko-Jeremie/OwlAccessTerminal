@@ -59,11 +59,25 @@ namespace OwlAsyncCallbackMailbox {
         boost::asio::io_context &ioc_a_;
         boost::asio::io_context &ioc_b_;
 
-    public:
         // B register the callback to receive mail from A
-        std::function<void(A2B_t)> receiveA2B;
+        std::function<void(A2B_t)> receiveA2B_;
         // A register the callback to receive mail from B
-        std::function<void(B2A_t)> receiveB2A;
+        std::function<void(B2A_t)> receiveB2A_;
+    public:
+
+        void receiveA2B(std::function<void(A2B_t)> &&c) {
+            // when receiveA2B_ already, cannot set again
+            // when receiveA2B_ already, only allow set nullptr then reset it
+            BOOST_ASSERT(!receiveA2B_ || !c);
+            receiveA2B_ = c;
+        }
+
+        void receiveB2A(std::function<void(B2A_t)> &&c) {
+            // when receiveB2A_ already, cannot set again
+            // when receiveB2A_ already, only allow set nullptr then reset it
+            BOOST_ASSERT(!receiveB2A_ || !c);
+            receiveB2A_ = c;
+        }
 
         // A call this function to send data to B
         void sendA2B(A2B_t &&data) {
@@ -75,7 +89,7 @@ namespace OwlAsyncCallbackMailbox {
                 BOOST_LOG_TRIVIAL(trace) << "AsyncCallbackMailbox sendA2B post" << " [" << debugTag_ << "]";
 #endif // DEBUG_AsyncCallbackMailbox
                 // avoid racing
-                auto &c = receiveA2B;
+                auto &c = receiveA2B_;
                 if (c) {
 #ifdef DEBUG_AsyncCallbackMailbox
                     BOOST_LOG_TRIVIAL(trace) << "AsyncCallbackMailbox sendA2B before call callback" << " [" << debugTag_ << "]";
@@ -104,7 +118,7 @@ namespace OwlAsyncCallbackMailbox {
                 BOOST_LOG_TRIVIAL(trace) << "AsyncCallbackMailbox sendB2A post" << " [" << debugTag_ << "]";
 #endif // DEBUG_AsyncCallbackMailbox
                 // avoid racing
-                auto &c = receiveB2A;
+                auto &c = receiveB2A_;
                 if (c) {
 #ifdef DEBUG_AsyncCallbackMailbox
                     BOOST_LOG_TRIVIAL(trace) << "AsyncCallbackMailbox sendB2A before call callback" << " [" << debugTag_ << "]";

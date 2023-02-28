@@ -38,22 +38,22 @@ namespace OwlCameraReader {
                                                                                              mailbox_tcp_protobuf),
                                                                                      mailbox_http_(mailbox_http) {
 
-        mailbox_tcp_protobuf_->receiveA2B = [this](OwlMailDefine::MailService2Camera &&data) {
+        mailbox_tcp_protobuf_->receiveA2B([this](OwlMailDefine::MailService2Camera &&data) {
             if (data->cmd == OwlMailDefine::ControlCameraCmd::reset) {
                 resetCamera(std::move(data), mailbox_tcp_protobuf_);
                 return;
             }
 //                BOOST_LOG_TRIVIAL(info) << "CameraReader mailbox_tcp_protobuf_->receiveA2B " << data->camera_id;
             getImage(std::move(data), mailbox_tcp_protobuf_);
-        };
-        mailbox_http_->receiveA2B = [this](OwlMailDefine::MailService2Camera &&data) {
+        });
+        mailbox_http_->receiveA2B([this](OwlMailDefine::MailService2Camera &&data) {
             if (data->cmd == OwlMailDefine::ControlCameraCmd::reset) {
                 resetCamera(std::move(data), mailbox_http_);
                 return;
             }
 //                BOOST_LOG_TRIVIAL(info) << "CameraReader mailbox_http_->receiveA2B " << data->camera_id;
             getImage(std::move(data), mailbox_http_);
-        };
+        });
     }
 
     void CameraReader::start() {

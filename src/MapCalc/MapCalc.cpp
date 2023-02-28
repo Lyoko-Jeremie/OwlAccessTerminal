@@ -29,9 +29,9 @@ namespace OwlMapCalc {
             OwlMailDefine::ServiceMapCalcMailbox &&mailbox
     ) : ioc_(boost::asio::make_strand(ioc)),
         mailbox_(mailbox) {
-        mailbox_->receiveA2B = [this](OwlMailDefine::MailService2MapCalc &&data) {
+        mailbox_->receiveA2B([this](OwlMailDefine::MailService2MapCalc &&data) {
             receiveMail(std::move(data));
-        };
+        });
         qjw_ = std::make_shared<OwlQuickJsWrapper::QuickJsWrapper>();
         qjw_->init();
 //        installOpenCVExt(qjw_->getContext());

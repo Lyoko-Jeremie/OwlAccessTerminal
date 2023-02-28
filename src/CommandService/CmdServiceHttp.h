@@ -231,7 +231,7 @@ namespace OwlCommandServiceHttp {
 
         ~CmdServiceHttp() {
             BOOST_LOG_TRIVIAL(trace) << "~CmdServiceHttp()";
-            mailbox_->receiveB2A = nullptr;
+            mailbox_->receiveB2A(nullptr);
         }
 
     private:

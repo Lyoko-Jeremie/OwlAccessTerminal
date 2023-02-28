@@ -154,7 +154,7 @@ namespace OwlImageServiceHttp {
 
         ~ImageServiceHttp() {
             BOOST_LOG_TRIVIAL(trace) << "~ImageServiceHttp()";
-            mailbox_->receiveB2A = nullptr;
+            mailbox_->receiveB2A(nullptr);
         }
 
     private:

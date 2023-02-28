@@ -547,12 +547,12 @@ namespace OwlImageServiceHttp {
         mailbox_(std::move(mailbox)),
         mailbox_time_(std::move(mailbox_time)) {
 
-        mailbox_->receiveB2A = [this](OwlMailDefine::MailCamera2Service &&data) {
+        mailbox_->receiveB2A([this](OwlMailDefine::MailCamera2Service &&data) {
             receiveMail(std::move(data));
-        };
-        mailbox_time_->receiveB2A = [this](OwlMailDefine::MailTime2Service &&data) {
+        });
+        mailbox_time_->receiveB2A([this](OwlMailDefine::MailTime2Service &&data) {
             data->runner(data);
-        };
+        });
 
         boost::beast::error_code ec;
 

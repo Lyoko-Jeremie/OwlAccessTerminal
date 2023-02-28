@@ -600,14 +600,14 @@ namespace OwlCommandServiceHttp {
         mailbox_(std::move(mailbox)),
         mailbox_map_(mailbox_map) {
 
-        mailbox_->receiveB2A = [this](OwlMailDefine::MailSerial2Cmd &&data) {
+        mailbox_->receiveB2A([this](OwlMailDefine::MailSerial2Cmd &&data) {
             receiveMail(std::move(data));
-        };
-        mailbox_map_->receiveB2A = [this](OwlMailDefine::MailMapCalc2Service &&data) {
+        });
+        mailbox_map_->receiveB2A([this](OwlMailDefine::MailMapCalc2Service &&data) {
             boost::asio::dispatch(ioc_, [self = shared_from_this(), data]() {
                 data->runner(data);
             });
-        };
+        });
 
         boost::beast::error_code ec;
 

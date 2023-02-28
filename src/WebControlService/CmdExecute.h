@@ -72,13 +72,13 @@ namespace OwlCmdExecute {
                 OwlMailDefine::WebCmdMailbox &&mailbox
         ) : ioc_(ioc), mailbox_(std::move(mailbox)),
             config_(std::move(config)) {
-            mailbox_->receiveA2B = [this](OwlMailDefine::MailWeb2Cmd &&data) {
+            mailbox_->receiveA2B([this](OwlMailDefine::MailWeb2Cmd &&data) {
                 receiveMail(std::move(data));
-            };
+            });
         }
 
         ~CmdExecute() {
-            mailbox_->receiveA2B = nullptr;
+            mailbox_->receiveA2B(nullptr);
         }
 
     private:

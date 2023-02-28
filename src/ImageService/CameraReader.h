@@ -53,8 +53,8 @@ namespace OwlCameraReader {
 
         ~CameraReader() {
             BOOST_LOG_TRIVIAL(trace) << "~CameraReader()";
-            mailbox_tcp_protobuf_->receiveA2B = nullptr;
-            mailbox_http_->receiveA2B = nullptr;
+            mailbox_tcp_protobuf_->receiveA2B(nullptr);
+            mailbox_http_->receiveA2B(nullptr);
         }
 
     private:

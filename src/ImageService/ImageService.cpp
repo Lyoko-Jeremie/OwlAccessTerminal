@@ -353,9 +353,9 @@ namespace OwlImageService {
               acceptor_(boost::asio::make_strand(ioc)),
               mailbox_(std::move(mailbox)) {
 
-        mailbox_->receiveB2A = [this](OwlMailDefine::MailCamera2Service &&data) {
+        mailbox_->receiveB2A([this](OwlMailDefine::MailCamera2Service &&data) {
             receiveMail(std::move(data));
-        };
+        });
 
         boost::system::error_code ec;
 

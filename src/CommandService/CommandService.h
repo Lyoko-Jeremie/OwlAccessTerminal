@@ -38,14 +38,14 @@ namespace OwlCommandService {
             json_parse_options_.max_depth = 5;
             //  boost::asio::ip::udp::endpoint _endpoint(boost::asio::ip::udp::v4(), 2333);
 
-            mailbox_->receiveB2A = [this](OwlMailDefine::MailSerial2Cmd &&data) {
+            mailbox_->receiveB2A([this](OwlMailDefine::MailSerial2Cmd &&data) {
                 receiveMail(std::move(data));
-            };
+            });
         }
 
         ~CommandService() {
             BOOST_LOG_TRIVIAL(trace) << "~CommandService()";
-            mailbox_->receiveB2A = nullptr;
+            mailbox_->receiveB2A(nullptr);
         }
 
     private:

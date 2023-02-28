@@ -119,7 +119,7 @@ namespace OwlImageService {
 
         ~ImageService() {
             BOOST_LOG_TRIVIAL(trace) << "~ImageService()";
-            mailbox_->receiveB2A = nullptr;
+            mailbox_->receiveB2A(nullptr);
         }
 
         static void fail(boost::system::error_code ec, const char *what) {

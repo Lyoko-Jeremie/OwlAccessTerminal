@@ -168,24 +168,24 @@ namespace OwlSerialController {
             package_repeater_box_ = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
                     ioc_, ioc_, "package_repeater_box_"
             );
-            ping_box_->receiveB2A = [](OwlMailDefine::MailSerial2Cmd &&data) {
+            ping_box_->receiveB2A([](OwlMailDefine::MailSerial2Cmd &&data) {
                 data->runner(data);
-            };
-            package_repeater_box_->receiveB2A = [](OwlMailDefine::MailSerial2Cmd &&data) {
+            });
+            package_repeater_box_->receiveB2A([](OwlMailDefine::MailSerial2Cmd &&data) {
                 data->runner(data);
-            };
+            });
 
-            ping_box_->receiveA2B = [this](OwlMailDefine::MailCmd2Serial &&data) {
+            ping_box_->receiveA2B([this](OwlMailDefine::MailCmd2Serial &&data) {
                 receiveMail(std::move(data), ping_box_);
-            };
-            package_repeater_box_->receiveA2B = [this](OwlMailDefine::MailCmd2Serial &&data) {
+            });
+            package_repeater_box_->receiveA2B([this](OwlMailDefine::MailCmd2Serial &&data) {
                 receiveMailRepeat(std::move(data), package_repeater_box_);
-            };
+            });
 
             for (auto &m: mailbox_list_) {
-                m->receiveA2B = [this, &m](OwlMailDefine::MailCmd2Serial &&data) {
+                m->receiveA2B([this, &m](OwlMailDefine::MailCmd2Serial &&data) {
                     receiveMail(std::move(data), m);
-                };
+                });
             }
 
         }
@@ -208,7 +208,7 @@ namespace OwlSerialController {
         ~SerialController() {
             BOOST_LOG_TRIVIAL(trace) << "~SerialController()";
             for (auto &m: mailbox_list_) {
-                m->receiveA2B = nullptr;
+                m->receiveA2B(nullptr);
             }
         }
 

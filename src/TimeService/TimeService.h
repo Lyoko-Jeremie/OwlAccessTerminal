@@ -20,14 +20,14 @@ namespace OwlTimeService {
                 OwlMailDefine::ServiceTimeMailbox &&mailbox
         ) : ioc_(ioc), mailbox_(mailbox) {
 
-            mailbox_->receiveA2B = [this](OwlMailDefine::MailService2Time &&data) {
+            mailbox_->receiveA2B([this](OwlMailDefine::MailService2Time &&data) {
                 receiveMail(std::move(data));
-            };
+            });
         }
 
         ~TimeService() {
             BOOST_LOG_TRIVIAL(trace) << "~TimeService()";
-            mailbox_->receiveB2A = nullptr;
+            mailbox_->receiveB2A(nullptr);
         }
 
     private:

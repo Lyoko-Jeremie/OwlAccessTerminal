@@ -29,7 +29,7 @@ namespace OwlMapCalc {
 
         ~MapCalc() {
             BOOST_LOG_TRIVIAL(trace) << "~MapCalc()";
-            mailbox_->receiveB2A = nullptr;
+            mailbox_->receiveB2A(nullptr);
         }
 
         using MapCalcFunctionType = std::function<

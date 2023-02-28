@@ -42,7 +42,7 @@ namespace OwlEmbedWebServer {
         );
 
         ~EmbedWebServer() {
-            mailbox_->receiveB2A = nullptr;
+            mailbox_->receiveB2A(nullptr);
         }
 
         // Start accepting incoming connections
