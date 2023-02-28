@@ -208,6 +208,7 @@ namespace OwlCommandServiceHttp {
         );
 
         void send_back_json(const boost::json::value &json_value) override {
+            BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::send_back_json";
             send_back(boost::json::serialize(json_value));
         }
 
