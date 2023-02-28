@@ -428,6 +428,8 @@ namespace OwlCommandServiceHttp {
                                         {"openError", data->openError},
                                 }
                         );
+                        BOOST_LOG_TRIVIAL(trace)
+                            << "CmdServiceHttpConnect::process_tag_info back m AprilTag send_back_json end";
                     };
                     sendMail(std::move(m));
                 };
@@ -659,6 +661,7 @@ namespace OwlCommandServiceHttp {
         boost::beast::ostream(response->body()) << json_string;
         response->content_length(response->body().size());
         write_response(response);
+        BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::send_back return";
     }
 
     std::shared_ptr<CmdServiceHttp> CmdServiceHttpConnect::getParentRef() {

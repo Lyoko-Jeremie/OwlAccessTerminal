@@ -48,6 +48,10 @@ namespace OwlCommandServiceHttp {
 
         }
 
+        ~CmdServiceHttpConnect() override {
+            BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::~CmdServiceHttpConnect()";
+        }
+
         // Initiate the asynchronous operations associated with the connection.
         void
         start() {
@@ -135,12 +139,15 @@ namespace OwlCommandServiceHttp {
         ) {
             auto self = shared_from_this();
 
+            BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::write_response";
             boost::beast::http::async_write(
                     socket_,
                     *response,
                     [self, response](boost::beast::error_code ec, std::size_t) {
+                        BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::write_response end";
                         self->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
                         self->deadline_.cancel();
+                        BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::write_response close";
                     });
         }
 
