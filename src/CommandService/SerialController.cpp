@@ -167,6 +167,14 @@ namespace OwlSerialController {
         }
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
+            if (!package_record_->mail()) {
+                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                data_r->runner = data->callbackRunner;
+                data_r->openError = true;
+                data_r->ok = false;
+                sendMail(std::move(data_r), mailbox);
+                return;
+            }
             package_record_->mail()->callbackRunner = data->callbackRunner;
 #ifdef DEBUG_ReceiveMailRepeat
             if (auto n = OwlMailDefine::AdditionCmdNameLookupTable.find(package_record_->mail()->additionCmd);
