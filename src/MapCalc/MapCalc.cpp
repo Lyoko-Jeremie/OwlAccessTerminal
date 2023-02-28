@@ -283,29 +283,29 @@ namespace OwlMapCalc {
         tagInfo->aprilTagCenter->centerX = x;
         tagInfo->aprilTagCenter->centerY = y;
 
-        tagInfo->aprilTagCenter->cornerLTx = x - 500;
+//        tagInfo->aprilTagCenter->cornerLTx = x - 500;
+//        tagInfo->aprilTagCenter->cornerLTy = y - 500;
+//
+//        tagInfo->aprilTagCenter->cornerRTx = x + 500;
+//        tagInfo->aprilTagCenter->cornerRTy = y - 500;
+//
+//        tagInfo->aprilTagCenter->cornerRBx = x + 500;
+//        tagInfo->aprilTagCenter->cornerRBy = y + 500;
+//
+//        tagInfo->aprilTagCenter->cornerLBx = x - 500;
+//        tagInfo->aprilTagCenter->cornerLBy = y + 500;
+
+        tagInfo->aprilTagCenter->cornerLTx = x;
         tagInfo->aprilTagCenter->cornerLTy = y - 500;
 
         tagInfo->aprilTagCenter->cornerRTx = x + 500;
-        tagInfo->aprilTagCenter->cornerRTy = y - 500;
+        tagInfo->aprilTagCenter->cornerRTy = y;
 
-        tagInfo->aprilTagCenter->cornerRBx = x + 500;
+        tagInfo->aprilTagCenter->cornerRBx = x;
         tagInfo->aprilTagCenter->cornerRBy = y + 500;
 
         tagInfo->aprilTagCenter->cornerLBx = x - 500;
-        tagInfo->aprilTagCenter->cornerLBy = y + 500;
-
-//        tagInfo->aprilTagCenter->cornerLTx = x;
-//        tagInfo->aprilTagCenter->cornerLTy = y - 10;
-//
-//        tagInfo->aprilTagCenter->cornerRTx = x + 10;
-//        tagInfo->aprilTagCenter->cornerRTy = y;
-//
-//        tagInfo->aprilTagCenter->cornerRBx = x;
-//        tagInfo->aprilTagCenter->cornerRBy = y + 10;
-//
-//        tagInfo->aprilTagCenter->cornerLBx = x - 10;
-//        tagInfo->aprilTagCenter->cornerLBy = y;
+        tagInfo->aprilTagCenter->cornerLBy = y;
         tagInfo->aprilTagList = std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type>();
         tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
 //        tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
