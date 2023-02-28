@@ -54,6 +54,8 @@ namespace OwlQuickJsWrapper {
             return context_;
         }
 
+        void trigger_qjs_update_when_thread_change();
+
     private:
         qjs::Runtime runtime_;
         qjs::Context context_;

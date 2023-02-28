@@ -141,4 +141,8 @@ namespace OwlQuickJsWrapper {
         return true;
     }
 
+    void QuickJsWrapperImpl::trigger_qjs_update_when_thread_change() {
+        JS_UpdateStackTop(runtime_.rt);
+    }
+
 } // OwlQuickJsWrapperImpl

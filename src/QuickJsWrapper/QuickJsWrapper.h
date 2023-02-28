@@ -34,6 +34,9 @@ namespace OwlQuickJsWrapper {
             return impl_->getContext();
         }
 
+        void trigger_qjs_update_when_thread_change() {
+            impl_->trigger_qjs_update_when_thread_change();
+        }
 
     private:
         std::shared_ptr<QuickJsWrapperImpl> impl_;

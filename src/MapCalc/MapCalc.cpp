@@ -183,6 +183,8 @@ namespace OwlMapCalc {
             }
             try {
                 auto rData = std::make_shared<MapCalcPlaneInfoType>();
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc calc_ before calcF trigger_qjs_update_when_thread_change";
+                qjw_->trigger_qjs_update_when_thread_change();
                 BOOST_LOG_TRIVIAL(trace) << "MapCalc calc_ before calcF";
                 auto r = calcF(qjw_->getContext().fromJSON(boost::json::serialize(inputData)));
                 BOOST_LOG_TRIVIAL(trace) << "MapCalc calc_ after calcF";
