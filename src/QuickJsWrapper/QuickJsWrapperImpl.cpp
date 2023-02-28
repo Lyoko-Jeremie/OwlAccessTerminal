@@ -39,6 +39,12 @@ namespace OwlQuickJsWrapper {
 
     bool QuickJsWrapperImpl::init() {
         try {
+
+            BOOST_LOG_TRIVIAL(trace) << "QuickJsWrapperImpl init JS_SetMemoryLimit begin";
+//            JS_SetMemoryLimit(runtime_.rt, std::numeric_limits<size_t>::max());
+            JS_SetMaxStackSize(runtime_.rt, 0);
+            BOOST_LOG_TRIVIAL(trace) << "QuickJsWrapperImpl init JS_SetMaxStackSize end";
+
             installMathModule(context_);
             installMathModuleExtend(context_);
             installMathExOpenCVModule(context_);
