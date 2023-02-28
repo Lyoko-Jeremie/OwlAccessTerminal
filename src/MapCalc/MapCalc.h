@@ -67,12 +67,16 @@ namespace OwlMapCalc {
     private:
 
         void receiveMail(OwlMailDefine::MailService2MapCalc &&data) {
+            BOOST_LOG_TRIVIAL(trace) << "MapCalc::receiveMail start";
             boost::asio::dispatch(ioc_, [this, self = shared_from_this(), data]() {
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc::receiveMail dispatch";
                 auto mail = std::make_shared<OwlMailDefine::MapCalc2Service>();
                 mail->runner = data->callbackRunner;
                 if (!calc_) {
+                    BOOST_LOG_TRIVIAL(trace) << "MapCalc::receiveMail mail (!calc_) send back";
                     return sendMail(std::move(mail));
                 }
+                BOOST_LOG_TRIVIAL(trace) << "MapCalc::receiveMail call calcMapPosition";
                 auto r = calcMapPosition(
                         data->tagInfo,
                         data->airplaneState
