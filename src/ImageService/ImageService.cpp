@@ -330,11 +330,11 @@ namespace OwlImageService {
             }
         } catch (const std::exception &e) {
             BOOST_LOG_OWL(error) << "do_process_request catch exception on " << ir->DebugString()
-                                     << " e: " << e.what();
+                                 << " e: " << e.what();
             return;
         } catch (...) {
             BOOST_LOG_OWL(error) << "do_process_request catch unknown exception on " << ir->DebugString()
-                                     << "\n" << boost::current_exception_diagnostic_information();
+                                 << "\n" << boost::current_exception_diagnostic_information();
             return;
         }
     }

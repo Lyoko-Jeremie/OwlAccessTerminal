@@ -497,7 +497,7 @@ namespace OwlCommandServiceHttp {
             return;
         } catch (...) {
             BOOST_LOG_OWL(error) << "CmdServiceHttpConnect::process_tag_info catch (...) exception"
-                                     << "\n" << boost::current_exception_diagnostic_information();
+                                 << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             send_back_json(
                     boost::json::value{

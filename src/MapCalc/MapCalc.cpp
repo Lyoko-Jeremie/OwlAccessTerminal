@@ -166,18 +166,18 @@ namespace OwlMapCalc {
             } catch (boost::exception &e) {
                 std::string diag = boost::diagnostic_information(e);
                 BOOST_LOG_OWL(error) << "MapCalc calc_ inputData std::exception :"
-                                         << "\n diag: " << diag
-                                         << "\n what: " << dynamic_cast<std::exception const &>(e).what();
+                                     << "\n diag: " << diag
+                                     << "\n what: " << dynamic_cast<std::exception const &>(e).what();
                 throw;
                 return {};
             } catch (std::exception &e) {
                 BOOST_LOG_OWL(error) << "MapCalc calc_ inputData std::exception :"
-                                         << e.what();
+                                     << e.what();
                 throw;
                 return {};
             } catch (...) {
                 BOOST_LOG_OWL(error) << "MapCalc calc_ inputData catch (...) "
-                                         << "\n" << boost::current_exception_diagnostic_information();
+                                     << "\n" << boost::current_exception_diagnostic_information();
                 throw;
                 return {};
             }
@@ -238,32 +238,32 @@ namespace OwlMapCalc {
                     BOOST_LOG_OWL(error) << "MapCalc calc_ calcF qjs::exception " << (std::string) exc;
                     if ((bool) exc["stack"]) {
                         BOOST_LOG_OWL(error) << "MapCalc loadMapCalcFunction qjs::exception "
-                                                 << (std::string) exc["stack"];
+                                             << (std::string) exc["stack"];
                     }
                 } catch (...) {
                     BOOST_LOG_OWL(error) << "MapCalc calc_ qjs::exception&e catch (...) exception"
-                                             << "\n current_exception_diagnostic_information : "
-                                             << boost::current_exception_diagnostic_information();
+                                         << "\n current_exception_diagnostic_information : "
+                                         << boost::current_exception_diagnostic_information();
                 }
                 // failed
                 return {};
             } catch (cv::Exception &e) {
                 BOOST_LOG_OWL(error) << "MapCalc calc_ calcF cv::exception :"
-                                         << e.what();
+                                     << e.what();
                 return {};
             } catch (boost::exception &e) {
                 std::string diag = boost::diagnostic_information(e);
                 BOOST_LOG_OWL(error) << "MapCalc calc_ calcF std::exception :"
-                                         << "\n diag: " << diag
-                                         << "\n what: " << dynamic_cast<std::exception const &>(e).what();
+                                     << "\n diag: " << diag
+                                     << "\n what: " << dynamic_cast<std::exception const &>(e).what();
                 return {};
             } catch (std::exception &e) {
                 BOOST_LOG_OWL(error) << "MapCalc calc_ calcF std::exception :"
-                                         << e.what();
+                                     << e.what();
                 return {};
             } catch (...) {
                 BOOST_LOG_OWL(error) << "MapCalc calc_ calcF catch (...) "
-                                         << "\n" << boost::current_exception_diagnostic_information();
+                                     << "\n" << boost::current_exception_diagnostic_information();
                 return {};
             }
 

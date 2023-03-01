@@ -149,7 +149,7 @@ namespace OwlConfigLoader {
         void init(const std::string &filePath) {
             auto j = load_json_file(filePath);
             BOOST_LOG_OWL(info) << "j.is_object() " << j.is_object() << "\t"
-                                    << "j.kind() " << boost::json::to_string(j.kind());
+                                << "j.kind() " << boost::json::to_string(j.kind());
             if (j.is_object()) {
                 config_ = parse_json(j.as_object());
             } else {

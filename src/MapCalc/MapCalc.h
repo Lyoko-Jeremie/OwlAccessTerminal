@@ -87,9 +87,9 @@ namespace OwlMapCalc {
             if constexpr (flag_DEBUG_IF_CHECK_POINT) {
                 BOOST_ASSERT(!weak_from_this().expired());
                 BOOST_LOG_OWL(trace) << "MapCalc::receiveMail weak_from_this().use_count(): "
-                                         << weak_from_this().use_count();
+                                     << weak_from_this().use_count();
                 BOOST_LOG_OWL(trace) << "MapCalc::receiveMail shared_from_this().use_count(): "
-                                         << this->shared_from_this().use_count();
+                                     << this->shared_from_this().use_count();
             }
             boost::asio::dispatch(ioc_, [this, self = shared_from_this(), data]() {
                 BOOST_ASSERT(self);

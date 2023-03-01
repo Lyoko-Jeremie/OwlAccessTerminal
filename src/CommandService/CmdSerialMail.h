@@ -176,17 +176,17 @@ namespace OwlMailDefine {
 
         ~Cmd2Serial() {
             BOOST_LOG_OWL(trace) << "Cmd2Serial::~Cmd2Serial() "
-                                     << static_cast<std::underlying_type_t<AdditionCmd>>(additionCmd);
+                                 << static_cast<std::underlying_type_t<AdditionCmd>>(additionCmd);
             if (auto n = OwlMailDefine::AdditionCmdNameLookupTable.find(additionCmd);
                     n != OwlMailDefine::AdditionCmdNameLookupTable.end()) {
                 if (additionCmd != OwlMailDefine::AdditionCmd::ping) {
                     BOOST_LOG_OWL(trace) << "Cmd2Serial::~Cmd2Serial() "
-                                             << static_cast<std::underlying_type_t<AdditionCmd>>(additionCmd)
-                                             << " additionCmd : " << n->second;
+                                         << static_cast<std::underlying_type_t<AdditionCmd>>(additionCmd)
+                                         << " additionCmd : " << n->second;
                 }
             } else {
                 BOOST_LOG_OWL(warning) << "Cmd2Serial::~Cmd2Serial() unknown additionCmd : "
-                                           << static_cast<std::underlying_type_t<AdditionCmd>>(additionCmd);
+                                       << static_cast<std::underlying_type_t<AdditionCmd>>(additionCmd);
             }
         }
     };

@@ -56,7 +56,7 @@ namespace OwlSerialController {
             auto ptr = parentRef_.lock();
             if (!ptr) {
                 BOOST_LOG_OWL(error) << "PortController"
-                                         << " parentRef_.lock() failed.";
+                                     << " parentRef_.lock() failed.";
                 return;
             }
             BOOST_ASSERT(ptr);

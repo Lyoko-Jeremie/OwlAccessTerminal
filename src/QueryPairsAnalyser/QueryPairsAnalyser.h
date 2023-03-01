@@ -18,12 +18,12 @@ namespace OwlQueryPairsAnalyser {
         QueryPairsType queryPairs;
 
         explicit QueryPairsAnalyser(
-                const boost::string_view& request_target
+                const boost::string_view &request_target
         ) {
             parse(request_target);
         }
 
-        void parse(const boost::string_view& request_target) {
+        void parse(const boost::string_view &request_target) {
 
             // from https://github.com/boostorg/beast/issues/787#issuecomment-376259849
             static const std::regex PARSE_URL{R"((/([^ ?]+)?)?/?\??([^/ ]+\=[^/ ]+)?)",

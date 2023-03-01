@@ -98,7 +98,7 @@ namespace OwlProcessJsonMessage {
             return;
         } catch (...) {
             BOOST_LOG_OWL(error) << "CommandService::analysisJoyConGyro catch (...) exception"
-                                     << "\n" << boost::current_exception_diagnostic_information();
+                                 << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             self->send_back_json(
                     boost::json::value{
@@ -172,7 +172,7 @@ namespace OwlProcessJsonMessage {
             return;
         } catch (...) {
             BOOST_LOG_OWL(error) << "CommandService::analysisJoyConSimple catch (...) exception"
-                                     << "\n" << boost::current_exception_diagnostic_information();
+                                 << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             self->send_back_json(
                     boost::json::value{
@@ -254,7 +254,7 @@ namespace OwlProcessJsonMessage {
             return;
         } catch (...) {
             BOOST_LOG_OWL(error) << "CommandService::analysisJoyCon catch (...) exception"
-                                     << "\n" << boost::current_exception_diagnostic_information();
+                                 << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             self->send_back_json(
                     boost::json::value{
@@ -1002,7 +1002,7 @@ namespace OwlProcessJsonMessage {
                     }
                     if (b < 0 || g < 0 || r < 0 || b > 255 || g > 255 || r > 255) {
                         BOOST_LOG_OWL(warning) << "(b < 0 || g < 0 || r < 0 || b > 255 || g > 255 || r > 255)"
-                                                   << jsv;
+                                               << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -1331,7 +1331,7 @@ namespace OwlProcessJsonMessage {
             return;
         } catch (...) {
             BOOST_LOG_OWL(error) << "CommandService::process_message catch (...) exception"
-                                     << "\n" << boost::current_exception_diagnostic_information();
+                                 << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             self->send_back_json(
                     boost::json::value{

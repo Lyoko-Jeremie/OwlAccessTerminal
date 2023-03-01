@@ -80,7 +80,7 @@ namespace OwlSerialController {
                     //                            << " cannot find start delim, next loop";
                 } else {
                     BOOST_LOG_OWL(trace) << "StateReaderImplNormal"
-                                             << " we find the start delim, next step";
+                                         << " we find the start delim, next step";
                     // we find the start delim
                     // trim the other data before start delim
                     readBuffer_.consume(p);
@@ -104,15 +104,15 @@ namespace OwlSerialController {
                         if (ec_) {
                             // error
                             BOOST_LOG_OWL(error) << "StateReaderImplNormal"
-                                                     << " async_read find start error: "
-                                                     << ec_.what();
+                                                 << " async_read find start error: "
+                                                 << ec_.what();
                             return;
                         }
                         if (bytes_transferred_ == 0) {
                             ++strange;
                             if (strange > 10) {
                                 BOOST_LOG_OWL(error) << "StateReaderImplNormal"
-                                                         << " async_read strange";
+                                                     << " async_read strange";
                                 return;
                             }
                             // retry
@@ -147,7 +147,7 @@ namespace OwlSerialController {
                     std::istreambuf_iterator<char>()
             }.starts_with(delimStart)) {
                 BOOST_LOG_OWL(error) << "StateReaderImplNormal"
-                                         << " check next start tag error, never go there !!!";
+                                     << " check next start tag error, never go there !!!";
                 BOOST_ASSERT_MSG(false,
                                  "StateReaderImplNormal check next start tag error, never go there !!!");
                 return;
@@ -205,13 +205,13 @@ namespace OwlSerialController {
                         if (ec_) {
                             // error
                             BOOST_LOG_OWL(error) << "StateReaderImplNormal"
-                                                     << " async_read_until data error: "
-                                                     << ec_.what();
+                                                 << " async_read_until data error: "
+                                                 << ec_.what();
                             return;
                         }
                         if (readBuffer_.size() < (dataSize_ + sizeof(uint32_t) + delimEnd.size())) {
                             BOOST_LOG_OWL(error) << "StateReaderImplNormal"
-                                                     << " async_read_until data bad";
+                                                 << " async_read_until data bad";
                             return;
                         }
 
@@ -223,7 +223,7 @@ namespace OwlSerialController {
 
             if (readBuffer_.size() < (dataSize_ + sizeof(uint32_t) + delimEnd.size())) {
                 BOOST_LOG_OWL(error) << "StateReaderImplNormal"
-                                         << " async_read_until data bad";
+                                     << " async_read_until data bad";
                 return;
             }
             // ======================================= process data
@@ -233,7 +233,7 @@ namespace OwlSerialController {
             {
                 if (dataSize_ != AirplaneStateDataSize) {
                     BOOST_LOG_OWL(error) << "StateReaderImplNormal"
-                                             << " (dataSize_ != AirplaneStateDataSize ) , ignore!!!";
+                                         << " (dataSize_ != AirplaneStateDataSize ) , ignore!!!";
                     // ignore this package
                 } else {
                     loadData();
@@ -242,7 +242,7 @@ namespace OwlSerialController {
                         auto ptr_sr = parentRef_.lock();
                         if (!ptr_sr) {
                             BOOST_LOG_OWL(error) << "StateReaderImplNormal"
-                                                     << " parentRef_.lock() ptr_sr failed.";
+                                                 << " parentRef_.lock() ptr_sr failed.";
                             return;
                         }
                         // do a ptr copy to make sure ptr not release by next loop too early
@@ -269,7 +269,7 @@ namespace OwlSerialController {
                 if (p == std::string::npos) {
                     // error, never go there
                     BOOST_LOG_OWL(error) << "StateReaderImplNormal"
-                                             << " make clean check error. never gone.";
+                                         << " make clean check error. never gone.";
                     BOOST_ASSERT(p != std::string::npos);
                     return;
                 } else {
@@ -295,7 +295,7 @@ namespace OwlSerialController {
             };
             if (data.size() < dataSize_) {
                 BOOST_LOG_OWL(error) << "StateReaderImplNormal"
-                                         << " loadData (data.size() < dataSize_), never go there !!!!!";
+                                     << " loadData (data.size() < dataSize_), never go there !!!!!";
                 BOOST_ASSERT(!(data.size() < dataSize_));
             }
 
