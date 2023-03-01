@@ -152,6 +152,9 @@ int main(int argc, const char *argv[]) {
 
     OwlLog::init_logging();
 
+    BOOST_LOG_OWL(info)
+        << "BOOST_LOG_SEV(OwlLog::slg, OwlLog::severity_level_my::aaa)";
+
     BOOST_LOG_TRIVIAL(info) << "cv::haveImageWriter(.jpg):" << cv::haveImageWriter(".jpg");
 
 //    // test

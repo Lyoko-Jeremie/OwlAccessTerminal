@@ -140,7 +140,7 @@ endif (USE_DYNAMIC_BOOST)
 
 set(Boost_USE_MULTITHREADED ON)
 #find_package(Boost REQUIRED COMPONENTS  REQUIRED)
-find_package(Boost 1.81.0 REQUIRED COMPONENTS system filesystem program_options json log url ${BOOST_THEAD_MODULE} REQUIRED)
+find_package(Boost 1.81.0 REQUIRED COMPONENTS system filesystem program_options json log log_setup url ${BOOST_THEAD_MODULE} REQUIRED)
 
 if (OpenCV_WORLD)
     find_package(OpenCV REQUIRED world)
