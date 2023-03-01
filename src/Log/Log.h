@@ -4,10 +4,11 @@
 #define OWLACCESSTERMINAL_LOG_H
 
 #include <string>
-//#include <boost/log/trivial.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/sources/logger.hpp>
 #include <boost/log/sources/severity_logger.hpp>
+#include <boost/log/sources/severity_feature.hpp>
+#include <boost/log/sources/record_ostream.hpp>
 
 
 namespace OwlLog {
@@ -32,6 +33,8 @@ namespace OwlLog {
 
 } // OwlLog
 
+#ifndef BOOST_LOG_OWL
 #define BOOST_LOG_OWL(lvl) BOOST_LOG_SEV(OwlLog::slg, OwlLog::severity_level::lvl )
+#endif // BOOST_LOG_OWL
 
 #endif //OWLACCESSTERMINAL_LOG_H
