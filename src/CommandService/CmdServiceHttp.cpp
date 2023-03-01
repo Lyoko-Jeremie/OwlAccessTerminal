@@ -433,7 +433,7 @@ namespace OwlCommandServiceHttp {
                             BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info back m AprilTag";
                             BOOST_ASSERT(aprilTagCmd);
                             BOOST_ASSERT(aprilTagCmd.use_count() > 0);
-                            BOOST_LOG_OWL(trace)
+                            BOOST_LOG_OWL(trace_cmd_tag)
                                 << "CmdServiceHttpConnect::process_tag_info aprilTagCmd.use_count() "
                                 << aprilTagCmd.use_count();
                             BOOST_ASSERT(data);
