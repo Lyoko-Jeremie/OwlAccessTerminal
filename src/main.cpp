@@ -151,13 +151,6 @@ int main(int argc, const char *argv[]) {
 
     OwlLog::init_logging();
 
-    BOOST_LOG_OWL(trace) << "BOOST_LOG_OWL(trace)";
-    BOOST_LOG_OWL(debug) << "BOOST_LOG_OWL(debug)";
-    BOOST_LOG_OWL(info) << "BOOST_LOG_OWL(info)";
-    BOOST_LOG_OWL(warning) << "BOOST_LOG_OWL(warning)";
-    BOOST_LOG_OWL(error) << "BOOST_LOG_OWL(error)";
-    BOOST_LOG_OWL(fatal) << "BOOST_LOG_OWL(fatal)";
-
     BOOST_LOG_OWL(info) << "cv::haveImageWriter(.jpg):" << cv::haveImageWriter(".jpg");
 
 //    // test

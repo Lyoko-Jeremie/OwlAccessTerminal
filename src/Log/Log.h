@@ -31,6 +31,7 @@ namespace OwlLog {
     };
 
     extern boost::log::sources::severity_logger<severity_level> slg;
+    extern const char *severity_level_str[severity_level::MAX];
 
     extern thread_local std::string threadName;
 

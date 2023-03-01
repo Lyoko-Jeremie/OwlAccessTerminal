@@ -131,21 +131,39 @@ namespace OwlLog {
         // core->get()->set_filter(severity != severity_level::error);
         // core->get()->set_filter(severity != severity_level::trace);
 
-#ifndef DEBUG_log_MAP
-        core->get()->set_filter(severity != severity_level::trace_map);
-#endif // DEBUG_log_MAP
-#ifndef DEBUG_log_TAG
-        core->get()->set_filter(severity != severity_level::trace_cmd_tag);
-#endif // DEBUG_log_TAG
-#ifndef DEBUG_log_HTTP
-        core->get()->set_filter(severity != severity_level::trace_cmd_http);
-#endif // DEBUG_log_HTTP
-#ifndef DEBUG_log_SerialPortWrite
-        core->get()->set_filter(severity != severity_level::trace_cmd_sp_w);
-#endif // DEBUG_log_SerialPortWrite
-#ifndef DEBUG_log_SerialPortRead
-        core->get()->set_filter(severity != severity_level::trace_cmd_sp_r);
+        core->get()->set_filter(
+                true
+                #ifndef DEBUG_log_MAP
+                && severity != severity_level::trace_map
+                #endif // DEBUG_log_MAP
+                #ifndef DEBUG_log_TAG
+                && severity != severity_level::trace_cmd_tag
+                #endif // DEBUG_log_TAG
+                #ifndef DEBUG_log_HTTP
+                && severity != severity_level::trace_cmd_http
+                #endif // DEBUG_log_HTTP
+                #ifndef DEBUG_log_SerialPortWrite
+                && severity != severity_level::trace_cmd_sp_w
+                #endif // DEBUG_log_SerialPortWrite
+                #ifndef DEBUG_log_SerialPortRead
+                && severity != severity_level::trace_cmd_sp_r
 #endif // DEBUG_log_SerialPortRead
+        );
+
+
+        BOOST_LOG_OWL(trace_cmd_tag) << "BOOST_LOG_OWL(trace_cmd_tag)";
+        BOOST_LOG_OWL(trace_cmd_http) << "BOOST_LOG_OWL(trace_cmd_http)";
+        BOOST_LOG_OWL(trace_cmd_sp_w) << "BOOST_LOG_OWL(trace_cmd_sp_w)";
+        BOOST_LOG_OWL(trace_cmd_sp_r) << "BOOST_LOG_OWL(trace_cmd_sp_r)";
+        BOOST_LOG_OWL(trace_map) << "BOOST_LOG_OWL(trace_map)";
+        BOOST_LOG_OWL(trace_dtor) << "BOOST_LOG_OWL(trace_dtor)";
+        BOOST_LOG_OWL(trace) << "BOOST_LOG_OWL(trace)";
+        BOOST_LOG_OWL(debug) << "BOOST_LOG_OWL(debug)";
+        BOOST_LOG_OWL(debug_sp_w) << "BOOST_LOG_OWL(debug_sp_w)";
+        BOOST_LOG_OWL(info) << "BOOST_LOG_OWL(info)";
+        BOOST_LOG_OWL(warning) << "BOOST_LOG_OWL(warning)";
+        BOOST_LOG_OWL(error) << "BOOST_LOG_OWL(error)";
+        BOOST_LOG_OWL(fatal) << "BOOST_LOG_OWL(fatal)";
 
     }
 } // OwlLog
