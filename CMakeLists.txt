@@ -59,32 +59,6 @@ endif (DEFAULT_CONFIG)
 #set(DEBUG_BOOST_ASIO ON)
 #set(DEBUG_IF_CHECK_POINT ON)
 #set(DEBUG_Mailbox ON)
-#set(DEBUG_GCC_GLIBCXX_DEBUG__ ON)
-#set(DEBUG_GCC_GLIBCXX_DEBUG ON)
-#set(DEBUG_GLIBCXX_DEBUG_LITE ON)
-
-if (DEBUG_GCC_GLIBCXX_DEBUG__)
-    add_definitions(-D_GLIBCXX_DEBUG__)
-    add_definitions(-D_GLIBCXX_ASSERTIONS)
-    add_definitions(-D_GLIBCXX_DEBUG_PEDANTIC)
-endif (DEBUG_GCC_GLIBCXX_DEBUG__)
-
-if (DEBUG_GCC_GLIBCXX_DEBUG)
-    # c++/11.3.0/debug/assertions.h
-    add_definitions(-D_GLIBCXX_DEBUG)
-    add_definitions(-D_GLIBCXX_ASSERTIONS)
-    add_definitions(-D_GLIBCXX_DEBUG_PEDANTIC)
-endif (DEBUG_GCC_GLIBCXX_DEBUG)
-
-if (DEBUG_GLIBCXX_DEBUG_LITE)
-    # https://gcc.gnu.org/wiki/LibstdcxxDebugMode
-    add_definitions(-D_GLIBCXX_DEBUG_LITE)
-    add_definitions(-D_GLIBCXX_DBG)
-    add_definitions(-D_GLIBCXX_SAFE)
-    add_definitions(-D_GLIBCXX_CHECK)
-    add_definitions(-D_GLIBCXX_CHECKED)
-    add_definitions(-D_GLIBCXX_ASSERTIONS)
-endif (DEBUG_GLIBCXX_DEBUG_LITE)
 
 if (DEBUG_BOOST_ASIO)
     add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
