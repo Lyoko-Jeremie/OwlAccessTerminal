@@ -15,11 +15,11 @@ using boost::asio::use_awaitable;
 namespace OwlSerialController {
 
     void StateReaderImplCo::start_next_read() {
-        BOOST_LOG_OWL(trace) << "StateReaderImplCo start_next_read()";
+        BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo start_next_read()";
         BOOST_ASSERT(!weak_from_this().expired());
         auto selfPtr = shared_from_this();
         boost::ignore_unused(selfPtr);
-        BOOST_LOG_OWL(trace) << "StateReaderImplCo start_next_read() co_spawn";
+        BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo start_next_read() co_spawn";
         boost::asio::co_spawn(
                 serialPort_->get_executor(),
                 // [this, self = shared_from_this()]() -> boost::asio::awaitable<bool> {
@@ -47,7 +47,7 @@ namespace OwlSerialController {
     }
 
     boost::asio::awaitable<bool> StateReaderImplCo::next_read(std::shared_ptr<StateReaderImplCo> _ptr_) {
-        BOOST_LOG_OWL(trace) << "StateReaderImplCo next_read()";
+        BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo next_read()";
         // https://www.boost.org/doc/libs/1_81_0/doc/html/boost_asio/example/cpp20/coroutines/echo_server.cpp
 
         boost::ignore_unused(_ptr_);
@@ -58,11 +58,11 @@ namespace OwlSerialController {
             // https://www.boost.org/doc/libs/1_78_0/doc/html/boost_asio/overview/core/cpp20_coroutines.html
 
             // ======================== find start
-            BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                 << " find start : strange " << strange;
+            BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                          << " find start : strange " << strange;
             for (;;) {
-                BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                     << " find when strange :" << strange;
+                BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                              << " find when strange :" << strange;
                 {
                     std::string s{
                             (std::istreambuf_iterator<char>(&readBuffer_)),
@@ -74,8 +74,8 @@ namespace OwlSerialController {
                         // BOOST_LOG_OWL(warning) << "StateReaderImplCo"
                         //                            << " cannot find start delim, next loop";
                     } else {
-                        BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                             << " we find the start delim, next step";
+                        BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                                      << " we find the start delim, next step";
                         // we find the start delim
                         // trim the other data before start delim
                         readBuffer_.consume(p);
@@ -99,8 +99,8 @@ namespace OwlSerialController {
                 }
                 if (bytes_transferred_ == 0) {
                     ++strange;
-                    BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                         << " do strange " << strange;
+                    BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                                  << " do strange " << strange;
                     if (strange > 10) {
                         BOOST_LOG_OWL(error) << "StateReaderImplCo"
                                              << " async_read strange";
@@ -120,8 +120,8 @@ namespace OwlSerialController {
                                                << " cannot find start delim, next loop";
                         continue;
                     } else {
-                        BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                             << " we find the start delim, next step";
+                        BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                                      << " we find the start delim, next step";
                         // we find the start delim
                         // trim the other data before start delim
                         readBuffer_.consume(p);
@@ -143,14 +143,14 @@ namespace OwlSerialController {
                 co_return false;
             }
             // remove start tag
-            BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                 << " remove start tag";
+            BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                          << " remove start tag";
             readBuffer_.consume(delimStart.size());
             // find data length tag
             if (readBuffer_.size() < sizeof(typeof(dataSize_))) {
-                BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                     << " find data length tag, need read more : "
-                                     << (sizeof(typeof(dataSize_)) - readBuffer_.size());
+                BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                              << " find data length tag, need read more : "
+                                              << (sizeof(typeof(dataSize_)) - readBuffer_.size());
                 ec_.clear();
                 bytes_transferred_ = 0;
                 bytes_transferred_ = co_await boost::asio::async_read(
@@ -179,8 +179,8 @@ namespace OwlSerialController {
             // load size
             dataSize_ = 0;
             {
-                BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                     << " try load dataSize_";
+                BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                              << " try load dataSize_";
                 static_assert(sizeof(typeof(dataSize_)) == 1);
                 // dataSize_ = uint8_t
                 std::string d{
@@ -189,8 +189,8 @@ namespace OwlSerialController {
                 };
                 // dataSize <- d
                 dataSize_ = static_cast<uint8_t>(d[0]);
-                BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                     << " dataSize_ : " << dataSize_;
+                BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                              << " dataSize_ : " << dataSize_;
             }
             if (dataSize_ != AirplaneStateDataSize) {
                 BOOST_LOG_OWL(error) << "StateReaderImplCo"
@@ -203,10 +203,10 @@ namespace OwlSerialController {
             }
             // dataSize+len_tag+end_tag
             if (readBuffer_.size() < (dataSize_ + sizeof(uint32_t) + delimEnd.size())) {
-                BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                     << " to read data+endTag, need read more : "
-                                     << (dataSize_ + sizeof(uint32_t) + delimEnd.size()) -
-                                        readBuffer_.size();
+                BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                              << " to read data+endTag, need read more : "
+                                              << (dataSize_ + sizeof(uint32_t) + delimEnd.size()) -
+                                                 readBuffer_.size();
                 ec_.clear();
                 bytes_transferred_ = 0;
                 bytes_transferred_ = co_await boost::asio::async_read(
@@ -237,8 +237,8 @@ namespace OwlSerialController {
                 co_return false;
             }
             // ======================================= process data
-            BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                 << " do process data";
+            BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                          << " do process data";
             airplaneState_ = std::make_shared<AirplaneState>();
             BOOST_ASSERT(airplaneState_);
             airplaneState_->initTimestamp();
@@ -248,11 +248,11 @@ namespace OwlSerialController {
                                          << " (dataSize_ != AirplaneStateDataSize) , ignore!!!";
                     // ignore this package
                 } else {
-                    BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                         << " do loadData";
+                    BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                                  << " do loadData";
                     loadData(_ptr_);
-                    BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                         << " do loadData ok";
+                    BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                                  << " do loadData ok";
                     // send
                     {
                         auto ptr_sr = parentRef_.lock();
@@ -262,8 +262,8 @@ namespace OwlSerialController {
                             co_return false;
                         }
                         // do a ptr copy to make sure ptr not release by next loop too early
-                        BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                             << " do sendAirplaneState";
+                        BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                                      << " do sendAirplaneState";
                         ptr_sr->sendAirplaneState(airplaneState_->shared_from_this());
                     }
                 }
@@ -272,8 +272,8 @@ namespace OwlSerialController {
 
 
             // ======================================= make clean
-            BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                 << " do make clean";
+            BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                          << " do make clean";
             // clean all used data
             {
                 std::string s{
@@ -288,15 +288,15 @@ namespace OwlSerialController {
                     BOOST_ASSERT(p != std::string::npos);
                     co_return false;
                 } else {
-                    BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                         << " trim the other data include end delim";
+                    BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                                  << " trim the other data include end delim";
                     // we find the end delim
                     // trim the other data include end delim
                     readBuffer_.consume(p + delimEnd.size());
                     dataSize_ = 0;
                     // goto next loop
-                    BOOST_LOG_OWL(trace) << "StateReaderImplCo"
-                                         << " goto next loop";
+                    BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
+                                                  << " goto next loop";
                     boost::ignore_unused(_ptr_);
                     start_next_read();
                     co_return true;

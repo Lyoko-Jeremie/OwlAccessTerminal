@@ -55,7 +55,7 @@ namespace OwlSerialController {
             constexpr bool flag_DEBUG_IF_CHECK_POINT = false;
 #endif // DEBUG_IF_CHECK_POINT
 
-            BOOST_LOG_OWL(trace) << "StateReaderImplCo start()";
+            BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo start()";
             if constexpr (flag_DEBUG_IF_CHECK_POINT) {
                 BOOST_ASSERT(!weak_from_this().expired());
                 BOOST_ASSERT(!parentRef_.expired());
