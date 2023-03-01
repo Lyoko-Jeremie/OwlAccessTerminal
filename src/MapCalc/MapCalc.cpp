@@ -38,28 +38,28 @@ namespace OwlMapCalc {
     }
 
     void MapCalc::init() {
-        BOOST_LOG_OWL(trace) << "MapCalc::init()";
+        BOOST_LOG_OWL(trace_map) << "MapCalc::init()";
         boost::asio::post(ioc_, [
                 this, self = shared_from_this()
         ]() {
-            BOOST_LOG_OWL(trace) << "MapCalc::init() dispatch";
+            BOOST_LOG_OWL(trace_map) << "MapCalc::init() dispatch";
             qjw_ = std::make_shared<OwlQuickJsWrapper::QuickJsWrapper>();
-            BOOST_LOG_OWL(trace) << "MapCalc::init() qjw_ create ok";
+            BOOST_LOG_OWL(trace_map) << "MapCalc::init() qjw_ create ok";
             qjw_->init();
-            BOOST_LOG_OWL(trace) << "MapCalc::init() qjw_->init() ok";
-            BOOST_LOG_OWL(trace)
+            BOOST_LOG_OWL(trace_map) << "MapCalc::init() qjw_->init() ok";
+            BOOST_LOG_OWL(trace_map)
                 << "MapCalc::init() loadCalcJsCodeFile "
                 <<
                 loadCalcJsCodeFile(config_->config().js_map_calc_file);
-            BOOST_LOG_OWL(trace)
+            BOOST_LOG_OWL(trace_map)
                 << "MapCalc::init() loadMapCalcFunction "
                 <<
                 loadMapCalcFunction(config_->config().js_map_calc_function_name);
-            BOOST_LOG_OWL(trace)
+            BOOST_LOG_OWL(trace_map)
                 << "MapCalc::init() testMapCalcFunction "
                 <<
                 testMapCalcFunction();
-            BOOST_LOG_OWL(trace) << "MapCalc::init() ok";
+            BOOST_LOG_OWL(trace_map) << "MapCalc::init() ok";
         });
     }
 
@@ -69,9 +69,9 @@ namespace OwlMapCalc {
             BOOST_LOG_OWL(error) << "MapCalc loadCalcJsCodeFile filePath not exists : " << filePath;
             return false;
         }
-        BOOST_LOG_OWL(trace) << "MapCalc loadCalcJsCodeFile qjw_->loadCode(filePath) begin";
+        BOOST_LOG_OWL(trace_map) << "MapCalc loadCalcJsCodeFile qjw_->loadCode(filePath) begin";
         bool ok = qjw_->loadCode(filePath);
-        BOOST_LOG_OWL(trace) << "MapCalc loadCalcJsCodeFile qjw_->loadCode(filePath) end";
+        BOOST_LOG_OWL(trace_map) << "MapCalc loadCalcJsCodeFile qjw_->loadCode(filePath) end";
         if (!ok) {
             BOOST_LOG_OWL(error) << "MapCalc loadCalcJsCodeFile loadCode failed.";
         }
@@ -92,7 +92,7 @@ namespace OwlMapCalc {
                         std::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
                         std::shared_ptr<OwlSerialController::AirplaneState> airplaneState
                 ) -> MapCalcFunctionType::result_type {
-            BOOST_LOG_OWL(trace) << "MapCalc calc_ start";
+            BOOST_LOG_OWL(trace_map) << "MapCalc calc_ start";
 
             boost::json::object inputData{};
             try {
@@ -103,7 +103,7 @@ namespace OwlMapCalc {
                     inputData.emplace("imageX", 0);
                     inputData.emplace("imageY", 0);
                 }
-                BOOST_LOG_OWL(trace) << "MapCalc calc_ (tagInfo) ok";
+                BOOST_LOG_OWL(trace_map) << "MapCalc calc_ (tagInfo) ok";
                 // tagInfo;
                 auto tv = [](const OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type &t) {
                     return boost::json::value{
@@ -134,7 +134,7 @@ namespace OwlMapCalc {
 //                            {"center", {}},
 //                    });
                 }
-                BOOST_LOG_OWL(trace) << "MapCalc calc_ (tagInfo && tagInfo->aprilTagCenter) ok";
+                BOOST_LOG_OWL(trace_map) << "MapCalc calc_ (tagInfo && tagInfo->aprilTagCenter) ok";
                 boost::json::array tagList{};
                 if (tagInfo && tagInfo->aprilTagList) {
                     for (const auto &a: tagInfo->aprilTagList.operator*()) {
@@ -144,7 +144,7 @@ namespace OwlMapCalc {
                 tagInfoJson.emplace("list", tagList);
 //                inputData["tagInfo"].as_object().emplace("list", tagList);
                 inputData.emplace("tagInfo", tagInfoJson);
-                BOOST_LOG_OWL(trace) << "MapCalc calc_ (tagInfo && tagInfo->aprilTagList) ok";
+                BOOST_LOG_OWL(trace_map) << "MapCalc calc_ (tagInfo && tagInfo->aprilTagList) ok";
 
                 // airplaneState;
                 if (airplaneState) {
@@ -162,7 +162,7 @@ namespace OwlMapCalc {
                 } else {
                     inputData.emplace("airplaneState", boost::json::value{});
                 }
-                BOOST_LOG_OWL(trace) << "MapCalc calc_ inputData (airplaneState) ok";
+                BOOST_LOG_OWL(trace_map) << "MapCalc calc_ inputData (airplaneState) ok";
             } catch (boost::exception &e) {
                 std::string diag = boost::diagnostic_information(e);
                 BOOST_LOG_OWL(error) << "MapCalc calc_ inputData std::exception :"
@@ -183,52 +183,52 @@ namespace OwlMapCalc {
             }
             try {
                 auto rData = std::make_shared<MapCalcPlaneInfoType>();
-                BOOST_LOG_OWL(trace) << "MapCalc calc_ before calcF trigger_qjs_update_when_thread_change";
+                BOOST_LOG_OWL(trace_map) << "MapCalc calc_ before calcF trigger_qjs_update_when_thread_change";
                 qjw_->trigger_qjs_update_when_thread_change();
-                BOOST_LOG_OWL(trace) << "MapCalc calc_ before calcF";
+                BOOST_LOG_OWL(trace_map) << "MapCalc calc_ before calcF";
                 auto r = calcF(qjw_->getContext().fromJSON(boost::json::serialize(inputData)));
-                BOOST_LOG_OWL(trace) << "MapCalc calc_ after calcF";
-                BOOST_LOG_OWL(trace) << "MapCalc calc_ calcF " << r.toJSON();
+                BOOST_LOG_OWL(trace_map) << "MapCalc calc_ after calcF";
+                BOOST_LOG_OWL(trace_map) << "MapCalc calc_ calcF " << r.toJSON();
                 bool ok = r["ok"].as<bool>();
                 if (!ok) {
-                    BOOST_LOG_OWL(trace) << "MapCalc calc_ (!ok)";
+                    BOOST_LOG_OWL(warning) << "MapCalc calc_ (!ok)";
                     // failed
                     return {};
                 }
                 auto info = r["info"].as<qjs::Value>();
-                BOOST_LOG_OWL(trace) << "MapCalc calc_ rData DirectDeg";
+                BOOST_LOG_OWL(trace_map) << "MapCalc calc_ rData DirectDeg";
                 rData->xDirectDeg = info["xDirectDeg"].as<double>();
                 rData->zDirectDeg = info["zDirectDeg"].as<double>();
                 rData->xzDirectDeg = info["xzDirectDeg"].as<double>();
-                BOOST_LOG_OWL(trace) << "read rData->xDirectDeg " << rData->xDirectDeg;
-                BOOST_LOG_OWL(trace) << "read rData->zDirectDeg " << rData->zDirectDeg;
-                BOOST_LOG_OWL(trace) << "read rData->xzDirectDeg " << rData->xzDirectDeg;
-                BOOST_LOG_OWL(trace) << " start read ";
+                BOOST_LOG_OWL(trace_map) << "read rData->xDirectDeg " << rData->xDirectDeg;
+                BOOST_LOG_OWL(trace_map) << "read rData->zDirectDeg " << rData->zDirectDeg;
+                BOOST_LOG_OWL(trace_map) << "read rData->xzDirectDeg " << rData->xzDirectDeg;
+                BOOST_LOG_OWL(trace_map) << " start read ";
                 {
                     auto n = info["PlaneP"].as<qjs::Value>();
                     rData->PlaneP.x = n["x"].as<double>();
                     rData->PlaneP.y = n["y"].as<double>();
-                    BOOST_LOG_OWL(trace) << "read PlaneP ok";
+                    BOOST_LOG_OWL(trace_map) << "read PlaneP ok";
                 }
                 {
                     auto n = info["ImageP"].as<qjs::Value>();
                     rData->ImageP.x = n["x"].as<double>();
                     rData->ImageP.y = n["y"].as<double>();
-                    BOOST_LOG_OWL(trace) << "read ImageP ok";
+                    BOOST_LOG_OWL(trace_map) << "read ImageP ok";
                 }
                 {
                     auto n = info["ScaleXZ"].as<qjs::Value>();
                     rData->ScaleXZ.x = n["x"].as<double>();
                     rData->ScaleXZ.y = n["y"].as<double>();
-                    BOOST_LOG_OWL(trace) << "read ScaleXZ ok";
+                    BOOST_LOG_OWL(trace_map) << "read ScaleXZ ok";
                 }
                 {
                     auto n = info["ScaleXY"].as<qjs::Value>();
                     rData->ScaleXY.x = n["x"].as<double>();
                     rData->ScaleXY.y = n["y"].as<double>();
-                    BOOST_LOG_OWL(trace) << "read ScaleXY ok";
+                    BOOST_LOG_OWL(trace_map) << "read ScaleXY ok";
                 }
-                BOOST_LOG_OWL(trace)
+                BOOST_LOG_OWL(trace_map)
                     << "MapCalc calc_ rData ok :"
                     << boost::json::serialize(MapCalcPlaneInfoType2JsonObject(rData));
                 return rData;
@@ -317,7 +317,7 @@ namespace OwlMapCalc {
         auto t1 = std::chrono::high_resolution_clock::now();
         auto r = calcMapPosition(tagInfo, airplaneState);
         auto t2 = std::chrono::high_resolution_clock::now();
-        BOOST_LOG_OWL(trace)
+        BOOST_LOG_OWL(trace_map)
             << "MapCalc testMapCalcFunction test time: "
             << "\n" << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() << " [nanoseconds]"
             << "\n" << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << " [microseconds]"

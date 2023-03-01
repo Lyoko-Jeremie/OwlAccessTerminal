@@ -30,7 +30,7 @@ namespace OwlMapCalc {
         );
 
         ~MapCalc() {
-            BOOST_LOG_OWL(trace) << "~MapCalc()";
+            BOOST_LOG_OWL(trace_map) << "~MapCalc()";
             mailbox_->receiveB2A(nullptr);
         }
 
@@ -64,13 +64,13 @@ namespace OwlMapCalc {
                 std::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
                 std::shared_ptr<OwlSerialController::AirplaneState> airplaneState
         ) {
-            BOOST_LOG_OWL(trace) << "MapCalc::calcMapPosition";
+            BOOST_LOG_OWL(trace_map) << "MapCalc::calcMapPosition";
             if (calc_) {
                 auto r = calc_(std::move(tagInfo), std::move(airplaneState));
-                BOOST_LOG_OWL(trace) << "MapCalc::calcMapPosition return r";
+                BOOST_LOG_OWL(trace_map) << "MapCalc::calcMapPosition return r";
                 return r;
             }
-            BOOST_LOG_OWL(trace) << "MapCalc::calcMapPosition return {}";
+            BOOST_LOG_OWL(trace_map) << "MapCalc::calcMapPosition return {}";
             return {};
         }
 
@@ -83,35 +83,35 @@ namespace OwlMapCalc {
             constexpr bool flag_DEBUG_IF_CHECK_POINT = false;
 #endif // DEBUG_IF_CHECK_POINT
 
-            BOOST_LOG_OWL(trace) << "MapCalc::receiveMail start";
+            BOOST_LOG_OWL(trace_map) << "MapCalc::receiveMail start";
             if constexpr (flag_DEBUG_IF_CHECK_POINT) {
                 BOOST_ASSERT(!weak_from_this().expired());
-                BOOST_LOG_OWL(trace) << "MapCalc::receiveMail weak_from_this().use_count(): "
-                                     << weak_from_this().use_count();
-                BOOST_LOG_OWL(trace) << "MapCalc::receiveMail shared_from_this().use_count(): "
-                                     << this->shared_from_this().use_count();
+                BOOST_LOG_OWL(trace_map) << "MapCalc::receiveMail weak_from_this().use_count(): "
+                                         << weak_from_this().use_count();
+                BOOST_LOG_OWL(trace_map) << "MapCalc::receiveMail shared_from_this().use_count(): "
+                                         << this->shared_from_this().use_count();
             }
             boost::asio::dispatch(ioc_, [this, self = shared_from_this(), data]() {
                 BOOST_ASSERT(self);
-                BOOST_LOG_OWL(trace) << "MapCalc::receiveMail dispatch";
+                BOOST_LOG_OWL(trace_map) << "MapCalc::receiveMail dispatch";
                 auto mail = std::make_shared<OwlMailDefine::MapCalc2Service>();
                 mail->runner = data->callbackRunner;
                 if (!calc_) {
-                    BOOST_LOG_OWL(trace) << "MapCalc::receiveMail mail (!calc_) send back";
+                    BOOST_LOG_OWL(trace_map) << "MapCalc::receiveMail mail (!calc_) send back";
                     return sendMail(std::move(mail));
                 }
-                BOOST_LOG_OWL(trace) << "MapCalc::receiveMail call calcMapPosition";
+                BOOST_LOG_OWL(trace_map) << "MapCalc::receiveMail call calcMapPosition";
                 auto r = calcMapPosition(
                         data->tagInfo,
                         data->airplaneState
                 );
                 if (!r) {
-                    BOOST_LOG_OWL(trace) << "MapCalc::receiveMail mail (!r) send back";
+                    BOOST_LOG_OWL(trace_map) << "MapCalc::receiveMail mail (!r) send back";
                     return sendMail(std::move(mail));
                 }
                 mail->ok = true;
                 mail->info = r;
-                BOOST_LOG_OWL(trace) << "MapCalc::receiveMail mail ok send back";
+                BOOST_LOG_OWL(trace_map) << "MapCalc::receiveMail mail ok send back";
                 return sendMail(std::move(mail));
             });
         }
