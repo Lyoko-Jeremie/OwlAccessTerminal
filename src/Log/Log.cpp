@@ -23,8 +23,15 @@ namespace OwlLog {
 
     // https://stackoverflow.com/questions/17930553/in-boost-log-how-do-i-format-a-custom-severity-level-using-a-format-string
     const char *severity_level_str[severity_level::MAX] = {
+            "trace_cmd_tag",
+            "trace_cmd_http",
+            "trace_cmd_sp_w",
+            "trace_cmd_sp_r",
+            "trace_map",
+            "trace_dtor",
             "trace",
             "debug",
+            "debug_sp_w",
             "info",
             "warning",
             "error",
