@@ -133,6 +133,9 @@ namespace OwlLog {
 
         core->get()->set_filter(
                 true
+                #ifndef DEBUG_log_dtor
+                && severity != severity_level::trace_dtor
+                #endif // DEBUG_log_dtor
                 #ifndef DEBUG_log_MAP
                 && severity != severity_level::trace_map
                 #endif // DEBUG_log_MAP
