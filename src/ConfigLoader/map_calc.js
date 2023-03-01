@@ -224,7 +224,6 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
     // ], undefined, 4));
     // console.log("pImgInPla :\n", JSON.stringify(pImgInPla, undefined, 4));
     // 图像中心点对应的平面上的点的坐标
-    // TODO
     const centerPlanPoint = { x: pImgInPla[0], y: pImgInPla[1] };
     info.PlaneP = {
         x: centerPlanPoint.x / AlgorithmMultiScale,
@@ -244,11 +243,11 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
         // rt
         centerPlanPoint.x + offsetLen, centerPlanPoint.y + offsetLen,
         // U
-        centerPlanPoint.x, centerPlanPoint.y + SizeZ * 1000,
+        centerPlanPoint.x, centerPlanPoint.y - SizeZ * 1000,
         // R
         centerPlanPoint.x + SizeX * 1000, centerPlanPoint.y,
         // RU
-        centerPlanPoint.x + SizeX * 1000, centerPlanPoint.y + SizeZ * 1000,
+        centerPlanPoint.x + SizeX * 1000, centerPlanPoint.y - SizeZ * 1000,
     ], mInImg);
     // console.log("pPlaInImg :\n", JSON.stringify(
     //     [
