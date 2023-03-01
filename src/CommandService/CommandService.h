@@ -44,7 +44,7 @@ namespace OwlCommandService {
         }
 
         ~CommandService() {
-            BOOST_LOG_TRIVIAL(trace) << "~CommandService()";
+            BOOST_LOG_OWL(trace) << "~CommandService()";
             mailbox_->receiveB2A(nullptr);
         }
 

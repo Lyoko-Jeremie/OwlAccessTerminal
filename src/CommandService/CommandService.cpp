@@ -1,7 +1,7 @@
 // jeremie
 
 #include "CommandService.h"
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 
 namespace OwlCommandService {
 
@@ -17,7 +17,7 @@ namespace OwlCommandService {
                     if (ec) {
                         // ignore it
 //                        std::cerr << ec.what() << "\n";
-                        BOOST_LOG_TRIVIAL(error) << ec.what();
+                        BOOST_LOG_OWL(error) << ec.what();
                     } else {
                         process_message(bytes_transferred);
                     }
@@ -41,7 +41,7 @@ namespace OwlCommandService {
                     // ignore
                     if (ec) {
 //                        std::cerr << ec.what() << "\n";
-                        BOOST_LOG_TRIVIAL(error) << ec.what();
+                        BOOST_LOG_OWL(error) << ec.what();
                     }
                 }
         );

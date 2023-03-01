@@ -15,7 +15,7 @@
 #include <boost/asio/read_until.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/array.hpp>
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 #include "ImageProtobufDefine/ImageProtocol/ImageProtocol.pb.h"
 #include "ImageServiceMail.h"
 
@@ -67,7 +67,7 @@ namespace OwlImageService {
         ) : ioc_(ioc), socket_(std::move(socket)), parents_(std::move(parents)) {}
 
 //        static void fail(boost::system::error_code ec, const char *what) {
-//            BOOST_LOG_TRIVIAL(error) << what << ": " << ec.message();
+//            BOOST_LOG_OWL(error) << what << ": " << ec.message();
 //        }
 
     private:
@@ -118,12 +118,12 @@ namespace OwlImageService {
         );
 
         ~ImageService() {
-            BOOST_LOG_TRIVIAL(trace) << "~ImageService()";
+            BOOST_LOG_OWL(trace) << "~ImageService()";
             mailbox_->receiveB2A(nullptr);
         }
 
         static void fail(boost::system::error_code ec, const char *what) {
-            BOOST_LOG_TRIVIAL(error) << what << ": " << ec.message();
+            BOOST_LOG_OWL(error) << what << ": " << ec.message();
         }
 
     private:

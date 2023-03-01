@@ -1,7 +1,7 @@
 // jeremie
 
 #include "QuickJsWrapperImpl.h"
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 #include <boost/exception/diagnostic_information.hpp>
 
 #include <sstream>
@@ -15,19 +15,19 @@ namespace OwlQuickJsWrapper {
     void logConsole(const qjs::rest<std::string> &args) {
         std::stringstream ss;
         for (auto const &arg: args) ss << arg;
-        BOOST_LOG_TRIVIAL(info) << ss.str();
+        BOOST_LOG_OWL(info) << ss.str();
     }
 
     void warningConsole(const qjs::rest<std::string> &args) {
         std::stringstream ss;
         for (auto const &arg: args) ss << arg;
-        BOOST_LOG_TRIVIAL(warning) << ss.str();
+        BOOST_LOG_OWL(warning) << ss.str();
     }
 
     void errorConsole(const qjs::rest<std::string> &args) {
         std::stringstream ss;
         for (auto const &arg: args) ss << arg;
-        BOOST_LOG_TRIVIAL(error) << ss.str();
+        BOOST_LOG_OWL(error) << ss.str();
     }
 
 
@@ -40,10 +40,10 @@ namespace OwlQuickJsWrapper {
     bool QuickJsWrapperImpl::init() {
         try {
 
-            BOOST_LOG_TRIVIAL(trace) << "QuickJsWrapperImpl init JS_SetMemoryLimit begin";
+            BOOST_LOG_OWL(trace) << "QuickJsWrapperImpl init JS_SetMemoryLimit begin";
 //            JS_SetMemoryLimit(runtime_.rt, std::numeric_limits<size_t>::max());
             JS_SetMaxStackSize(runtime_.rt, 0);
-            BOOST_LOG_TRIVIAL(trace) << "QuickJsWrapperImpl init JS_SetMaxStackSize end";
+            BOOST_LOG_OWL(trace) << "QuickJsWrapperImpl init JS_SetMaxStackSize end";
 
             installMathModule(context_);
             installMathModuleExtend(context_);
@@ -69,18 +69,18 @@ namespace OwlQuickJsWrapper {
         catch (qjs::exception &e) {
             try {
                 auto exc = context_.getException();
-                BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl init qjs::exception " << (std::string) exc;
+                BOOST_LOG_OWL(error) << "QuickJsWrapperImpl init qjs::exception " << (std::string) exc;
                 if ((bool) exc["stack"]) {
-                    BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl init qjs::exception " << (std::string) exc["stack"];
+                    BOOST_LOG_OWL(error) << "QuickJsWrapperImpl init qjs::exception " << (std::string) exc["stack"];
                 }
             } catch (...) {
-                BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl::init qjs::exception&e catch (...) exception"
+                BOOST_LOG_OWL(error) << "QuickJsWrapperImpl::init qjs::exception&e catch (...) exception"
                                          << "\n current_exception_diagnostic_information : "
                                          << boost::current_exception_diagnostic_information();
             }
             return false;
         } catch (cv::Exception &e) {
-            BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl init cv::exception :"
+            BOOST_LOG_OWL(error) << "QuickJsWrapperImpl init cv::exception :"
                                      << e.what();
             return false;
         }
@@ -94,19 +94,19 @@ namespace OwlQuickJsWrapper {
         catch (qjs::exception &e) {
             try {
                 auto exc = context_.getException();
-                BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl evalCode qjs::exception " << (std::string) exc;
+                BOOST_LOG_OWL(error) << "QuickJsWrapperImpl evalCode qjs::exception " << (std::string) exc;
                 if ((bool) exc["stack"]) {
-                    BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl evalCode qjs::exception "
+                    BOOST_LOG_OWL(error) << "QuickJsWrapperImpl evalCode qjs::exception "
                                              << (std::string) exc["stack"];
                 }
             } catch (...) {
-                BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl::evalCode qjs::exception&e catch (...) exception"
+                BOOST_LOG_OWL(error) << "QuickJsWrapperImpl::evalCode qjs::exception&e catch (...) exception"
                                          << "\n current_exception_diagnostic_information : "
                                          << boost::current_exception_diagnostic_information();
             }
             return false;
         } catch (cv::Exception &e) {
-            BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl evalCode cv::exception :"
+            BOOST_LOG_OWL(error) << "QuickJsWrapperImpl evalCode cv::exception :"
                                      << e.what();
             return false;
         }
@@ -115,26 +115,26 @@ namespace OwlQuickJsWrapper {
 
     bool QuickJsWrapperImpl::loadCode(const std::string &filePath) {
         try {
-            BOOST_LOG_TRIVIAL(trace) << "QuickJsWrapperImpl loadCode context_.evalFile(filePath.c_str()) begin";
+            BOOST_LOG_OWL(trace) << "QuickJsWrapperImpl loadCode context_.evalFile(filePath.c_str()) begin";
             context_.evalFile(filePath.c_str());
-            BOOST_LOG_TRIVIAL(trace) << "QuickJsWrapperImpl loadCode context_.evalFile(filePath.c_str()) end";
+            BOOST_LOG_OWL(trace) << "QuickJsWrapperImpl loadCode context_.evalFile(filePath.c_str()) end";
         }
         catch (qjs::exception &e) {
             try {
                 auto exc = context_.getException();
-                BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl loadCode qjs::exception " << (std::string) exc;
+                BOOST_LOG_OWL(error) << "QuickJsWrapperImpl loadCode qjs::exception " << (std::string) exc;
                 if ((bool) exc["stack"]) {
-                    BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl loadCode qjs::exception "
+                    BOOST_LOG_OWL(error) << "QuickJsWrapperImpl loadCode qjs::exception "
                                              << (std::string) exc["stack"];
                 }
             } catch (...) {
-                BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl::loadCode qjs::exception&e catch (...) exception"
+                BOOST_LOG_OWL(error) << "QuickJsWrapperImpl::loadCode qjs::exception&e catch (...) exception"
                                          << "\n current_exception_diagnostic_information : "
                                          << boost::current_exception_diagnostic_information();
             }
             return false;
         } catch (cv::Exception &e) {
-            BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl loadCode cv::exception :"
+            BOOST_LOG_OWL(error) << "QuickJsWrapperImpl loadCode cv::exception :"
                                      << e.what();
             return false;
         }

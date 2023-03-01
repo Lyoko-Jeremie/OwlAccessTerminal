@@ -10,7 +10,7 @@
 #include <boost/asio.hpp>
 #include <boost/process.hpp>
 #include <boost/atomic.hpp>
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 
 #include "WebCmdMail.h"
 #include "../ConfigLoader/ConfigLoader.h"

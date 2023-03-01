@@ -20,7 +20,7 @@ namespace OwlCommandServiceHttp {
         if (p) {
             p->sendMail(std::move(data));
         } else {
-            BOOST_LOG_TRIVIAL(error) << "CmdServiceHttpConnect::sendMail() " << "(!p)";
+            BOOST_LOG_OWL(error) << "CmdServiceHttpConnect::sendMail() " << "(!p)";
         }
     }
 
@@ -30,7 +30,7 @@ namespace OwlCommandServiceHttp {
         if (p) {
             p->mailbox_map_->sendA2B(std::move(data));
         } else {
-            BOOST_LOG_TRIVIAL(error) << "CmdServiceHttpConnect::sendMail() " << "(!p)";
+            BOOST_LOG_OWL(error) << "CmdServiceHttpConnect::sendMail() " << "(!p)";
         }
     }
 
@@ -66,8 +66,8 @@ namespace OwlCommandServiceHttp {
     }
 
     void CmdServiceHttpConnect::process_tag_info() {
-//        BOOST_LOG_TRIVIAL(trace) << "process_tag_info";
-//        BOOST_LOG_TRIVIAL(trace) << request_.target();
+//        BOOST_LOG_OWL(trace) << "process_tag_info";
+//        BOOST_LOG_OWL(trace) << request_.target();
         auto u = boost::urls::parse_uri_reference(request_.target());
         if (u.has_error()) {
             auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
@@ -89,7 +89,7 @@ namespace OwlCommandServiceHttp {
         // q.find("");
 
         std::string jsonS = boost::beast::buffers_to_string(request_.body().data());
-        // BOOST_LOG_TRIVIAL(trace) << jsonS;
+        // BOOST_LOG_OWL(trace) << jsonS;
 
         // resize json space
         json_storage_ = std::make_unique<decltype(json_storage_)::element_type>(JSON_Package_Max_Size_TagInfo, 0);
@@ -111,7 +111,7 @@ namespace OwlCommandServiceHttp {
             if (ec) {
                 // ignore
                 // std::cerr << ec.what() << "\n";
-                BOOST_LOG_TRIVIAL(error) << "process_tag_info " << ec.what();
+                BOOST_LOG_OWL(error) << "process_tag_info " << ec.what();
                 send_back_json({
                                        {"msg",    "error"},
                                        {"error",  "boost::json::parse failed : " + ec.what()},
@@ -122,7 +122,7 @@ namespace OwlCommandServiceHttp {
 
             auto json_o = json_v.as_object();
             if (!json_o.contains("imageX") || !json_o.at("imageX").is_int64()) {
-                BOOST_LOG_TRIVIAL(warning) << "contains fail (imageCenterX)" << jsonS;
+                BOOST_LOG_OWL(warning) << "contains fail (imageCenterX)" << jsonS;
                 send_back_json(
                         boost::json::value{
                                 {"msg",    "error"},
@@ -133,7 +133,7 @@ namespace OwlCommandServiceHttp {
                 return;
             }
             if (!json_o.contains("imageY") || !json_o.at("imageY").is_int64()) {
-                BOOST_LOG_TRIVIAL(warning) << "contains fail (imageY)" << jsonS;
+                BOOST_LOG_OWL(warning) << "contains fail (imageY)" << jsonS;
                 send_back_json(
                         boost::json::value{
                                 {"msg",    "error"},
@@ -147,7 +147,7 @@ namespace OwlCommandServiceHttp {
             auto imageY = json_o.at("imageY").get_int64();
 
             if (!json_o.contains("tagList") || !json_o.at("tagList").is_array()) {
-                BOOST_LOG_TRIVIAL(warning) << "contains fail (tagList)" << jsonS;
+                BOOST_LOG_OWL(warning) << "contains fail (tagList)" << jsonS;
                 send_back_json(
                         boost::json::value{
                                 {"msg",    "error"},
@@ -192,7 +192,7 @@ namespace OwlCommandServiceHttp {
                             b.contains("cLBx") &&
                             b.contains("cLBy")
                     )) {
-                        BOOST_LOG_TRIVIAL(warning) << "invalid tagList items" << jsonS;
+                        BOOST_LOG_OWL(warning) << "invalid tagList items" << jsonS;
                         send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -226,7 +226,7 @@ namespace OwlCommandServiceHttp {
             OwlMailDefine::AprilTagCmd::AprilTagCenterType aprilTagInfoCenter{};
             if (json_o.contains("centerTag")) {
                 if (!json_o.at("centerTag").is_object()) {
-                    BOOST_LOG_TRIVIAL(warning) << "(!json_o.at(\"center\").is_object())" << jsonS;
+                    BOOST_LOG_OWL(warning) << "(!json_o.at(\"center\").is_object())" << jsonS;
                     send_back_json(
                             boost::json::value{
                                     {"msg",    "error"},
@@ -252,7 +252,7 @@ namespace OwlCommandServiceHttp {
                         b.contains("cLBx") &&
                         b.contains("cLBy")
                 )) {
-                    BOOST_LOG_TRIVIAL(warning) << "invalid centerTag items" << jsonS;
+                    BOOST_LOG_OWL(warning) << "invalid centerTag items" << jsonS;
                     send_back_json(
                             boost::json::value{
                                     {"msg",    "error"},
@@ -282,7 +282,7 @@ namespace OwlCommandServiceHttp {
             }
 
             if constexpr (SHOW_DEBUG_TAG_INFO) {
-//                BOOST_LOG_TRIVIAL(trace) << jsonS;
+//                BOOST_LOG_OWL(trace) << jsonS;
                 std::stringstream ss;
                 ss << "DEBUG_TAG_INFO ";
                 if (!aprilTagInfoCenter) {
@@ -332,7 +332,7 @@ namespace OwlCommandServiceHttp {
                     }
                 }
                 auto s = ss.str();
-                BOOST_LOG_TRIVIAL(trace) << s;
+                BOOST_LOG_OWL(trace) << s;
             }
 
             if (!aprilTagInfoList && !aprilTagInfoCenter) {
@@ -354,14 +354,14 @@ namespace OwlCommandServiceHttp {
             // get newestAirplaneState
             auto getASm = std::make_shared<OwlMailDefine::Cmd2Serial>();
             getASm->additionCmd = OwlMailDefine::AdditionCmd::getAirplaneState;
-            BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info to getASm";
+            BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::process_tag_info to getASm";
             getASm->callbackRunner = [
                     this, self = shared_from_this(),
                     aprilTagCmd
             ](
                     OwlMailDefine::MailSerial2Cmd data
             ) {
-                BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info back getASm";
+                BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::process_tag_info back getASm";
                 BOOST_ASSERT(data);
                 BOOST_ASSERT(self);
                 BOOST_ASSERT(self.use_count() > 0);
@@ -383,14 +383,14 @@ namespace OwlCommandServiceHttp {
                 auto mc = std::make_shared<OwlMailDefine::Service2MapCalc>();
                 mc->airplaneState = data->newestAirplaneState;
                 mc->tagInfo = aprilTagCmd->shared_from_this();
-                BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info to mc newestAirplaneState";
+                BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::process_tag_info to mc newestAirplaneState";
                 mc->callbackRunner = [
                         this, self = shared_from_this(),
                         aprilTagCmd
                 ](
                         OwlMailDefine::MailMapCalc2Service data
                 ) {
-                    BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info back mc newestAirplaneState";
+                    BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::process_tag_info back mc newestAirplaneState";
                     BOOST_ASSERT(data);
                     BOOST_ASSERT(self);
                     BOOST_ASSERT(self.use_count() > 0);
@@ -398,7 +398,7 @@ namespace OwlCommandServiceHttp {
                             this, self = shared_from_this(),
                             aprilTagCmd, data
                     ]() {
-                        BOOST_LOG_TRIVIAL(trace)
+                        BOOST_LOG_OWL(trace)
                             << "CmdServiceHttpConnect::process_tag_info back mc newestAirplaneState dispatch";
                         BOOST_ASSERT(data);
                         BOOST_ASSERT(self);
@@ -422,17 +422,17 @@ namespace OwlCommandServiceHttp {
                         auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                         m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;
                         m->aprilTagCmdPtr = aprilTagCmd;
-                        BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info to m AprilTag";
+                        BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::process_tag_info to m AprilTag";
                         m->callbackRunner = [
                                 this, self = shared_from_this(),
                                 aprilTagCmd
                         ](
                                 OwlMailDefine::MailSerial2Cmd data
                         ) {
-                            BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::process_tag_info back m AprilTag";
+                            BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::process_tag_info back m AprilTag";
                             BOOST_ASSERT(aprilTagCmd);
                             BOOST_ASSERT(aprilTagCmd.use_count() > 0);
-                            BOOST_LOG_TRIVIAL(trace)
+                            BOOST_LOG_OWL(trace)
                                 << "CmdServiceHttpConnect::process_tag_info aprilTagCmd.use_count() "
                                 << aprilTagCmd.use_count();
                             BOOST_ASSERT(data);
@@ -443,11 +443,11 @@ namespace OwlCommandServiceHttp {
                                     this, self = shared_from_this(),
                                     aprilTagCmd, data
                             ]() {
-                                BOOST_LOG_TRIVIAL(trace)
+                                BOOST_LOG_OWL(trace)
                                     << "CmdServiceHttpConnect::process_tag_info back m AprilTag dispatch";
                                 BOOST_ASSERT(aprilTagCmd);
                                 BOOST_ASSERT(aprilTagCmd.use_count() > 0);
-                                BOOST_LOG_TRIVIAL(trace)
+                                BOOST_LOG_OWL(trace)
                                     << "CmdServiceHttpConnect::process_tag_info aprilTagCmd.use_count() "
                                     << aprilTagCmd.use_count();
                                 BOOST_ASSERT(data);
@@ -460,7 +460,7 @@ namespace OwlCommandServiceHttp {
                                                 {"openError", data->openError},
                                         }
                                 );
-                                BOOST_LOG_TRIVIAL(trace)
+                                BOOST_LOG_OWL(trace)
                                     << "CmdServiceHttpConnect::process_tag_info back m AprilTag send_back_json end";
                             });
                         };
@@ -473,7 +473,7 @@ namespace OwlCommandServiceHttp {
             return;
 
         } catch (std::exception &e) {
-            BOOST_LOG_TRIVIAL(error) << "CmdServiceHttpConnect::process_tag_info " << e.what();
+            BOOST_LOG_OWL(error) << "CmdServiceHttpConnect::process_tag_info " << e.what();
             // ignore
 //                send_back_json(
 //                        boost::json::value{
@@ -496,7 +496,7 @@ namespace OwlCommandServiceHttp {
             write_response(response);
             return;
         } catch (...) {
-            BOOST_LOG_TRIVIAL(error) << "CmdServiceHttpConnect::process_tag_info catch (...) exception"
+            BOOST_LOG_OWL(error) << "CmdServiceHttpConnect::process_tag_info catch (...) exception"
                                      << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             send_back_json(
@@ -511,7 +511,7 @@ namespace OwlCommandServiceHttp {
     }
 
     void CmdServiceHttpConnect::create_post_response() {
-//        BOOST_LOG_TRIVIAL(trace) << "create_post_response";
+//        BOOST_LOG_OWL(trace) << "create_post_response";
 
         if (request_.body().size() > 0) {
 
@@ -532,7 +532,7 @@ namespace OwlCommandServiceHttp {
             }
 
         }
-        BOOST_LOG_TRIVIAL(error) << "create_post_response invalid post request";
+        BOOST_LOG_OWL(error) << "create_post_response invalid post request";
 
         auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
         response->version(request_.version());
@@ -683,7 +683,7 @@ namespace OwlCommandServiceHttp {
     }
 
     void CmdServiceHttpConnect::send_back(std::string &&json_string) {
-        BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::send_back json_string:" << json_string;
+        BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::send_back json_string:" << json_string;
         auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
         response->version(request_.version());
         response->keep_alive(false);
@@ -695,13 +695,13 @@ namespace OwlCommandServiceHttp {
         boost::beast::ostream(response->body()) << json_string;
         response->content_length(response->body().size());
         write_response(response);
-        BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::send_back return";
+        BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::send_back return";
     }
 
     std::shared_ptr<CmdServiceHttp> CmdServiceHttpConnect::getParentRef() {
         auto p = parents_.lock();
         if (!p) {
-            BOOST_LOG_TRIVIAL(error) << "CmdServiceHttpConnect::getParentRef() " << "(!p)";
+            BOOST_LOG_OWL(error) << "CmdServiceHttpConnect::getParentRef() " << "(!p)";
             // inner error
             auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
             response->version(request_.version());
@@ -732,9 +732,9 @@ namespace OwlCommandServiceHttp {
             receiveMail(std::move(data));
         });
         mailbox_map_->receiveB2A([this](OwlMailDefine::MailMapCalc2Service &&data) {
-            BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttp::receiveMail mailbox_map_->receiveB2A";
+            BOOST_LOG_OWL(trace) << "CmdServiceHttp::receiveMail mailbox_map_->receiveB2A";
             boost::asio::dispatch(ioc_, [self = shared_from_this(), data]() {
-                BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttp::receiveMail mailbox_map_->receiveB2A dispatch";
+                BOOST_LOG_OWL(trace) << "CmdServiceHttp::receiveMail mailbox_map_->receiveB2A dispatch";
                 data->runner(data);
             });
         });
@@ -744,21 +744,21 @@ namespace OwlCommandServiceHttp {
         // Open the acceptor
         acceptor_.open(endpoint.protocol(), ec);
         if (ec) {
-            BOOST_LOG_TRIVIAL(error) << "open" << " : " << ec.message();
+            BOOST_LOG_OWL(error) << "open" << " : " << ec.message();
             return;
         }
 
         // Allow address reuse
         acceptor_.set_option(boost::asio::socket_base::reuse_address(true), ec);
         if (ec) {
-            BOOST_LOG_TRIVIAL(error) << "set_option" << " : " << ec.message();
+            BOOST_LOG_OWL(error) << "set_option" << " : " << ec.message();
             return;
         }
 
         // Bind to the server address
         acceptor_.bind(endpoint, ec);
         if (ec) {
-            BOOST_LOG_TRIVIAL(error) << "bind" << " : " << ec.message();
+            BOOST_LOG_OWL(error) << "bind" << " : " << ec.message();
             return;
         }
 
@@ -766,7 +766,7 @@ namespace OwlCommandServiceHttp {
         acceptor_.listen(
                 boost::asio::socket_base::max_listen_connections, ec);
         if (ec) {
-            BOOST_LOG_TRIVIAL(error) << "listen" << " : " << ec.message();
+            BOOST_LOG_OWL(error) << "listen" << " : " << ec.message();
             return;
         }
     }

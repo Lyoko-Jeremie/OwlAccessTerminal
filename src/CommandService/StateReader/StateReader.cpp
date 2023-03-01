@@ -25,7 +25,7 @@ namespace OwlSerialController {
 
     void StateReader::init() {
         if constexpr (flag_DEBUG_IF_CHECK_POINT) {
-            BOOST_LOG_TRIVIAL(trace) << "weak_from_this().lock().use_count() : " << weak_from_this().lock().use_count();
+            BOOST_LOG_OWL(trace) << "weak_from_this().lock().use_count() : " << weak_from_this().lock().use_count();
             BOOST_ASSERT(!parentRef_.expired());
             BOOST_ASSERT(!parentRef_.lock()->parentRef_.expired());
             BOOST_ASSERT(parentRef_.lock()->parentRef_.lock());
@@ -37,7 +37,7 @@ namespace OwlSerialController {
     }
 
     void StateReader::start() {
-        BOOST_LOG_TRIVIAL(trace) << "StateReader::start()";
+        BOOST_LOG_OWL(trace) << "StateReader::start()";
         if constexpr (flag_DEBUG_IF_CHECK_POINT) {
             BOOST_ASSERT(!weak_from_this().expired());
             BOOST_ASSERT(!parentRef_.expired());
@@ -45,7 +45,7 @@ namespace OwlSerialController {
             BOOST_ASSERT(parentRef_.lock()->parentRef_.lock());
         }
         BOOST_ASSERT(impl);
-        BOOST_LOG_TRIVIAL(trace) << "StateReader::start() impl.use_count():" << impl.use_count();
+        BOOST_LOG_OWL(trace) << "StateReader::start() impl.use_count():" << impl.use_count();
         impl->start();
     }
 
@@ -55,7 +55,7 @@ namespace OwlSerialController {
                 this, self = shared_from_this(), airplaneState]() {
             auto ptr = parentRef_.lock();
             if (!ptr) {
-                BOOST_LOG_TRIVIAL(error) << "PortController"
+                BOOST_LOG_OWL(error) << "PortController"
                                          << " parentRef_.lock() failed.";
                 return;
             }

@@ -9,7 +9,7 @@
 #include <boost/array.hpp>
 #include <boost/json.hpp>
 #include <boost/system/error_code.hpp>
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 #include <boost/utility/string_view.hpp>
 #include <boost/assert.hpp>
 #include <boost/exception/diagnostic_information.hpp>
@@ -60,7 +60,7 @@ namespace OwlProcessJsonMessage {
             m->joyConGyroPtr->c = getFromJsonObject<int16_t>(joyConGyro, "c", good);
             m->joyConGyroPtr->d = getFromJsonObject<int16_t>(joyConGyro, "d", good);
             if (!good) {
-                BOOST_LOG_TRIVIAL(warning) << "analysisJoyConGyro getFromJsonObject fail " << joyConGyro;
+                BOOST_LOG_OWL(warning) << "analysisJoyConGyro getFromJsonObject fail " << joyConGyro;
                 self->send_back_json(
                         boost::json::value{
                                 {"msg",    "error"},
@@ -86,7 +86,7 @@ namespace OwlProcessJsonMessage {
             };
             self->sendMail(std::move(m));
         } catch (std::exception &e) {
-            BOOST_LOG_TRIVIAL(error) << "CommandService::analysisJoyConGyro";
+            BOOST_LOG_OWL(error) << "CommandService::analysisJoyConGyro";
             // ignore
             self->send_back_json(
                     boost::json::value{
@@ -97,7 +97,7 @@ namespace OwlProcessJsonMessage {
             );
             return;
         } catch (...) {
-            BOOST_LOG_TRIVIAL(error) << "CommandService::analysisJoyConGyro catch (...) exception"
+            BOOST_LOG_OWL(error) << "CommandService::analysisJoyConGyro catch (...) exception"
                                      << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             self->send_back_json(
@@ -134,7 +134,7 @@ namespace OwlProcessJsonMessage {
             m->joyConPtr->buttonAdd = getFromJsonObject<int8_t>(joyConSimple, "buttonAdd", good);
             m->joyConPtr->buttonReduce = getFromJsonObject<int8_t>(joyConSimple, "buttonReduce", good);
             if (!good) {
-                BOOST_LOG_TRIVIAL(warning) << "analysisJoyConSimple getFromJsonObject fail " << joyConSimple;
+                BOOST_LOG_OWL(warning) << "analysisJoyConSimple getFromJsonObject fail " << joyConSimple;
                 self->send_back_json(
                         boost::json::value{
                                 {"msg",    "error"},
@@ -160,7 +160,7 @@ namespace OwlProcessJsonMessage {
             };
             self->sendMail(std::move(m));
         } catch (std::exception &e) {
-            BOOST_LOG_TRIVIAL(error) << "CommandService::analysisJoyConSimple";
+            BOOST_LOG_OWL(error) << "CommandService::analysisJoyConSimple";
             // ignore
             self->send_back_json(
                     boost::json::value{
@@ -171,7 +171,7 @@ namespace OwlProcessJsonMessage {
             );
             return;
         } catch (...) {
-            BOOST_LOG_TRIVIAL(error) << "CommandService::analysisJoyConSimple catch (...) exception"
+            BOOST_LOG_OWL(error) << "CommandService::analysisJoyConSimple catch (...) exception"
                                      << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             self->send_back_json(
@@ -216,7 +216,7 @@ namespace OwlProcessJsonMessage {
             m->joyConPtr->buttonAdd = getFromJsonObject<int8_t>(joyCon, "buttonAdd", good);
             m->joyConPtr->buttonReduce = getFromJsonObject<int8_t>(joyCon, "buttonReduce", good);
             if (!good) {
-                BOOST_LOG_TRIVIAL(warning) << "analysisJoyCon getFromJsonObject fail " << joyCon;
+                BOOST_LOG_OWL(warning) << "analysisJoyCon getFromJsonObject fail " << joyCon;
                 self->send_back_json(
                         boost::json::value{
                                 {"msg",    "error"},
@@ -242,7 +242,7 @@ namespace OwlProcessJsonMessage {
             };
             self->sendMail(std::move(m));
         } catch (std::exception &e) {
-            BOOST_LOG_TRIVIAL(error) << "CommandService::analysisJoyCon";
+            BOOST_LOG_OWL(error) << "CommandService::analysisJoyCon";
             // ignore
             self->send_back_json(
                     boost::json::value{
@@ -253,7 +253,7 @@ namespace OwlProcessJsonMessage {
             );
             return;
         } catch (...) {
-            BOOST_LOG_TRIVIAL(error) << "CommandService::analysisJoyCon catch (...) exception"
+            BOOST_LOG_OWL(error) << "CommandService::analysisJoyCon catch (...) exception"
                                      << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             self->send_back_json(
@@ -335,7 +335,7 @@ namespace OwlProcessJsonMessage {
             if (ec) {
                 // ignore
                 // std::cerr << ec.what() << "\n";
-                BOOST_LOG_TRIVIAL(error) << ec.what();
+                BOOST_LOG_OWL(error) << ec.what();
                 self->send_back_json(
                         boost::json::value{
                                 {"msg",    "error"},
@@ -346,10 +346,10 @@ namespace OwlProcessJsonMessage {
                 return;
             }
             //  std::cout << boost::json::serialize(json_v) << "\n";
-            BOOST_LOG_TRIVIAL(info) << boost::json::serialize(json_v);
+            BOOST_LOG_OWL(info) << boost::json::serialize(json_v);
             auto json_o = json_v.as_object();
             if (!json_o.contains("cmdId") && !json_o.contains("packageId")) {
-                BOOST_LOG_TRIVIAL(warning) << "contains fail " << jsv;
+                BOOST_LOG_OWL(warning) << "contains fail " << jsv;
                 self->send_back_json(
                         boost::json::value{
                                 {"msg",    "error"},
@@ -363,7 +363,7 @@ namespace OwlProcessJsonMessage {
             auto cmdId = getFromJsonObject<int32_t>(json_o, "cmdId", good);
             auto packageId = getFromJsonObject<int32_t>(json_o, "packageId", good);
             if (!good) {
-                BOOST_LOG_TRIVIAL(warning) << "getFromJsonObject fail " << jsv;
+                BOOST_LOG_OWL(warning) << "getFromJsonObject fail " << jsv;
                 self->send_back_json(
                         boost::json::value{
                                 {"msg",    "error"},
@@ -376,7 +376,7 @@ namespace OwlProcessJsonMessage {
             switch (cmdId) {
                 case static_cast<int>(OwlCmdEnum::ping):
                     // ping-pong
-                    BOOST_LOG_TRIVIAL(info) << "ping-pong";
+                    BOOST_LOG_OWL(info) << "ping-pong";
                     self->send_back_json(
                             boost::json::value{
                                     {"cmdId",     cmdId},
@@ -388,7 +388,7 @@ namespace OwlProcessJsonMessage {
                     break;
                 case static_cast<int>(OwlCmdEnum::calibrate): {
                     // calibrate
-                    BOOST_LOG_TRIVIAL(info) << "calibrate";
+                    BOOST_LOG_OWL(info) << "calibrate";
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::calibrate;
                     m->callbackRunner = [self, cmdId, packageId](
@@ -410,7 +410,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::emergencyStop): {
                     // emergencyStop
-                    BOOST_LOG_TRIVIAL(info) << "emergencyStop";
+                    BOOST_LOG_OWL(info) << "emergencyStop";
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::emergencyStop;
                     m->callbackRunner = [self, cmdId, packageId](
@@ -432,7 +432,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::unlock): {
                     // unlock
-                    BOOST_LOG_TRIVIAL(info) << "unlock";
+                    BOOST_LOG_OWL(info) << "unlock";
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::unlock;
                     m->callbackRunner = [self, cmdId, packageId](
@@ -454,7 +454,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::breakCmd): {
                     // break
-                    BOOST_LOG_TRIVIAL(info) << "break";
+                    BOOST_LOG_OWL(info) << "break";
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::stop;
                     m->callbackRunner = [self, cmdId, packageId](
@@ -476,9 +476,9 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::takeoff): {
                     // takeoff
-                    BOOST_LOG_TRIVIAL(info) << "takeoff";
+                    BOOST_LOG_OWL(info) << "takeoff";
                     if (!json_o.contains("distance")) {
-                        BOOST_LOG_TRIVIAL(warning) << "move step contains fail " << jsv;
+                        BOOST_LOG_OWL(warning) << "move step contains fail " << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
@@ -490,11 +490,11 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
-                    BOOST_LOG_TRIVIAL(info) << "takeoff distance check ok";
+                    BOOST_LOG_OWL(info) << "takeoff distance check ok";
                     bool good = true;
                     auto moveStepDistance = getFromJsonObject<int32_t>(json_o, "distance", good);
                     if (!good) {
-                        BOOST_LOG_TRIVIAL(warning) << "takeoff getFromJsonObject fail" << jsv;
+                        BOOST_LOG_OWL(warning) << "takeoff getFromJsonObject fail" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -504,9 +504,9 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
-                    BOOST_LOG_TRIVIAL(info) << "takeoff moveStepDistance get ok , :" << moveStepDistance;
+                    BOOST_LOG_OWL(info) << "takeoff moveStepDistance get ok , :" << moveStepDistance;
                     if (moveStepDistance > 32767 || moveStepDistance < 0) {
-                        BOOST_LOG_TRIVIAL(warning) << "(moveStepDistance > 32767 || moveStepDistance < 0)" << jsv;
+                        BOOST_LOG_OWL(warning) << "(moveStepDistance > 32767 || moveStepDistance < 0)" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -539,7 +539,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::land): {
                     // land
-                    BOOST_LOG_TRIVIAL(info) << "land";
+                    BOOST_LOG_OWL(info) << "land";
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::land;
                     m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
@@ -562,10 +562,10 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::move):
                     // move step
-                    BOOST_LOG_TRIVIAL(info) << "move step";
+                    BOOST_LOG_OWL(info) << "move step";
                     {
                         if (!json_o.contains("forward") && !json_o.contains("distance")) {
-                            BOOST_LOG_TRIVIAL(warning) << "move step contains fail " << jsv;
+                            BOOST_LOG_OWL(warning) << "move step contains fail " << jsv;
                             self->send_back_json(
                                     boost::json::value{
                                             {"cmdId",     cmdId},
@@ -581,7 +581,7 @@ namespace OwlProcessJsonMessage {
                         auto moveStepForward = getFromJsonObject<int32_t>(json_o, "forward", good);
                         auto moveStepDistance = getFromJsonObject<int32_t>(json_o, "distance", good);
                         if (!good) {
-                            BOOST_LOG_TRIVIAL(warning) << "move step getFromJsonObject fail" << jsv;
+                            BOOST_LOG_OWL(warning) << "move step getFromJsonObject fail" << jsv;
                             self->send_back_json(
                                     boost::json::value{
                                             {"msg",    "error"},
@@ -592,7 +592,7 @@ namespace OwlProcessJsonMessage {
                             return;
                         }
                         if (moveStepDistance > 32767 || moveStepDistance < 0) {
-                            BOOST_LOG_TRIVIAL(warning) << "(moveStepDistance > 32767 || moveStepDistance < 0)" << jsv;
+                            BOOST_LOG_OWL(warning) << "(moveStepDistance > 32767 || moveStepDistance < 0)" << jsv;
                             self->send_back_json(
                                     boost::json::value{
                                             {"msg",    "error"},
@@ -605,7 +605,7 @@ namespace OwlProcessJsonMessage {
                         switch (moveStepForward) {
                             case static_cast<int>(OwlCmdMoveEnum::up): {
                                 // up
-                                BOOST_LOG_TRIVIAL(info) << "move up " << moveStepDistance;
+                                BOOST_LOG_OWL(info) << "move up " << moveStepDistance;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
                                 m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
@@ -629,7 +629,7 @@ namespace OwlProcessJsonMessage {
                             }
                             case static_cast<int>(OwlCmdMoveEnum::down): {
                                 // down
-                                BOOST_LOG_TRIVIAL(info) << "move down " << moveStepDistance;
+                                BOOST_LOG_OWL(info) << "move down " << moveStepDistance;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
                                 m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
@@ -653,7 +653,7 @@ namespace OwlProcessJsonMessage {
                             }
                             case static_cast<int>(OwlCmdMoveEnum::left): {
                                 // left
-                                BOOST_LOG_TRIVIAL(info) << "move left " << moveStepDistance;
+                                BOOST_LOG_OWL(info) << "move left " << moveStepDistance;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
                                 m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
@@ -677,7 +677,7 @@ namespace OwlProcessJsonMessage {
                             }
                             case static_cast<int>(OwlCmdMoveEnum::right): {
                                 // right
-                                BOOST_LOG_TRIVIAL(info) << "move right " << moveStepDistance;
+                                BOOST_LOG_OWL(info) << "move right " << moveStepDistance;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
                                 m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
@@ -701,7 +701,7 @@ namespace OwlProcessJsonMessage {
                             }
                             case static_cast<int>(OwlCmdMoveEnum::forward): {
                                 // forward
-                                BOOST_LOG_TRIVIAL(info) << "move forward " << moveStepDistance;
+                                BOOST_LOG_OWL(info) << "move forward " << moveStepDistance;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
                                 m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
@@ -725,7 +725,7 @@ namespace OwlProcessJsonMessage {
                             }
                             case static_cast<int>(OwlCmdMoveEnum::back): {
                                 // back
-                                BOOST_LOG_TRIVIAL(info) << "move back " << moveStepDistance;
+                                BOOST_LOG_OWL(info) << "move back " << moveStepDistance;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
                                 m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
@@ -749,7 +749,7 @@ namespace OwlProcessJsonMessage {
                             }
                             default:
                                 // ignore
-                                BOOST_LOG_TRIVIAL(warning) << "move ignore " << jsv;
+                                BOOST_LOG_OWL(warning) << "move ignore " << jsv;
                                 self->send_back_json(
                                         boost::json::value{
                                                 {"cmdId",     cmdId},
@@ -764,10 +764,10 @@ namespace OwlProcessJsonMessage {
                     break;
                 case static_cast<int>(OwlCmdEnum::rotate):
                     // rotate
-                    BOOST_LOG_TRIVIAL(info) << "rotate ";
+                    BOOST_LOG_OWL(info) << "rotate ";
                     {
                         if (!json_o.contains("rotate") && !json_o.contains("rote")) {
-                            BOOST_LOG_TRIVIAL(warning) << "rotate contains fail " << jsv;
+                            BOOST_LOG_OWL(warning) << "rotate contains fail " << jsv;
                             self->send_back_json(
                                     boost::json::value{
                                             {"cmdId",     cmdId},
@@ -783,7 +783,7 @@ namespace OwlProcessJsonMessage {
                         auto rotate = getFromJsonObject<int32_t>(json_o, "rotate", good);
                         auto rote = getFromJsonObject<int32_t>(json_o, "rote", good);
                         if (!good) {
-                            BOOST_LOG_TRIVIAL(warning) << "rotate getFromJsonObject fail" << jsv;
+                            BOOST_LOG_OWL(warning) << "rotate getFromJsonObject fail" << jsv;
                             self->send_back_json(
                                     boost::json::value{
                                             {"msg",    "error"},
@@ -794,7 +794,7 @@ namespace OwlProcessJsonMessage {
                             return;
                         }
                         if (rote > 360 || rote < 0) {
-                            BOOST_LOG_TRIVIAL(warning) << "(rote > 360 || rote < 0)" << jsv;
+                            BOOST_LOG_OWL(warning) << "(rote > 360 || rote < 0)" << jsv;
                             self->send_back_json(
                                     boost::json::value{
                                             {"msg",    "error"},
@@ -807,7 +807,7 @@ namespace OwlProcessJsonMessage {
                         switch (rotate) {
                             case static_cast<int>(OwlCmdRotateEnum::cw): {
                                 // cw
-                                BOOST_LOG_TRIVIAL(info) << "rotate cw " << rote;
+                                BOOST_LOG_OWL(info) << "rotate cw " << rote;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::rotate;
                                 m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
@@ -831,7 +831,7 @@ namespace OwlProcessJsonMessage {
                             }
                             case static_cast<int>(OwlCmdRotateEnum::ccw): {
                                 // ccw
-                                BOOST_LOG_TRIVIAL(info) << "rotate ccw " << rote;
+                                BOOST_LOG_OWL(info) << "rotate ccw " << rote;
                                 auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::rotate;
                                 m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
@@ -855,7 +855,7 @@ namespace OwlProcessJsonMessage {
                             }
                             default:
                                 // ignore
-                                BOOST_LOG_TRIVIAL(info) << "rotate ignore " << jsv;
+                                BOOST_LOG_OWL(info) << "rotate ignore " << jsv;
                                 self->send_back_json(
                                         boost::json::value{
                                                 {"cmdId",     cmdId},
@@ -870,7 +870,7 @@ namespace OwlProcessJsonMessage {
                     break;
                 case static_cast<int>(OwlCmdEnum::keep): {
                     // keep position
-                    BOOST_LOG_TRIVIAL(info) << "keep";
+                    BOOST_LOG_OWL(info) << "keep";
                     auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::keep;
                     m->callbackRunner = [self, cmdId, packageId](
@@ -892,9 +892,9 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::gotoCmd): {
                     // goto position
-                    BOOST_LOG_TRIVIAL(info) << "gotoPosition";
+                    BOOST_LOG_OWL(info) << "gotoPosition";
                     if (!json_o.contains("x") && !json_o.contains("y") && !json_o.contains("h")) {
-                        BOOST_LOG_TRIVIAL(warning) << "gotoPosition contains fail " << jsv;
+                        BOOST_LOG_OWL(warning) << "gotoPosition contains fail " << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
@@ -911,7 +911,7 @@ namespace OwlProcessJsonMessage {
                     auto y = getFromJsonObject<int32_t>(json_o, "y", good);
                     auto h = getFromJsonObject<int32_t>(json_o, "h", good);
                     if (!good) {
-                        BOOST_LOG_TRIVIAL(warning) << "gotoPosition getFromJsonObject fail" << jsv;
+                        BOOST_LOG_OWL(warning) << "gotoPosition getFromJsonObject fail" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -922,7 +922,7 @@ namespace OwlProcessJsonMessage {
                         return;
                     }
                     if (x < 0 || y < 0 || h < 0) {
-                        BOOST_LOG_TRIVIAL(warning) << "(x < 0 || y < 0 || h < 0)" << jsv;
+                        BOOST_LOG_OWL(warning) << "(x < 0 || y < 0 || h < 0)" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -933,7 +933,7 @@ namespace OwlProcessJsonMessage {
                         return;
                     }
                     if (x > 32767 || y > 32767 || h > 32767) {
-                        BOOST_LOG_TRIVIAL(warning) << "(x > 32767 || y > 32767 || h > 32767)" << jsv;
+                        BOOST_LOG_OWL(warning) << "(x > 32767 || y > 32767 || h > 32767)" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -968,10 +968,10 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::led): {
                     // led
-                    BOOST_LOG_TRIVIAL(info) << "led";
+                    BOOST_LOG_OWL(info) << "led";
                     if (!json_o.contains("ledMode")
                         && !json_o.contains("b") && !json_o.contains("g") && !json_o.contains("r")) {
-                        BOOST_LOG_TRIVIAL(warning) << "led contains fail " << jsv;
+                        BOOST_LOG_OWL(warning) << "led contains fail " << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
@@ -990,7 +990,7 @@ namespace OwlProcessJsonMessage {
                     auto g = getFromJsonObject<int32_t>(json_o, "g", good);
                     auto r = getFromJsonObject<int32_t>(json_o, "r", good);
                     if (!good) {
-                        BOOST_LOG_TRIVIAL(warning) << "led getFromJsonObject fail" << jsv;
+                        BOOST_LOG_OWL(warning) << "led getFromJsonObject fail" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -1001,7 +1001,7 @@ namespace OwlProcessJsonMessage {
                         return;
                     }
                     if (b < 0 || g < 0 || r < 0 || b > 255 || g > 255 || r > 255) {
-                        BOOST_LOG_TRIVIAL(warning) << "(b < 0 || g < 0 || r < 0 || b > 255 || g > 255 || r > 255)"
+                        BOOST_LOG_OWL(warning) << "(b < 0 || g < 0 || r < 0 || b > 255 || g > 255 || r > 255)"
                                                    << jsv;
                         self->send_back_json(
                                 boost::json::value{
@@ -1038,9 +1038,9 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::high): {
                     // high
-                    BOOST_LOG_TRIVIAL(info) << "high";
+                    BOOST_LOG_OWL(info) << "high";
                     if (!json_o.contains("high")) {
-                        BOOST_LOG_TRIVIAL(warning) << "high contains fail " << jsv;
+                        BOOST_LOG_OWL(warning) << "high contains fail " << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
@@ -1055,7 +1055,7 @@ namespace OwlProcessJsonMessage {
                     bool good = true;
                     auto high = getFromJsonObject<int32_t>(json_o, "high", good);
                     if (!good) {
-                        BOOST_LOG_TRIVIAL(warning) << "high getFromJsonObject fail" << jsv;
+                        BOOST_LOG_OWL(warning) << "high getFromJsonObject fail" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -1066,7 +1066,7 @@ namespace OwlProcessJsonMessage {
                         return;
                     }
                     if (high < 0 || high > 32767) {
-                        BOOST_LOG_TRIVIAL(warning) << "(high < 0 || high > 32767)" << jsv;
+                        BOOST_LOG_OWL(warning) << "(high < 0 || high > 32767)" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -1099,9 +1099,9 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::speed): {
                     // speed
-                    BOOST_LOG_TRIVIAL(info) << "speed";
+                    BOOST_LOG_OWL(info) << "speed";
                     if (!json_o.contains("speed")) {
-                        BOOST_LOG_TRIVIAL(warning) << "speed contains fail " << jsv;
+                        BOOST_LOG_OWL(warning) << "speed contains fail " << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
@@ -1116,7 +1116,7 @@ namespace OwlProcessJsonMessage {
                     bool good = true;
                     auto speed = getFromJsonObject<int32_t>(json_o, "speed", good);
                     if (!good) {
-                        BOOST_LOG_TRIVIAL(warning) << "speed getFromJsonObject fail" << jsv;
+                        BOOST_LOG_OWL(warning) << "speed getFromJsonObject fail" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -1127,7 +1127,7 @@ namespace OwlProcessJsonMessage {
                         return;
                     }
                     if (speed <= 0 || speed > 32767) {
-                        BOOST_LOG_TRIVIAL(warning) << "(speed <= 0 || speed > 32767)" << jsv;
+                        BOOST_LOG_OWL(warning) << "(speed <= 0 || speed > 32767)" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -1160,9 +1160,9 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::flyMode): {
                     // flyMode
-                    BOOST_LOG_TRIVIAL(info) << "flyMode";
+                    BOOST_LOG_OWL(info) << "flyMode";
                     if (!json_o.contains("flyMode")) {
-                        BOOST_LOG_TRIVIAL(warning) << "flyMode contains fail " << jsv;
+                        BOOST_LOG_OWL(warning) << "flyMode contains fail " << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
@@ -1177,7 +1177,7 @@ namespace OwlProcessJsonMessage {
                     bool good = true;
                     auto flyMode = getFromJsonObject<int32_t>(json_o, "flyMode", good);
                     if (!good) {
-                        BOOST_LOG_TRIVIAL(warning) << "flyMode getFromJsonObject fail" << jsv;
+                        BOOST_LOG_OWL(warning) << "flyMode getFromJsonObject fail" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -1210,9 +1210,9 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::joyCon): {
                     // joystick
-                    BOOST_LOG_TRIVIAL(info) << "JoyCon";
+                    BOOST_LOG_OWL(info) << "JoyCon";
                     if (!json_o.contains("JoyCon")) {
-                        BOOST_LOG_TRIVIAL(warning) << "JoyCon contains fail " << jsv;
+                        BOOST_LOG_OWL(warning) << "JoyCon contains fail " << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
@@ -1227,7 +1227,7 @@ namespace OwlProcessJsonMessage {
                     bool good = true;
                     auto joyConObj = json_o.at("JoyCon");
                     if (!joyConObj.is_object()) {
-                        BOOST_LOG_TRIVIAL(warning) << "joyConObj (!JoyCon.is_object())" << jsv;
+                        BOOST_LOG_OWL(warning) << "joyConObj (!JoyCon.is_object())" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -1242,9 +1242,9 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::joyConSimple): {
                     // joystick
-                    BOOST_LOG_TRIVIAL(info) << "JoyConSimple";
+                    BOOST_LOG_OWL(info) << "JoyConSimple";
                     if (!json_o.contains("JoyConSimple")) {
-                        BOOST_LOG_TRIVIAL(warning) << "JoyConSimple contains fail " << jsv;
+                        BOOST_LOG_OWL(warning) << "JoyConSimple contains fail " << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
@@ -1259,7 +1259,7 @@ namespace OwlProcessJsonMessage {
                     bool good = true;
                     auto joyConSimpleObj = json_o.at("JoyConSimple");
                     if (!joyConSimpleObj.is_object()) {
-                        BOOST_LOG_TRIVIAL(warning) << "joyConSimpleObj (!JoyConSimple.is_object())" << jsv;
+                        BOOST_LOG_OWL(warning) << "joyConSimpleObj (!JoyConSimple.is_object())" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -1274,9 +1274,9 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::joyConGyro): {
                     // joystick
-                    BOOST_LOG_TRIVIAL(info) << "JoyConGyro";
+                    BOOST_LOG_OWL(info) << "JoyConGyro";
                     if (!json_o.contains("JoyConGyro")) {
-                        BOOST_LOG_TRIVIAL(warning) << "JoyConGyro contains fail " << jsv;
+                        BOOST_LOG_OWL(warning) << "JoyConGyro contains fail " << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
@@ -1291,7 +1291,7 @@ namespace OwlProcessJsonMessage {
                     bool good = true;
                     auto joyConGyroObj = json_o.at("JoyConGyro");
                     if (!joyConGyroObj.is_object()) {
-                        BOOST_LOG_TRIVIAL(warning) << "joyConGyroObj (!JoyConGyro.is_object())" << jsv;
+                        BOOST_LOG_OWL(warning) << "joyConGyroObj (!JoyConGyro.is_object())" << jsv;
                         self->send_back_json(
                                 boost::json::value{
                                         {"msg",    "error"},
@@ -1306,7 +1306,7 @@ namespace OwlProcessJsonMessage {
                 }
                 default:
                     // ignore
-                    BOOST_LOG_TRIVIAL(warning) << "ignore " << jsv;
+                    BOOST_LOG_OWL(warning) << "ignore " << jsv;
                     self->send_back_json(
                             boost::json::value{
                                     {"cmdId",     cmdId},
@@ -1319,7 +1319,7 @@ namespace OwlProcessJsonMessage {
             }
             return;
         } catch (std::exception &e) {
-            BOOST_LOG_TRIVIAL(error) << "CommandService::process_message";
+            BOOST_LOG_OWL(error) << "CommandService::process_message";
             // ignore
             self->send_back_json(
                     boost::json::value{
@@ -1330,7 +1330,7 @@ namespace OwlProcessJsonMessage {
             );
             return;
         } catch (...) {
-            BOOST_LOG_TRIVIAL(error) << "CommandService::process_message catch (...) exception"
+            BOOST_LOG_OWL(error) << "CommandService::process_message catch (...) exception"
                                      << "\n" << boost::current_exception_diagnostic_information();
             // ignore
             self->send_back_json(

@@ -15,7 +15,7 @@
 #include <boost/system.hpp>
 #include <boost/json.hpp>
 #include <boost/utility/string_view.hpp>
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 
 namespace OwlCameraConfig {
     // from cv::VideoCaptureAPIs
@@ -141,19 +141,19 @@ namespace OwlConfigLoader {
     public:
 
         ~ConfigLoader() {
-            BOOST_LOG_TRIVIAL(trace) << "~ConfigLoader()";
+            BOOST_LOG_OWL(trace) << "~ConfigLoader()";
         }
 
         void print();
 
         void init(const std::string &filePath) {
             auto j = load_json_file(filePath);
-            BOOST_LOG_TRIVIAL(info) << "j.is_object() " << j.is_object() << "\t"
+            BOOST_LOG_OWL(info) << "j.is_object() " << j.is_object() << "\t"
                                     << "j.kind() " << boost::json::to_string(j.kind());
             if (j.is_object()) {
                 config_ = parse_json(j.as_object());
             } else {
-                BOOST_LOG_TRIVIAL(error)
+                BOOST_LOG_OWL(error)
                     << "ConfigLoader: config file not exit OR cannot load config file OR config file invalid.";
             }
         }

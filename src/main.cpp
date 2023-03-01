@@ -7,7 +7,6 @@
 #include <boost/asio.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/thread.hpp>
-#include <boost/log/trivial.hpp>
 #include <boost/program_options.hpp>
 #include "CommandService/CommandService.h"
 #include "CommandService/CmdServiceHttp.h"
@@ -42,31 +41,31 @@ struct ThreadCallee {
     int operator()() {
         try {
             OwlLog::threadName = thisThreadName;
-            BOOST_LOG_TRIVIAL(info) << ">>>" << OwlLog::threadName << "<<< running thread <<< <<<";
+            BOOST_LOG_OWL(info) << ">>>" << OwlLog::threadName << "<<< running thread <<< <<<";
             // use work to keep ioc run
             auto work_guard_ = boost::asio::make_work_guard(ioc);
             ioc.run();
             boost::ignore_unused(work_guard_);
-            BOOST_LOG_TRIVIAL(warning) << "ThreadCallee ioc exit. thread: " << OwlLog::threadName;
+            BOOST_LOG_OWL(warning) << "ThreadCallee ioc exit. thread: " << OwlLog::threadName;
         } catch (int e) {
             tg.interrupt_all();
-            BOOST_LOG_TRIVIAL(error) << "ThreadCallee catch (int) exception: " << e;
+            BOOST_LOG_OWL(error) << "ThreadCallee catch (int) exception: " << e;
             return -1;
         } catch (boost::exception &e) {
             tg.interrupt_all();
             // https://www.boost.org/doc/libs/1_81_0/libs/exception/doc/diagnostic_information.html
-            BOOST_LOG_TRIVIAL(error) << "ThreadCallee catch std::exception :"
+            BOOST_LOG_OWL(error) << "ThreadCallee catch std::exception :"
                                      << "\n diag: " << boost::diagnostic_information(e)
                                      << "\n what: " << dynamic_cast<std::exception const &>(e).what();
             return -1;
         } catch (const std::exception &e) {
             tg.interrupt_all();
-            BOOST_LOG_TRIVIAL(error) << "ThreadCallee catch std::exception: " << e.what();
+            BOOST_LOG_OWL(error) << "ThreadCallee catch std::exception: " << e.what();
             return -1;
         } catch (...) {
             tg.interrupt_all();
             // https://www.boost.org/doc/libs/1_81_0/libs/exception/doc/current_exception_diagnostic_information.html
-            BOOST_LOG_TRIVIAL(error) << "ThreadCallee catch (...) exception"
+            BOOST_LOG_OWL(error) << "ThreadCallee catch (...) exception"
                                      << "\n current_exception_diagnostic_information : "
                                      << boost::current_exception_diagnostic_information();
             return -1;
@@ -78,12 +77,12 @@ struct ThreadCallee {
 //int main() {
 //    auto u = boost::urls::parse_uri_reference("/abc?zzxcv=123&er=12");
 //    if (u.has_error()) {
-//        BOOST_LOG_TRIVIAL(trace) << "(u.has_error()) " << u.error().what();
+//        BOOST_LOG_OWL(trace) << "(u.has_error()) " << u.error().what();
 //    }
-//    BOOST_LOG_TRIVIAL(trace) << "ok";
+//    BOOST_LOG_OWL(trace) << "ok";
 //    auto v = u.value();
-//    BOOST_LOG_TRIVIAL(trace) << v.path();
-//    BOOST_LOG_TRIVIAL(trace) << v.query();
+//    BOOST_LOG_OWL(trace) << v.path();
+//    BOOST_LOG_OWL(trace) << v.query();
 //    // auto q = u.value().params();
 //    // q.find("");
 //
@@ -106,7 +105,7 @@ struct ThreadCallee {
 //        return 0;
 //    }
 //
-//    BOOST_LOG_TRIVIAL(trace) << "image:"
+//    BOOST_LOG_OWL(trace) << "image:"
 //                             << " cols " << image.cols
 //                             << " rows " << image.rows
 //                             << " channels " << image.channels();
@@ -114,7 +113,7 @@ struct ThreadCallee {
 ////        cv::cvtColor(image, image, cv::ColorConversionCodes::COLOR_BGR2GRAY);
 ////    }
 ////    cv::resize(image, image, cv::Size{640, 480}, 0, 0, cv::InterpolationFlags::INTER_CUBIC);
-//    BOOST_LOG_TRIVIAL(trace) << "image:"
+//    BOOST_LOG_OWL(trace) << "image:"
 //                             << " cols " << image.cols
 //                             << " rows " << image.rows
 //                             << " channels " << image.channels();
@@ -126,9 +125,9 @@ struct ThreadCallee {
 //    cv::aruco::ArucoDetector detector(dictionary, detectorParams);
 //    detector.detectMarkers(image, markerCorners, markerIds, rejectedCandidates);
 //
-//    BOOST_LOG_TRIVIAL(trace) << "markerIds.size():" << markerIds.size();
-//    BOOST_LOG_TRIVIAL(trace) << "markerCorners.size():" << markerCorners.size();
-//    BOOST_LOG_TRIVIAL(trace) << "rejectedCandidates.size():" << rejectedCandidates.size();
+//    BOOST_LOG_OWL(trace) << "markerIds.size():" << markerIds.size();
+//    BOOST_LOG_OWL(trace) << "markerCorners.size():" << markerCorners.size();
+//    BOOST_LOG_OWL(trace) << "rejectedCandidates.size():" << rejectedCandidates.size();
 //
 //    cv::Mat markerImage;
 //    cv::aruco::generateImageMarker(dictionary, 1, 200, markerImage, 1);
@@ -155,7 +154,7 @@ int main(int argc, const char *argv[]) {
     BOOST_LOG_OWL(info)
         << "BOOST_LOG_SEV(OwlLog::slg, OwlLog::severity_level_my::aaa)";
 
-    BOOST_LOG_TRIVIAL(info) << "cv::haveImageWriter(.jpg):" << cv::haveImageWriter(".jpg");
+    BOOST_LOG_OWL(info) << "cv::haveImageWriter(.jpg):" << cv::haveImageWriter(".jpg");
 
 //    // test
 //    OwlImageService::ProtobufTest::createImageRequest();
@@ -199,7 +198,7 @@ int main(int argc, const char *argv[]) {
         return 0;
     }
 
-    BOOST_LOG_TRIVIAL(info) << "config_file: " << config_file;
+    BOOST_LOG_OWL(info) << "config_file: " << config_file;
 
 
 
@@ -337,15 +336,15 @@ int main(int argc, const char *argv[]) {
     sig.add(SIGTERM);
     sig.async_wait([&](const boost::system::error_code error, int signum) {
         if (error) {
-            BOOST_LOG_TRIVIAL(error) << "got signal error: " << error.what() << " signum " << signum;
+            BOOST_LOG_OWL(error) << "got signal error: " << error.what() << " signum " << signum;
             return;
         }
-        BOOST_LOG_TRIVIAL(error) << "got signal: " << signum;
+        BOOST_LOG_OWL(error) << "got signal: " << signum;
         switch (signum) {
             case SIGINT:
             case SIGTERM: {
                 // stop all service on there
-                BOOST_LOG_TRIVIAL(info) << "stopping all service. ";
+                BOOST_LOG_OWL(info) << "stopping all service. ";
                 ioc_map_calc.stop();
                 ioc_cmd.stop();
                 ioc_time.stop();
@@ -358,13 +357,13 @@ int main(int argc, const char *argv[]) {
             }
                 break;
             default:
-                BOOST_LOG_TRIVIAL(warning) << "sig switch default.";
+                BOOST_LOG_OWL(warning) << "sig switch default.";
                 break;
         }
     });
 
     size_t processor_count = boost::thread::hardware_concurrency();
-    BOOST_LOG_TRIVIAL(info) << "processor_count: " << processor_count;
+    BOOST_LOG_OWL(info) << "processor_count: " << processor_count;
 
     boost::thread_group tg;
     tg.create_thread(ThreadCallee{ioc_map_calc, tg, "ioc_map_calc"});
@@ -380,12 +379,12 @@ int main(int argc, const char *argv[]) {
 
 
     BOOST_ASSERT(!serialControllerService->weak_from_this().expired());
-    BOOST_LOG_TRIVIAL(info) << "boost::thread_group running";
-    BOOST_LOG_TRIVIAL(info) << "boost::thread_group size : " << tg.size();
+    BOOST_LOG_OWL(info) << "boost::thread_group running";
+    BOOST_LOG_OWL(info) << "boost::thread_group size : " << tg.size();
     tg.join_all();
-    BOOST_LOG_TRIVIAL(info) << "boost::thread_group end";
+    BOOST_LOG_OWL(info) << "boost::thread_group end";
 
     google::protobuf::ShutdownProtobufLibrary();
-    BOOST_LOG_TRIVIAL(info) << "boost::thread_group all clear.";
+    BOOST_LOG_OWL(info) << "boost::thread_group all clear.";
     return 0;
 }

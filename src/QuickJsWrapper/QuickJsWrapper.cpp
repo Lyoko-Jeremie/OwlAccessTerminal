@@ -1,7 +1,7 @@
 // jeremie
 
 #include "QuickJsWrapper.h"
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 
 
 namespace OwlQuickJsWrapper {

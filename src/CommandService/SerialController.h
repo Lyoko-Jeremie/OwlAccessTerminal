@@ -6,7 +6,7 @@
 #include <memory>
 #include <boost/asio.hpp>
 #include <boost/asio/read_until.hpp>
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 #include <boost/core/ignore_unused.hpp>
 #include <boost/assert.hpp>
 #include <boost/bind/bind.hpp>
@@ -33,7 +33,7 @@ namespace OwlSerialController {
         void init();
 
         ~PortController() {
-            BOOST_LOG_TRIVIAL(trace) << "~SerialController()";
+            BOOST_LOG_OWL(trace) << "~SerialController()";
             close();
         }
 
@@ -74,7 +74,7 @@ namespace OwlSerialController {
             BOOST_ASSERT(sp_);
             sp_->set_option(option, ec);
             if (ec) {
-                BOOST_LOG_TRIVIAL(error) << "PortController set_option error: " << ec.what();
+                BOOST_LOG_OWL(error) << "PortController set_option error: " << ec.what();
                 return false;
             }
             return true;
@@ -94,16 +94,16 @@ namespace OwlSerialController {
 
         bool close() {
             BOOST_ASSERT(sp_);
-            BOOST_LOG_TRIVIAL(trace) << "PortController::close";
+            BOOST_LOG_OWL(trace) << "PortController::close";
             if (sp_->is_open()) {
                 boost::system::error_code ec;
                 sp_->close(ec);
                 if (ec) {
-                    BOOST_LOG_TRIVIAL(error) << "PortController close error: " << ec.what();
+                    BOOST_LOG_OWL(error) << "PortController close error: " << ec.what();
                     return false;
                 }
             }
-            BOOST_LOG_TRIVIAL(trace) << "PortController::close true";
+            BOOST_LOG_OWL(trace) << "PortController::close true";
             return true;
         }
 
@@ -182,10 +182,10 @@ namespace OwlSerialController {
 
         void init() {
             BOOST_ASSERT(!weak_from_this().expired());
-            BOOST_LOG_TRIVIAL(trace) << "weak_from_this().lock().use_count() : " << weak_from_this().lock().use_count();
+            BOOST_LOG_OWL(trace) << "weak_from_this().lock().use_count() : " << weak_from_this().lock().use_count();
             airplanePortController = std::make_shared<PortController>(ioc_, weak_from_this());
             BOOST_ASSERT(!weak_from_this().expired());
-            BOOST_LOG_TRIVIAL(trace) << "airplanePortController.use_count() : " << airplanePortController.use_count();
+            BOOST_LOG_OWL(trace) << "airplanePortController.use_count() : " << airplanePortController.use_count();
             BOOST_ASSERT(airplanePortController.use_count() > 0);
             airplanePortController->init();
 
@@ -194,7 +194,7 @@ namespace OwlSerialController {
         }
 
         ~SerialController() {
-            BOOST_LOG_TRIVIAL(trace) << "~SerialController()";
+            BOOST_LOG_OWL(trace) << "~SerialController()";
             for (auto &m: mailbox_list_) {
                 m->receiveA2B(nullptr);
             }

@@ -5,7 +5,7 @@
 
 #include <memory>
 #include <functional>
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 #include <boost/exception/diagnostic_information.hpp>
 
 #include "./QuickJsH.h"
@@ -34,14 +34,14 @@ namespace OwlQuickJsWrapper {
             catch (qjs::exception &e) {
                 try {
                     auto exc = context_.getException();
-                    BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl getCallbackFunction qjs::exception "
+                    BOOST_LOG_OWL(error) << "QuickJsWrapperImpl getCallbackFunction qjs::exception "
                                              << (std::string) exc;
                     if ((bool) exc["stack"]) {
-                        BOOST_LOG_TRIVIAL(error) << "QuickJsWrapperImpl getCallbackFunction qjs::exception "
+                        BOOST_LOG_OWL(error) << "QuickJsWrapperImpl getCallbackFunction qjs::exception "
                                                  << (std::string) exc["stack"];
                     }
                 } catch (...) {
-                    BOOST_LOG_TRIVIAL(error)
+                    BOOST_LOG_OWL(error)
                         << "QuickJsWrapperImpl getCallbackFunction qjs::exception&e catch (...) exception"
                         << "\n current_exception_diagnostic_information : "
                         << boost::current_exception_diagnostic_information();

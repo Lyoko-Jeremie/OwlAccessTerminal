@@ -6,7 +6,7 @@
 #include <memory>
 #include <boost/asio.hpp>
 #include <boost/asio/read_until.hpp>
-#include <boost/log/trivial.hpp>
+#include "../../Log/Log.h"
 #include <boost/core/ignore_unused.hpp>
 #include <utility>
 #include "../CmdSerialMail.h"
@@ -38,7 +38,7 @@ namespace OwlSerialController {
         void init();
 
         ~StateReader() {
-            BOOST_LOG_TRIVIAL(trace) << "~StateReader()";
+            BOOST_LOG_OWL(trace) << "~StateReader()";
         }
 
     private:

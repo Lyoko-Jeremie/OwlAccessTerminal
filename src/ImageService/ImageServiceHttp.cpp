@@ -47,7 +47,7 @@ namespace OwlImageServiceHttp {
             ) {
                 std::string time_string;
                 if (!boost::conversion::try_lexical_convert<std::string>(time_data_r->clockTimestampMs, time_string)) {
-                    BOOST_LOG_TRIVIAL(error)
+                    BOOST_LOG_OWL(error)
                         << "ImageServiceHttpConnect::create_get_response_image try_lexical_convert error";
                     time_string = "0";
                     boost::asio::dispatch(socket_.get_executor(), [this, self = shared_from_this()]() {
@@ -307,7 +307,7 @@ namespace OwlImageServiceHttp {
 
                 std::string ts;
                 if (!boost::conversion::try_lexical_convert<std::string>(data_r->clockTimestampMs, ts)) {
-                    BOOST_LOG_TRIVIAL(error)
+                    BOOST_LOG_OWL(error)
                         << "ImageServiceHttpConnect::create_get_response_time try_lexical_convert error";
                     internal_server_error("try_lexical_convert error");
                     return;
@@ -559,21 +559,21 @@ namespace OwlImageServiceHttp {
         // Open the acceptor
         acceptor_.open(endpoint.protocol(), ec);
         if (ec) {
-            BOOST_LOG_TRIVIAL(error) << "open" << " : " << ec.message();
+            BOOST_LOG_OWL(error) << "open" << " : " << ec.message();
             return;
         }
 
         // Allow address reuse
         acceptor_.set_option(boost::asio::socket_base::reuse_address(true), ec);
         if (ec) {
-            BOOST_LOG_TRIVIAL(error) << "set_option" << " : " << ec.message();
+            BOOST_LOG_OWL(error) << "set_option" << " : " << ec.message();
             return;
         }
 
         // Bind to the server address
         acceptor_.bind(endpoint, ec);
         if (ec) {
-            BOOST_LOG_TRIVIAL(error) << "bind" << " : " << ec.message();
+            BOOST_LOG_OWL(error) << "bind" << " : " << ec.message();
             return;
         }
 
@@ -581,7 +581,7 @@ namespace OwlImageServiceHttp {
         acceptor_.listen(
                 boost::asio::socket_base::max_listen_connections, ec);
         if (ec) {
-            BOOST_LOG_TRIVIAL(error) << "listen" << " : " << ec.message();
+            BOOST_LOG_OWL(error) << "listen" << " : " << ec.message();
             return;
         }
     }

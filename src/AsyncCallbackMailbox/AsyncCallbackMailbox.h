@@ -6,7 +6,7 @@
 #include <memory>
 #include <functional>
 #include <boost/asio.hpp>
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 #include <boost/core/ignore_unused.hpp>
 #include <utility>
 
@@ -30,7 +30,7 @@ namespace OwlAsyncCallbackMailbox {
         std::string debugTag_;
 
         ~AsyncCallbackMailbox() {
-            BOOST_LOG_TRIVIAL(trace) << "~AsyncCallbackMailbox() " << debugTag_;
+            BOOST_LOG_OWL(trace) << "~AsyncCallbackMailbox() " << debugTag_;
         }
 
         AsyncCallbackMailbox(
@@ -42,7 +42,7 @@ namespace OwlAsyncCallbackMailbox {
 #else // DEBUG_AsyncCallbackMailbox
 
         ~AsyncCallbackMailbox() {
-            BOOST_LOG_TRIVIAL(trace) << "~AsyncCallbackMailbox()";
+            BOOST_LOG_OWL(trace) << "~AsyncCallbackMailbox()";
         }
 
         AsyncCallbackMailbox(
@@ -82,27 +82,27 @@ namespace OwlAsyncCallbackMailbox {
         // A call this function to send data to B
         void sendA2B(A2B_t &&data) {
 #ifdef DEBUG_AsyncCallbackMailbox
-            BOOST_LOG_TRIVIAL(trace) << "AsyncCallbackMailbox sendA2B" << " [" << debugTag_ << "]";
+            BOOST_LOG_OWL(trace) << "AsyncCallbackMailbox sendA2B" << " [" << debugTag_ << "]";
 #endif // DEBUG_AsyncCallbackMailbox
             boost::asio::post(ioc_b_, [this, self = this->shared_from_this(), data]() {
 #ifdef DEBUG_AsyncCallbackMailbox
-                BOOST_LOG_TRIVIAL(trace) << "AsyncCallbackMailbox sendA2B post" << " [" << debugTag_ << "]";
+                BOOST_LOG_OWL(trace) << "AsyncCallbackMailbox sendA2B post" << " [" << debugTag_ << "]";
 #endif // DEBUG_AsyncCallbackMailbox
                 // avoid racing
                 auto &c = receiveA2B_;
                 if (c) {
 #ifdef DEBUG_AsyncCallbackMailbox
-                    BOOST_LOG_TRIVIAL(trace) << "AsyncCallbackMailbox sendA2B before call callback" << " [" << debugTag_ << "]";
+                    BOOST_LOG_OWL(trace) << "AsyncCallbackMailbox sendA2B before call callback" << " [" << debugTag_ << "]";
 #endif // DEBUG_AsyncCallbackMailbox
                     c(std::move(data));
 #ifdef DEBUG_AsyncCallbackMailbox
-                    BOOST_LOG_TRIVIAL(trace) << "AsyncCallbackMailbox sendA2B after call callback" << " [" << debugTag_ << "]";
+                    BOOST_LOG_OWL(trace) << "AsyncCallbackMailbox sendA2B after call callback" << " [" << debugTag_ << "]";
 #endif // DEBUG_AsyncCallbackMailbox
                 } else {
 #ifdef DEBUG_AsyncCallbackMailbox
-                    BOOST_LOG_TRIVIAL(error) << "AsyncCallbackMailbox sendA2B receiveA2B empty" << " [" << debugTag_ << "]";
+                    BOOST_LOG_OWL(error) << "AsyncCallbackMailbox sendA2B receiveA2B empty" << " [" << debugTag_ << "]";
 #else // DEBUG_AsyncCallbackMailbox
-                    BOOST_LOG_TRIVIAL(error) << "AsyncCallbackMailbox sendA2B receiveA2B empty";
+                    BOOST_LOG_OWL(error) << "AsyncCallbackMailbox sendA2B receiveA2B empty";
 #endif // DEBUG_AsyncCallbackMailbox
                 }
             });
@@ -111,27 +111,27 @@ namespace OwlAsyncCallbackMailbox {
         // B call this function to send data to A
         void sendB2A(B2A_t &&data) {
 #ifdef DEBUG_AsyncCallbackMailbox
-            BOOST_LOG_TRIVIAL(trace) << "AsyncCallbackMailbox sendB2A" << " [" << debugTag_ << "]";
+            BOOST_LOG_OWL(trace) << "AsyncCallbackMailbox sendB2A" << " [" << debugTag_ << "]";
 #endif // DEBUG_AsyncCallbackMailbox
             boost::asio::post(ioc_a_, [this, self = this->shared_from_this(), data]() {
 #ifdef DEBUG_AsyncCallbackMailbox
-                BOOST_LOG_TRIVIAL(trace) << "AsyncCallbackMailbox sendB2A post" << " [" << debugTag_ << "]";
+                BOOST_LOG_OWL(trace) << "AsyncCallbackMailbox sendB2A post" << " [" << debugTag_ << "]";
 #endif // DEBUG_AsyncCallbackMailbox
                 // avoid racing
                 auto &c = receiveB2A_;
                 if (c) {
 #ifdef DEBUG_AsyncCallbackMailbox
-                    BOOST_LOG_TRIVIAL(trace) << "AsyncCallbackMailbox sendB2A before call callback" << " [" << debugTag_ << "]";
+                    BOOST_LOG_OWL(trace) << "AsyncCallbackMailbox sendB2A before call callback" << " [" << debugTag_ << "]";
 #endif // DEBUG_AsyncCallbackMailbox
                     c(std::move(data));
 #ifdef DEBUG_AsyncCallbackMailbox
-                    BOOST_LOG_TRIVIAL(trace) << "AsyncCallbackMailbox sendB2A after call callback" << " [" << debugTag_ << "]";
+                    BOOST_LOG_OWL(trace) << "AsyncCallbackMailbox sendB2A after call callback" << " [" << debugTag_ << "]";
 #endif // DEBUG_AsyncCallbackMailbox
                 } else {
 #ifdef DEBUG_AsyncCallbackMailbox
-                    BOOST_LOG_TRIVIAL(error) << "AsyncCallbackMailbox sendB2A receiveB2A empty" << " [" << debugTag_ << "]";
+                    BOOST_LOG_OWL(error) << "AsyncCallbackMailbox sendB2A receiveB2A empty" << " [" << debugTag_ << "]";
 #else // DEBUG_AsyncCallbackMailbox
-                    BOOST_LOG_TRIVIAL(error) << "AsyncCallbackMailbox sendB2A receiveB2A empty";
+                    BOOST_LOG_OWL(error) << "AsyncCallbackMailbox sendB2A receiveB2A empty";
 #endif // DEBUG_AsyncCallbackMailbox
                 }
             });

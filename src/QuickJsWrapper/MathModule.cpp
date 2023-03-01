@@ -5,7 +5,7 @@
 #include <limits>
 #include <random>
 #include <opencv2/opencv.hpp>
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 
 namespace MathRandom {
     // https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution
@@ -115,9 +115,9 @@ void installMathModuleExtend(qjs::Context &context, const std::string &moduleNam
     });
     module.function("atan2Deg", [](double y, double x) -> double {
         auto r = std::atan2(y, x);
-//        BOOST_LOG_TRIVIAL(trace) << "atan2Deg r 1 :" << r;
+//        BOOST_LOG_OWL(trace) << "atan2Deg r 1 :" << r;
         r = r / (M_PI / 180.0);
-//        BOOST_LOG_TRIVIAL(trace) << "atan2Deg r 2 :" << r;
+//        BOOST_LOG_OWL(trace) << "atan2Deg r 2 :" << r;
 //        if (r >= 0) {
 //            return r;
 //        } else {
@@ -165,7 +165,7 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
                         cv::Point2f{static_cast<float>(p3xDst), static_cast<float>(p3yDst)},
                 }
         );
-//        BOOST_LOG_TRIVIAL(trace) << "getAffineTransform m :" << m;
+//        BOOST_LOG_OWL(trace) << "getAffineTransform m :" << m;
         return std::vector<double>{
                 m.begin<double>(), m.end<double>()
         };
@@ -198,13 +198,13 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
         m = m.reshape(1, 2);
         cv::Mat ps{pArray, true};
         ps = ps.reshape(2);
-//        BOOST_LOG_TRIVIAL(trace) << "transform m :" << m;
-//        BOOST_LOG_TRIVIAL(trace) << "transform m cols :" << m.cols;
-//        BOOST_LOG_TRIVIAL(trace) << "transform ps :" << ps;
-//        BOOST_LOG_TRIVIAL(trace) << "transform ps channels :" << ps.channels();
+//        BOOST_LOG_OWL(trace) << "transform m :" << m;
+//        BOOST_LOG_OWL(trace) << "transform m cols :" << m.cols;
+//        BOOST_LOG_OWL(trace) << "transform ps :" << ps;
+//        BOOST_LOG_OWL(trace) << "transform ps channels :" << ps.channels();
         cv::Mat mOut;
         cv::transform(ps, mOut, m);
-//        BOOST_LOG_TRIVIAL(trace) << "transform mOut :" << mOut;
+//        BOOST_LOG_OWL(trace) << "transform mOut :" << mOut;
         mOut = mOut.reshape(1);
         return std::vector<double>{
                 mOut.begin<double>(), mOut.end<double>()

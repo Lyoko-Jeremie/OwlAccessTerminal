@@ -1,7 +1,7 @@
 // jeremie
 
 #include "EmbedWebServerTools.h"
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 
 namespace OwlEmbedWebServer {
 
@@ -60,7 +60,7 @@ namespace OwlEmbedWebServer {
 
     void fail(boost::beast::error_code ec, const char *what) {
 //        std::cerr << what << ": " << ec.message() << "\n";
-        BOOST_LOG_TRIVIAL(error) << what << ": " << ec.message();
+        BOOST_LOG_OWL(error) << what << ": " << ec.message();
     }
 }
 

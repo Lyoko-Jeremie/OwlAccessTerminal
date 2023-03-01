@@ -8,7 +8,7 @@
 #include <chrono>
 #include <atomic>
 #include <boost/asio.hpp>
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 #include "./TimeServiceMail.h"
 
 namespace OwlTimeService {
@@ -26,7 +26,7 @@ namespace OwlTimeService {
         }
 
         ~TimeService() {
-            BOOST_LOG_TRIVIAL(trace) << "~TimeService()";
+            BOOST_LOG_OWL(trace) << "~TimeService()";
             mailbox_->receiveB2A(nullptr);
         }
 
@@ -94,7 +94,7 @@ namespace OwlTimeService {
                         break;
                     case OwlMailDefine::TimeServiceCmd::ignore:
                     default: {
-                        BOOST_LOG_TRIVIAL(error) << "TimeService receiveMail switch(data->cmd) TimeServiceCmd ignore..";
+                        BOOST_LOG_OWL(error) << "TimeService receiveMail switch(data->cmd) TimeServiceCmd ignore..";
                         auto data_r = std::make_shared<OwlMailDefine::Time2Service>();
                         data_r->runner = data->callbackRunner;
                         sendMail(std::move(data_r));

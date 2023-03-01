@@ -30,7 +30,7 @@ namespace OwlSerialController {
         ) : parentRef_(std::move(parentRef)), serialPort_(std::move(serialPort)) {}
 
         ~StateReaderImplCo() {
-            BOOST_LOG_TRIVIAL(trace) << "~StateReaderImplCo()";
+            BOOST_LOG_OWL(trace) << "~StateReaderImplCo()";
         }
 
     private:
@@ -55,7 +55,7 @@ namespace OwlSerialController {
             constexpr bool flag_DEBUG_IF_CHECK_POINT = false;
 #endif // DEBUG_IF_CHECK_POINT
 
-            BOOST_LOG_TRIVIAL(trace) << "StateReaderImplCo start()";
+            BOOST_LOG_OWL(trace) << "StateReaderImplCo start()";
             if constexpr (flag_DEBUG_IF_CHECK_POINT) {
                 BOOST_ASSERT(!weak_from_this().expired());
                 BOOST_ASSERT(!parentRef_.expired());

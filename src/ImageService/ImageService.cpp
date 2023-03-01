@@ -29,7 +29,7 @@ namespace OwlImageService {
 
         if (!socket_.is_open()) {
             // is closed by other function, stop!
-            BOOST_LOG_TRIVIAL(info) << "Connection closed by other function, stop!";
+            BOOST_LOG_OWL(info) << "Connection closed by other function, stop!";
             return;
         }
 
@@ -45,19 +45,19 @@ namespace OwlImageService {
 
                     if (ec == boost::asio::error::eof) {
                         // Connection closed cleanly by peer.
-                        BOOST_LOG_TRIVIAL(info) << "Connection closed cleanly by peer.";
+                        BOOST_LOG_OWL(info) << "Connection closed cleanly by peer.";
                         close_connect();
                         return;
                     }
                     if (ec) {
                         // Connection error
-                        BOOST_LOG_TRIVIAL(error) << "Connection error " << ec.what();
+                        BOOST_LOG_OWL(error) << "Connection error " << ec.what();
                         close_connect();
                         return;
                     }
                     if (bytes_transferred != 4) {
                         // bytes_transferred
-                        BOOST_LOG_TRIVIAL(error) << "do_receive_size bytes_transferred : " << bytes_transferred;
+                        BOOST_LOG_OWL(error) << "do_receive_size bytes_transferred : " << bytes_transferred;
                         close_connect();
                         return;
                     }
@@ -66,7 +66,7 @@ namespace OwlImageService {
 
                     if (package_r_->size_ > TCP_Receive_Package_Max_Size) {
                         // size_ too big, maybe a wrong size_ byte
-                        BOOST_LOG_TRIVIAL(warning)
+                        BOOST_LOG_OWL(warning)
                             << "(package_r_.size_ > TCP_Receive_Package_Max_Size), size_: " << package_r_->size_;
                         // close connect
                         close_connect();
@@ -85,7 +85,7 @@ namespace OwlImageService {
 
         if (!socket_.is_open()) {
             // is closed by other function, stop!
-            BOOST_LOG_TRIVIAL(info) << "Connection closed by other function, stop!";
+            BOOST_LOG_OWL(info) << "Connection closed by other function, stop!";
             return;
         }
 
@@ -99,17 +99,17 @@ namespace OwlImageService {
 
                     if (ec == boost::asio::error::eof) {
                         // Connection closed cleanly by peer.
-                        BOOST_LOG_TRIVIAL(info) << "Connection closed cleanly by peer.";
+                        BOOST_LOG_OWL(info) << "Connection closed cleanly by peer.";
                         return;
                     }
                     if (ec) {
                         // Connection error
-                        BOOST_LOG_TRIVIAL(error) << "Connection error " << ec.what();
+                        BOOST_LOG_OWL(error) << "Connection error " << ec.what();
                         return;
                     }
                     if (bytes_transferred != package_r_->size_) {
                         // bytes_transferred
-                        BOOST_LOG_TRIVIAL(error) << "do_receive_data bytes_transferred : " << bytes_transferred;
+                        BOOST_LOG_OWL(error) << "do_receive_data bytes_transferred : " << bytes_transferred;
                         return;
                     }
 
@@ -133,7 +133,7 @@ namespace OwlImageService {
 
         if (!socket_.is_open()) {
             // is closed by other function, stop!
-            BOOST_LOG_TRIVIAL(info) << "Connection closed by other function, stop!";
+            BOOST_LOG_OWL(info) << "Connection closed by other function, stop!";
             return;
         }
 
@@ -148,17 +148,17 @@ namespace OwlImageService {
 
                     if (ec == boost::asio::error::eof) {
                         // Connection closed cleanly by peer.
-                        BOOST_LOG_TRIVIAL(info) << "Connection closed cleanly by peer.";
+                        BOOST_LOG_OWL(info) << "Connection closed cleanly by peer.";
                         return;
                     }
                     if (ec) {
                         // Connection error
-                        BOOST_LOG_TRIVIAL(error) << "Connection error " << ec.what();
+                        BOOST_LOG_OWL(error) << "Connection error " << ec.what();
                         return;
                     }
                     if (bytes_transferred != 4) {
                         // bytes_transferred
-                        BOOST_LOG_TRIVIAL(error) << "do_send_size bytes_transferred : " << bytes_transferred;
+                        BOOST_LOG_OWL(error) << "do_send_size bytes_transferred : " << bytes_transferred;
                         return;
                     }
 
@@ -172,7 +172,7 @@ namespace OwlImageService {
 
         if (!socket_.is_open()) {
             // is closed by other function, stop!
-            BOOST_LOG_TRIVIAL(info) << "Connection closed by other function, stop!";
+            BOOST_LOG_OWL(info) << "Connection closed by other function, stop!";
             return;
         }
 
@@ -186,22 +186,22 @@ namespace OwlImageService {
 
                     if (ec == boost::asio::error::eof) {
                         // Connection closed cleanly by peer.
-                        BOOST_LOG_TRIVIAL(info) << "Connection closed cleanly by peer.";
+                        BOOST_LOG_OWL(info) << "Connection closed cleanly by peer.";
                         return;
                     }
                     if (ec) {
                         // Connection error
-                        BOOST_LOG_TRIVIAL(error) << "Connection error " << ec.what();
+                        BOOST_LOG_OWL(error) << "Connection error " << ec.what();
                         return;
                     }
                     if (bytes_transferred != package_s_->size_) {
                         // bytes_transferred
-                        BOOST_LOG_TRIVIAL(error) << "do_send_size bytes_transferred : " << bytes_transferred;
+                        BOOST_LOG_OWL(error) << "do_send_size bytes_transferred : " << bytes_transferred;
                         return;
                     }
 
                     // all ok
-                    BOOST_LOG_TRIVIAL(info) << "do_send_data complete." << ec.what();
+                    BOOST_LOG_OWL(info) << "do_send_data complete." << ec.what();
 
                     return;
                 }
@@ -212,12 +212,12 @@ namespace OwlImageService {
 
         std::shared_ptr<ImageRequest> ir = std::make_shared<ImageRequest>();
         if (!ir->ParseFromString(s)) {
-            BOOST_LOG_TRIVIAL(info) << "do_process_request ParseFromString failed.";
+            BOOST_LOG_OWL(info) << "do_process_request ParseFromString failed.";
             // ignore
             return;
         }
 
-        BOOST_LOG_TRIVIAL(info) << "do_process_request ImageRequest: " << ir->DebugString();
+        BOOST_LOG_OWL(info) << "do_process_request ImageRequest: " << ir->DebugString();
 
         try {
             switch (ir->cmd_id()) {
@@ -228,7 +228,7 @@ namespace OwlImageService {
 
                         auto p = parents_.lock();
                         if (!p) {
-                            BOOST_LOG_TRIVIAL(error)
+                            BOOST_LOG_OWL(error)
                                 << "do_process_request TODO inner error. ";
                             // TODO inner error
                         } else {
@@ -302,7 +302,7 @@ namespace OwlImageService {
                                             std::string is_string;
                                             if (!is.SerializeToString(&is_string)) {
                                                 is.clear_image_data();
-                                                BOOST_LOG_TRIVIAL(error)
+                                                BOOST_LOG_OWL(error)
                                                     << "do_process_request SerializeToString failed : "
                                                     << is.DebugString();
                                                 // ignore
@@ -325,15 +325,15 @@ namespace OwlImageService {
                 }
                     return;
                 default:
-                    BOOST_LOG_TRIVIAL(warning) << "do_process_request switch default: " << ir->DebugString();
+                    BOOST_LOG_OWL(warning) << "do_process_request switch default: " << ir->DebugString();
                     return;
             }
         } catch (const std::exception &e) {
-            BOOST_LOG_TRIVIAL(error) << "do_process_request catch exception on " << ir->DebugString()
+            BOOST_LOG_OWL(error) << "do_process_request catch exception on " << ir->DebugString()
                                      << " e: " << e.what();
             return;
         } catch (...) {
-            BOOST_LOG_TRIVIAL(error) << "do_process_request catch unknown exception on " << ir->DebugString()
+            BOOST_LOG_OWL(error) << "do_process_request catch unknown exception on " << ir->DebugString()
                                      << "\n" << boost::current_exception_diagnostic_information();
             return;
         }

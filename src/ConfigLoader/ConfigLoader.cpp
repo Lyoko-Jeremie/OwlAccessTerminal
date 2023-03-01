@@ -44,10 +44,10 @@ namespace OwlCameraConfig {
     VideoCaptureAPIs string2VideoCaptureAPI(const std::string &s) {
         auto it = VideoCaptureAPITable.find(s);
         if (it != VideoCaptureAPITable.end()) {
-            BOOST_LOG_TRIVIAL(info) << "string2VideoCaptureAPI it: " << s;
+            BOOST_LOG_OWL(info) << "string2VideoCaptureAPI it: " << s;
             return it->second;
         } else {
-            BOOST_LOG_TRIVIAL(info) << "string2VideoCaptureAPI else it: CAP_ANY";
+            BOOST_LOG_OWL(info) << "string2VideoCaptureAPI else it: CAP_ANY";
             return VideoCaptureAPIs::CAP_ANY;
         }
     }
@@ -141,7 +141,7 @@ namespace OwlConfigLoader {
         std::stringstream ss;
         boost::filesystem::ifstream f(filePath);
         if (!f) {
-            BOOST_LOG_TRIVIAL(error) << "load_json_file (!f)";
+            BOOST_LOG_OWL(error) << "load_json_file (!f)";
             return nullptr;
         }
         ss << f.rdbuf();
@@ -149,12 +149,12 @@ namespace OwlConfigLoader {
         boost::json::stream_parser p;
         p.write(ss.str(), ec);
         if (ec) {
-            BOOST_LOG_TRIVIAL(error) << "load_json_file (ec) " << ec.what();
+            BOOST_LOG_OWL(error) << "load_json_file (ec) " << ec.what();
             return nullptr;
         }
         p.finish(ec);
         if (ec) {
-            BOOST_LOG_TRIVIAL(error) << "load_json_file (ec) " << ec.what();
+            BOOST_LOG_OWL(error) << "load_json_file (ec) " << ec.what();
             return nullptr;
         }
         return p.release();
@@ -167,8 +167,8 @@ namespace OwlConfigLoader {
             std::stringstream ss;
             pretty_print(ss, root);
             auto s = ss.str();
-            BOOST_LOG_TRIVIAL(info) << "parse_json from : \n" << s;
-            // BOOST_LOG_TRIVIAL(info) << "parse_json from : \n" << boost::json::serialize(root);
+            BOOST_LOG_OWL(info) << "parse_json from : \n" << s;
+            // BOOST_LOG_OWL(info) << "parse_json from : \n" << boost::json::serialize(root);
         }
 
         std::shared_ptr<Config> _config_ = std::make_shared<Config>();
@@ -232,7 +232,7 @@ namespace OwlConfigLoader {
 
     void ConfigLoader::print() {
         auto &config = *config_;
-        BOOST_LOG_TRIVIAL(info)
+        BOOST_LOG_OWL(info)
             << "\n"
             << "\n" << "ConfigLoader config:"
             << "\n" << "CommandServiceUdpPort " << config.CommandServiceUdpPort

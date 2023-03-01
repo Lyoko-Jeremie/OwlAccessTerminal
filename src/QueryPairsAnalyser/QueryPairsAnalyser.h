@@ -8,7 +8,7 @@
 #include <regex>
 #include <boost/beast.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 
 namespace OwlQueryPairsAnalyser {
 
@@ -55,14 +55,14 @@ namespace OwlQueryPairsAnalyser {
                     }
                 }
 
-                BOOST_LOG_TRIVIAL(info) << "query:" << query;
-                BOOST_LOG_TRIVIAL(info) << "queryList:";
+                BOOST_LOG_OWL(info) << "query:" << query;
+                BOOST_LOG_OWL(info) << "queryList:";
                 for (const auto &a: queryList) {
-                    BOOST_LOG_TRIVIAL(info) << "\t" << a;
+                    BOOST_LOG_OWL(info) << "\t" << a;
                 }
-                BOOST_LOG_TRIVIAL(info) << "queryPairs:";
+                BOOST_LOG_OWL(info) << "queryPairs:";
                 for (const auto &a: queryPairs) {
-                    BOOST_LOG_TRIVIAL(info) << "\t" << a.first << " = " << a.second;
+                    BOOST_LOG_OWL(info) << "\t" << a.first << " = " << a.second;
                 }
 
             }

@@ -17,12 +17,12 @@ namespace OwlCameraReader {
         if (std::visit([this]<typename T>(T &a) {
             return vc->open(a, api);
         }, path)) {
-            BOOST_LOG_TRIVIAL(info) << "CameraItem open ok : id " << id << " path "
+            BOOST_LOG_OWL(info) << "CameraItem open ok : id " << id << " path "
                                     << std::visit(OwlConfigLoader::helperCameraAddr2String, path);
             vc->set(cv::VideoCaptureProperties::CAP_PROP_FRAME_WIDTH, w);
             vc->set(cv::VideoCaptureProperties::CAP_PROP_FRAME_HEIGHT, h);
         } else {
-            BOOST_LOG_TRIVIAL(error) << "CameraItem open error : id " << id << " path "
+            BOOST_LOG_OWL(error) << "CameraItem open error : id " << id << " path "
                                      << std::visit(OwlConfigLoader::helperCameraAddr2String, path);
         }
     }
@@ -43,7 +43,7 @@ namespace OwlCameraReader {
                 resetCamera(std::move(data), mailbox_tcp_protobuf_);
                 return;
             }
-//                BOOST_LOG_TRIVIAL(info) << "CameraReader mailbox_tcp_protobuf_->receiveA2B " << data->camera_id;
+//                BOOST_LOG_OWL(info) << "CameraReader mailbox_tcp_protobuf_->receiveA2B " << data->camera_id;
             getImage(std::move(data), mailbox_tcp_protobuf_);
         });
         mailbox_http_->receiveA2B([this](OwlMailDefine::MailService2Camera &&data) {
@@ -51,7 +51,7 @@ namespace OwlCameraReader {
                 resetCamera(std::move(data), mailbox_http_);
                 return;
             }
-//                BOOST_LOG_TRIVIAL(info) << "CameraReader mailbox_http_->receiveA2B " << data->camera_id;
+//                BOOST_LOG_OWL(info) << "CameraReader mailbox_http_->receiveA2B " << data->camera_id;
             getImage(std::move(data), mailbox_http_);
         });
     }
@@ -86,7 +86,7 @@ namespace OwlCameraReader {
                             data_r->camera_id = data->camera_id;
                             if (!cc->isOpened()) {
                                 data_r->ok = false;
-                                BOOST_LOG_TRIVIAL(warning) << "getImage (!c->isOpened()) cannot open: "
+                                BOOST_LOG_OWL(warning) << "getImage (!c->isOpened()) cannot open: "
                                                            << data->camera_id;
                             } else {
                                 // read the image
@@ -94,14 +94,14 @@ namespace OwlCameraReader {
                                 if (!cc->vc->read(img)) {
                                     // `false` if no frames has been grabbed
                                     data_r->ok = false;
-                                    BOOST_LOG_TRIVIAL(warning) << "getImage (!c->vc->read(img)) read frame fail: "
+                                    BOOST_LOG_OWL(warning) << "getImage (!c->vc->read(img)) read frame fail: "
                                                                << data->camera_id;
                                 } else {
                                     data_r->image = img;
                                     data_r->ok = true;
                                     if (img.empty()) {
                                         data_r->ok = false;
-                                        BOOST_LOG_TRIVIAL(warning) << "getImage (img.empty()) read frame fail: "
+                                        BOOST_LOG_OWL(warning) << "getImage (img.empty()) read frame fail: "
                                                                    << data->camera_id;
                                     }
                                 }
@@ -113,7 +113,7 @@ namespace OwlCameraReader {
                 }
             }
             // cannot find camera
-            BOOST_LOG_TRIVIAL(warning) << "getImage cannot find camera: " << data->camera_id;
+            BOOST_LOG_OWL(warning) << "getImage cannot find camera: " << data->camera_id;
             OwlMailDefine::MailCamera2Service data_r = std::make_shared<OwlMailDefine::Camera2Service>();
             data_r->runner = data->callbackRunner;
             data_r->camera_id = data->camera_id;

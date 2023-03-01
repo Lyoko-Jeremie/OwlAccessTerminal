@@ -11,7 +11,7 @@
 #include <boost/asio.hpp>
 #include <boost/json.hpp>
 #include <boost/url.hpp>
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 #include "CmdSerialMail.h"
 #include "ProcessJsonMessage.h"
 #include "../QueryPairsAnalyser/QueryPairsAnalyser.h"
@@ -49,7 +49,7 @@ namespace OwlCommandServiceHttp {
         }
 
         ~CmdServiceHttpConnect() override {
-            BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::~CmdServiceHttpConnect()";
+            BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::~CmdServiceHttpConnect()";
         }
 
         // Initiate the asynchronous operations associated with the connection.
@@ -97,7 +97,7 @@ namespace OwlCommandServiceHttp {
                            std::size_t bytes_transferred) {
                         boost::ignore_unused(bytes_transferred);
                         if (ec) {
-                            BOOST_LOG_TRIVIAL(warning) << "CmdServiceHttpConnect read_request error: " << ec.what();
+                            BOOST_LOG_OWL(warning) << "CmdServiceHttpConnect read_request error: " << ec.what();
                             return;
                         }
                         self->process_request();
@@ -139,15 +139,15 @@ namespace OwlCommandServiceHttp {
         ) {
             auto self = shared_from_this();
 
-            BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::write_response";
+            BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::write_response";
             boost::beast::http::async_write(
                     socket_,
                     *response,
                     [self, response](boost::beast::error_code ec, std::size_t) {
-                        BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::write_response end";
+                        BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::write_response end";
                         self->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
                         self->deadline_.cancel();
-                        BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::write_response close";
+                        BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::write_response close";
                     });
         }
 
@@ -162,11 +162,11 @@ namespace OwlCommandServiceHttp {
                             return;
                         }
                         if (ec == boost::beast::errc::timed_out) {
-                            BOOST_LOG_TRIVIAL(warning) << "CmdServiceHttpConnect check_deadline : " << ec.what();
+                            BOOST_LOG_OWL(warning) << "CmdServiceHttpConnect check_deadline : " << ec.what();
                             return;
                         }
                         if (ec) {
-                            BOOST_LOG_TRIVIAL(warning) << "CmdServiceHttpConnect check_deadline : " << ec.what();
+                            BOOST_LOG_OWL(warning) << "CmdServiceHttpConnect check_deadline : " << ec.what();
                             return;
                         }
                         // Close socket to cancel any outstanding operation.
@@ -215,7 +215,7 @@ namespace OwlCommandServiceHttp {
         );
 
         void send_back_json(const boost::json::value &json_value) override {
-            BOOST_LOG_TRIVIAL(trace) << "CmdServiceHttpConnect::send_back_json";
+            BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::send_back_json";
             send_back(boost::json::serialize(json_value));
         }
 
@@ -238,7 +238,7 @@ namespace OwlCommandServiceHttp {
         );
 
         ~CmdServiceHttp() {
-            BOOST_LOG_TRIVIAL(trace) << "~CmdServiceHttp()";
+            BOOST_LOG_OWL(trace) << "~CmdServiceHttp()";
             mailbox_->receiveB2A(nullptr);
         }
 
@@ -282,7 +282,7 @@ namespace OwlCommandServiceHttp {
         on_accept(boost::beast::error_code ec, boost::asio::ip::tcp::socket socket) {
 
             if (ec) {
-                BOOST_LOG_TRIVIAL(error) << "accept" << " : " << ec.message();
+                BOOST_LOG_OWL(error) << "accept" << " : " << ec.message();
             } else {
                 // Create the session and run it
                 std::make_shared<CmdServiceHttpConnect>(

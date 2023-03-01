@@ -17,33 +17,33 @@ namespace OwlSerialController {
 #endif // DEBUG_IF_CHECK_POINT
 
     bool SerialController::initPort() {
-        BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort";
+        BOOST_LOG_OWL(trace) << "SerialController::initPort";
         if constexpr (flag_DEBUG_IF_CHECK_POINT) {
             BOOST_ASSERT(!weak_from_this().expired());
         }
         BOOST_ASSERT(airplanePortController);
-        BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort close";
+        BOOST_LOG_OWL(trace) << "SerialController::initPort close";
         airplanePortController->close();
         // set and open the airplanePortController
-        BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort open";
-        BOOST_LOG_TRIVIAL(trace) << "config_->config().airplane_fly_serial_addr "
+        BOOST_LOG_OWL(trace) << "SerialController::initPort open";
+        BOOST_LOG_OWL(trace) << "config_->config().airplane_fly_serial_addr "
                                  << config_->config().airplane_fly_serial_addr;
         if constexpr (flag_DEBUG_IF_CHECK_POINT) {
             BOOST_ASSERT(!weak_from_this().expired());
-            BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort weak_from_this().use_count(): "
+            BOOST_LOG_OWL(trace) << "SerialController::initPort weak_from_this().use_count(): "
                                      << weak_from_this().use_count();
-            BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort shared_from_this().use_count(): "
+            BOOST_LOG_OWL(trace) << "SerialController::initPort shared_from_this().use_count(): "
                                      << this->shared_from_this().use_count();
         }
         initOk = airplanePortController->open(config_->config().airplane_fly_serial_addr);
-        BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort open " << initOk;
+        BOOST_LOG_OWL(trace) << "SerialController::initPort open " << initOk;
         if (initOk) {
             initOk = airplanePortController->set_option(
                     boost::asio::serial_port::baud_rate(config_->config().airplane_fly_serial_baud_rate)
             );
-            BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort set_option " << initOk;
+            BOOST_LOG_OWL(trace) << "SerialController::initPort set_option " << initOk;
         }
-        BOOST_LOG_TRIVIAL(trace) << "SerialController::initPort initOk " << initOk;
+        BOOST_LOG_OWL(trace) << "SerialController::initPort initOk " << initOk;
         if (!initOk) {
             return false;
         }
@@ -74,7 +74,7 @@ namespace OwlSerialController {
                 return;
             }
             default: {
-                BOOST_LOG_TRIVIAL(error) << "SerialController"
+                BOOST_LOG_OWL(error) << "SerialController"
                                          << " receiveMailGetAirplaneState"
                                          << " switch (data->additionCmd) default";
                 auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
@@ -113,7 +113,7 @@ namespace OwlSerialController {
                     data_r->runner = data->callbackRunner;
                     if (ec) {
                         // error
-                        BOOST_LOG_TRIVIAL(error) << "SerialController"
+                        BOOST_LOG_OWL(error) << "SerialController"
                                                  << " receiveMail"
                                                  << " async_write error: "
                                                  << ec.what();
@@ -179,13 +179,13 @@ namespace OwlSerialController {
 #ifdef DEBUG_ReceiveMailRepeat
             if (auto n = OwlMailDefine::AdditionCmdNameLookupTable.find(package_record_->mail()->additionCmd);
                     n != OwlMailDefine::AdditionCmdNameLookupTable.end()) {
-                BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMailRepeat package_record "
+                BOOST_LOG_OWL(trace) << "SerialController::receiveMailRepeat package_record "
                                          << " lastUpdateTime " << package_record_->lastUpdateTime
                                          << " id " << package_record_->id()
                                          << " additionCmd " << to_underlying(package_record_->mail()->additionCmd)
                                          << " additionCmd " << n->second;
             } else {
-                BOOST_LOG_TRIVIAL(warning) << "SerialController::receiveMailRepeat package_record "
+                BOOST_LOG_OWL(warning) << "SerialController::receiveMailRepeat package_record "
                                            << " lastUpdateTime " << package_record_->lastUpdateTime
                                            << " id " << package_record_->id()
                                            << " additionCmd unknown "
@@ -202,12 +202,12 @@ namespace OwlSerialController {
         if (auto n = OwlMailDefine::AdditionCmdNameLookupTable.find(data->additionCmd);
                 n != OwlMailDefine::AdditionCmdNameLookupTable.end()) {
             if (data->additionCmd != OwlMailDefine::AdditionCmd::ping) {
-                BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail "
+                BOOST_LOG_OWL(trace) << "SerialController::receiveMail "
                                          << to_underlying(data->additionCmd) << " additionCmd:"
                                          << n->second;
             }
         } else {
-            BOOST_LOG_TRIVIAL(warning) << "SerialController::receiveMail unknown additionCmd : "
+            BOOST_LOG_OWL(warning) << "SerialController::receiveMail unknown additionCmd : "
                                        << to_underlying(data->additionCmd);
         }
         if (data->additionCmd == OwlMailDefine::AdditionCmd::getAirplaneState) {
@@ -221,7 +221,7 @@ namespace OwlSerialController {
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
             if (data->additionCmd != OwlMailDefine::AdditionCmd::ping) {
-                BOOST_LOG_TRIVIAL(trace) << "SerialController::receiveMail " << "dispatch initOk";
+                BOOST_LOG_OWL(trace) << "SerialController::receiveMail " << "dispatch initOk";
             }
             BOOST_ASSERT(data->additionCmd != OwlMailDefine::AdditionCmd::ignore);
             switch (data->additionCmd) {
@@ -282,14 +282,14 @@ namespace OwlSerialController {
 
         BOOST_ASSERT(data);
         if (data->additionCmd != OwlMailDefine::AdditionCmd::ping && !repeating) {
-            BOOST_LOG_TRIVIAL(trace) << "SerialController::sendData2Serial " << "dispatch";
+            BOOST_LOG_OWL(trace) << "SerialController::sendData2Serial " << "dispatch";
         }
         if constexpr (flag_DEBUG_IF_CHECK_POINT) {
             BOOST_ASSERT(!weak_from_this().expired());
             BOOST_ASSERT(this->weak_from_this().use_count() > 0);
         }
         if (!initOk && !initPort()) {
-            BOOST_LOG_TRIVIAL(trace) << "SerialController::sendData2Serial " << "dispatch initError";
+            BOOST_LOG_OWL(trace) << "SerialController::sendData2Serial " << "dispatch initError";
             auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
             data_r->runner = data->callbackRunner;
             data_r->openError = true;
@@ -300,7 +300,7 @@ namespace OwlSerialController {
         // BOOST_ASSERT(data->additionCmd != OwlMailDefine::AdditionCmd::ignore);
         switch (data->additionCmd) {
             case OwlMailDefine::AdditionCmd::ignore: {
-                BOOST_LOG_TRIVIAL(error) << "SerialController"
+                BOOST_LOG_OWL(error) << "SerialController"
                                          << " sendData2Serial"
                                          << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::ignore";
                 auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
@@ -322,12 +322,12 @@ namespace OwlSerialController {
             case OwlMailDefine::AdditionCmd::gotoPosition:
             case OwlMailDefine::AdditionCmd::led: {
                 if (!repeating)
-                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                    BOOST_LOG_OWL(trace) << "SerialController"
                                              << " sendData2Serial"
                                              << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::* move class";
                 auto mcp = data->moveCmdPtr;
                 if (!mcp) {
-                    BOOST_LOG_TRIVIAL(error) << "SerialController"
+                    BOOST_LOG_OWL(error) << "SerialController"
                                              << " sendData2Serial"
                                              << " OwlMailDefine::AdditionCmd::* move class nullptr";
                     auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
@@ -382,12 +382,12 @@ namespace OwlSerialController {
             }
             case OwlMailDefine::AdditionCmd::AprilTag: {
                 if (!repeating)
-                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                    BOOST_LOG_OWL(trace) << "SerialController"
                                              << " sendData2Serial"
                                              << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag";
 
                 if (!data->aprilTagCmdPtr) {
-                    BOOST_LOG_TRIVIAL(error) << "SerialController"
+                    BOOST_LOG_OWL(error) << "SerialController"
                                              << " sendData2Serial"
                                              << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag"
                                              << " (!data->aprilTagCmdPtr)";
@@ -404,7 +404,7 @@ namespace OwlSerialController {
                 auto pcy = static_cast<uint16_t>(data->aprilTagCmdPtr->imageY);
 
                 if (!data->aprilTagCmdPtr->mapCalcPlaneInfoType) {
-                    BOOST_LOG_TRIVIAL(error)
+                    BOOST_LOG_OWL(error)
                         << "SerialController"
                         << " sendData2Serial"
                         << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag"
@@ -512,12 +512,12 @@ namespace OwlSerialController {
             }
             case OwlMailDefine::AdditionCmd::JoyCon: {
                 if (!repeating)
-                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                    BOOST_LOG_OWL(trace) << "SerialController"
                                              << " sendData2Serial"
                                              << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::JoyCon";
                 auto jcp = data->joyConPtr;
                 if (!jcp) {
-                    BOOST_LOG_TRIVIAL(error) << "SerialController"
+                    BOOST_LOG_OWL(error) << "SerialController"
                                              << " sendData2Serial"
                                              << " OwlMailDefine::AdditionCmd::JoyCon nullptr";
                     auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
@@ -588,12 +588,12 @@ namespace OwlSerialController {
             }
             case OwlMailDefine::AdditionCmd::JoyConSimple: {
                 if (!repeating)
-                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                    BOOST_LOG_OWL(trace) << "SerialController"
                                              << " sendData2Serial"
                                              << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::JoyConSimple";
                 auto jcp = data->joyConPtr;
                 if (!jcp) {
-                    BOOST_LOG_TRIVIAL(error) << "SerialController"
+                    BOOST_LOG_OWL(error) << "SerialController"
                                              << " sendData2Serial"
                                              << " OwlMailDefine::AdditionCmd::JoyConSimple nullptr";
                     auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
@@ -654,12 +654,12 @@ namespace OwlSerialController {
             }
             case OwlMailDefine::AdditionCmd::JoyConGyro: {
                 if (!repeating)
-                    BOOST_LOG_TRIVIAL(trace) << "SerialController"
+                    BOOST_LOG_OWL(trace) << "SerialController"
                                              << " sendData2Serial"
                                              << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::JoyConGyro";
                 auto jcgp = data->joyConPtr;
                 if (!jcgp) {
-                    BOOST_LOG_TRIVIAL(error) << "SerialController"
+                    BOOST_LOG_OWL(error) << "SerialController"
                                              << " sendData2Serial"
                                              << " OwlMailDefine::AdditionCmd::JoyConGyro nullptr";
                     auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
@@ -774,7 +774,7 @@ namespace OwlSerialController {
                 return;
             }
             default: {
-                BOOST_LOG_TRIVIAL(error) << "SerialController"
+                BOOST_LOG_OWL(error) << "SerialController"
                                          << " sendData2Serial"
                                          << " switch (data->additionCmd) default";
                 auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
@@ -790,31 +790,31 @@ namespace OwlSerialController {
 
     bool PortController::open(const std::string &deviceName, boost::system::error_code &ec) {
         BOOST_ASSERT(sp_);
-        BOOST_LOG_TRIVIAL(trace) << "PortController::open";
+        BOOST_LOG_OWL(trace) << "PortController::open";
         if (sp_->is_open()) {
             close();
         }
-        BOOST_LOG_TRIVIAL(trace) << "PortController::open do";
+        BOOST_LOG_OWL(trace) << "PortController::open do";
         deviceName_ = deviceName;
         sp_->open(deviceName, ec);
         if (ec) {
-            BOOST_LOG_TRIVIAL(error) << "PortController open error: " << ec.what();
+            BOOST_LOG_OWL(error) << "PortController open error: " << ec.what();
             return false;
         }
-        BOOST_LOG_TRIVIAL(trace) << "PortController::open ok";
+        BOOST_LOG_OWL(trace) << "PortController::open ok";
 #ifndef DEBUG_DisableStateReader
-        BOOST_LOG_TRIVIAL(trace) << "PortController::open start stateReader_";
+        BOOST_LOG_OWL(trace) << "PortController::open start stateReader_";
         if constexpr (flag_DEBUG_IF_CHECK_POINT) {
             BOOST_ASSERT(!weak_from_this().expired());
-            BOOST_LOG_TRIVIAL(trace) << "PortController::open parentRef_.use_count(): " << parentRef_.use_count();
+            BOOST_LOG_OWL(trace) << "PortController::open parentRef_.use_count(): " << parentRef_.use_count();
             BOOST_ASSERT(!parentRef_.expired());
             BOOST_ASSERT(parentRef_.lock());
         }
         BOOST_ASSERT(stateReader_);
-        BOOST_LOG_TRIVIAL(trace) << "PortController::open stateReader_.use_count(): " << stateReader_.use_count();
+        BOOST_LOG_OWL(trace) << "PortController::open stateReader_.use_count(): " << stateReader_.use_count();
         stateReader_->start();
 #endif // DEBUG_DisableStateReader
-        BOOST_LOG_TRIVIAL(trace) << "PortController::open true";
+        BOOST_LOG_OWL(trace) << "PortController::open true";
         return true;
     }
 
@@ -828,17 +828,17 @@ namespace OwlSerialController {
 
     void PortController::init() {
         if constexpr (flag_DEBUG_IF_CHECK_POINT) {
-            BOOST_LOG_TRIVIAL(trace) << "PortController::open parentRef_.use_count(): " << parentRef_.use_count();
+            BOOST_LOG_OWL(trace) << "PortController::open parentRef_.use_count(): " << parentRef_.use_count();
             BOOST_ASSERT(!parentRef_.expired());
             BOOST_ASSERT(parentRef_.lock());
             BOOST_ASSERT(!weak_from_this().expired());
-            BOOST_LOG_TRIVIAL(trace) << "weak_from_this().lock().use_count() : " << weak_from_this().lock().use_count();
+            BOOST_LOG_OWL(trace) << "weak_from_this().lock().use_count() : " << weak_from_this().lock().use_count();
         }
 #ifndef DEBUG_DisableStateReader
         BOOST_ASSERT(!weak_from_this().expired());
         stateReader_ = std::make_shared<StateReader>(weak_from_this(), sp_);
         BOOST_ASSERT(!weak_from_this().expired());
-        BOOST_LOG_TRIVIAL(trace) << "stateReader_.use_count() : " << stateReader_.use_count();
+        BOOST_LOG_OWL(trace) << "stateReader_.use_count() : " << stateReader_.use_count();
         BOOST_ASSERT(stateReader_.use_count() > 0);
         stateReader_->init();
 #endif // DEBUG_DisableStateReader
@@ -849,7 +849,7 @@ namespace OwlSerialController {
                 this, self = shared_from_this(), airplaneState]() {
             auto ptr = parentRef_.lock();
             if (!ptr) {
-                BOOST_LOG_TRIVIAL(error) << "PortController"
+                BOOST_LOG_OWL(error) << "PortController"
                                          << " parentRef_.lock() failed.";
                 return;
             }
@@ -863,7 +863,7 @@ namespace OwlSerialController {
             auto p = airplaneState;
             if (p) {
                 BOOST_ASSERT(p);
-                BOOST_LOG_TRIVIAL(trace)
+                BOOST_LOG_OWL(trace)
                     << "new airplaneState come:"
                     << "\n\tstateFly: " << p->stateFly
                     << "\n\tpitch: " << p->pitch

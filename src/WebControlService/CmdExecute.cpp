@@ -129,7 +129,7 @@ namespace OwlCmdExecute {
                 if (!c1 || !c2 || !c3 ||
                     !data->DEVICE_NAME.starts_with("wlx") || data->DEVICE_NAME.length() < 3 ||
                     data->SSID.length() < 8 || data->PASSWORD.length() < 1) {
-                    BOOST_LOG_TRIVIAL(warning)
+                    BOOST_LOG_OWL(warning)
                         << "(!c1 || !c2 || !c3)";
                     OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
                     m->ok = false;
@@ -163,7 +163,7 @@ namespace OwlCmdExecute {
                 if (!c1 || !c2 || !c3 ||
                     !data->DEVICE_NAME.starts_with("wlx") || data->DEVICE_NAME.length() < 3 ||
                     data->SSID.length() < 8 || data->PASSWORD.length() < 1) {
-                    BOOST_LOG_TRIVIAL(warning)
+                    BOOST_LOG_OWL(warning)
                         << "(!c1 || !c2 || !c3)";
                     OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
                     m->ok = false;
@@ -207,7 +207,7 @@ namespace OwlCmdExecute {
                     return ('a' <= a && a <= 'z') || ('A' <= a && a <= 'Z') || ('0' <= a && a <= '9');
                 });
                 if (!c1 || !data->DEVICE_NAME.starts_with("wlx") || data->DEVICE_NAME.length() < 3) {
-                    BOOST_LOG_TRIVIAL(warning)
+                    BOOST_LOG_OWL(warning)
                         << "(!c1 || !data->DEVICE_NAME.starts_with(\"wlx\") || data->DEVICE_NAME.length() < 3)";
                     OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
                     m->ok = false;
@@ -237,7 +237,7 @@ namespace OwlCmdExecute {
             case OwlMailDefine::WifiCmd::ignore:
             default:
                 // invalid
-                BOOST_LOG_TRIVIAL(error) << "receiveMail MailWeb2Cmd ignore/default.";
+                BOOST_LOG_OWL(error) << "receiveMail MailWeb2Cmd ignore/default.";
                 {
                     OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
                     m->ok = false;

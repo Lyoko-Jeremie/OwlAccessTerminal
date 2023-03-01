@@ -9,7 +9,7 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/asio.hpp>
-#include <boost/log/trivial.hpp>
+#include "../Log/Log.h"
 #include <chrono>
 #include <cstdlib>
 #include <ctime>
@@ -74,7 +74,7 @@ namespace OwlImageServiceHttp {
                            std::size_t bytes_transferred) {
                         boost::ignore_unused(bytes_transferred);
                         if (ec) {
-                            BOOST_LOG_TRIVIAL(warning) << "ImageServiceHttpConnect read_request error: " << ec.what();
+                            BOOST_LOG_OWL(warning) << "ImageServiceHttpConnect read_request error: " << ec.what();
                             return;
                         }
                         self->process_request();
@@ -128,11 +128,11 @@ namespace OwlImageServiceHttp {
                             return;
                         }
                         if (ec == boost::beast::errc::timed_out) {
-                            BOOST_LOG_TRIVIAL(warning) << "CmdServiceHttpConnect check_deadline : " << ec.what();
+                            BOOST_LOG_OWL(warning) << "CmdServiceHttpConnect check_deadline : " << ec.what();
                             return;
                         }
                         if (ec) {
-                            BOOST_LOG_TRIVIAL(warning) << "ImageServiceHttpConnect check_deadline : " << ec.what();
+                            BOOST_LOG_OWL(warning) << "ImageServiceHttpConnect check_deadline : " << ec.what();
                             return;
                         }
                         // Close socket to cancel any outstanding operation.
@@ -153,7 +153,7 @@ namespace OwlImageServiceHttp {
         );
 
         ~ImageServiceHttp() {
-            BOOST_LOG_TRIVIAL(trace) << "~ImageServiceHttp()";
+            BOOST_LOG_OWL(trace) << "~ImageServiceHttp()";
             mailbox_->receiveB2A(nullptr);
         }
 
@@ -203,7 +203,7 @@ namespace OwlImageServiceHttp {
         on_accept(boost::beast::error_code ec, boost::asio::ip::tcp::socket socket) {
 
             if (ec) {
-                BOOST_LOG_TRIVIAL(error) << "accept" << " : " << ec.message();
+                BOOST_LOG_OWL(error) << "accept" << " : " << ec.message();
             } else {
                 // Create the session and run it
                 std::make_shared<ImageServiceHttpConnect>(
