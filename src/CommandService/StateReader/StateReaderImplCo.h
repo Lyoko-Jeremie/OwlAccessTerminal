@@ -30,7 +30,7 @@ namespace OwlSerialController {
         ) : parentRef_(std::move(parentRef)), serialPort_(std::move(serialPort)) {}
 
         ~StateReaderImplCo() {
-            BOOST_LOG_OWL(trace) << "~StateReaderImplCo()";
+            BOOST_LOG_OWL(trace_dtor) << "~StateReaderImplCo()";
         }
 
     private:

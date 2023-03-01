@@ -30,7 +30,7 @@ namespace OwlMapCalc {
         );
 
         ~MapCalc() {
-            BOOST_LOG_OWL(trace_map) << "~MapCalc()";
+            BOOST_LOG_OWL(trace_dtor) << "~MapCalc()";
             mailbox_->receiveB2A(nullptr);
         }
 

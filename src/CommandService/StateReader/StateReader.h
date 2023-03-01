@@ -38,7 +38,7 @@ namespace OwlSerialController {
         void init();
 
         ~StateReader() {
-            BOOST_LOG_OWL(trace) << "~StateReader()";
+            BOOST_LOG_OWL(trace_dtor) << "~StateReader()";
         }
 
     private:

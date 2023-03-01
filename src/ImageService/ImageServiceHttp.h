@@ -153,7 +153,7 @@ namespace OwlImageServiceHttp {
         );
 
         ~ImageServiceHttp() {
-            BOOST_LOG_OWL(trace) << "~ImageServiceHttp()";
+            BOOST_LOG_OWL(trace_dtor) << "~ImageServiceHttp()";
             mailbox_->receiveB2A(nullptr);
         }
 

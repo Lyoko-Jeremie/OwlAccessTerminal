@@ -141,7 +141,7 @@ namespace OwlConfigLoader {
     public:
 
         ~ConfigLoader() {
-            BOOST_LOG_OWL(trace) << "~ConfigLoader()";
+            BOOST_LOG_OWL(trace_dtor) << "~ConfigLoader()";
         }
 
         void print();

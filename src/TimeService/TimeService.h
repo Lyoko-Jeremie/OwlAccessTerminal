@@ -26,7 +26,7 @@ namespace OwlTimeService {
         }
 
         ~TimeService() {
-            BOOST_LOG_OWL(trace) << "~TimeService()";
+            BOOST_LOG_OWL(trace_dtor) << "~TimeService()";
             mailbox_->receiveB2A(nullptr);
         }
 

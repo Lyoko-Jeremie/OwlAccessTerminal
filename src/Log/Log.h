@@ -19,6 +19,7 @@ namespace OwlLog {
         trace_cmd_sp_w,
         trace_cmd_sp_r,
         trace_map,
+        trace_dtor,
         trace,
         debug,
         debug_sp_w,

@@ -238,7 +238,7 @@ namespace OwlCommandServiceHttp {
         );
 
         ~CmdServiceHttp() {
-            BOOST_LOG_OWL(trace) << "~CmdServiceHttp()";
+            BOOST_LOG_OWL(trace_dtor) << "~CmdServiceHttp()";
             mailbox_->receiveB2A(nullptr);
         }
 

@@ -52,7 +52,7 @@ namespace OwlCameraReader {
         );
 
         ~CameraReader() {
-            BOOST_LOG_OWL(trace) << "~CameraReader()";
+            BOOST_LOG_OWL(trace_dtor) << "~CameraReader()";
             mailbox_tcp_protobuf_->receiveA2B(nullptr);
             mailbox_http_->receiveA2B(nullptr);
         }
