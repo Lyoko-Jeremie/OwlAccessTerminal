@@ -66,8 +66,8 @@ namespace OwlCommandServiceHttp {
     }
 
     void CmdServiceHttpConnect::process_tag_info() {
-//        BOOST_LOG_OWL(trace) << "process_tag_info";
-//        BOOST_LOG_OWL(trace) << request_.target();
+//        BOOST_LOG_OWL(trace_cmd_tag) << "process_tag_info";
+//        BOOST_LOG_OWL(tracetrace_cmd_tag) << request_.target();
         auto u = boost::urls::parse_uri_reference(request_.target());
         if (u.has_error()) {
             auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
@@ -354,14 +354,14 @@ namespace OwlCommandServiceHttp {
             // get newestAirplaneState
             auto getASm = std::make_shared<OwlMailDefine::Cmd2Serial>();
             getASm->additionCmd = OwlMailDefine::AdditionCmd::getAirplaneState;
-            BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::process_tag_info to getASm";
+            BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info to getASm";
             getASm->callbackRunner = [
                     this, self = shared_from_this(),
                     aprilTagCmd
             ](
                     OwlMailDefine::MailSerial2Cmd data
             ) {
-                BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::process_tag_info back getASm";
+                BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info back getASm";
                 BOOST_ASSERT(data);
                 BOOST_ASSERT(self);
                 BOOST_ASSERT(self.use_count() > 0);
@@ -383,14 +383,15 @@ namespace OwlCommandServiceHttp {
                 auto mc = std::make_shared<OwlMailDefine::Service2MapCalc>();
                 mc->airplaneState = data->newestAirplaneState;
                 mc->tagInfo = aprilTagCmd->shared_from_this();
-                BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::process_tag_info to mc newestAirplaneState";
+                BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info to mc newestAirplaneState";
                 mc->callbackRunner = [
                         this, self = shared_from_this(),
                         aprilTagCmd
                 ](
                         OwlMailDefine::MailMapCalc2Service data
                 ) {
-                    BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::process_tag_info back mc newestAirplaneState";
+                    BOOST_LOG_OWL(trace_cmd_tag)
+                        << "CmdServiceHttpConnect::process_tag_info back mc newestAirplaneState";
                     BOOST_ASSERT(data);
                     BOOST_ASSERT(self);
                     BOOST_ASSERT(self.use_count() > 0);
@@ -398,7 +399,7 @@ namespace OwlCommandServiceHttp {
                             this, self = shared_from_this(),
                             aprilTagCmd, data
                     ]() {
-                        BOOST_LOG_OWL(trace)
+                        BOOST_LOG_OWL(trace_cmd_tag)
                             << "CmdServiceHttpConnect::process_tag_info back mc newestAirplaneState dispatch";
                         BOOST_ASSERT(data);
                         BOOST_ASSERT(self);
@@ -422,14 +423,14 @@ namespace OwlCommandServiceHttp {
                         auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
                         m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;
                         m->aprilTagCmdPtr = aprilTagCmd;
-                        BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::process_tag_info to m AprilTag";
+                        BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info to m AprilTag";
                         m->callbackRunner = [
                                 this, self = shared_from_this(),
                                 aprilTagCmd
                         ](
                                 OwlMailDefine::MailSerial2Cmd data
                         ) {
-                            BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::process_tag_info back m AprilTag";
+                            BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info back m AprilTag";
                             BOOST_ASSERT(aprilTagCmd);
                             BOOST_ASSERT(aprilTagCmd.use_count() > 0);
                             BOOST_LOG_OWL(trace)
@@ -443,11 +444,11 @@ namespace OwlCommandServiceHttp {
                                     this, self = shared_from_this(),
                                     aprilTagCmd, data
                             ]() {
-                                BOOST_LOG_OWL(trace)
+                                BOOST_LOG_OWL(trace_cmd_tag)
                                     << "CmdServiceHttpConnect::process_tag_info back m AprilTag dispatch";
                                 BOOST_ASSERT(aprilTagCmd);
                                 BOOST_ASSERT(aprilTagCmd.use_count() > 0);
-                                BOOST_LOG_OWL(trace)
+                                BOOST_LOG_OWL(trace_cmd_tag)
                                     << "CmdServiceHttpConnect::process_tag_info aprilTagCmd.use_count() "
                                     << aprilTagCmd.use_count();
                                 BOOST_ASSERT(data);
@@ -460,7 +461,7 @@ namespace OwlCommandServiceHttp {
                                                 {"openError", data->openError},
                                         }
                                 );
-                                BOOST_LOG_OWL(trace)
+                                BOOST_LOG_OWL(trace_cmd_tag)
                                     << "CmdServiceHttpConnect::process_tag_info back m AprilTag send_back_json end";
                             });
                         };
@@ -683,7 +684,7 @@ namespace OwlCommandServiceHttp {
     }
 
     void CmdServiceHttpConnect::send_back(std::string &&json_string) {
-        BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::send_back json_string:" << json_string;
+        BOOST_LOG_OWL(trace_cmd_http) << "CmdServiceHttpConnect::send_back json_string:" << json_string;
         auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
         response->version(request_.version());
         response->keep_alive(false);
@@ -695,7 +696,7 @@ namespace OwlCommandServiceHttp {
         boost::beast::ostream(response->body()) << json_string;
         response->content_length(response->body().size());
         write_response(response);
-        BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::send_back return";
+        BOOST_LOG_OWL(trace_cmd_http) << "CmdServiceHttpConnect::send_back return";
     }
 
     std::shared_ptr<CmdServiceHttp> CmdServiceHttpConnect::getParentRef() {
@@ -732,9 +733,9 @@ namespace OwlCommandServiceHttp {
             receiveMail(std::move(data));
         });
         mailbox_map_->receiveB2A([this](OwlMailDefine::MailMapCalc2Service &&data) {
-            BOOST_LOG_OWL(trace) << "CmdServiceHttp::receiveMail mailbox_map_->receiveB2A";
+            BOOST_LOG_OWL(trace_cmd_http) << "CmdServiceHttp::receiveMail mailbox_map_->receiveB2A";
             boost::asio::dispatch(ioc_, [self = shared_from_this(), data]() {
-                BOOST_LOG_OWL(trace) << "CmdServiceHttp::receiveMail mailbox_map_->receiveB2A dispatch";
+                BOOST_LOG_OWL(trace_cmd_http) << "CmdServiceHttp::receiveMail mailbox_map_->receiveB2A dispatch";
                 data->runner(data);
             });
         });
