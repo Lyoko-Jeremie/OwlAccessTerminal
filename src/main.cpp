@@ -55,8 +55,8 @@ struct ThreadCallee {
             tg.interrupt_all();
             // https://www.boost.org/doc/libs/1_81_0/libs/exception/doc/diagnostic_information.html
             BOOST_LOG_OWL(error) << "ThreadCallee catch std::exception :"
-                                     << "\n diag: " << boost::diagnostic_information(e)
-                                     << "\n what: " << dynamic_cast<std::exception const &>(e).what();
+                                 << "\n diag: " << boost::diagnostic_information(e)
+                                 << "\n what: " << dynamic_cast<std::exception const &>(e).what();
             return -1;
         } catch (const std::exception &e) {
             tg.interrupt_all();
@@ -66,8 +66,8 @@ struct ThreadCallee {
             tg.interrupt_all();
             // https://www.boost.org/doc/libs/1_81_0/libs/exception/doc/current_exception_diagnostic_information.html
             BOOST_LOG_OWL(error) << "ThreadCallee catch (...) exception"
-                                     << "\n current_exception_diagnostic_information : "
-                                     << boost::current_exception_diagnostic_information();
+                                 << "\n current_exception_diagnostic_information : "
+                                 << boost::current_exception_diagnostic_information();
             return -1;
         }
         return 0;
@@ -151,8 +151,12 @@ int main(int argc, const char *argv[]) {
 
     OwlLog::init_logging();
 
-    BOOST_LOG_OWL(info)
-        << "BOOST_LOG_SEV(OwlLog::slg, OwlLog::severity_level_my::aaa)";
+    BOOST_LOG_OWL(trace) << "BOOST_LOG_OWL(trace)";
+    BOOST_LOG_OWL(debug) << "BOOST_LOG_OWL(debug)";
+    BOOST_LOG_OWL(info) << "BOOST_LOG_OWL(info)";
+    BOOST_LOG_OWL(warning) << "BOOST_LOG_OWL(warning)";
+    BOOST_LOG_OWL(error) << "BOOST_LOG_OWL(error)";
+    BOOST_LOG_OWL(fatal) << "BOOST_LOG_OWL(fatal)";
 
     BOOST_LOG_OWL(info) << "cv::haveImageWriter(.jpg):" << cv::haveImageWriter(".jpg");
 

@@ -11,6 +11,8 @@
 #include <boost/log/attributes.hpp>
 #include <boost/log/utility/setup/formatter_parser.hpp>
 
+//#include <boost/log/trivial.hpp>
+
 namespace OwlLog {
     thread_local std::string threadName;
 
@@ -65,6 +67,8 @@ namespace OwlLog {
 
     };
 
+    BOOST_LOG_ATTRIBUTE_KEYWORD(severity, "Severity", severity_level)
+
     void init_logging() {
 
         // https://stackoverflow.com/questions/15853981/boost-log-2-0-empty-severity-level-in-logs
@@ -111,12 +115,14 @@ namespace OwlLog {
         core->add_global_attribute("ThreadName", thread_name());
         core->add_global_attribute("ThreadID", boost::log::attributes::current_thread_id());
         core->add_global_attribute("TimeStamp", boost::log::attributes::local_clock());
-//        core->add_global_attribute("Severity", severity_level_my);
         // core->add_global_attribute("ProcessID", boost::log::attributes::current_process_id());
         // core->add_global_attribute("ProcessName", boost::log::attributes::current_process_name());
 
         // https://stackoverflow.com/questions/69967084/how-to-set-the-severity-level-of-boost-log-library
         // core->get()->set_filter(boost::log::trivial::severity >= boost::log::trivial::info);
+        // core->get()->set_filter(severity >= severity_level::error);
+        // core->get()->set_filter(severity != severity_level::error);
+        // core->get()->set_filter(severity != severity_level::trace);
 
     }
 } // OwlLog
