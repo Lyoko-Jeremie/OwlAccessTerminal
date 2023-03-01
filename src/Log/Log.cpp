@@ -131,5 +131,21 @@ namespace OwlLog {
         // core->get()->set_filter(severity != severity_level::error);
         // core->get()->set_filter(severity != severity_level::trace);
 
+#ifndef DEBUG_log_MAP
+        core->get()->set_filter(severity != severity_level::trace_map);
+#endif // DEBUG_log_MAP
+#ifndef DEBUG_log_TAG
+        core->get()->set_filter(severity != severity_level::trace_cmd_tag);
+#endif // DEBUG_log_TAG
+#ifndef DEBUG_log_HTTP
+        core->get()->set_filter(severity != severity_level::trace_cmd_http);
+#endif // DEBUG_log_HTTP
+#ifndef DEBUG_log_SerialPortWrite
+        core->get()->set_filter(severity != severity_level::trace_cmd_sp_w);
+#endif // DEBUG_log_SerialPortWrite
+#ifndef DEBUG_log_SerialPortRead
+        core->get()->set_filter(severity != severity_level::trace_cmd_sp_r);
+#endif // DEBUG_log_SerialPortRead
+
     }
 } // OwlLog
