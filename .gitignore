@@ -122,3 +122,5 @@ _deps
 
 **/ImageProtocolKotlin/
 **/ImageProtocolPython/
+
+/src/VERSION/CodeVersion.h

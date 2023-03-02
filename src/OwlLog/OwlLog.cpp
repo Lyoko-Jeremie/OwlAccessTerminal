@@ -11,7 +11,8 @@
 #include <boost/log/attributes.hpp>
 #include <boost/log/utility/setup/formatter_parser.hpp>
 
-//#include <boost/log/trivial.hpp>
+#include <opencv2/core/version.hpp>
+#include <google/protobuf/stubs/common.h>
 
 namespace OwlLog {
     thread_local std::string threadName;
@@ -153,6 +154,17 @@ namespace OwlLog {
 #endif // DEBUG_log_SerialPortRead
         );
 
+        BOOST_LOG_OWL(info)
+            << "OwlAccessTerminal"
+            << "\n   ProgramVersion " << ProgramVersion
+            << "\n   CodeVersion_GIT_REV " << CodeVersion_GIT_REV
+            << "\n   CodeVersion_GIT_TAG " << CodeVersion_GIT_TAG
+            << "\n   CodeVersion_GIT_BRANCH " << CodeVersion_GIT_BRANCH
+            << "\n   Boost " << BOOST_LIB_VERSION
+            << "\n   ProtoBuf " << GOOGLE_PROTOBUF_VERSION
+            << "\n   OpenCV " << CV_VERSION
+            << "\n   BUILD_DATETIME " << CodeVersion_BUILD_DATETIME
+            << "\n ---------- OwlAccessTerminal  Copyright (C) 2023 ---------- ";
 
         BOOST_LOG_OWL(trace_cmd_tag) << "BOOST_LOG_OWL(trace_cmd_tag)";
         BOOST_LOG_OWL(trace_cmd_http) << "BOOST_LOG_OWL(trace_cmd_http)";

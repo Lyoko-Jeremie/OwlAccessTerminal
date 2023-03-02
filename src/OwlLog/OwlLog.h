@@ -10,6 +10,8 @@
 #include <boost/log/sources/severity_feature.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 
+#include "../VERSION/ProgramVersion.h"
+#include "../VERSION/CodeVersion.h"
 
 namespace OwlLog {
 

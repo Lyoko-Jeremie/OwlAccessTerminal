@@ -203,7 +203,7 @@ message(STATUS "CMAKE_THREAD_LIBS_INIT: ${CMAKE_THREAD_LIBS_INIT}")
 
 
 # https://www.mattkeeter.com/blog/2018-01-06-versioning/
-execute_process(COMMAND git log --pretty=format:'%h' -n 1
+execute_process(COMMAND git log --pretty=format:'%H' -n 1
         OUTPUT_VARIABLE GIT_REV
         ERROR_QUIET)
 
@@ -227,7 +227,7 @@ else ()
             OUTPUT_VARIABLE GIT_BRANCH)
 
     string(STRIP "${GIT_REV}" GIT_REV)
-    string(SUBSTRING "${GIT_REV}" 1 7 GIT_REV)
+#    string(SUBSTRING "${GIT_REV}" 1 7 GIT_REV)
     string(STRIP "${GIT_DIFF}" GIT_DIFF)
     string(STRIP "${GIT_TAG}" GIT_TAG)
     string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
@@ -237,20 +237,22 @@ endif ()
 string(TIMESTAMP currentSeconds "%s")
 message(STATUS "currentSeconds = ${currentSeconds}")
 
-string(TIMESTAMP currentTime "%Y-%m-%d-%H:%M:%S")
-message(STATUS "currentTime = ${currentTime}")
+string(TIMESTAMP BUILD_DATETIME "%Y-%m-%d-%H:%M:%S")
+message(STATUS "BUILD_DATETIME = ${BUILD_DATETIME}")
 
 set(VERSION "const char* GIT_REV=\"git-[${GIT_REV}-${GIT_DIFF}]\";
 const char* GIT_TAG=\"${GIT_TAG}\";
 const char* GIT_BRANCH=\"${GIT_BRANCH}\";
-const char* BUILD_DATETIME=\"${currentTime}\";
+const char* BUILD_DATETIME=\"${BUILD_DATETIME}\";
 ")
 
 message(STATUS "VERSION: ${VERSION}")
 
-
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/VERSION/CodeVersion.h.in
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/VERSION/CodeVersion.h)
 
 add_executable(${ProjectMainName}
+        src/VERSION/CodeVersion.h
         src/main.cpp
         src/CommandService/CommandService.cpp
         src/CommandService/CommandService.h
@@ -302,7 +304,8 @@ add_executable(${ProjectMainName}
         src/MapCalc/MapCalc.h
         src/MapCalc/MapCalcMail.h
         src/MapCalc/MapCalcPlaneInfoType.h
-        src/MapCalc/MapCalcPlaneInfoType.cpp)
+        src/MapCalc/MapCalcPlaneInfoType.cpp
+        src/VERSION/ProgramVersion.h)
 
 
 if (EnableWebStaticModule)

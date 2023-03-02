@@ -188,9 +188,15 @@ int main(int argc, const char *argv[]) {
         return 0;
     }
     if (vMap.count("version")) {
-        std::cout << "Boost " << BOOST_LIB_VERSION <<
+        std::cout <<
+                  ", ProgramVersion " << ProgramVersion <<
+                  ", CodeVersion_GIT_REV " << CodeVersion_GIT_REV <<
+                  ", CodeVersion_GIT_TAG " << CodeVersion_GIT_TAG <<
+                  ", CodeVersion_GIT_BRANCH " << CodeVersion_GIT_BRANCH <<
+                  ", Boost " << BOOST_LIB_VERSION <<
                   ", ProtoBuf " << GOOGLE_PROTOBUF_VERSION <<
                   ", OpenCV " << CV_VERSION
+                  ", BUILD_DATETIME " << CodeVersion_BUILD_DATETIME
                   << std::endl;
         return 0;
     }
