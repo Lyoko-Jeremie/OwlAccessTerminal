@@ -728,7 +728,7 @@ namespace OwlSerialController {
                                 // AdditionCmd
                                 uint8_t(to_underlying(data->additionCmd)),
                                 // data size
-                                uint8_t(0),
+                                uint8_t(packageSize - 5),
                                 // serial ID
                                 uint8_t(packageId & 0xff),
                                 uint8_t(packageId >> 8),
@@ -758,7 +758,7 @@ namespace OwlSerialController {
                                 // AdditionCmd
                                 uint8_t(to_underlying(data->additionCmd)),
                                 // data size
-                                uint8_t(0),
+                                uint8_t(2),
                                 // serial ID
                                 uint8_t(0),
                                 uint8_t(0),
