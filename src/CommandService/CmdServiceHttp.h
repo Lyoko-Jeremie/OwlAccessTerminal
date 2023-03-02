@@ -49,7 +49,7 @@ namespace OwlCommandServiceHttp {
         }
 
         ~CmdServiceHttpConnect() override {
-            BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::~CmdServiceHttpConnect()";
+            BOOST_LOG_OWL(trace_dtor) << "CmdServiceHttpConnect::~CmdServiceHttpConnect()";
         }
 
         // Initiate the asynchronous operations associated with the connection.
@@ -139,15 +139,15 @@ namespace OwlCommandServiceHttp {
         ) {
             auto self = shared_from_this();
 
-            BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::write_response";
+            BOOST_LOG_OWL(trace_cmd_http) << "CmdServiceHttpConnect::write_response";
             boost::beast::http::async_write(
                     socket_,
                     *response,
                     [self, response](boost::beast::error_code ec, std::size_t) {
-                        BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::write_response end";
+                        BOOST_LOG_OWL(trace_cmd_http) << "CmdServiceHttpConnect::write_response end";
                         self->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
                         self->deadline_.cancel();
-                        BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::write_response close";
+                        BOOST_LOG_OWL(trace_cmd_http) << "CmdServiceHttpConnect::write_response close";
                     });
         }
 
@@ -215,7 +215,7 @@ namespace OwlCommandServiceHttp {
         );
 
         void send_back_json(const boost::json::value &json_value) override {
-            BOOST_LOG_OWL(trace) << "CmdServiceHttpConnect::send_back_json";
+            BOOST_LOG_OWL(trace_cmd_http) << "CmdServiceHttpConnect::send_back_json";
             send_back(boost::json::serialize(json_value));
         }
 
