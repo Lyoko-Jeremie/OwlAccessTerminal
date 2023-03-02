@@ -15,7 +15,7 @@
 #include <boost/system.hpp>
 #include <boost/json.hpp>
 #include <boost/utility/string_view.hpp>
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 
 namespace OwlCameraConfig {
     // from cv::VideoCaptureAPIs

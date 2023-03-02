@@ -9,7 +9,7 @@
 #include <vector>
 #include <mutex>
 #include <opencv2/opencv.hpp>
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 #include "ImageServiceMail.h"
 #include "../ConfigLoader/ConfigLoader.h"
 

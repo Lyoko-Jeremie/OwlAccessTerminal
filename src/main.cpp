@@ -23,7 +23,7 @@
 
 #include "ImageService/protobuf_test.h"
 
-#include "Log/Log.h"
+#include "OwlLog/OwlLog.h"
 
 #include <google/protobuf/stubs/common.h>
 #include <opencv2/imgcodecs.hpp>

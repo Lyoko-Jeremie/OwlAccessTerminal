@@ -11,7 +11,7 @@
 #include <boost/asio.hpp>
 #include <boost/json.hpp>
 #include <boost/url.hpp>
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 #include "CmdSerialMail.h"
 #include "ProcessJsonMessage.h"
 #include "../QueryPairsAnalyser/QueryPairsAnalyser.h"

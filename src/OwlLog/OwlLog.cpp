@@ -1,6 +1,6 @@
 // jeremie
 
-#include "Log.h"
+#include "OwlLog.h"
 #include <boost/core/null_deleter.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/sinks/sync_frontend.hpp>

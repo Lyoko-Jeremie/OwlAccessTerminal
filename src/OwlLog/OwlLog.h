@@ -1,7 +1,7 @@
 // jeremie
 
-#ifndef OWLACCESSTERMINAL_LOG_H
-#define OWLACCESSTERMINAL_LOG_H
+#ifndef OWLACCESSTERMINAL_OWLLOG_H
+#define OWLACCESSTERMINAL_OWLLOG_H
 
 #include <string>
 #include <boost/log/core.hpp>
@@ -45,4 +45,4 @@ namespace OwlLog {
 #define BOOST_LOG_OWL(lvl) BOOST_LOG_SEV(OwlLog::slg, OwlLog::severity_level::lvl )
 #endif // BOOST_LOG_OWL
 
-#endif //OWLACCESSTERMINAL_LOG_H
+#endif //OWLACCESSTERMINAL_OWLLOG_H

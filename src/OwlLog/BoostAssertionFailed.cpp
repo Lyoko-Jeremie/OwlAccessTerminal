@@ -1,6 +1,6 @@
 // jeremie
 
-#include "../Log/Log.h"
+#include "OwlLog.h"
 #include <boost/assert.hpp>
 
 namespace boost {

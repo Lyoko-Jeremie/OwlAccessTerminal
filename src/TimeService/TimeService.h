@@ -8,7 +8,7 @@
 #include <chrono>
 #include <atomic>
 #include <boost/asio.hpp>
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 #include "./TimeServiceMail.h"
 
 namespace OwlTimeService {

@@ -7,7 +7,7 @@
 #include <functional>
 #include <vector>
 #include <map>
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 #include "../AsyncCallbackMailbox/AsyncCallbackMailbox.h"
 #include "../MapCalc/MapCalcPlaneInfoType.h"
 #include "./AirplaneState.h"

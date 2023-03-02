@@ -6,7 +6,7 @@
 #include <memory>
 #include <functional>
 #include <boost/asio.hpp>
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 #include <boost/core/ignore_unused.hpp>
 #include <utility>
 

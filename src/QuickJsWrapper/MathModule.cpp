@@ -5,7 +5,7 @@
 #include <limits>
 #include <random>
 #include <opencv2/opencv.hpp>
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 
 namespace MathRandom {
     // https://en.cppreference.com/w/cpp/numeric/random/uniform_int_distribution

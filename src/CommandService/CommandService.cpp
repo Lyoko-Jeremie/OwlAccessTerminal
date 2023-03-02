@@ -1,7 +1,7 @@
 // jeremie
 
 #include "CommandService.h"
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 
 namespace OwlCommandService {
 

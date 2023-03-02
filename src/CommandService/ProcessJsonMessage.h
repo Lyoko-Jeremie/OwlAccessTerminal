@@ -9,7 +9,7 @@
 #include <boost/array.hpp>
 #include <boost/json.hpp>
 #include <boost/system/error_code.hpp>
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 #include <boost/utility/string_view.hpp>
 #include <boost/assert.hpp>
 #include <boost/exception/diagnostic_information.hpp>

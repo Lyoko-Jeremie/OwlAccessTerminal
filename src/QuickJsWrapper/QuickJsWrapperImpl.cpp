@@ -1,7 +1,7 @@
 // jeremie
 
 #include "QuickJsWrapperImpl.h"
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 #include <boost/exception/diagnostic_information.hpp>
 
 #include <sstream>

@@ -7,7 +7,7 @@
 #include <functional>
 #include <array>
 #include <boost/asio.hpp>
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 #include <utility>
 #include "MapCalcMail.h"
 #include "MapCalcPlaneInfoType.h"

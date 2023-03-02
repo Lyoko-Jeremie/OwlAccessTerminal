@@ -277,9 +277,9 @@ add_executable(${ProjectMainName}
         src/CommandService/CmdServiceHttp.cpp
         src/CommandService/CmdServiceHttp.h
         src/CommandService/ProcessJsonMessage.h
-        src/Log/Log.cpp
-        src/Log/Log.h
-        src/Log/BoostAssertionFailed.cpp
+        src/OwlLog/OwlLog.cpp
+        src/OwlLog/OwlLog.h
+        src/OwlLog/BoostAssertionFailed.cpp
         src/TimeService/TimeServiceMail.h
         src/TimeService/TimeService.cpp
         src/TimeService/TimeService.h

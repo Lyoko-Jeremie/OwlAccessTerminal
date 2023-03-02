@@ -15,7 +15,7 @@
 #include <boost/asio/read_until.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/array.hpp>
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 #include "ImageProtobufDefine/ImageProtocol/ImageProtocol.pb.h"
 #include "ImageServiceMail.h"
 

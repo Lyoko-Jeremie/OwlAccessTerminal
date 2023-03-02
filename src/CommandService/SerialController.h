@@ -6,7 +6,7 @@
 #include <memory>
 #include <boost/asio.hpp>
 #include <boost/asio/read_until.hpp>
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 #include <boost/core/ignore_unused.hpp>
 #include <boost/assert.hpp>
 #include <boost/bind/bind.hpp>

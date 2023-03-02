@@ -1,7 +1,7 @@
 // jeremie
 
 #include "QuickJsWrapper.h"
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 
 
 namespace OwlQuickJsWrapper {

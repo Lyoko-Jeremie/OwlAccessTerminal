@@ -8,7 +8,7 @@
 #include <regex>
 #include <boost/beast.hpp>
 #include <boost/algorithm/string.hpp>
-#include "../Log/Log.h"
+#include "../OwlLog/OwlLog.h"
 
 namespace OwlQueryPairsAnalyser {
 
