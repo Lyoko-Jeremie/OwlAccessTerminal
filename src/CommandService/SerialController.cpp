@@ -510,6 +510,115 @@ namespace OwlSerialController {
                 );
                 return;
             }
+            case OwlMailDefine::AdditionCmd::AprilTagSimple: {
+                if (!repeating)
+                    BOOST_LOG_OWL(trace_cmd_sp_w) << "SerialController"
+                                                  << " sendData2Serial"
+                                                  << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTagSimple";
+
+                if (!data->aprilTagCmdPtr) {
+                    BOOST_LOG_OWL(error) << "SerialController"
+                                         << " sendData2Serial"
+                                         << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTagSimple"
+                                         << " (!data->aprilTagCmdPtr)";
+                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    data_r->runner = data->callbackRunner;
+                    data_r->openError = false;
+                    data_r->ok = false;
+                    sendMail(std::move(data_r), mailbox);
+                    return;
+                }
+                BOOST_ASSERT(data->aprilTagCmdPtr);
+
+//                auto pcx = static_cast<uint16_t>(data->aprilTagCmdPtr->imageX);
+//                auto pcy = static_cast<uint16_t>(data->aprilTagCmdPtr->imageY);
+
+                if (!data->aprilTagCmdPtr->mapCalcPlaneInfoType) {
+                    BOOST_LOG_OWL(error)
+                        << "SerialController"
+                        << " sendData2Serial"
+                        << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTagSimple"
+                        << " (!data->aprilTagCmdPtr->mapCalcPlaneInfoType)";
+                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    data_r->runner = data->callbackRunner;
+                    data_r->openError = false;
+                    data_r->ok = false;
+                    sendMail(std::move(data_r), mailbox);
+                    return;
+                }
+                BOOST_ASSERT(data->aprilTagCmdPtr->mapCalcPlaneInfoType);
+
+
+                if (!repeating) {
+                    // save a copy for other use
+                    atomic_store(&aprilTagCmdData, data->aprilTagCmdPtr);
+                }
+
+                auto &info = *data->aprilTagCmdPtr->mapCalcPlaneInfoType;
+
+                auto xDirectDeg = int16_t(std::round(info.xDirectDeg));
+                auto zDirectDeg = int16_t(std::round(info.zDirectDeg));
+                auto xzDirectDeg = int16_t(std::round(info.xzDirectDeg));
+//                auto ImageP_x = int16_t(std::round(info.ImageP.x));
+//                auto ImageP_y = int16_t(std::round(info.ImageP.y));
+                auto PlaneP_x = int16_t(std::round(info.PlaneP.x));
+                auto PlaneP_y = int16_t(std::round(info.PlaneP.y));
+//                auto ScaleXY_x = int16_t(std::round(info.ScaleXY.x));
+//                auto ScaleXY_y = int16_t(std::round(info.ScaleXY.y));
+//                auto ScaleXZ_x = int16_t(std::round(info.ScaleXZ.x));
+//                auto ScaleXZ_y = int16_t(std::round(info.ScaleXZ.y));
+
+                // if (needRepeat) {
+                //     // ok, this package is safe, now to remember this package
+                //
+                //     // clone a package without callback to recorder
+                //     packageId = package_record_->setNewMail(data->repeat());
+                // }
+
+                // send cmd to serial
+                // make send data
+                constexpr uint8_t packageSize = 17;
+                makeADataBuffer<packageSize>(
+                        std::array<uint8_t, packageSize>{
+                                // 0xAA
+                                uint8_t(0xAA),
+
+                                // AdditionCmd
+                                uint8_t(to_underlying(data->additionCmd)),
+                                // data size
+                                uint8_t(packageSize - 5),
+
+                                // https://stackoverflow.com/questions/2711522/what-happens-if-i-assign-a-negative-value-to-an-unsigned-variable
+
+                                uint8_t(uint16_t(xDirectDeg & 0xff)),
+                                uint8_t(uint16_t(xDirectDeg & 0xff00) >> 8),
+
+                                uint8_t(uint16_t(zDirectDeg & 0xff)),
+                                uint8_t(uint16_t(zDirectDeg & 0xff00) >> 8),
+
+                                uint8_t(uint16_t(xzDirectDeg & 0xff)),
+                                uint8_t(uint16_t(xzDirectDeg & 0xff00) >> 8),
+
+                                uint8_t(uint16_t(PlaneP_x & 0xff)),
+                                uint8_t(uint16_t(PlaneP_x & 0xff00) >> 8),
+                                uint8_t(uint16_t(PlaneP_y & 0xff)),
+                                uint8_t(uint16_t(PlaneP_y & 0xff00) >> 8),
+
+
+                                // serial ID
+                                uint8_t(0),
+                                uint8_t(0),
+                                // xor checksum byte
+                                uint8_t(0),
+                                // 0xBB
+                                uint8_t(0xBB),
+                        },
+                        shared_from_this(),
+                        data,
+                        mailbox
+                );
+                return;
+            }
             case OwlMailDefine::AdditionCmd::JoyCon: {
                 if (!repeating)
                     BOOST_LOG_OWL(trace_cmd_sp_w) << "SerialController"

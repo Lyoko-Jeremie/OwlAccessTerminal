@@ -38,6 +38,7 @@ namespace OwlMailDefine {
         calibrate = 90,
 
         AprilTag = 100,
+        AprilTagSimple = 101,
 
         JoyCon = 111,
         JoyConSimple = 112,
