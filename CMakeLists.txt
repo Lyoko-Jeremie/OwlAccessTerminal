@@ -60,7 +60,7 @@ endif (DEFAULT_CONFIG)
 #set(DEBUG_IF_CHECK_POINT ON)
 #set(DEBUG_Mailbox ON)
 
-set(DEBUG_log_MAP ON)
+#set(DEBUG_log_MAP ON)
 
 if (DEBUG_BOOST_ASIO)
     add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
