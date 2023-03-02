@@ -31,9 +31,10 @@ namespace OwlLog {
             "trace_map",
             "trace_dtor",
             "trace",
-            "debug",
             "debug_sp_w",
+            "debug",
             "info",
+            "info_VSERION",
             "warning",
             "error",
             "fatal"
@@ -154,7 +155,7 @@ namespace OwlLog {
 #endif // DEBUG_log_SerialPortRead
         );
 
-        BOOST_LOG_OWL(info)
+        BOOST_LOG_OWL(info_VSERION)
             << "OwlAccessTerminal"
             << "\n   ProgramVersion " << ProgramVersion
             << "\n   CodeVersion_GIT_REV " << CodeVersion_GIT_REV
