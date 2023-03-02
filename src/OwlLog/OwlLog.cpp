@@ -174,10 +174,12 @@ namespace OwlLog {
         BOOST_LOG_OWL(trace_cmd_sp_r) << "BOOST_LOG_OWL(trace_cmd_sp_r)";
         BOOST_LOG_OWL(trace_map) << "BOOST_LOG_OWL(trace_map)";
         BOOST_LOG_OWL(trace_dtor) << "BOOST_LOG_OWL(trace_dtor)";
+        BOOST_LOG_OWL(trace_json) << "BOOST_LOG_OWL(trace_json)";
         BOOST_LOG_OWL(trace) << "BOOST_LOG_OWL(trace)";
         BOOST_LOG_OWL(debug) << "BOOST_LOG_OWL(debug)";
         BOOST_LOG_OWL(debug_sp_w) << "BOOST_LOG_OWL(debug_sp_w)";
         BOOST_LOG_OWL(info) << "BOOST_LOG_OWL(info)";
+        BOOST_LOG_OWL(info_VSERION) << "BOOST_LOG_OWL(info_VSERION)";
         BOOST_LOG_OWL(warning) << "BOOST_LOG_OWL(warning)";
         BOOST_LOG_OWL(error) << "BOOST_LOG_OWL(error)";
         BOOST_LOG_OWL(fatal) << "BOOST_LOG_OWL(fatal)";
