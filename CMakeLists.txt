@@ -82,7 +82,7 @@ if (DEBUG_log_SerialPortWrite)
     add_definitions(-DDEBUG_log_SerialPortWrite)
 endif (DEBUG_log_SerialPortWrite)
 if (DEBUG_log_SerialPortWrite_dbg)
-    add_definitions(-DDEBUG_log_SerialPortWrite_dbg)
+    add_definitions(-DDEBUG_log_SerialPortWrite_dbg)    #
 endif (DEBUG_log_SerialPortWrite_dbg)
 if (DEBUG_log_JSON)
     add_definitions(-DDEBUG_log_JSON)
@@ -117,7 +117,7 @@ else (StateReaderImpl_UseNormal) # StateReaderImpl_UseCo
 endif (StateReaderImpl_UseNormal)
 
 # https://www.boost.org/doc/libs/1_81_0/libs/assert/doc/html/assert.html
-add_definitions(-DBOOST_ENABLE_ASSERT_HANDLER)
+add_definitions(-DBOOST_ENABLE_ASSERT_HANDLER)  #
 
 
 add_subdirectory(src/ExternLib/quickjspp/quickjs)

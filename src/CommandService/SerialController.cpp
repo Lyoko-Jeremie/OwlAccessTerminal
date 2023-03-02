@@ -202,9 +202,9 @@ namespace OwlSerialController {
         if (auto n = OwlMailDefine::AdditionCmdNameLookupTable.find(data->additionCmd);
                 n != OwlMailDefine::AdditionCmdNameLookupTable.end()) {
             if (data->additionCmd != OwlMailDefine::AdditionCmd::ping) {
-                BOOST_LOG_OWL(trace_cmd_sp_w) << "SerialController::receiveMail "
-                                              << to_underlying(data->additionCmd) << " additionCmd:"
-                                              << n->second;
+                BOOST_LOG_OWL(debug_sp_w) << "SerialController::receiveMail "
+                                          << to_underlying(data->additionCmd) << " additionCmd:"
+                                          << n->second;
             }
         } else {
             BOOST_LOG_OWL(warning) << "SerialController::receiveMail unknown additionCmd : "
@@ -322,9 +322,10 @@ namespace OwlSerialController {
             case OwlMailDefine::AdditionCmd::gotoPosition:
             case OwlMailDefine::AdditionCmd::led: {
                 if (!repeating)
-                    BOOST_LOG_OWL(debug_sp_w) << "SerialController"
-                                              << " sendData2Serial"
-                                              << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::* move class";
+                    BOOST_LOG_OWL(trace_cmd_sp_w)
+                        << "SerialController"
+                        << " sendData2Serial"
+                        << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::* move class";
                 auto mcp = data->moveCmdPtr;
                 if (!mcp) {
                     BOOST_LOG_OWL(error) << "SerialController"
