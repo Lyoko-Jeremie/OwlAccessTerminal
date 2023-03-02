@@ -6,6 +6,5 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/enable_shared_from_this.hpp>
-#include <boost/atomic.hpp>
 
 #endif //OWLACCESSTERMINAL_MEMORYBOOST_H

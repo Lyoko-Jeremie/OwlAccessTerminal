@@ -986,7 +986,7 @@ namespace OwlSerialController {
                     << "\n\ttimestamp: " << p->timestamp
                     << "";
             }
-            boost::atomic_store(&newestAirplaneState, p);
+            atomic_store(&newestAirplaneState, p);
         });
     }
 
