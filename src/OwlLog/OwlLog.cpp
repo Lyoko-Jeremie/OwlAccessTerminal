@@ -151,6 +151,12 @@ namespace OwlLog {
                 #ifndef DEBUG_log_SerialPortWrite
                 && severity != severity_level::trace_cmd_sp_w
                 #endif // DEBUG_log_SerialPortWrite
+                #ifndef DEBUG_log_SerialPortWrite_dbg
+                && severity != severity_level::debug_sp_w
+                #endif // DEBUG_log_SerialPortWrite_dbg
+                #ifndef DEBUG_log_JSON
+                && severity != severity_level::trace_json
+                #endif // DEBUG_log_JSON
                 #ifndef DEBUG_log_SerialPortRead
                 && severity != severity_level::trace_cmd_sp_r
 #endif // DEBUG_log_SerialPortRead
