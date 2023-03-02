@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_STATEREADER_H
 #define OWLACCESSTERMINAL_STATEREADER_H
 
-#include <memory>
+#include "../../MemoryBoost.h"
 #include <boost/asio.hpp>
 #include <boost/asio/read_until.hpp>
 #include "../../OwlLog/OwlLog.h"
@@ -28,11 +28,11 @@ namespace OwlSerialController {
     using StateReaderImpl = StateReaderImplCo;
 #endif // UseStateReaderImplNormal
 
-    class StateReader : public std::enable_shared_from_this<StateReader> {
+    class StateReader : public boost::enable_shared_from_this<StateReader> {
     public:
         StateReader(
-                std::weak_ptr<PortController> parentRef,
-                std::shared_ptr<boost::asio::serial_port> serialPort
+                boost::weak_ptr<PortController> parentRef,
+                boost::shared_ptr<boost::asio::serial_port> serialPort
         );
 
         void init();
@@ -46,13 +46,13 @@ namespace OwlSerialController {
 
         friend class StateReaderImplNormal;
 
-        std::weak_ptr<PortController> parentRef_;
+        boost::weak_ptr<PortController> parentRef_;
 
-        std::shared_ptr<boost::asio::serial_port> serialPort_;
+        boost::shared_ptr<boost::asio::serial_port> serialPort_;
 
-        std::shared_ptr<StateReaderImpl> impl;
+        boost::shared_ptr<StateReaderImpl> impl;
 
-        void sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState);
+        void sendAirplaneState(const boost::shared_ptr<AirplaneState> &airplaneState);
 
     public:
         void start();

@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_CAMERAREADER_H
 #define OWLACCESSTERMINAL_CAMERAREADER_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <utility>
 #include <tuple>
 #include <vector>
@@ -15,7 +15,7 @@
 
 namespace OwlCameraReader {
 
-    struct CameraItem : public std::enable_shared_from_this<CameraItem> {
+    struct CameraItem : public boost::enable_shared_from_this<CameraItem> {
         boost::asio::strand<boost::asio::io_context::executor_type> strand_;
         int id;
         OwlConfigLoader::CameraAddrType path;
@@ -42,7 +42,7 @@ namespace OwlCameraReader {
 
     };
 
-    class CameraReader : public std::enable_shared_from_this<CameraReader> {
+    class CameraReader : public boost::enable_shared_from_this<CameraReader> {
     public:
         CameraReader(
                 boost::asio::io_context &ioc,
@@ -60,7 +60,7 @@ namespace OwlCameraReader {
     private:
         boost::asio::io_context &ioc_;
         std::vector<OwlCameraConfig::CameraInfoTuple> camera_info_list_;
-        std::vector<std::shared_ptr<CameraItem>> camera_item_list_;
+        std::vector<boost::shared_ptr<CameraItem>> camera_item_list_;
         std::mutex mtx_camera_item_list_;
         OwlMailDefine::ServiceCameraMailbox mailbox_tcp_protobuf_;
         OwlMailDefine::ServiceCameraMailbox mailbox_http_;

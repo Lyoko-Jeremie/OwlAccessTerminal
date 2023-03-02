@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_ASYNCCALLBACKMAILBOX_H
 #define OWLACCESSTERMINAL_ASYNCCALLBACKMAILBOX_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <functional>
 #include <boost/asio.hpp>
 #include "../OwlLog/OwlLog.h"
@@ -14,7 +14,7 @@ namespace OwlAsyncCallbackMailbox {
 
     template<typename A2B, typename B2A>
     class AsyncCallbackMailbox :
-            public std::enable_shared_from_this<AsyncCallbackMailbox<A2B, B2A>> {
+            public boost::enable_shared_from_this<AsyncCallbackMailbox<A2B, B2A>> {
     public:
         AsyncCallbackMailbox() = delete;
 
@@ -23,8 +23,8 @@ namespace OwlAsyncCallbackMailbox {
                 boost::asio::io_context &ioc_b
         ) : ioc_a_(ioc_a), ioc_b_(ioc_b) {}
 
-        using A2B_t = std::shared_ptr<A2B>;
-        using B2A_t = std::shared_ptr<B2A>;
+        using A2B_t = boost::shared_ptr<A2B>;
+        using B2A_t = boost::shared_ptr<B2A>;
 
 #ifdef DEBUG_AsyncCallbackMailbox
         std::string debugTag_;

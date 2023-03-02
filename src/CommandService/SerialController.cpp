@@ -58,14 +58,14 @@ namespace OwlSerialController {
                 auto pn = atomic_load(&newestAirplaneState);
                 auto pa = atomic_load(&aprilTagCmdData);
                 if (!pn || !pa) {
-                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                     data_r->runner = data->callbackRunner;
                     data_r->openError = true;
                     data_r->ok = false;
                     sendMail(std::move(data_r), mailbox);
                     return;
                 }
-                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                 data_r->runner = data->callbackRunner;
                 data_r->ok = pn && pa;
                 data_r->newestAirplaneState = pn->shared_from_this();
@@ -77,7 +77,7 @@ namespace OwlSerialController {
                 BOOST_LOG_OWL(error) << "SerialController"
                                      << " receiveMailGetAirplaneState"
                                      << " switch (data->additionCmd) default";
-                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                 data_r->runner = data->callbackRunner;
                 data_r->openError = true;
                 data_r->ok = false;
@@ -89,8 +89,8 @@ namespace OwlSerialController {
 
     template<uint8_t packageSize>
     void sendADataBuffer(
-            std::shared_ptr<SerialController> selfPtr,
-            std::shared_ptr<std::array<uint8_t, packageSize>> sendDataBuffer,
+            boost::shared_ptr<SerialController> selfPtr,
+            boost::shared_ptr<std::array<uint8_t, packageSize>> sendDataBuffer,
             OwlMailDefine::MailCmd2Serial data,
             OwlMailDefine::CmdSerialMailbox &mailbox
     ) {
@@ -109,7 +109,7 @@ namespace OwlSerialController {
                     BOOST_ASSERT(data);
                     boost::ignore_unused(bytes_transferred);
                     // make cmd result
-                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                     data_r->runner = data->callbackRunner;
                     if (ec) {
                         // error
@@ -130,13 +130,13 @@ namespace OwlSerialController {
     template<uint8_t packageSize>
     void makeADataBuffer(
             std::array<uint8_t, packageSize> &&dataInitList,
-            std::shared_ptr<SerialController> selfPtr,
+            boost::shared_ptr<SerialController> selfPtr,
             OwlMailDefine::MailCmd2Serial data,
             OwlMailDefine::CmdSerialMailbox &mailbox
     ) {
         BOOST_ASSERT(selfPtr);
         BOOST_ASSERT(data);
-        auto sendDataBuffer = std::make_shared<std::array<uint8_t, packageSize>>(std::move(dataInitList));
+        auto sendDataBuffer = boost::make_shared<std::array<uint8_t, packageSize>>(std::move(dataInitList));
         // add xor checksum
         if (sendDataBuffer->size() > 5) {
             for (size_t i = 3; i != packageSize - 2; ++i) {
@@ -168,7 +168,7 @@ namespace OwlSerialController {
         boost::asio::dispatch(ioc_, [
                 this, self = shared_from_this(), data, &mailbox]() {
             if (!package_record_->mail()) {
-                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                 data_r->runner = data->callbackRunner;
                 data_r->openError = true;
                 data_r->ok = false;
@@ -290,7 +290,7 @@ namespace OwlSerialController {
         }
         if (!initOk && !initPort()) {
             BOOST_LOG_OWL(trace_cmd_sp_w) << "SerialController::sendData2Serial " << "dispatch initError";
-            auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+            auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
             data_r->runner = data->callbackRunner;
             data_r->openError = true;
             data_r->ok = true;
@@ -303,7 +303,7 @@ namespace OwlSerialController {
                 BOOST_LOG_OWL(error) << "SerialController"
                                      << " sendData2Serial"
                                      << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::ignore";
-                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                 data_r->runner = data->callbackRunner;
                 data_r->openError = true;
                 data_r->ok = false;
@@ -330,7 +330,7 @@ namespace OwlSerialController {
                     BOOST_LOG_OWL(error) << "SerialController"
                                          << " sendData2Serial"
                                          << " OwlMailDefine::AdditionCmd::* move class nullptr";
-                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                     data_r->runner = data->callbackRunner;
                     data_r->openError = false;
                     data_r->ok = false;
@@ -391,7 +391,7 @@ namespace OwlSerialController {
                                          << " sendData2Serial"
                                          << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag"
                                          << " (!data->aprilTagCmdPtr)";
-                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                     data_r->runner = data->callbackRunner;
                     data_r->openError = false;
                     data_r->ok = false;
@@ -409,7 +409,7 @@ namespace OwlSerialController {
                         << " sendData2Serial"
                         << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTag"
                         << " (!data->aprilTagCmdPtr->mapCalcPlaneInfoType)";
-                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                     data_r->runner = data->callbackRunner;
                     data_r->openError = false;
                     data_r->ok = false;
@@ -521,7 +521,7 @@ namespace OwlSerialController {
                                          << " sendData2Serial"
                                          << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTagSimple"
                                          << " (!data->aprilTagCmdPtr)";
-                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                     data_r->runner = data->callbackRunner;
                     data_r->openError = false;
                     data_r->ok = false;
@@ -539,7 +539,7 @@ namespace OwlSerialController {
                         << " sendData2Serial"
                         << " switch (data->additionCmd) OwlMailDefine::AdditionCmd::AprilTagSimple"
                         << " (!data->aprilTagCmdPtr->mapCalcPlaneInfoType)";
-                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                     data_r->runner = data->callbackRunner;
                     data_r->openError = false;
                     data_r->ok = false;
@@ -629,7 +629,7 @@ namespace OwlSerialController {
                     BOOST_LOG_OWL(error) << "SerialController"
                                          << " sendData2Serial"
                                          << " OwlMailDefine::AdditionCmd::JoyCon nullptr";
-                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                     data_r->runner = data->callbackRunner;
                     data_r->openError = false;
                     data_r->ok = false;
@@ -705,7 +705,7 @@ namespace OwlSerialController {
                     BOOST_LOG_OWL(error) << "SerialController"
                                          << " sendData2Serial"
                                          << " OwlMailDefine::AdditionCmd::JoyConSimple nullptr";
-                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                     data_r->runner = data->callbackRunner;
                     data_r->openError = false;
                     data_r->ok = false;
@@ -771,7 +771,7 @@ namespace OwlSerialController {
                     BOOST_LOG_OWL(error) << "SerialController"
                                          << " sendData2Serial"
                                          << " OwlMailDefine::AdditionCmd::JoyConGyro nullptr";
-                    auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                    auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                     data_r->runner = data->callbackRunner;
                     data_r->openError = false;
                     data_r->ok = false;
@@ -886,7 +886,7 @@ namespace OwlSerialController {
                 BOOST_LOG_OWL(error) << "SerialController"
                                      << " sendData2Serial"
                                      << " switch (data->additionCmd) default";
-                auto data_r = std::make_shared<OwlMailDefine::Serial2Cmd>();
+                auto data_r = boost::make_shared<OwlMailDefine::Serial2Cmd>();
                 data_r->runner = data->callbackRunner;
                 data_r->openError = true;
                 data_r->ok = false;
@@ -930,8 +930,8 @@ namespace OwlSerialController {
 
     PortController::PortController(
             boost::asio::io_context &ioc,
-            std::weak_ptr<SerialController> &&parentRef)
-            : sp_(std::make_shared<boost::asio::serial_port>(boost::asio::make_strand(ioc))),
+            boost::weak_ptr<SerialController> &&parentRef)
+            : sp_(boost::make_shared<boost::asio::serial_port>(boost::asio::make_strand(ioc))),
               parentRef_(std::move(parentRef)) {
     }
 
@@ -945,7 +945,7 @@ namespace OwlSerialController {
         }
 #ifndef DEBUG_DisableStateReader
         BOOST_ASSERT(!weak_from_this().expired());
-        stateReader_ = std::make_shared<StateReader>(weak_from_this(), sp_);
+        stateReader_ = boost::make_shared<StateReader>(weak_from_this(), sp_);
         BOOST_ASSERT(!weak_from_this().expired());
         BOOST_LOG_OWL(trace) << "stateReader_.use_count() : " << stateReader_.use_count();
         BOOST_ASSERT(stateReader_.use_count() > 0);
@@ -953,7 +953,7 @@ namespace OwlSerialController {
 #endif // DEBUG_DisableStateReader
     }
 
-    void PortController::sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState) {
+    void PortController::sendAirplaneState(const boost::shared_ptr<AirplaneState> &airplaneState) {
         boost::asio::dispatch(sp_->get_executor(), [
                 this, self = shared_from_this(), airplaneState]() {
             auto ptr = parentRef_.lock();
@@ -967,7 +967,7 @@ namespace OwlSerialController {
         });
     }
 
-    void SerialController::sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState) {
+    void SerialController::sendAirplaneState(const boost::shared_ptr<AirplaneState> &airplaneState) {
         boost::asio::dispatch(ioc_, [this, self = shared_from_this(), airplaneState]() {
             auto p = airplaneState;
             if (p) {
@@ -986,7 +986,7 @@ namespace OwlSerialController {
                     << "\n\ttimestamp: " << p->timestamp
                     << "";
             }
-            std::atomic_store(&newestAirplaneState, p);
+            boost::atomic_store(&newestAirplaneState, p);
         });
     }
 

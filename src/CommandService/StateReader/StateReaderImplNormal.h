@@ -8,7 +8,7 @@
 #include "StateReader.h"
 #include <utility>
 #include <string_view>
-#include <memory>
+#include "../../MemoryBoost.h"
 #include <deque>
 #include <boost/asio/read_until.hpp>
 #include <boost/bind/bind.hpp>
@@ -21,11 +21,11 @@
 namespace OwlSerialController {
 
 
-    class StateReaderImplNormal : public std::enable_shared_from_this<StateReaderImplNormal> {
+    class StateReaderImplNormal : public boost::enable_shared_from_this<StateReaderImplNormal> {
     public:
         StateReaderImplNormal(
-                std::weak_ptr<StateReader> parentRef,
-                std::shared_ptr<boost::asio::serial_port> serialPort
+                boost::weak_ptr<StateReader> parentRef,
+                boost::shared_ptr<boost::asio::serial_port> serialPort
         ) : parentRef_(std::move(parentRef)), serialPort_(std::move(serialPort)) {}
 
         ~StateReaderImplNormal() {
@@ -33,12 +33,12 @@ namespace OwlSerialController {
         }
 
     private:
-        std::weak_ptr<StateReader> parentRef_;
+        boost::weak_ptr<StateReader> parentRef_;
 
         boost::asio::streambuf readBuffer_;
-        std::shared_ptr<boost::asio::serial_port> serialPort_;
+        boost::shared_ptr<boost::asio::serial_port> serialPort_;
 
-        std::shared_ptr<AirplaneState> airplaneState_;
+        boost::shared_ptr<AirplaneState> airplaneState_;
         uint8_t dataSize_ = 0;
 
         boost::system::error_code ec_{};
@@ -227,7 +227,7 @@ namespace OwlSerialController {
                 return;
             }
             // ======================================= process data
-            airplaneState_ = std::make_shared<AirplaneState>();
+            airplaneState_ = boost::make_shared<AirplaneState>();
             BOOST_ASSERT(airplaneState_);
             airplaneState_->initTimestamp();
             {

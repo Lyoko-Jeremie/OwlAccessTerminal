@@ -33,7 +33,7 @@ namespace OwlImageService {
             return;
         }
 
-        auto package_r_ = std::make_shared<CommonTcpPackage>();
+        auto package_r_ = boost::make_shared<CommonTcpPackage>();
         boost::asio::async_read(
                 socket_,
                 boost::asio::buffer(
@@ -81,7 +81,7 @@ namespace OwlImageService {
         );
     }
 
-    void ImageServiceSession::do_receive_data(std::shared_ptr<CommonTcpPackage> package_r_) {
+    void ImageServiceSession::do_receive_data(boost::shared_ptr<CommonTcpPackage> package_r_) {
 
         if (!socket_.is_open()) {
             // is closed by other function, stop!
@@ -129,7 +129,7 @@ namespace OwlImageService {
 
     }
 
-    void ImageServiceSession::do_send_size(std::shared_ptr<CommonTcpPackage> package_s_) {
+    void ImageServiceSession::do_send_size(boost::shared_ptr<CommonTcpPackage> package_s_) {
 
         if (!socket_.is_open()) {
             // is closed by other function, stop!
@@ -168,7 +168,7 @@ namespace OwlImageService {
         );
     }
 
-    void ImageServiceSession::do_send_data(std::shared_ptr<CommonTcpPackage> package_s_) {
+    void ImageServiceSession::do_send_data(boost::shared_ptr<CommonTcpPackage> package_s_) {
 
         if (!socket_.is_open()) {
             // is closed by other function, stop!
@@ -210,7 +210,7 @@ namespace OwlImageService {
 
     void ImageServiceSession::do_process_request(std::string &&s) {
 
-        std::shared_ptr<ImageRequest> ir = std::make_shared<ImageRequest>();
+        boost::shared_ptr<ImageRequest> ir = boost::make_shared<ImageRequest>();
         if (!ir->ParseFromString(s)) {
             BOOST_LOG_OWL(info) << "do_process_request ParseFromString failed.";
             // ignore
@@ -233,7 +233,7 @@ namespace OwlImageService {
                             // TODO inner error
                         } else {
 
-                            OwlMailDefine::MailService2Camera cmd_data = std::make_shared<OwlMailDefine::Service2Camera>();
+                            OwlMailDefine::MailService2Camera cmd_data = boost::make_shared<OwlMailDefine::Service2Camera>();
                             cmd_data->camera_id = ir->camera_id();
 
                             cmd_data->callbackRunner = [this, self = shared_from_this(), ir](
@@ -245,7 +245,7 @@ namespace OwlImageService {
 
                                     boost::asio::dispatch(socket_.get_executor(), [this, self = shared_from_this()]() {
                                         // now create empty package and send it
-                                        auto package_s_ = std::make_shared<CommonTcpPackage>();
+                                        auto package_s_ = boost::make_shared<CommonTcpPackage>();
 
                                         package_s_->size_ = 0;
                                         do_send_size(package_s_);
@@ -297,7 +297,7 @@ namespace OwlImageService {
                                             is.set_is_ok(true);
 
                                             // now create package and send it
-                                            auto package_s_ = std::make_shared<CommonTcpPackage>();
+                                            auto package_s_ = boost::make_shared<CommonTcpPackage>();
                                             // https://stackoverflow.com/questions/44904295/convert-stdstring-to-boostasiostreambuf
                                             std::string is_string;
                                             if (!is.SerializeToString(&is_string)) {
@@ -408,6 +408,6 @@ namespace OwlImageService {
     }
 
     void ImageService::on_accept(boost::asio::ip::tcp::socket &&socket) {
-        std::make_shared<ImageServiceSession>(ioc_, std::move(socket), weak_from_this())->start();
+        boost::make_shared<ImageServiceSession>(ioc_, std::move(socket), weak_from_this())->start();
     }
 } // OwlImageService

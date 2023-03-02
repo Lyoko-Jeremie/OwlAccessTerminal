@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_CMDEXECUTE_H
 #define OWLACCESSTERMINAL_CMDEXECUTE_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <utility>
 #include <thread>
 #include <unordered_map>
@@ -20,7 +20,7 @@ namespace OwlCmdExecute {
 
     class CmdExecute;
 
-    struct CmdExecuteItem : public std::enable_shared_from_this<CmdExecuteItem> {
+    struct CmdExecuteItem : public boost::enable_shared_from_this<CmdExecuteItem> {
         size_t ceiId;
         std::string pName;
         std::string params;
@@ -37,7 +37,7 @@ namespace OwlCmdExecute {
         bool isEnd = false;
         bool isErr = false;
 
-        std::weak_ptr<CmdExecute> parentRef;
+        boost::weak_ptr<CmdExecute> parentRef;
 
         std::function<void()> callbackEnd;
 
@@ -46,7 +46,7 @@ namespace OwlCmdExecute {
                 boost::asio::io_context &ioc,
                 std::string pName,
                 std::string params,
-                std::weak_ptr<CmdExecute> parentRef
+                boost::weak_ptr<CmdExecute> parentRef
         ) : ceiId(ceiId),
             pName(std::move(pName)),
             params(std::move(params)),
@@ -64,11 +64,11 @@ namespace OwlCmdExecute {
     };
 
 
-    class CmdExecute : public std::enable_shared_from_this<CmdExecute> {
+    class CmdExecute : public boost::enable_shared_from_this<CmdExecute> {
     public:
         explicit CmdExecute(
                 boost::asio::io_context &ioc,
-                std::shared_ptr<OwlConfigLoader::ConfigLoader> &&config,
+                boost::shared_ptr<OwlConfigLoader::ConfigLoader> &&config,
                 OwlMailDefine::WebCmdMailbox &&mailbox
         ) : ioc_(ioc), mailbox_(std::move(mailbox)),
             config_(std::move(config)) {
@@ -85,11 +85,11 @@ namespace OwlCmdExecute {
         boost::asio::io_context &ioc_;
         OwlMailDefine::WebCmdMailbox mailbox_;
 
-        std::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
+        boost::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
 
         std::atomic_size_t ceiIdGenerator_{1};
         std::mutex ceiMtx_;
-        std::unordered_map<size_t, std::weak_ptr<CmdExecuteItem>> ceiPool_;
+        std::unordered_map<size_t, boost::weak_ptr<CmdExecuteItem>> ceiPool_;
 
     public:
 
@@ -104,7 +104,7 @@ namespace OwlCmdExecute {
                 const std::lock_guard<typeof(ceiMtx_)> &lg
         );
 
-        void sendBackResult(std::shared_ptr<CmdExecuteItem> cei, OwlMailDefine::MailWeb2Cmd data);
+        void sendBackResult(boost::shared_ptr<CmdExecuteItem> cei, OwlMailDefine::MailWeb2Cmd data);
 
         void receiveMail(OwlMailDefine::MailWeb2Cmd &&data);
 
@@ -114,7 +114,7 @@ namespace OwlCmdExecute {
 
     private:
 
-        std::shared_ptr<CmdExecuteItem> createCEI(
+        boost::shared_ptr<CmdExecuteItem> createCEI(
                 const std::string &pName, const std::string &params
         );
 

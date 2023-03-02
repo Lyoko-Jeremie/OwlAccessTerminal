@@ -160,7 +160,7 @@ namespace OwlConfigLoader {
         return p.release();
     }
 
-    std::shared_ptr<Config> ConfigLoader::parse_json(const boost::json::value &&json_v) {
+    boost::shared_ptr<Config> ConfigLoader::parse_json(const boost::json::value &&json_v) {
         const auto &root = json_v.as_object();
 
         {
@@ -171,7 +171,7 @@ namespace OwlConfigLoader {
             // BOOST_LOG_OWL(info) << "parse_json from : \n" << boost::json::serialize(root);
         }
 
-        std::shared_ptr<Config> _config_ = std::make_shared<Config>();
+        boost::shared_ptr<Config> _config_ = boost::make_shared<Config>();
         auto &config = *_config_;
 
         config.CommandServiceUdpPort = get(root, "CommandServiceUdpPort", config.CommandServiceUdpPort);

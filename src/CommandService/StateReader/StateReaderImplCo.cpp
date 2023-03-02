@@ -46,7 +46,7 @@ namespace OwlSerialController {
                 });
     }
 
-    boost::asio::awaitable<bool> StateReaderImplCo::next_read(std::shared_ptr<StateReaderImplCo> _ptr_) {
+    boost::asio::awaitable<bool> StateReaderImplCo::next_read(boost::shared_ptr<StateReaderImplCo> _ptr_) {
         BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo next_read()";
         // https://www.boost.org/doc/libs/1_81_0/doc/html/boost_asio/example/cpp20/coroutines/echo_server.cpp
 
@@ -239,7 +239,7 @@ namespace OwlSerialController {
             // ======================================= process data
             BOOST_LOG_OWL(trace_cmd_sp_r) << "StateReaderImplCo"
                                           << " do process data";
-            airplaneState_ = std::make_shared<AirplaneState>();
+            airplaneState_ = boost::make_shared<AirplaneState>();
             BOOST_ASSERT(airplaneState_);
             airplaneState_->initTimestamp();
             {
@@ -311,7 +311,7 @@ namespace OwlSerialController {
         co_return true;
     }
 
-    void StateReaderImplCo::loadData(std::shared_ptr<StateReaderImplCo> _ptr_) {
+    void StateReaderImplCo::loadData(boost::shared_ptr<StateReaderImplCo> _ptr_) {
 
         // https://stackoverflow.com/questions/41220792/how-copy-or-reuse-boostasiostreambuf
         // std::vector<uint8_t> data(readBuffer_.size());

@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_CMDSERVICEHTTP_H
 #define OWLACCESSTERMINAL_CMDSERVICEHTTP_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <vector>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
@@ -27,13 +27,13 @@ namespace OwlCommandServiceHttp {
     class CmdServiceHttp;
 
     class CmdServiceHttpConnect
-            : public std::enable_shared_from_this<CmdServiceHttpConnect>,
+            : public boost::enable_shared_from_this<CmdServiceHttpConnect>,
               public OwlProcessJsonMessage::ProcessJsonMessageSelfTypeInterface {
     public:
         CmdServiceHttpConnect(
                 boost::asio::io_context &ioc,
                 boost::asio::ip::tcp::socket &&socket,
-                std::weak_ptr<CmdServiceHttp> &&parents
+                boost::weak_ptr<CmdServiceHttp> &&parents
         ) : ioc_(ioc),
             socket_(std::move(socket)),
             parents_(std::move(parents)),
@@ -65,7 +65,7 @@ namespace OwlCommandServiceHttp {
         // The socket for the currently connected client.
         boost::asio::ip::tcp::socket socket_;
 
-        std::weak_ptr<CmdServiceHttp> parents_;
+        boost::weak_ptr<CmdServiceHttp> parents_;
 
         // The buffer for performing reads.
         boost::beast::flat_buffer buffer_{JSON_Package_Max_Size};
@@ -135,7 +135,7 @@ namespace OwlCommandServiceHttp {
         // Asynchronously transmit the response message.
         template<typename BodyType =boost::beast::http::dynamic_body>
         void write_response(
-                std::shared_ptr<boost::beast::http::response<BodyType>> response
+                boost::shared_ptr<boost::beast::http::response<BodyType>> response
         ) {
             auto self = shared_from_this();
 
@@ -186,7 +186,7 @@ namespace OwlCommandServiceHttp {
                 boost::string_view,
                 boost::json::static_resource &,
                 boost::json::parse_options &,
-                // const std::shared_ptr<ProcessJsonMessageSelfTypeInterface> &&self
+                // const boost::shared_ptr<ProcessJsonMessageSelfTypeInterface> &&self
                 SelfPtrType &&
         );
 
@@ -223,12 +223,12 @@ namespace OwlCommandServiceHttp {
 
         void sendMail_map(OwlMailDefine::MailService2MapCalc &&data);
 
-        std::shared_ptr<CmdServiceHttp> getParentRef();
+        boost::shared_ptr<CmdServiceHttp> getParentRef();
 
     };
 
 
-    class CmdServiceHttp : public std::enable_shared_from_this<CmdServiceHttp> {
+    class CmdServiceHttp : public boost::enable_shared_from_this<CmdServiceHttp> {
     public:
         CmdServiceHttp(
                 boost::asio::io_context &ioc,
@@ -285,7 +285,7 @@ namespace OwlCommandServiceHttp {
                 BOOST_LOG_OWL(error) << "accept" << " : " << ec.message();
             } else {
                 // Create the session and run it
-                std::make_shared<CmdServiceHttpConnect>(
+                boost::make_shared<CmdServiceHttpConnect>(
                         ioc_,
                         std::move(socket),
                         weak_from_this()

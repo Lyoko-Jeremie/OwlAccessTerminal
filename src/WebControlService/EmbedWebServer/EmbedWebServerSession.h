@@ -5,7 +5,7 @@
 
 // https://www.boost.org/doc/libs/develop/libs/beast/example/http/server/async/http_server_async.cpp
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -24,7 +24,7 @@ namespace OwlEmbedWebServer {
     struct EmbedWebServerSessionHelperCmd;
 
     // Handles an HTTP server connection
-    class EmbedWebServerSession : public std::enable_shared_from_this<EmbedWebServerSession> {
+    class EmbedWebServerSession : public boost::enable_shared_from_this<EmbedWebServerSession> {
         // This is the C++11 equivalent of a generic lambda.
         // The function object is used to send an HTTP message.
         struct send_lambda {
@@ -40,15 +40,15 @@ namespace OwlEmbedWebServer {
             operator()(boost::beast::http::message<isRequest, Body, Fields> &&msg) const;
         };
 
-        std::weak_ptr<EmbedWebServer> parentRef_;
+        boost::weak_ptr<EmbedWebServer> parentRef_;
         boost::beast::tcp_stream stream_;
         boost::beast::flat_buffer buffer_;
-        std::shared_ptr<std::string const> doc_root_;
-        std::shared_ptr<std::string const> index_file_of_root;
-        std::shared_ptr<std::string const> backend_json_string;
+        boost::shared_ptr<std::string const> doc_root_;
+        boost::shared_ptr<std::string const> index_file_of_root;
+        boost::shared_ptr<std::string const> backend_json_string;
         std::vector<std::string> allowFileExtList;
         boost::beast::http::request<boost::beast::http::string_body> req_;
-        std::shared_ptr<void> res_;
+        boost::shared_ptr<void> res_;
         send_lambda lambda_;
 
         friend EmbedWebServerSessionHelperCmd;
@@ -56,11 +56,11 @@ namespace OwlEmbedWebServer {
     public:
         // Take ownership of the stream
         EmbedWebServerSession(
-                std::weak_ptr<EmbedWebServer> parentRef,
+                boost::weak_ptr<EmbedWebServer> parentRef,
                 boost::asio::ip::tcp::socket &&socket,
-                std::shared_ptr<std::string const> const &doc_root,
-                std::shared_ptr<std::string const> const &index_file_of_root,
-                std::shared_ptr<std::string const> const &backend_json_string,
+                boost::shared_ptr<std::string const> const &doc_root,
+                boost::shared_ptr<std::string const> const &index_file_of_root,
+                boost::shared_ptr<std::string const> const &backend_json_string,
                 std::vector<std::string> const &allowFileExtList)
                 : parentRef_(std::move(parentRef)),
                   stream_(std::move(socket)),

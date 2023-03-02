@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_TIMESERVICE_H
 #define OWLACCESSTERMINAL_TIMESERVICE_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <functional>
 #include <chrono>
 #include <atomic>
@@ -13,7 +13,7 @@
 
 namespace OwlTimeService {
 
-    class TimeService : public std::enable_shared_from_this<TimeService> {
+    class TimeService : public boost::enable_shared_from_this<TimeService> {
     public:
         TimeService(
                 boost::asio::io_context &ioc,
@@ -69,7 +69,7 @@ namespace OwlTimeService {
             boost::asio::dispatch(ioc_, [this, self = shared_from_this(), data]() {
                 switch (data->cmd) {
                     case OwlMailDefine::TimeServiceCmd::getSteadyClock: {
-                        auto data_r = std::make_shared<OwlMailDefine::Time2Service>();
+                        auto data_r = boost::make_shared<OwlMailDefine::Time2Service>();
                         data_r->runner = data->callbackRunner;
                         data_r->clockTimestampMs = getNowSteadyClock();
                         sendMail(std::move(data_r));
@@ -77,7 +77,7 @@ namespace OwlTimeService {
                     }
                         break;
                     case OwlMailDefine::TimeServiceCmd::getSyncClock: {
-                        auto data_r = std::make_shared<OwlMailDefine::Time2Service>();
+                        auto data_r = boost::make_shared<OwlMailDefine::Time2Service>();
                         data_r->runner = data->callbackRunner;
                         data_r->clockTimestampMs = getNowSyncClock();
                         sendMail(std::move(data_r));
@@ -85,7 +85,7 @@ namespace OwlTimeService {
                     }
                         break;
                     case OwlMailDefine::TimeServiceCmd::setNowClock: {
-                        auto data_r = std::make_shared<OwlMailDefine::Time2Service>();
+                        auto data_r = boost::make_shared<OwlMailDefine::Time2Service>();
                         data_r->runner = data->callbackRunner;
                         data_r->clockTimestampMs = setNowClockToUpdateDiffAndGetNowSteadyClock(data->clockTimestampMs);
                         sendMail(std::move(data_r));
@@ -95,7 +95,7 @@ namespace OwlTimeService {
                     case OwlMailDefine::TimeServiceCmd::ignore:
                     default: {
                         BOOST_LOG_OWL(error) << "TimeService receiveMail switch(data->cmd) TimeServiceCmd ignore..";
-                        auto data_r = std::make_shared<OwlMailDefine::Time2Service>();
+                        auto data_r = boost::make_shared<OwlMailDefine::Time2Service>();
                         data_r->runner = data->callbackRunner;
                         sendMail(std::move(data_r));
                         return;

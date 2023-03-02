@@ -46,7 +46,7 @@ namespace OwlCommandServiceHttp {
                 break;
 
             default: {
-                auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+                auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
                 response->version(request_.version());
                 response->keep_alive(false);
                 // We return responses indicating an error if
@@ -70,7 +70,7 @@ namespace OwlCommandServiceHttp {
 //        BOOST_LOG_OWL(tracetrace_cmd_tag) << request_.target();
         auto u = boost::urls::parse_uri_reference(request_.target());
         if (u.has_error()) {
-            auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+            auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
             response->version(request_.version());
             response->keep_alive(false);
             response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
@@ -169,10 +169,10 @@ namespace OwlCommandServiceHttp {
 //                return;
 //            }
 
-            std::shared_ptr<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type> aprilTagInfoList{};
+            boost::shared_ptr<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type> aprilTagInfoList{};
             if (!tl.empty()) {
                 aprilTagInfoList =
-                        std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type>();
+                        boost::make_shared<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type>();
                 aprilTagInfoList->reserve(tl.size());
 
                 for (const auto &a: tl) {
@@ -262,7 +262,7 @@ namespace OwlCommandServiceHttp {
                     );
                     return;
                 }
-                aprilTagInfoCenter = std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type>(
+                aprilTagInfoCenter = boost::make_shared<OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type>(
                         OwlMailDefine::AprilTagInfo{
                                 .id=              static_cast<int>(b.at("id").get_int64()),
                                 .hamming=         static_cast<int>(b.at("ham").get_int64()),
@@ -345,14 +345,14 @@ namespace OwlCommandServiceHttp {
                 return;
             }
 
-            auto aprilTagCmd = std::make_shared<OwlMailDefine::AprilTagCmd>();
+            auto aprilTagCmd = boost::make_shared<OwlMailDefine::AprilTagCmd>();
             aprilTagCmd->aprilTagList = aprilTagInfoList;
             aprilTagCmd->aprilTagCenter = aprilTagInfoCenter;
             aprilTagCmd->imageX = imageX;
             aprilTagCmd->imageY = imageY;
 
             // get newestAirplaneState
-            auto getASm = std::make_shared<OwlMailDefine::Cmd2Serial>();
+            auto getASm = boost::make_shared<OwlMailDefine::Cmd2Serial>();
             getASm->additionCmd = OwlMailDefine::AdditionCmd::getAirplaneState;
             BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info to getASm";
             getASm->callbackRunner = [
@@ -380,7 +380,7 @@ namespace OwlCommandServiceHttp {
                     // TODO
                 }
 
-                auto mc = std::make_shared<OwlMailDefine::Service2MapCalc>();
+                auto mc = boost::make_shared<OwlMailDefine::Service2MapCalc>();
                 mc->airplaneState = data->newestAirplaneState;
                 mc->tagInfo = aprilTagCmd->shared_from_this();
                 BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info to mc newestAirplaneState";
@@ -420,7 +420,7 @@ namespace OwlCommandServiceHttp {
                         BOOST_ASSERT(aprilTagCmd->aprilTagList);
                         BOOST_ASSERT(aprilTagCmd->aprilTagCenter);
 
-                        auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                        auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                         m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;
                         m->aprilTagCmdPtr = aprilTagCmd;
                         BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info to m AprilTag";
@@ -483,7 +483,7 @@ namespace OwlCommandServiceHttp {
 //                                {"result", false},
 //                        }
 //                );
-            auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+            auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
             response->version(request_.version());
             response->keep_alive(false);
             response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
@@ -535,7 +535,7 @@ namespace OwlCommandServiceHttp {
         }
         BOOST_LOG_OWL(error) << "create_post_response invalid post request";
 
-        auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+        auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
         response->version(request_.version());
         response->keep_alive(false);
 
@@ -553,7 +553,7 @@ namespace OwlCommandServiceHttp {
 
     void CmdServiceHttpConnect::create_get_airplane_state() {
 
-        auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+        auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
         m->additionCmd = OwlMailDefine::AdditionCmd::getAirplaneState;
         m->callbackRunner = [this, self = shared_from_this()](
                 OwlMailDefine::MailSerial2Cmd data
@@ -575,7 +575,7 @@ namespace OwlCommandServiceHttp {
             auto send_back_data = [
                     this, self = shared_from_this(), state
             ](
-                    std::shared_ptr<OwlMapCalc::MapCalcPlaneInfoType> tags, bool ok
+                    boost::shared_ptr<OwlMapCalc::MapCalcPlaneInfoType> tags, bool ok
             ) {
                 send_back_json(
                         boost::json::value{
@@ -612,7 +612,7 @@ namespace OwlCommandServiceHttp {
                 send_back_data(tags->mapCalcPlaneInfoType, true);
                 return;
             }
-            auto mm = std::make_shared<OwlMailDefine::Service2MapCalc>();
+            auto mm = boost::make_shared<OwlMailDefine::Service2MapCalc>();
             mm->airplaneState = state;
             mm->tagInfo = tags;
             mm->callbackRunner = [
@@ -637,7 +637,7 @@ namespace OwlCommandServiceHttp {
 
     void CmdServiceHttpConnect::create_get_response() {
 
-        auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+        auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
         response->version(request_.version());
         response->keep_alive(false);
 
@@ -685,7 +685,7 @@ namespace OwlCommandServiceHttp {
 
     void CmdServiceHttpConnect::send_back(std::string &&json_string) {
         BOOST_LOG_OWL(trace_cmd_http) << "CmdServiceHttpConnect::send_back json_string:" << json_string;
-        auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+        auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
         response->version(request_.version());
         response->keep_alive(false);
 
@@ -699,12 +699,12 @@ namespace OwlCommandServiceHttp {
         BOOST_LOG_OWL(trace_cmd_http) << "CmdServiceHttpConnect::send_back return";
     }
 
-    std::shared_ptr<CmdServiceHttp> CmdServiceHttpConnect::getParentRef() {
+    boost::shared_ptr<CmdServiceHttp> CmdServiceHttpConnect::getParentRef() {
         auto p = parents_.lock();
         if (!p) {
             BOOST_LOG_OWL(error) << "CmdServiceHttpConnect::getParentRef() " << "(!p)";
             // inner error
-            auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+            auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
             response->version(request_.version());
             response->keep_alive(false);
 

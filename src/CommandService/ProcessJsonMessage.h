@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_PROCESSJSONMESSAGE_H
 #define OWLACCESSTERMINAL_PROCESSJSONMESSAGE_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
@@ -40,7 +40,7 @@ namespace OwlProcessJsonMessage {
     };
 
 
-    template<typename SelfType = ProcessJsonMessageSelfTypeInterface, typename SelfPtrType = std::shared_ptr<SelfType> >
+    template<typename SelfType = ProcessJsonMessageSelfTypeInterface, typename SelfPtrType = boost::shared_ptr<SelfType> >
     void analysisJoyConGyro(
             SelfPtrType self,
             boost::json::object &joyConGyro,
@@ -48,9 +48,9 @@ namespace OwlProcessJsonMessage {
             int packageId
     ) {
         try {
-            auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+            auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
             m->additionCmd = OwlMailDefine::AdditionCmd::JoyConGyro;
-            m->joyConGyroPtr = std::make_shared<OwlMailDefine::JoyConGyro>();
+            m->joyConGyroPtr = boost::make_shared<OwlMailDefine::JoyConGyro>();
             bool good = true;
             m->joyConGyroPtr->x = getFromJsonObject<int16_t>(joyConGyro, "x", good);
             m->joyConGyroPtr->y = getFromJsonObject<int16_t>(joyConGyro, "y", good);
@@ -111,7 +111,7 @@ namespace OwlProcessJsonMessage {
         }
     }
 
-    template<typename SelfType = ProcessJsonMessageSelfTypeInterface, typename SelfPtrType = std::shared_ptr<SelfType> >
+    template<typename SelfType = ProcessJsonMessageSelfTypeInterface, typename SelfPtrType = boost::shared_ptr<SelfType> >
     void analysisJoyConSimple(
             SelfPtrType self,
             boost::json::object &joyConSimple,
@@ -119,9 +119,9 @@ namespace OwlProcessJsonMessage {
             int packageId
     ) {
         try {
-            auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+            auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
             m->additionCmd = OwlMailDefine::AdditionCmd::JoyConSimple;
-            m->joyConPtr = std::make_shared<OwlMailDefine::JoyCon>();
+            m->joyConPtr = boost::make_shared<OwlMailDefine::JoyCon>();
             bool good = true;
             m->joyConPtr->leftRockerX = getFromJsonObject<int16_t>(joyConSimple, "leftRockerX", good);
             m->joyConPtr->leftRockerY = getFromJsonObject<int16_t>(joyConSimple, "leftRockerY", good);
@@ -185,7 +185,7 @@ namespace OwlProcessJsonMessage {
         }
     }
 
-    template<typename SelfType = ProcessJsonMessageSelfTypeInterface, typename SelfPtrType = std::shared_ptr<SelfType> >
+    template<typename SelfType = ProcessJsonMessageSelfTypeInterface, typename SelfPtrType = boost::shared_ptr<SelfType> >
     void analysisJoyCon(
             SelfPtrType self,
             boost::json::object &joyCon,
@@ -193,9 +193,9 @@ namespace OwlProcessJsonMessage {
             int packageId
     ) {
         try {
-            auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+            auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
             m->additionCmd = OwlMailDefine::AdditionCmd::JoyCon;
-            m->joyConPtr = std::make_shared<OwlMailDefine::JoyCon>();
+            m->joyConPtr = boost::make_shared<OwlMailDefine::JoyCon>();
             bool good = true;
             m->joyConPtr->leftRockerX = getFromJsonObject<int16_t>(joyCon, "leftRockerX", good);
             m->joyConPtr->leftRockerY = getFromJsonObject<int16_t>(joyCon, "leftRockerY", good);
@@ -308,18 +308,18 @@ namespace OwlProcessJsonMessage {
      *
      * @tparam SelfType : must impl `send_back_json(const boost::json::value &json_value)`
      *                          and `sendMail(OwlMailDefine::MailCmd2Serial &&data)`
-     * @tparam SelfPtrType = std::shared_ptr<SelfType>
+     * @tparam SelfPtrType = boost::shared_ptr<SelfType>
      * @param jsv   : json string_view
      * @param json_parse_options_
      * @param json_storage_resource_
      * @param self = SelfPtrType
      */
-    template<typename SelfType = ProcessJsonMessageSelfTypeInterface, typename SelfPtrType = std::shared_ptr<SelfType> >
+    template<typename SelfType = ProcessJsonMessageSelfTypeInterface, typename SelfPtrType = boost::shared_ptr<SelfType> >
     void process_json_message(
             boost::string_view jsv,
             boost::json::static_resource &json_storage_resource_,
             boost::json::parse_options &json_parse_options_,
-//            const std::shared_ptr<ProcessJsonMessageSelfTypeInterface> &&self
+//            const boost::shared_ptr<ProcessJsonMessageSelfTypeInterface> &&self
             SelfPtrType &&self
     ) {
         BOOST_ASSERT(self);
@@ -389,7 +389,7 @@ namespace OwlProcessJsonMessage {
                 case static_cast<int>(OwlCmdEnum::calibrate): {
                     // calibrate
                     BOOST_LOG_OWL(info) << "calibrate";
-                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::calibrate;
                     m->callbackRunner = [self, cmdId, packageId](
                             const OwlMailDefine::MailSerial2Cmd &data
@@ -411,7 +411,7 @@ namespace OwlProcessJsonMessage {
                 case static_cast<int>(OwlCmdEnum::emergencyStop): {
                     // emergencyStop
                     BOOST_LOG_OWL(info) << "emergencyStop";
-                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::emergencyStop;
                     m->callbackRunner = [self, cmdId, packageId](
                             const OwlMailDefine::MailSerial2Cmd &data
@@ -433,7 +433,7 @@ namespace OwlProcessJsonMessage {
                 case static_cast<int>(OwlCmdEnum::unlock): {
                     // unlock
                     BOOST_LOG_OWL(info) << "unlock";
-                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::unlock;
                     m->callbackRunner = [self, cmdId, packageId](
                             const OwlMailDefine::MailSerial2Cmd &data
@@ -455,7 +455,7 @@ namespace OwlProcessJsonMessage {
                 case static_cast<int>(OwlCmdEnum::breakCmd): {
                     // break
                     BOOST_LOG_OWL(info) << "break";
-                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::stop;
                     m->callbackRunner = [self, cmdId, packageId](
                             const OwlMailDefine::MailSerial2Cmd &data
@@ -516,9 +516,9 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
-                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::takeoff;
-                    m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                    m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                     m->moveCmdPtr->y = int16_t(moveStepDistance);
                     m->callbackRunner = [self, cmdId, packageId](
                             const OwlMailDefine::MailSerial2Cmd &data
@@ -540,9 +540,9 @@ namespace OwlProcessJsonMessage {
                 case static_cast<int>(OwlCmdEnum::land): {
                     // land
                     BOOST_LOG_OWL(info) << "land";
-                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::land;
-                    m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                    m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                     m->callbackRunner = [self, cmdId, packageId](
                             const OwlMailDefine::MailSerial2Cmd &data
                     ) {
@@ -606,9 +606,9 @@ namespace OwlProcessJsonMessage {
                             case static_cast<int>(OwlCmdMoveEnum::up): {
                                 // up
                                 BOOST_LOG_OWL(info) << "move up " << moveStepDistance;
-                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
-                                m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                                m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->y = int16_t(moveStepDistance);
                                 m->callbackRunner = [self, cmdId, packageId](
                                         const OwlMailDefine::MailSerial2Cmd &data
@@ -630,9 +630,9 @@ namespace OwlProcessJsonMessage {
                             case static_cast<int>(OwlCmdMoveEnum::down): {
                                 // down
                                 BOOST_LOG_OWL(info) << "move down " << moveStepDistance;
-                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
-                                m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                                m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->y = int16_t(-moveStepDistance);
                                 m->callbackRunner = [self, cmdId, packageId](
                                         const OwlMailDefine::MailSerial2Cmd &data
@@ -654,9 +654,9 @@ namespace OwlProcessJsonMessage {
                             case static_cast<int>(OwlCmdMoveEnum::left): {
                                 // left
                                 BOOST_LOG_OWL(info) << "move left " << moveStepDistance;
-                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
-                                m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                                m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->z = int16_t(-moveStepDistance);
                                 m->callbackRunner = [self, cmdId, packageId](
                                         const OwlMailDefine::MailSerial2Cmd &data
@@ -678,9 +678,9 @@ namespace OwlProcessJsonMessage {
                             case static_cast<int>(OwlCmdMoveEnum::right): {
                                 // right
                                 BOOST_LOG_OWL(info) << "move right " << moveStepDistance;
-                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
-                                m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                                m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->z = int16_t(moveStepDistance);
                                 m->callbackRunner = [self, cmdId, packageId](
                                         const OwlMailDefine::MailSerial2Cmd &data
@@ -702,9 +702,9 @@ namespace OwlProcessJsonMessage {
                             case static_cast<int>(OwlCmdMoveEnum::forward): {
                                 // forward
                                 BOOST_LOG_OWL(info) << "move forward " << moveStepDistance;
-                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
-                                m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                                m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->x = int16_t(moveStepDistance);
                                 m->callbackRunner = [self, cmdId, packageId](
                                         const OwlMailDefine::MailSerial2Cmd &data
@@ -726,9 +726,9 @@ namespace OwlProcessJsonMessage {
                             case static_cast<int>(OwlCmdMoveEnum::back): {
                                 // back
                                 BOOST_LOG_OWL(info) << "move back " << moveStepDistance;
-                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
-                                m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                                m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->x = int16_t(-moveStepDistance);
                                 m->callbackRunner = [self, cmdId, packageId](
                                         const OwlMailDefine::MailSerial2Cmd &data
@@ -808,9 +808,9 @@ namespace OwlProcessJsonMessage {
                             case static_cast<int>(OwlCmdRotateEnum::cw): {
                                 // cw
                                 BOOST_LOG_OWL(info) << "rotate cw " << rote;
-                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::rotate;
-                                m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                                m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->cw = int16_t(rote);
                                 m->callbackRunner = [self, cmdId, packageId](
                                         const OwlMailDefine::MailSerial2Cmd &data
@@ -832,9 +832,9 @@ namespace OwlProcessJsonMessage {
                             case static_cast<int>(OwlCmdRotateEnum::ccw): {
                                 // ccw
                                 BOOST_LOG_OWL(info) << "rotate ccw " << rote;
-                                auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                                auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::rotate;
-                                m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                                m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->cw = int16_t(-rote);
                                 m->callbackRunner = [self, cmdId, packageId](
                                         OwlMailDefine::MailSerial2Cmd data
@@ -871,7 +871,7 @@ namespace OwlProcessJsonMessage {
                 case static_cast<int>(OwlCmdEnum::keep): {
                     // keep position
                     BOOST_LOG_OWL(info) << "keep";
-                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::keep;
                     m->callbackRunner = [self, cmdId, packageId](
                             OwlMailDefine::MailSerial2Cmd data
@@ -943,9 +943,9 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
-                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::gotoPosition;
-                    m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                    m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                     m->moveCmdPtr->x = static_cast<int16_t>(y);
                     m->moveCmdPtr->z = static_cast<int16_t>(x);
                     m->moveCmdPtr->y = static_cast<int16_t>(h);
@@ -1012,9 +1012,9 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
-                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::led;
-                    m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                    m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                     m->moveCmdPtr->x = static_cast<int16_t>(b);
                     m->moveCmdPtr->y = static_cast<int16_t>(g);
                     m->moveCmdPtr->z = static_cast<int16_t>(r);
@@ -1076,9 +1076,9 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
-                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::high;
-                    m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                    m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                     m->moveCmdPtr->y = static_cast<int16_t>(high);
                     m->callbackRunner = [self, cmdId, packageId](
                             OwlMailDefine::MailSerial2Cmd data
@@ -1137,9 +1137,9 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
-                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::speed;
-                    m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                    m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                     m->moveCmdPtr->x = static_cast<int16_t>(speed);
                     m->callbackRunner = [self, cmdId, packageId](
                             OwlMailDefine::MailSerial2Cmd data
@@ -1187,9 +1187,9 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
-                    auto m = std::make_shared<OwlMailDefine::Cmd2Serial>();
+                    auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::flyMode;
-                    m->moveCmdPtr = std::make_shared<OwlMailDefine::MoveCmd>();
+                    m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                     m->moveCmdPtr->x = static_cast<int16_t>(flyMode);
                     m->callbackRunner = [self, cmdId, packageId](
                             OwlMailDefine::MailSerial2Cmd data

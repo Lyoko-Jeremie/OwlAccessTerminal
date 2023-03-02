@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_CMDSERIALMAIL_H
 #define OWLACCESSTERMINAL_CMDSERIALMAIL_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <functional>
 #include <vector>
 #include <map>
@@ -71,16 +71,16 @@ namespace OwlMailDefine {
         double cornerLBy;
     };
 
-    struct AprilTagCmd : public std::enable_shared_from_this<AprilTagCmd> {
-        using AprilTagListType = std::shared_ptr<std::vector<OwlMailDefine::AprilTagInfo>>;
-        using AprilTagCenterType = std::shared_ptr<OwlMailDefine::AprilTagInfo>;
+    struct AprilTagCmd : public boost::enable_shared_from_this<AprilTagCmd> {
+        using AprilTagListType = boost::shared_ptr<std::vector<OwlMailDefine::AprilTagInfo>>;
+        using AprilTagCenterType = boost::shared_ptr<OwlMailDefine::AprilTagInfo>;
 
         uint64_t imageX{0};
         uint64_t imageY{0};
 
         AprilTagListType aprilTagList;
         AprilTagCenterType aprilTagCenter;
-        std::shared_ptr<OwlMapCalc::MapCalcPlaneInfoType> mapCalcPlaneInfoType;
+        boost::shared_ptr<OwlMapCalc::MapCalcPlaneInfoType> mapCalcPlaneInfoType;
 
         int64_t timestamp{std::chrono::time_point_cast<std::chrono::milliseconds>(
                 std::chrono::steady_clock::now()).time_since_epoch().count()};
@@ -152,21 +152,21 @@ namespace OwlMailDefine {
 
     struct Serial2Cmd;
 
-    struct Cmd2Serial : public std::enable_shared_from_this<Cmd2Serial> {
+    struct Cmd2Serial : public boost::enable_shared_from_this<Cmd2Serial> {
 
         // AdditionCmd
         AdditionCmd additionCmd = AdditionCmd::ignore;
 
-        std::shared_ptr<MoveCmd> moveCmdPtr;
-        std::shared_ptr<AprilTagCmd> aprilTagCmdPtr;
-        std::shared_ptr<JoyCon> joyConPtr;
-        std::shared_ptr<JoyConGyro> joyConGyroPtr;
+        boost::shared_ptr<MoveCmd> moveCmdPtr;
+        boost::shared_ptr<AprilTagCmd> aprilTagCmdPtr;
+        boost::shared_ptr<JoyCon> joyConPtr;
+        boost::shared_ptr<JoyConGyro> joyConGyroPtr;
 
         // Serial2Cmd.runner = Cmd2Serial.callbackRunner
-        std::function<void(std::shared_ptr<Serial2Cmd>)> callbackRunner;
+        std::function<void(boost::shared_ptr<Serial2Cmd>)> callbackRunner;
 
-        std::shared_ptr<Cmd2Serial> repeat() const {
-            auto o = std::make_shared<Cmd2Serial>();
+        boost::shared_ptr<Cmd2Serial> repeat() const {
+            auto o = boost::make_shared<Cmd2Serial>();
             o->additionCmd = additionCmd;
             o->moveCmdPtr = moveCmdPtr;
             o->aprilTagCmdPtr = aprilTagCmdPtr;
@@ -193,15 +193,15 @@ namespace OwlMailDefine {
     };
 
     struct Serial2Cmd {
-        std::function<void(std::shared_ptr<Serial2Cmd>)> runner;
+        std::function<void(boost::shared_ptr<Serial2Cmd>)> runner;
         bool ok = false;
         bool openError = false;
 
-        std::shared_ptr<OwlSerialController::AirplaneState> newestAirplaneState;
-        std::shared_ptr<OwlMailDefine::AprilTagCmd> aprilTagCmdData;
+        boost::shared_ptr<OwlSerialController::AirplaneState> newestAirplaneState;
+        boost::shared_ptr<OwlMailDefine::AprilTagCmd> aprilTagCmdData;
     };
     using CmdSerialMailbox =
-            std::shared_ptr<
+            boost::shared_ptr<
                     OwlAsyncCallbackMailbox::AsyncCallbackMailbox<
                             Cmd2Serial,
                             Serial2Cmd

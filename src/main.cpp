@@ -1,7 +1,7 @@
 // jeremie
 
 #include <iostream>
-#include <memory>
+#include "../../MemoryBoost.h"
 #include <vector>
 #include <utility>
 #include <boost/asio.hpp>
@@ -206,26 +206,26 @@ int main(int argc, const char *argv[]) {
 
 
     // load config
-    auto config = std::make_shared<OwlConfigLoader::ConfigLoader>();
+    auto config = boost::make_shared<OwlConfigLoader::ConfigLoader>();
     config->init(config_file);
     config->print();
 
     boost::asio::io_context ioc_cmd;
     boost::asio::io_context ioc_map_calc;
-    auto mailbox_map_calc = std::make_shared<OwlMailDefine::ServiceMapCalcMailbox::element_type>(
+    auto mailbox_map_calc = boost::make_shared<OwlMailDefine::ServiceMapCalcMailbox::element_type>(
             ioc_cmd, ioc_map_calc, "mailbox_map_calc"
     );
-    auto mapCalcService = std::make_shared<OwlMapCalc::MapCalc>(
+    auto mapCalcService = boost::make_shared<OwlMapCalc::MapCalc>(
             ioc_map_calc,
             config->shared_from_this(),
             mailbox_map_calc->shared_from_this()
     );
     mapCalcService->init();
 
-    auto mailbox_cmd_udp = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
+    auto mailbox_cmd_udp = boost::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
             ioc_cmd, ioc_cmd, "mailbox_cmd_udp"
     );
-    auto cmdService = std::make_shared<OwlCommandService::CommandService>(
+    auto cmdService = boost::make_shared<OwlCommandService::CommandService>(
             ioc_cmd,
             mailbox_cmd_udp->shared_from_this(),
             boost::asio::ip::udp::endpoint(
@@ -234,10 +234,10 @@ int main(int argc, const char *argv[]) {
             )
     );
     cmdService->start();
-    auto mailbox_cmd_http = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
+    auto mailbox_cmd_http = boost::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
             ioc_cmd, ioc_cmd, "mailbox_cmd_http"
     );
-    auto cmdHttpService = std::make_shared<OwlCommandServiceHttp::CmdServiceHttp>(
+    auto cmdHttpService = boost::make_shared<OwlCommandServiceHttp::CmdServiceHttp>(
             ioc_cmd,
             boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
@@ -247,7 +247,7 @@ int main(int argc, const char *argv[]) {
             mailbox_map_calc->shared_from_this()
     );
     cmdHttpService->start();
-    auto serialControllerService = std::make_shared<OwlSerialController::SerialController>(
+    auto serialControllerService = boost::make_shared<OwlSerialController::SerialController>(
             ioc_cmd,
             config->shared_from_this(),
             std::vector<OwlMailDefine::CmdSerialMailbox>{
@@ -260,18 +260,18 @@ int main(int argc, const char *argv[]) {
 
     boost::asio::io_context ioc_time;
     boost::asio::io_context ioc_imageWeb;
-    auto mailbox_imageWeb_time = std::make_shared<OwlMailDefine::ServiceTimeMailbox::element_type>(
+    auto mailbox_imageWeb_time = boost::make_shared<OwlMailDefine::ServiceTimeMailbox::element_type>(
             ioc_imageWeb, ioc_time, "mailbox_imageWeb_time"
     );
-    auto timeService = std::make_shared<OwlTimeService::TimeService>(
+    auto timeService = boost::make_shared<OwlTimeService::TimeService>(
             ioc_time,
             mailbox_imageWeb_time->shared_from_this()
     );
     boost::asio::io_context ioc_cameraReader;
-    auto mailbox_image_protobuf = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
+    auto mailbox_image_protobuf = boost::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
             ioc_imageWeb, ioc_cameraReader, "mailbox_image_protobuf"
     );
-    auto imageServiceProtobuf = std::make_shared<OwlImageService::ImageService>(
+    auto imageServiceProtobuf = boost::make_shared<OwlImageService::ImageService>(
             ioc_imageWeb,
             boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
@@ -280,10 +280,10 @@ int main(int argc, const char *argv[]) {
             mailbox_image_protobuf->shared_from_this()
     );
     imageServiceProtobuf->start();
-    auto mailbox_image_http = std::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
+    auto mailbox_image_http = boost::make_shared<OwlMailDefine::ServiceCameraMailbox::element_type>(
             ioc_imageWeb, ioc_cameraReader, "mailbox_image_http"
     );
-    auto imageServiceHttp = std::make_shared<OwlImageServiceHttp::ImageServiceHttp>(
+    auto imageServiceHttp = boost::make_shared<OwlImageServiceHttp::ImageServiceHttp>(
             ioc_imageWeb,
             boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
@@ -294,7 +294,7 @@ int main(int argc, const char *argv[]) {
             mailbox_imageWeb_time->shared_from_this()
     );
     imageServiceHttp->start();
-    auto cameraReader = std::make_shared<OwlCameraReader::CameraReader>(
+    auto cameraReader = boost::make_shared<OwlCameraReader::CameraReader>(
             ioc_cameraReader,
             std::vector<OwlCameraConfig::CameraInfoTuple>{
                     {1, config->config().camera_addr_1, config->config().camera_1_VideoCaptureAPI,
@@ -310,23 +310,23 @@ int main(int argc, const char *argv[]) {
 
 #ifdef EnableWebStaticModule
     boost::asio::io_context ioc_web_static;
-    auto mailbox_web = std::make_shared<OwlMailDefine::WebCmdMailbox::element_type>(
+    auto mailbox_web = boost::make_shared<OwlMailDefine::WebCmdMailbox::element_type>(
             ioc_web_static, ioc_web_static, "mailbox_web"
     );
-    auto webService = std::make_shared<OwlEmbedWebServer::EmbedWebServer>(
+    auto webService = boost::make_shared<OwlEmbedWebServer::EmbedWebServer>(
             ioc_web_static,
             mailbox_web->shared_from_this(),
             boost::asio::ip::tcp::endpoint(
                     boost::asio::ip::tcp::v4(),
                     config->config().EmbedWebServerHttpPort
             ),
-            std::make_shared<std::string>(config->config().embedWebServer.doc_root),
-            std::make_shared<std::string>(config->config().embedWebServer.index_file_of_root),
-            std::make_shared<std::string>(config->config().embedWebServer.backend_json_string),
-            std::make_shared<std::string>(config->config().embedWebServer.allowFileExtList)
+            boost::make_shared<std::string>(config->config().embedWebServer.doc_root),
+            boost::make_shared<std::string>(config->config().embedWebServer.index_file_of_root),
+            boost::make_shared<std::string>(config->config().embedWebServer.backend_json_string),
+            boost::make_shared<std::string>(config->config().embedWebServer.allowFileExtList)
     );
     webService->start();
-    auto cmdExecuteService = std::make_shared<OwlCmdExecute::CmdExecute>(
+    auto cmdExecuteService = boost::make_shared<OwlCmdExecute::CmdExecute>(
             ioc_web_static,
             config->shared_from_this(),
             mailbox_web->shared_from_this()

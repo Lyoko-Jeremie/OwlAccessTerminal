@@ -227,7 +227,7 @@ else ()
             OUTPUT_VARIABLE GIT_BRANCH)
 
     string(STRIP "${GIT_REV}" GIT_REV)
-#    string(SUBSTRING "${GIT_REV}" 1 7 GIT_REV)
+    #    string(SUBSTRING "${GIT_REV}" 1 7 GIT_REV)
     string(STRIP "${GIT_DIFF}" GIT_DIFF)
     string(STRIP "${GIT_TAG}" GIT_TAG)
     string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
@@ -250,6 +250,8 @@ message(STATUS "VERSION: ${VERSION}")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/VERSION/CodeVersion.h.in
         ${CMAKE_CURRENT_SOURCE_DIR}/src/VERSION/CodeVersion.h)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(${ProjectMainName}
         src/VERSION/CodeVersion.h
@@ -305,7 +307,8 @@ add_executable(${ProjectMainName}
         src/MapCalc/MapCalcMail.h
         src/MapCalc/MapCalcPlaneInfoType.h
         src/MapCalc/MapCalcPlaneInfoType.cpp
-        src/VERSION/ProgramVersion.h)
+        src/VERSION/ProgramVersion.h
+        src/MemoryBoost.h)
 
 
 if (EnableWebStaticModule)

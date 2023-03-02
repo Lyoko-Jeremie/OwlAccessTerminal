@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_IMAGESERVICEMAIL_H
 #define OWLACCESSTERMINAL_IMAGESERVICEMAIL_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <functional>
 #include <variant>
 #include <tuple>
@@ -24,7 +24,7 @@ namespace OwlMailDefine {
         int camera_id;
 
         // Serial2Cmd.runner = Cmd2Serial.callbackRunner
-        std::function<void(std::shared_ptr<Camera2Service>)> callbackRunner;
+        std::function<void(boost::shared_ptr<Camera2Service>)> callbackRunner;
 
         ControlCameraCmd cmd = ControlCameraCmd::noop;
         std::variant<bool, OwlCameraConfig::CameraInfoTuple> cmdParams{false};
@@ -33,13 +33,13 @@ namespace OwlMailDefine {
         int camera_id;
         cv::Mat image;
 
-        std::function<void(std::shared_ptr<Camera2Service>)> runner;
+        std::function<void(boost::shared_ptr<Camera2Service>)> runner;
         bool ok = false;
 
         ControlCameraCmd cmd = ControlCameraCmd::noop;
     };
     using ServiceCameraMailbox =
-            std::shared_ptr<
+            boost::shared_ptr<
                     OwlAsyncCallbackMailbox::AsyncCallbackMailbox<
                             Service2Camera,
                             Camera2Service

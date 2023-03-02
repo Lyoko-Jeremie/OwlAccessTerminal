@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_SERIALCONTROLLER_H
 #define OWLACCESSTERMINAL_SERIALCONTROLLER_H
 
-#include <memory>
+#include "../../MemoryBoost.h"
 #include <boost/asio.hpp>
 #include <boost/asio/read_until.hpp>
 #include "../OwlLog/OwlLog.h"
@@ -23,11 +23,11 @@ namespace OwlSerialController {
 
     class SerialController;
 
-    struct PortController : public std::enable_shared_from_this<PortController> {
+    struct PortController : public boost::enable_shared_from_this<PortController> {
 
         explicit PortController(
                 boost::asio::io_context &ioc,
-                std::weak_ptr<SerialController> &&parentRef
+                boost::weak_ptr<SerialController> &&parentRef
         );
 
         void init();
@@ -37,15 +37,15 @@ namespace OwlSerialController {
             close();
         }
 
-        std::shared_ptr<boost::asio::serial_port> sp_;
-        std::weak_ptr<SerialController> parentRef_;
+        boost::shared_ptr<boost::asio::serial_port> sp_;
+        boost::weak_ptr<SerialController> parentRef_;
         std::string deviceName_;
 
-        std::shared_ptr<StateReader> stateReader_;
+        boost::shared_ptr<StateReader> stateReader_;
 
         friend class StateReader;
 
-        void sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState);
+        void sendAirplaneState(const boost::shared_ptr<AirplaneState> &airplaneState);
 
         /**
          * @tparam SettableSerialPortOption from boost::asio::serial_port::
@@ -113,10 +113,10 @@ namespace OwlSerialController {
 
     };
 
-    struct SerialControllerCmdPackageRecord : public std::enable_shared_from_this<SerialControllerCmdPackageRecord> {
+    struct SerialControllerCmdPackageRecord : public boost::enable_shared_from_this<SerialControllerCmdPackageRecord> {
     private:
         std::atomic_uint16_t packageId = 1;
-        std::shared_ptr<OwlMailDefine::Cmd2Serial> mail_;
+        boost::shared_ptr<OwlMailDefine::Cmd2Serial> mail_;
 
         uint16_t nextId() {
             if (packageId < 62766 && packageId > 0) {
@@ -131,7 +131,7 @@ namespace OwlSerialController {
 
         long long lastUpdateTime = 0;
 
-        std::shared_ptr<OwlMailDefine::Cmd2Serial> mail() {
+        boost::shared_ptr<OwlMailDefine::Cmd2Serial> mail() {
             return atomic_load(&mail_);
         }
 
@@ -150,18 +150,18 @@ namespace OwlSerialController {
         }
     };
 
-    class SerialController : public std::enable_shared_from_this<SerialController> {
+    class SerialController : public boost::enable_shared_from_this<SerialController> {
     public:
         explicit SerialController(
                 boost::asio::io_context &ioc,
-                std::shared_ptr<OwlConfigLoader::ConfigLoader> &&config,
+                boost::shared_ptr<OwlConfigLoader::ConfigLoader> &&config,
                 std::vector<OwlMailDefine::CmdSerialMailbox> &&mailbox_list
         ) : ioc_(ioc), config_(std::move(config)), mailbox_list_(std::move(mailbox_list)),
             package_repeater_timer_(ioc_, std::chrono::milliseconds(1000)) {
 
-            package_record_ = std::make_shared<SerialControllerCmdPackageRecord>();
+            package_record_ = boost::make_shared<SerialControllerCmdPackageRecord>();
 
-            package_repeater_box_ = std::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
+            package_repeater_box_ = boost::make_shared<OwlMailDefine::CmdSerialMailbox::element_type>(
                     ioc_, ioc_, "package_repeater_box_"
             );
             package_repeater_box_->receiveB2A([](OwlMailDefine::MailSerial2Cmd &&data) {
@@ -183,7 +183,7 @@ namespace OwlSerialController {
         void init() {
             BOOST_ASSERT(!weak_from_this().expired());
             BOOST_LOG_OWL(trace) << "weak_from_this().lock().use_count() : " << weak_from_this().lock().use_count();
-            airplanePortController = std::make_shared<PortController>(ioc_, weak_from_this());
+            airplanePortController = boost::make_shared<PortController>(ioc_, weak_from_this());
             BOOST_ASSERT(!weak_from_this().expired());
             BOOST_LOG_OWL(trace) << "airplanePortController.use_count() : " << airplanePortController.use_count();
             BOOST_ASSERT(airplanePortController.use_count() > 0);
@@ -202,31 +202,31 @@ namespace OwlSerialController {
 
     private:
         boost::asio::io_context &ioc_;
-        std::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
+        boost::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
         std::vector<OwlMailDefine::CmdSerialMailbox> mailbox_list_;
 
-        std::shared_ptr<PortController> airplanePortController;
+        boost::shared_ptr<PortController> airplanePortController;
 
         bool initOk = false;
 
         template<uint8_t packageSize>
         friend void sendADataBuffer(
-                std::shared_ptr<SerialController> selfPtr,
-                std::shared_ptr<std::array<uint8_t, packageSize>> sendDataBuffer,
+                boost::shared_ptr<SerialController> selfPtr,
+                boost::shared_ptr<std::array<uint8_t, packageSize>> sendDataBuffer,
                 OwlMailDefine::MailCmd2Serial data,
                 OwlMailDefine::CmdSerialMailbox &mailbox
         );
 
-        std::shared_ptr<SerialControllerCmdPackageRecord> package_record_;
+        boost::shared_ptr<SerialControllerCmdPackageRecord> package_record_;
 
     public:
 
-        void sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState);
+        void sendAirplaneState(const boost::shared_ptr<AirplaneState> &airplaneState);
 
     private:
 
-        std::shared_ptr<AirplaneState> newestAirplaneState = std::make_shared<AirplaneState>();
-        std::shared_ptr<OwlMailDefine::AprilTagCmd> aprilTagCmdData = std::make_shared<OwlMailDefine::AprilTagCmd>();
+        boost::shared_ptr<AirplaneState> newestAirplaneState = boost::make_shared<AirplaneState>();
+        boost::shared_ptr<OwlMailDefine::AprilTagCmd> aprilTagCmdData = boost::make_shared<OwlMailDefine::AprilTagCmd>();
 
     private:
         friend struct PortController;
@@ -258,11 +258,11 @@ namespace OwlSerialController {
         boost::asio::steady_timer package_repeater_timer_;
         OwlMailDefine::CmdSerialMailbox package_repeater_box_;
 
-        void package_repeater(const boost::system::error_code &ec, std::shared_ptr<SerialController> self) {
+        void package_repeater(const boost::system::error_code &ec, boost::shared_ptr<SerialController> self) {
             boost::ignore_unused(ec);
             package_repeater_timer_.cancel();
             if (initOk && airplanePortController && airplanePortController->isOpened()) {
-                auto mm = std::make_shared<OwlMailDefine::MailCmd2Serial::element_type>();
+                auto mm = boost::make_shared<OwlMailDefine::MailCmd2Serial::element_type>();
                 mm->additionCmd = OwlMailDefine::AdditionCmd::ignore;
                 mm->callbackRunner = [this, self = std::move(self)](OwlMailDefine::MailSerial2Cmd &&data) {
                     boost::ignore_unused(data);

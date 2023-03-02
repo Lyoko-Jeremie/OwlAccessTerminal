@@ -3,13 +3,13 @@
 #ifndef OWLACCESSTERMINAL_MAPCALCPLANEINFOTYPE_H
 #define OWLACCESSTERMINAL_MAPCALCPLANEINFOTYPE_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <boost/json.hpp>
 
 namespace OwlMapCalc {
 
     // same as typescript `map_calc.ts` `interface PlaneInfo{}`
-    struct MapCalcPlaneInfoType : public std::enable_shared_from_this<MapCalcPlaneInfoType> {
+    struct MapCalcPlaneInfoType : public boost::enable_shared_from_this<MapCalcPlaneInfoType> {
         struct Point2 {
             double x;
             double y;
@@ -39,7 +39,7 @@ namespace OwlMapCalc {
         Vec2 ScaleXY;
     };
 
-    extern boost::json::object MapCalcPlaneInfoType2JsonObject(const std::shared_ptr<MapCalcPlaneInfoType> &info);
+    extern boost::json::object MapCalcPlaneInfoType2JsonObject(const boost::shared_ptr<MapCalcPlaneInfoType> &info);
 
 }
 

@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_COMMANDSERVICE_H
 #define OWLACCESSTERMINAL_COMMANDSERVICE_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
@@ -20,7 +20,7 @@ namespace OwlCommandService {
     }; // 6M
 
     class CommandService
-            : public std::enable_shared_from_this<CommandService>,
+            : public boost::enable_shared_from_this<CommandService>,
               public OwlProcessJsonMessage::ProcessJsonMessageSelfTypeInterface {
     public:
         CommandService(boost::asio::io_context &_ioc,
@@ -82,7 +82,7 @@ namespace OwlCommandService {
                 boost::string_view,
                 boost::json::static_resource &,
                 boost::json::parse_options &,
-                // const std::shared_ptr<ProcessJsonMessageSelfTypeInterface> &&self
+                // const boost::shared_ptr<ProcessJsonMessageSelfTypeInterface> &&self
                 SelfPtrType &&
         );
 

@@ -5,7 +5,7 @@
 
 // https://www.boost.org/doc/libs/develop/libs/beast/example/http/server/async/http_server_async.cpp
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -47,7 +47,7 @@ namespace OwlEmbedWebServer {
             boost::beast::string_view doc_root,
             boost::beast::http::request<Body, boost::beast::http::basic_fields<Allocator>> &&req,
             Send &&send,
-            std::shared_ptr<std::string const> index_file_of_root,
+            boost::shared_ptr<std::string const> index_file_of_root,
             const std::vector<std::string> allowFileExtList) {
         // Returns a bad request response
         auto const bad_request =

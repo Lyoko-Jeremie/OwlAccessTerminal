@@ -61,7 +61,7 @@ namespace OwlCameraReader {
             // make sure the construct of CameraItem run in self ioc
             std::lock_guard lg{mtx_camera_item_list_};
             for (auto &t: camera_info_list_) {
-                camera_item_list_.push_back(std::make_shared<CameraItem>(
+                camera_item_list_.push_back(boost::make_shared<CameraItem>(
                         boost::asio::make_strand(ioc_),
                         t
                 ));
@@ -81,7 +81,7 @@ namespace OwlCameraReader {
                         // now we not need access `camera_item_list_` more
                         ul.unlock();
                         boost::asio::dispatch(cc->strand_, [this, self = shared_from_this(), data, &mailbox, cc]() {
-                            OwlMailDefine::MailCamera2Service data_r = std::make_shared<OwlMailDefine::Camera2Service>();
+                            OwlMailDefine::MailCamera2Service data_r = boost::make_shared<OwlMailDefine::Camera2Service>();
                             data_r->runner = data->callbackRunner;
                             data_r->camera_id = data->camera_id;
                             if (!cc->isOpened()) {
@@ -114,7 +114,7 @@ namespace OwlCameraReader {
             }
             // cannot find camera
             BOOST_LOG_OWL(warning) << "getImage cannot find camera: " << data->camera_id;
-            OwlMailDefine::MailCamera2Service data_r = std::make_shared<OwlMailDefine::Camera2Service>();
+            OwlMailDefine::MailCamera2Service data_r = boost::make_shared<OwlMailDefine::Camera2Service>();
             data_r->runner = data->callbackRunner;
             data_r->camera_id = data->camera_id;
             data_r->ok = false;
@@ -131,7 +131,7 @@ namespace OwlCameraReader {
                 std::lock_guard lg{mtx_camera_item_list_};
 
                 auto it1 = std::find_if(camera_item_list_.begin(), camera_item_list_.end(),
-                                        [&data](std::shared_ptr<CameraItem> &a) -> bool {
+                                        [&data](boost::shared_ptr<CameraItem> &a) -> bool {
                                             return a->id == data->camera_id;
                                         });
                 auto it2 = std::find_if(camera_info_list_.begin(), camera_info_list_.end(),
@@ -141,7 +141,7 @@ namespace OwlCameraReader {
 
                 if (it2 == camera_info_list_.end()) {
                     // // cannot fine the camera config, means that the camera not exist
-                    // OwlMailDefine::MailCamera2Service data_r = std::make_shared<OwlMailDefine::Camera2Service>();
+                    // OwlMailDefine::MailCamera2Service data_r = boost::make_shared<OwlMailDefine::Camera2Service>();
                     // data_r->runner = data->callbackRunner;
                     // data_r->camera_id = data->camera_id;
                     // data_r->ok = false;
@@ -150,7 +150,7 @@ namespace OwlCameraReader {
 
                     // create new camera
                     camera_info_list_.push_back(std::get<1>(data->cmdParams));
-                    camera_item_list_.push_back(std::make_shared<CameraItem>(
+                    camera_item_list_.push_back(boost::make_shared<CameraItem>(
                             boost::asio::make_strand(ioc_),
                             std::get<1>(data->cmdParams)
                     ));
@@ -188,14 +188,14 @@ namespace OwlCameraReader {
                 }
 
                 // create new camera
-                camera_item_list_.push_back(std::make_shared<CameraItem>(
+                camera_item_list_.push_back(boost::make_shared<CameraItem>(
                         boost::asio::make_strand(ioc_),
                         *it2
                 ));
 
             }
 
-            OwlMailDefine::MailCamera2Service data_r = std::make_shared<OwlMailDefine::Camera2Service>();
+            OwlMailDefine::MailCamera2Service data_r = boost::make_shared<OwlMailDefine::Camera2Service>();
             data_r->runner = data->callbackRunner;
             data_r->camera_id = data->camera_id;
             data_r->ok = true;

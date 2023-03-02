@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_MAPCALC_H
 #define OWLACCESSTERMINAL_MAPCALC_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <functional>
 #include <array>
 #include <boost/asio.hpp>
@@ -21,11 +21,11 @@ namespace OwlQuickJsWrapper {
 
 namespace OwlMapCalc {
 
-    class MapCalc : public std::enable_shared_from_this<MapCalc> {
+    class MapCalc : public boost::enable_shared_from_this<MapCalc> {
     public:
         MapCalc(
                 boost::asio::io_context &ioc,
-                std::shared_ptr<OwlConfigLoader::ConfigLoader> config,
+                boost::shared_ptr<OwlConfigLoader::ConfigLoader> config,
                 OwlMailDefine::ServiceMapCalcMailbox &&mailbox
         );
 
@@ -35,17 +35,17 @@ namespace OwlMapCalc {
         }
 
         using MapCalcFunctionType = std::function<
-                std::shared_ptr<MapCalcPlaneInfoType>(
-                        std::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
-                        std::shared_ptr<OwlSerialController::AirplaneState> airplaneState
+                boost::shared_ptr<MapCalcPlaneInfoType>(
+                        boost::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
+                        boost::shared_ptr<OwlSerialController::AirplaneState> airplaneState
                 )>;
 
     private:
         boost::asio::strand<boost::asio::io_context::executor_type> ioc_;
-        std::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
+        boost::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
         OwlMailDefine::ServiceMapCalcMailbox mailbox_;
 
-        std::shared_ptr<OwlQuickJsWrapper::QuickJsWrapper> qjw_;
+        boost::shared_ptr<OwlQuickJsWrapper::QuickJsWrapper> qjw_;
 
         MapCalcFunctionType calc_;
 
@@ -61,8 +61,8 @@ namespace OwlMapCalc {
         bool testMapCalcFunction();
 
         MapCalcFunctionType::result_type calcMapPosition(
-                std::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
-                std::shared_ptr<OwlSerialController::AirplaneState> airplaneState
+                boost::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
+                boost::shared_ptr<OwlSerialController::AirplaneState> airplaneState
         ) {
             BOOST_LOG_OWL(trace_map) << "MapCalc::calcMapPosition";
             if (calc_) {
@@ -94,7 +94,7 @@ namespace OwlMapCalc {
             boost::asio::dispatch(ioc_, [this, self = shared_from_this(), data]() {
                 BOOST_ASSERT(self);
                 BOOST_LOG_OWL(trace_map) << "MapCalc::receiveMail dispatch";
-                auto mail = std::make_shared<OwlMailDefine::MapCalc2Service>();
+                auto mail = boost::make_shared<OwlMailDefine::MapCalc2Service>();
                 mail->runner = data->callbackRunner;
                 if (!calc_) {
                     BOOST_LOG_OWL(trace_map) << "MapCalc::receiveMail mail (!calc_) send back";

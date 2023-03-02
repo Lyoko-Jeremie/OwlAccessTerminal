@@ -20,7 +20,7 @@ namespace OwlEmbedWebServer {
         // The lifetime of the message has to extend
         // for the duration of the async operation so
         // we use a shared_ptr to manage it.
-        auto sp = std::make_shared<
+        auto sp = boost::make_shared<
                 boost::beast::http::message<isRequest, Body, Fields>>(std::move(msg));
 
         // Store a type-erased version of the shared
@@ -199,7 +199,7 @@ namespace OwlEmbedWebServer {
         // get return type of `EmbedWebServerSession::parentRef_.lock()`
         //      use `decltype(std::declval<decltype(EmbedWebServerSession::parentRef_)>().lock())`
         //      from https://www.appsloveworld.com/cplus/100/12/get-return-type-of-member-function-without-an-object
-        static bool processCmd(const std::shared_ptr<EmbedWebServerSession> &ref,
+        static bool processCmd(const boost::shared_ptr<EmbedWebServerSession> &ref,
                                decltype(std::declval<decltype(EmbedWebServerSession::parentRef_)>().lock()) &p,
                                const EmbedWebServerSessionHelperCmd &helperCmdLookupTable) {
 
@@ -211,7 +211,7 @@ namespace OwlEmbedWebServer {
 
             auto t = helperCmdLookupTable(url.path());
             if (t != helperCmdLookupTable.cend()) {
-                OwlMailDefine::MailWeb2Cmd data = std::make_shared<OwlMailDefine::Web2Cmd>();
+                OwlMailDefine::MailWeb2Cmd data = boost::make_shared<OwlMailDefine::Web2Cmd>();
                 data->cmd = t->second.cmd;
                 if (!t->second.paramsCheckList.empty()) {
                     if (!checkParamCheckListHelper(t->second, queryPairs, *ref)) {
@@ -228,7 +228,7 @@ namespace OwlEmbedWebServer {
                     }
                 }
                 data->callbackRunner = [ref](
-                        const std::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
+                        const boost::shared_ptr<OwlMailDefine::Cmd2Web> &data_r
                 ) {
                     if (!data_r->ok) {
                         return ref->send_json(

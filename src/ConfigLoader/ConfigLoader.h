@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_CONFIGLOADER_H
 #define OWLACCESSTERMINAL_CONFIGLOADER_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <sstream>
 #include <variant>
 #include <functional>
@@ -137,7 +137,7 @@ namespace OwlConfigLoader {
     };
 
 
-    class ConfigLoader : public std::enable_shared_from_this<ConfigLoader> {
+    class ConfigLoader : public boost::enable_shared_from_this<ConfigLoader> {
     public:
 
         ~ConfigLoader() {
@@ -163,13 +163,13 @@ namespace OwlConfigLoader {
         }
 
     private:
-        std::shared_ptr<Config> config_ = std::make_shared<Config>();
+        boost::shared_ptr<Config> config_ = boost::make_shared<Config>();
 
     private:
 
         static boost::json::value load_json_file(const std::string &filePath);
 
-        std::shared_ptr<Config> parse_json(const boost::json::value &&json_v);
+        boost::shared_ptr<Config> parse_json(const boost::json::value &&json_v);
 
         template<typename T>
         std::remove_cvref_t<T> get(const boost::json::object &v, boost::string_view key, T &&d) {

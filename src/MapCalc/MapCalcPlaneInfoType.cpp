@@ -4,7 +4,7 @@
 
 namespace OwlMapCalc {
 
-    boost::json::object MapCalcPlaneInfoType2JsonObject(const std::shared_ptr<MapCalcPlaneInfoType> &info) {
+    boost::json::object MapCalcPlaneInfoType2JsonObject(const boost::shared_ptr<MapCalcPlaneInfoType> &info) {
         if (!info) {
             return {};
         }

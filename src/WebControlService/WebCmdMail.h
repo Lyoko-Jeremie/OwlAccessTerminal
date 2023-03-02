@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_WEBCMDMAIL_H
 #define OWLACCESSTERMINAL_WEBCMDMAIL_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include "../AsyncCallbackMailbox/AsyncCallbackMailbox.h"
 
 namespace OwlMailDefine {
@@ -29,10 +29,10 @@ namespace OwlMailDefine {
         std::string DEVICE_NAME;
 
         // Cmd2Web.runner = Web2Cmd.callbackRunner
-        std::function<void(std::shared_ptr<Cmd2Web>)> callbackRunner;
+        std::function<void(boost::shared_ptr<Cmd2Web>)> callbackRunner;
     };
     struct Cmd2Web {
-        std::function<void(std::shared_ptr<Cmd2Web>)> runner;
+        std::function<void(boost::shared_ptr<Cmd2Web>)> runner;
         bool ok = false;
 
         int result = -1;
@@ -41,7 +41,7 @@ namespace OwlMailDefine {
     };
 
     using WebCmdMailbox =
-            std::shared_ptr<
+            boost::shared_ptr<
                     OwlAsyncCallbackMailbox::AsyncCallbackMailbox<
                             Web2Cmd,
                             Cmd2Web

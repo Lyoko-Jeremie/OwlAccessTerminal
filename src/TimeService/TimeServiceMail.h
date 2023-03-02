@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_TIMESERVICEMAIL_H
 #define OWLACCESSTERMINAL_TIMESERVICEMAIL_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <functional>
 #include <chrono>
 #include "../AsyncCallbackMailbox/AsyncCallbackMailbox.h"
@@ -24,16 +24,16 @@ namespace OwlMailDefine {
         int64_t clockTimestampMs = 0;
 
         // Time2Service.runner = Service2Time.callbackRunner
-        std::function<void(std::shared_ptr<Time2Service>)> callbackRunner;
+        std::function<void(boost::shared_ptr<Time2Service>)> callbackRunner;
     };
     struct Time2Service {
 
         int64_t clockTimestampMs = 0;
 
-        std::function<void(std::shared_ptr<Time2Service>)> runner;
+        std::function<void(boost::shared_ptr<Time2Service>)> runner;
     };
     using ServiceTimeMailbox =
-            std::shared_ptr<
+            boost::shared_ptr<
                     OwlAsyncCallbackMailbox::AsyncCallbackMailbox<
                             Service2Time,
                             Time2Service

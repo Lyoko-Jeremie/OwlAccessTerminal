@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_IMAGESERVICE_H
 #define OWLACCESSTERMINAL_IMAGESERVICE_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -58,12 +58,12 @@ namespace OwlImageService {
 
     class ImageService;
 
-    class ImageServiceSession : public std::enable_shared_from_this<ImageServiceSession> {
+    class ImageServiceSession : public boost::enable_shared_from_this<ImageServiceSession> {
     public:
         explicit ImageServiceSession(
                 boost::asio::io_context &ioc,
                 boost::asio::ip::tcp::socket &&socket,
-                std::weak_ptr<ImageService> &&parents
+                boost::weak_ptr<ImageService> &&parents
         ) : ioc_(ioc), socket_(std::move(socket)), parents_(std::move(parents)) {}
 
 //        static void fail(boost::system::error_code ec, const char *what) {
@@ -73,7 +73,7 @@ namespace OwlImageService {
     private:
         boost::asio::io_context &ioc_;
         boost::asio::ip::tcp::socket socket_;
-        std::weak_ptr<ImageService> parents_;
+        boost::weak_ptr<ImageService> parents_;
 
     public:
         void
@@ -94,14 +94,14 @@ namespace OwlImageService {
         do_receive_size();
 
         void
-        do_receive_data(std::shared_ptr<CommonTcpPackage> package_r_);
+        do_receive_data(boost::shared_ptr<CommonTcpPackage> package_r_);
 
     private:
         void
-        do_send_size(std::shared_ptr<CommonTcpPackage> package_s_);
+        do_send_size(boost::shared_ptr<CommonTcpPackage> package_s_);
 
         void
-        do_send_data(std::shared_ptr<CommonTcpPackage> package_s_);
+        do_send_data(boost::shared_ptr<CommonTcpPackage> package_s_);
 
     private:
         void
@@ -109,7 +109,7 @@ namespace OwlImageService {
 
     };
 
-    class ImageService : public std::enable_shared_from_this<ImageService> {
+    class ImageService : public boost::enable_shared_from_this<ImageService> {
     public:
         ImageService(
                 boost::asio::io_context &ioc,

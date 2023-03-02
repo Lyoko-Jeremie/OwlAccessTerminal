@@ -65,8 +65,8 @@ namespace OwlCmdExecute {
         return true;
     }
 
-    std::shared_ptr<CmdExecuteItem> CmdExecute::createCEI(const std::string &pName, const std::string &params) {
-        auto p = std::make_shared<CmdExecuteItem>(
+    boost::shared_ptr<CmdExecuteItem> CmdExecute::createCEI(const std::string &pName, const std::string &params) {
+        auto p = boost::make_shared<CmdExecuteItem>(
                 ceiIdGenerator_.fetch_add(1),
                 ioc_, pName, params, weak_from_this()
         );
@@ -131,7 +131,7 @@ namespace OwlCmdExecute {
                     data->SSID.length() < 8 || data->PASSWORD.length() < 1) {
                     BOOST_LOG_OWL(warning)
                         << "(!c1 || !c2 || !c3)";
-                    OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
+                    OwlMailDefine::MailCmd2Web m = boost::make_shared<OwlMailDefine::Cmd2Web>();
                     m->ok = false;
                     m->s_err = "ERROR (!c1 || !c2 || !c3) ERROR";
                     m->runner = data->callbackRunner;
@@ -165,7 +165,7 @@ namespace OwlCmdExecute {
                     data->SSID.length() < 8 || data->PASSWORD.length() < 1) {
                     BOOST_LOG_OWL(warning)
                         << "(!c1 || !c2 || !c3)";
-                    OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
+                    OwlMailDefine::MailCmd2Web m = boost::make_shared<OwlMailDefine::Cmd2Web>();
                     m->ok = false;
                     m->s_err = "ERROR (!c1 || !c2 || !c3) ERROR";
                     m->runner = data->callbackRunner;
@@ -209,7 +209,7 @@ namespace OwlCmdExecute {
                 if (!c1 || !data->DEVICE_NAME.starts_with("wlx") || data->DEVICE_NAME.length() < 3) {
                     BOOST_LOG_OWL(warning)
                         << "(!c1 || !data->DEVICE_NAME.starts_with(\"wlx\") || data->DEVICE_NAME.length() < 3)";
-                    OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
+                    OwlMailDefine::MailCmd2Web m = boost::make_shared<OwlMailDefine::Cmd2Web>();
                     m->ok = false;
                     m->s_err = "(!c1 || !data->DEVICE_NAME.starts_with(\"wlx\") || data->DEVICE_NAME.length() < 3)";
                     m->runner = data->callbackRunner;
@@ -239,7 +239,7 @@ namespace OwlCmdExecute {
                 // invalid
                 BOOST_LOG_OWL(error) << "receiveMail MailWeb2Cmd ignore/default.";
                 {
-                    OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
+                    OwlMailDefine::MailCmd2Web m = boost::make_shared<OwlMailDefine::Cmd2Web>();
                     m->ok = false;
                     m->s_err = "ERROR receiveMail MailWeb2Cmd ignore/default. ERROR";
                     m->runner = data->callbackRunner;
@@ -249,9 +249,9 @@ namespace OwlCmdExecute {
         }
     }
 
-    void CmdExecute::sendBackResult(std::shared_ptr<CmdExecuteItem> cei, OwlMailDefine::MailWeb2Cmd data) {
+    void CmdExecute::sendBackResult(boost::shared_ptr<CmdExecuteItem> cei, OwlMailDefine::MailWeb2Cmd data) {
         boost::asio::dispatch(ioc_, [this, self = shared_from_this(), cei, data]() {
-            OwlMailDefine::MailCmd2Web m = std::make_shared<OwlMailDefine::Cmd2Web>();
+            OwlMailDefine::MailCmd2Web m = boost::make_shared<OwlMailDefine::Cmd2Web>();
             m->runner = data->callbackRunner;
             if (cei->isErr) {
                 m->ok = false;

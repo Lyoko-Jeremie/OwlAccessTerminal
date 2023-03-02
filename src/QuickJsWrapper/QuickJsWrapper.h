@@ -3,13 +3,13 @@
 #ifndef OWLACCESSTERMINAL_QUICKJSWRAPPER_H
 #define OWLACCESSTERMINAL_QUICKJSWRAPPER_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include <functional>
 #include "./QuickJsWrapperImpl.h"
 
 namespace OwlQuickJsWrapper {
 
-    class QuickJsWrapper : public std::enable_shared_from_this<QuickJsWrapper> {
+    class QuickJsWrapper : public boost::enable_shared_from_this<QuickJsWrapper> {
     public:
         QuickJsWrapper();
 
@@ -39,7 +39,7 @@ namespace OwlQuickJsWrapper {
         }
 
     private:
-        std::shared_ptr<QuickJsWrapperImpl> impl_;
+        boost::shared_ptr<QuickJsWrapperImpl> impl_;
     };
 
 } // OwlQuickJsWrapper

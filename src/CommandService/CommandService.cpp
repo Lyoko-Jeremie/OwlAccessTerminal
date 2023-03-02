@@ -28,7 +28,7 @@ namespace OwlCommandService {
 
 
     void CommandService::send_back(std::string &&json_string) {
-        auto send_string_ptr = std::make_shared<std::string>(std::move(json_string));
+        auto send_string_ptr = boost::make_shared<std::string>(std::move(json_string));
         udp_socket_.async_send_to(
                 boost::asio::buffer(*send_string_ptr),
                 remote_endpoint_,

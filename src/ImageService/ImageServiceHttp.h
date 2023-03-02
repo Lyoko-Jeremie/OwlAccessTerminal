@@ -3,7 +3,7 @@
 #ifndef OWLACCESSTERMINAL_IMAGESERVICEHTTP_H
 #define OWLACCESSTERMINAL_IMAGESERVICEHTTP_H
 
-#include <memory>
+#include "../MemoryBoost.h"
 #include "ImageServiceMail.h"
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
@@ -14,7 +14,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
-#include <memory>
+#include "../MemoryBoost.h"
 #include <string>
 #include <utility>
 #include "../TimeService/TimeServiceMail.h"
@@ -24,12 +24,12 @@ namespace OwlImageServiceHttp {
 
     class ImageServiceHttp;
 
-    class ImageServiceHttpConnect : public std::enable_shared_from_this<ImageServiceHttpConnect> {
+    class ImageServiceHttpConnect : public boost::enable_shared_from_this<ImageServiceHttpConnect> {
     public:
         ImageServiceHttpConnect(
                 boost::asio::ip::tcp::socket &&socket,
-                std::shared_ptr<OwlConfigLoader::ConfigLoader> config,
-                std::weak_ptr<ImageServiceHttp> &&parents
+                boost::shared_ptr<OwlConfigLoader::ConfigLoader> config,
+                boost::weak_ptr<ImageServiceHttp> &&parents
         ) : socket_(std::move(socket)),
             config_(std::move(config)),
             parents_(std::move(parents)) {
@@ -47,9 +47,9 @@ namespace OwlImageServiceHttp {
         // The socket for the currently connected client.
         boost::asio::ip::tcp::socket socket_;
 
-        std::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
+        boost::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
 
-        std::weak_ptr<ImageServiceHttp> parents_;
+        boost::weak_ptr<ImageServiceHttp> parents_;
 
         // The buffer for performing reads.
         boost::beast::flat_buffer buffer_{8192};
@@ -104,7 +104,7 @@ namespace OwlImageServiceHttp {
         // Asynchronously transmit the response message.
         template<typename BodyType = boost::beast::http::dynamic_body>
         void write_response(
-                std::shared_ptr<boost::beast::http::response<BodyType>> response
+                boost::shared_ptr<boost::beast::http::response<BodyType>> response
         ) {
             auto self = shared_from_this();
 
@@ -142,12 +142,12 @@ namespace OwlImageServiceHttp {
     };
 
 
-    class ImageServiceHttp : public std::enable_shared_from_this<ImageServiceHttp> {
+    class ImageServiceHttp : public boost::enable_shared_from_this<ImageServiceHttp> {
     public:
         ImageServiceHttp(
                 boost::asio::io_context &ioc,
                 const boost::asio::ip::tcp::endpoint &endpoint,
-                std::shared_ptr<OwlConfigLoader::ConfigLoader> config,
+                boost::shared_ptr<OwlConfigLoader::ConfigLoader> config,
                 OwlMailDefine::ServiceCameraMailbox &&mailbox,
                 OwlMailDefine::ServiceTimeMailbox &&mailbox_time
         );
@@ -160,7 +160,7 @@ namespace OwlImageServiceHttp {
     private:
         boost::asio::io_context &ioc_;
         boost::asio::ip::tcp::acceptor acceptor_;
-        std::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
+        boost::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
         OwlMailDefine::ServiceCameraMailbox mailbox_;
         OwlMailDefine::ServiceTimeMailbox mailbox_time_;
     public:
@@ -206,7 +206,7 @@ namespace OwlImageServiceHttp {
                 BOOST_LOG_OWL(error) << "accept" << " : " << ec.message();
             } else {
                 // Create the session and run it
-                std::make_shared<ImageServiceHttpConnect>(
+                boost::make_shared<ImageServiceHttpConnect>(
                         std::move(socket),
                         config_->shared_from_this(),
                         weak_from_this()

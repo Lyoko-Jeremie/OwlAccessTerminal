@@ -5,7 +5,7 @@
 
 // https://www.boost.org/doc/libs/develop/libs/beast/example/http/server/async/http_server_async.cpp
 
-#include <memory>
+#include "../../MemoryBoost.h"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -21,13 +21,13 @@ namespace OwlEmbedWebServer {
     //------------------------------------------------------------------------------
 
     // Accepts incoming connections and launches the sessions
-    class EmbedWebServer : public std::enable_shared_from_this<EmbedWebServer> {
+    class EmbedWebServer : public boost::enable_shared_from_this<EmbedWebServer> {
         boost::asio::io_context &ioc_;
         OwlMailDefine::WebCmdMailbox mailbox_;
         boost::asio::ip::tcp::acceptor acceptor_;
-        std::shared_ptr<std::string const> doc_root_;
-        std::shared_ptr<std::string const> index_file_of_root;
-        std::shared_ptr<std::string const> backend_json_string;
+        boost::shared_ptr<std::string const> doc_root_;
+        boost::shared_ptr<std::string const> index_file_of_root;
+        boost::shared_ptr<std::string const> backend_json_string;
         std::vector<std::string> allowFileExtList;
 
     public:
@@ -35,10 +35,10 @@ namespace OwlEmbedWebServer {
                 boost::asio::io_context &ioc,
                 OwlMailDefine::WebCmdMailbox &&mailbox,
                 const boost::asio::ip::tcp::endpoint &endpoint,
-                std::shared_ptr<std::string const> const &doc_root,
-                std::shared_ptr<std::string const> const &index_file_of_root,
-                std::shared_ptr<std::string const> const &backend_json_string,
-                std::shared_ptr<std::string const> const &allowFileExtList
+                boost::shared_ptr<std::string const> const &doc_root,
+                boost::shared_ptr<std::string const> const &index_file_of_root,
+                boost::shared_ptr<std::string const> const &backend_json_string,
+                boost::shared_ptr<std::string const> const &allowFileExtList
         );
 
         ~EmbedWebServer() {

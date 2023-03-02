@@ -17,7 +17,7 @@ namespace OwlImageServiceHttp {
             return;
         }
 
-        OwlMailDefine::MailService2Camera cmd_data = std::make_shared<OwlMailDefine::Service2Camera>();
+        OwlMailDefine::MailService2Camera cmd_data = boost::make_shared<OwlMailDefine::Service2Camera>();
         cmd_data->camera_id = camera_id;
 
         cmd_data->callbackRunner = [this, self = shared_from_this()](
@@ -40,7 +40,7 @@ namespace OwlImageServiceHttp {
                 return;
             }
 
-            OwlMailDefine::MailService2Time time_data = std::make_shared<OwlMailDefine::Service2Time>();
+            OwlMailDefine::MailService2Time time_data = boost::make_shared<OwlMailDefine::Service2Time>();
             time_data->cmd = OwlMailDefine::TimeServiceCmd::getSyncClock;
             time_data->callbackRunner = [this, self = shared_from_this(), camera_data](
                     const OwlMailDefine::MailTime2Service &time_data_r
@@ -66,14 +66,14 @@ namespace OwlImageServiceHttp {
                     cv::Mat img = camera_data->image;
                     camera_data->image.release();
 
-                    auto imageBuffer = std::make_shared<std::vector<uchar>>();
+                    auto imageBuffer = boost::make_shared<std::vector<uchar>>();
                     cv::imencode(".jpg", img, *imageBuffer,
                                  {cv::ImwriteFlags::IMWRITE_JPEG_QUALITY, 70});
 
 
                     // https://www.boost.org/doc/libs/develop/libs/beast/example/doc/http_examples.hpp
                     //      `send_cgi_response()`
-                    auto response = std::make_shared<boost::beast::http::response<boost::beast::http::buffer_body>>();
+                    auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::buffer_body>>();
                     response->version(request_.version());
                     response->keep_alive(false);
 
@@ -171,7 +171,7 @@ namespace OwlImageServiceHttp {
         }
 
         // send cmd to let camera re-create
-        OwlMailDefine::MailService2Camera cmd_data = std::make_shared<OwlMailDefine::Service2Camera>();
+        OwlMailDefine::MailService2Camera cmd_data = boost::make_shared<OwlMailDefine::Service2Camera>();
         cmd_data->camera_id = camera_id;
         cmd_data->cmd = OwlMailDefine::ControlCameraCmd::reset;
         cmd_data->cmdParams = {OwlCameraConfig::CameraInfoTuple{
@@ -197,7 +197,7 @@ namespace OwlImageServiceHttp {
             }
 
             boost::asio::dispatch(socket_.get_executor(), [this, self = shared_from_this()]() {
-                auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+                auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
                 response->version(request_.version());
                 response->keep_alive(false);
 
@@ -295,7 +295,7 @@ namespace OwlImageServiceHttp {
             return;
         }
 
-        auto data = std::make_shared<OwlMailDefine::Service2Time>();
+        auto data = boost::make_shared<OwlMailDefine::Service2Time>();
         data->cmd = OwlMailDefine::TimeServiceCmd::setNowClock;
         data->clockTimestampMs = set_timestamp;
 
@@ -316,7 +316,7 @@ namespace OwlImageServiceHttp {
                 auto js = std::string{R"({"steadyClockTimestampMs": <NUMBER>})"};
                 boost::replace_all(js, "<NUMBER>", boost::lexical_cast<std::string>(data_r->clockTimestampMs));
 
-                auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+                auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
                 response->version(request_.version());
                 response->keep_alive(false);
 
@@ -350,7 +350,7 @@ namespace OwlImageServiceHttp {
             return;
         }
 
-        auto data = std::make_shared<OwlMailDefine::Service2Time>();
+        auto data = boost::make_shared<OwlMailDefine::Service2Time>();
         data->cmd = OwlMailDefine::TimeServiceCmd::getSyncClock;
 
         data->callbackRunner = [this, self = shared_from_this(), p](
@@ -367,7 +367,7 @@ namespace OwlImageServiceHttp {
                     }
             );
 
-            auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+            auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
             response->version(request_.version());
             response->keep_alive(false);
 
@@ -424,7 +424,7 @@ namespace OwlImageServiceHttp {
             return;
         }
 
-        auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+        auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
         response->version(request_.version());
         response->keep_alive(false);
 
@@ -487,7 +487,7 @@ namespace OwlImageServiceHttp {
                 break;
 
             default: {
-                auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+                auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
                 response->version(request_.version());
                 response->keep_alive(false);
                 // We return responses indicating an error if
@@ -508,7 +508,7 @@ namespace OwlImageServiceHttp {
 
     void ImageServiceHttpConnect::bad_request(const std::string &r) {
         // bad request
-        auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+        auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
         response->version(request_.version());
         response->keep_alive(false);
 
@@ -522,7 +522,7 @@ namespace OwlImageServiceHttp {
     }
 
     void ImageServiceHttpConnect::internal_server_error(const std::string &r) {
-        auto response = std::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+        auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
         response->version(request_.version());
         response->keep_alive(false);
 
@@ -538,7 +538,7 @@ namespace OwlImageServiceHttp {
     ImageServiceHttp::ImageServiceHttp(
             boost::asio::io_context &ioc,
             const boost::asio::ip::tcp::endpoint &endpoint,
-            std::shared_ptr<OwlConfigLoader::ConfigLoader> config,
+            boost::shared_ptr<OwlConfigLoader::ConfigLoader> config,
             OwlMailDefine::ServiceCameraMailbox &&mailbox,
             OwlMailDefine::ServiceTimeMailbox &&mailbox_time
     ) : ioc_(ioc),

@@ -27,7 +27,7 @@ namespace OwlMapCalc {
 
     MapCalc::MapCalc(
             boost::asio::io_context &ioc,
-            std::shared_ptr<OwlConfigLoader::ConfigLoader> config,
+            boost::shared_ptr<OwlConfigLoader::ConfigLoader> config,
             OwlMailDefine::ServiceMapCalcMailbox &&mailbox
     ) : ioc_(boost::asio::make_strand(ioc)),
         config_(config),
@@ -43,7 +43,7 @@ namespace OwlMapCalc {
                 this, self = shared_from_this()
         ]() {
             BOOST_LOG_OWL(trace_map) << "MapCalc::init() dispatch";
-            qjw_ = std::make_shared<OwlQuickJsWrapper::QuickJsWrapper>();
+            qjw_ = boost::make_shared<OwlQuickJsWrapper::QuickJsWrapper>();
             BOOST_LOG_OWL(trace_map) << "MapCalc::init() qjw_ create ok";
             qjw_->init();
             BOOST_LOG_OWL(trace_map) << "MapCalc::init() qjw_->init() ok";
@@ -89,8 +89,8 @@ namespace OwlMapCalc {
         }
         calc_ = [this, self = shared_from_this(), calcF = std::move(f)]
                 (
-                        std::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
-                        std::shared_ptr<OwlSerialController::AirplaneState> airplaneState
+                        boost::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo,
+                        boost::shared_ptr<OwlSerialController::AirplaneState> airplaneState
                 ) -> MapCalcFunctionType::result_type {
             BOOST_LOG_OWL(trace_map) << "MapCalc calc_ start";
 
@@ -182,7 +182,7 @@ namespace OwlMapCalc {
                 return {};
             }
             try {
-                auto rData = std::make_shared<MapCalcPlaneInfoType>();
+                auto rData = boost::make_shared<MapCalcPlaneInfoType>();
                 BOOST_LOG_OWL(trace_map) << "MapCalc calc_ before calcF trigger_qjs_update_when_thread_change";
                 qjw_->trigger_qjs_update_when_thread_change();
                 BOOST_LOG_OWL(trace_map) << "MapCalc calc_ before calcF";
@@ -272,10 +272,10 @@ namespace OwlMapCalc {
     }
 
     bool MapCalc::testMapCalcFunction() {
-        auto tagInfo = std::make_shared<OwlMailDefine::AprilTagCmd>();
+        auto tagInfo = boost::make_shared<OwlMailDefine::AprilTagCmd>();
         tagInfo->imageX = 800;
         tagInfo->imageY = 600;
-        tagInfo->aprilTagCenter = std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type>();
+        tagInfo->aprilTagCenter = boost::make_shared<OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type>();
         tagInfo->aprilTagCenter->id = 0;
         // (0,0) at image left top
         double x = 400;
@@ -306,11 +306,11 @@ namespace OwlMapCalc {
 
         tagInfo->aprilTagCenter->cornerLBx = x - 500;
         tagInfo->aprilTagCenter->cornerLBy = y;
-        tagInfo->aprilTagList = std::make_shared<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type>();
+        tagInfo->aprilTagList = boost::make_shared<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type>();
         tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
 //        tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
 //        tagInfo->aprilTagList->push_back(tagInfo->aprilTagCenter.operator*());
-        auto airplaneState = std::make_shared<OwlSerialController::AirplaneState>();
+        auto airplaneState = boost::make_shared<OwlSerialController::AirplaneState>();
         airplaneState->initTimestamp();
         airplaneState->high = 50;
 

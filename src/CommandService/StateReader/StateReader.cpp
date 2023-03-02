@@ -2,7 +2,7 @@
 
 #include "StateReader.h"
 #include <utility>
-#include <memory>
+#include "../../MemoryBoost.h"
 #include <boost/assert.hpp>
 #include "../SerialController.h"
 
@@ -17,8 +17,8 @@ namespace OwlSerialController {
     constexpr bool flag_DEBUG_IF_CHECK_POINT = false;
 #endif // DEBUG_IF_CHECK_POINT
 
-    StateReader::StateReader(std::weak_ptr<PortController> parentRef,
-                             std::shared_ptr<boost::asio::serial_port> serialPort)
+    StateReader::StateReader(boost::weak_ptr<PortController> parentRef,
+                             boost::shared_ptr<boost::asio::serial_port> serialPort)
             : parentRef_(std::move(parentRef)),
               serialPort_(std::move(serialPort)) {
     }
@@ -32,7 +32,7 @@ namespace OwlSerialController {
             BOOST_ASSERT(!weak_from_this().expired());
         }
         BOOST_ASSERT(!weak_from_this().expired());
-        impl = std::make_shared<StateReaderImpl>(weak_from_this(), serialPort_);
+        impl = boost::make_shared<StateReaderImpl>(weak_from_this(), serialPort_);
         BOOST_ASSERT(!weak_from_this().expired());
     }
 
@@ -49,7 +49,7 @@ namespace OwlSerialController {
         impl->start();
     }
 
-    void StateReader::sendAirplaneState(const std::shared_ptr<AirplaneState> &airplaneState) {
+    void StateReader::sendAirplaneState(const boost::shared_ptr<AirplaneState> &airplaneState) {
         BOOST_ASSERT(serialPort_);
         boost::asio::dispatch(serialPort_->get_executor(), [
                 this, self = shared_from_this(), airplaneState]() {
