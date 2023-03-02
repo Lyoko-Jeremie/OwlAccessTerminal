@@ -30,6 +30,7 @@ namespace OwlLog {
             "trace_cmd_sp_r",
             "trace_map",
             "trace_dtor",
+            "trace_json",
             "trace",
             "debug_sp_w",
             "debug",

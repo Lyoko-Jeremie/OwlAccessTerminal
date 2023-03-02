@@ -346,7 +346,7 @@ namespace OwlProcessJsonMessage {
                 return;
             }
             //  std::cout << boost::json::serialize(json_v) << "\n";
-            BOOST_LOG_OWL(info) << boost::json::serialize(json_v);
+            BOOST_LOG_OWL(trace_json) << boost::json::serialize(json_v);
             auto json_o = json_v.as_object();
             if (!json_o.contains("cmdId") && !json_o.contains("packageId")) {
                 BOOST_LOG_OWL(warning) << "contains fail " << jsv;
@@ -376,7 +376,7 @@ namespace OwlProcessJsonMessage {
             switch (cmdId) {
                 case static_cast<int>(OwlCmdEnum::ping):
                     // ping-pong
-                    BOOST_LOG_OWL(info) << "ping-pong";
+                    BOOST_LOG_OWL(trace_json) << "ping-pong";
                     self->send_back_json(
                             boost::json::value{
                                     {"cmdId",     cmdId},
@@ -388,7 +388,7 @@ namespace OwlProcessJsonMessage {
                     break;
                 case static_cast<int>(OwlCmdEnum::calibrate): {
                     // calibrate
-                    BOOST_LOG_OWL(info) << "calibrate";
+                    BOOST_LOG_OWL(trace_json) << "calibrate";
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::calibrate;
                     m->callbackRunner = [self, cmdId, packageId](
@@ -410,7 +410,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::emergencyStop): {
                     // emergencyStop
-                    BOOST_LOG_OWL(info) << "emergencyStop";
+                    BOOST_LOG_OWL(trace_json) << "emergencyStop";
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::emergencyStop;
                     m->callbackRunner = [self, cmdId, packageId](
@@ -432,7 +432,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::unlock): {
                     // unlock
-                    BOOST_LOG_OWL(info) << "unlock";
+                    BOOST_LOG_OWL(trace_json) << "unlock";
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::unlock;
                     m->callbackRunner = [self, cmdId, packageId](
@@ -454,7 +454,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::breakCmd): {
                     // break
-                    BOOST_LOG_OWL(info) << "break";
+                    BOOST_LOG_OWL(trace_json) << "break";
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::stop;
                     m->callbackRunner = [self, cmdId, packageId](
@@ -476,7 +476,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::takeoff): {
                     // takeoff
-                    BOOST_LOG_OWL(info) << "takeoff";
+                    BOOST_LOG_OWL(trace_json) << "takeoff";
                     if (!json_o.contains("distance")) {
                         BOOST_LOG_OWL(warning) << "move step contains fail " << jsv;
                         self->send_back_json(
@@ -490,7 +490,7 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
-                    BOOST_LOG_OWL(info) << "takeoff distance check ok";
+                    BOOST_LOG_OWL(trace_json) << "takeoff distance check ok";
                     bool good = true;
                     auto moveStepDistance = getFromJsonObject<int32_t>(json_o, "distance", good);
                     if (!good) {
@@ -504,7 +504,7 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
-                    BOOST_LOG_OWL(info) << "takeoff moveStepDistance get ok , :" << moveStepDistance;
+                    BOOST_LOG_OWL(trace_json) << "takeoff moveStepDistance get ok , :" << moveStepDistance;
                     if (moveStepDistance > 32767 || moveStepDistance < 0) {
                         BOOST_LOG_OWL(warning) << "(moveStepDistance > 32767 || moveStepDistance < 0)" << jsv;
                         self->send_back_json(
@@ -539,7 +539,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::land): {
                     // land
-                    BOOST_LOG_OWL(info) << "land";
+                    BOOST_LOG_OWL(trace_json) << "land";
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::land;
                     m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
@@ -562,7 +562,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::move):
                     // move step
-                    BOOST_LOG_OWL(info) << "move step";
+                    BOOST_LOG_OWL(trace_json) << "move step";
                     {
                         if (!json_o.contains("forward") && !json_o.contains("distance")) {
                             BOOST_LOG_OWL(warning) << "move step contains fail " << jsv;
@@ -605,7 +605,7 @@ namespace OwlProcessJsonMessage {
                         switch (moveStepForward) {
                             case static_cast<int>(OwlCmdMoveEnum::up): {
                                 // up
-                                BOOST_LOG_OWL(info) << "move up " << moveStepDistance;
+                                BOOST_LOG_OWL(trace_json) << "move up " << moveStepDistance;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
@@ -629,7 +629,7 @@ namespace OwlProcessJsonMessage {
                             }
                             case static_cast<int>(OwlCmdMoveEnum::down): {
                                 // down
-                                BOOST_LOG_OWL(info) << "move down " << moveStepDistance;
+                                BOOST_LOG_OWL(trace_json) << "move down " << moveStepDistance;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
@@ -653,7 +653,7 @@ namespace OwlProcessJsonMessage {
                             }
                             case static_cast<int>(OwlCmdMoveEnum::left): {
                                 // left
-                                BOOST_LOG_OWL(info) << "move left " << moveStepDistance;
+                                BOOST_LOG_OWL(trace_json) << "move left " << moveStepDistance;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
@@ -677,7 +677,7 @@ namespace OwlProcessJsonMessage {
                             }
                             case static_cast<int>(OwlCmdMoveEnum::right): {
                                 // right
-                                BOOST_LOG_OWL(info) << "move right " << moveStepDistance;
+                                BOOST_LOG_OWL(trace_json) << "move right " << moveStepDistance;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
@@ -701,7 +701,7 @@ namespace OwlProcessJsonMessage {
                             }
                             case static_cast<int>(OwlCmdMoveEnum::forward): {
                                 // forward
-                                BOOST_LOG_OWL(info) << "move forward " << moveStepDistance;
+                                BOOST_LOG_OWL(trace_json) << "move forward " << moveStepDistance;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
@@ -725,7 +725,7 @@ namespace OwlProcessJsonMessage {
                             }
                             case static_cast<int>(OwlCmdMoveEnum::back): {
                                 // back
-                                BOOST_LOG_OWL(info) << "move back " << moveStepDistance;
+                                BOOST_LOG_OWL(trace_json) << "move back " << moveStepDistance;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
@@ -764,7 +764,7 @@ namespace OwlProcessJsonMessage {
                     break;
                 case static_cast<int>(OwlCmdEnum::rotate):
                     // rotate
-                    BOOST_LOG_OWL(info) << "rotate ";
+                    BOOST_LOG_OWL(trace_json) << "rotate ";
                     {
                         if (!json_o.contains("rotate") && !json_o.contains("rote")) {
                             BOOST_LOG_OWL(warning) << "rotate contains fail " << jsv;
@@ -807,7 +807,7 @@ namespace OwlProcessJsonMessage {
                         switch (rotate) {
                             case static_cast<int>(OwlCmdRotateEnum::cw): {
                                 // cw
-                                BOOST_LOG_OWL(info) << "rotate cw " << rote;
+                                BOOST_LOG_OWL(trace_json) << "rotate cw " << rote;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::rotate;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
@@ -831,7 +831,7 @@ namespace OwlProcessJsonMessage {
                             }
                             case static_cast<int>(OwlCmdRotateEnum::ccw): {
                                 // ccw
-                                BOOST_LOG_OWL(info) << "rotate ccw " << rote;
+                                BOOST_LOG_OWL(trace_json) << "rotate ccw " << rote;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::rotate;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
@@ -855,7 +855,7 @@ namespace OwlProcessJsonMessage {
                             }
                             default:
                                 // ignore
-                                BOOST_LOG_OWL(info) << "rotate ignore " << jsv;
+                                BOOST_LOG_OWL(warning) << "rotate ignore " << jsv;
                                 self->send_back_json(
                                         boost::json::value{
                                                 {"cmdId",     cmdId},
@@ -870,7 +870,7 @@ namespace OwlProcessJsonMessage {
                     break;
                 case static_cast<int>(OwlCmdEnum::keep): {
                     // keep position
-                    BOOST_LOG_OWL(info) << "keep";
+                    BOOST_LOG_OWL(trace_json) << "keep";
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::keep;
                     m->callbackRunner = [self, cmdId, packageId](
@@ -892,7 +892,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::gotoCmd): {
                     // goto position
-                    BOOST_LOG_OWL(info) << "gotoPosition";
+                    BOOST_LOG_OWL(trace_json) << "gotoPosition";
                     if (!json_o.contains("x") && !json_o.contains("y") && !json_o.contains("h")) {
                         BOOST_LOG_OWL(warning) << "gotoPosition contains fail " << jsv;
                         self->send_back_json(
@@ -968,7 +968,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::led): {
                     // led
-                    BOOST_LOG_OWL(info) << "led";
+                    BOOST_LOG_OWL(trace_json) << "led";
                     if (!json_o.contains("ledMode")
                         && !json_o.contains("b") && !json_o.contains("g") && !json_o.contains("r")) {
                         BOOST_LOG_OWL(warning) << "led contains fail " << jsv;
@@ -1038,7 +1038,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::high): {
                     // high
-                    BOOST_LOG_OWL(info) << "high";
+                    BOOST_LOG_OWL(trace_json) << "high";
                     if (!json_o.contains("high")) {
                         BOOST_LOG_OWL(warning) << "high contains fail " << jsv;
                         self->send_back_json(
@@ -1099,7 +1099,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::speed): {
                     // speed
-                    BOOST_LOG_OWL(info) << "speed";
+                    BOOST_LOG_OWL(trace_json) << "speed";
                     if (!json_o.contains("speed")) {
                         BOOST_LOG_OWL(warning) << "speed contains fail " << jsv;
                         self->send_back_json(
@@ -1160,7 +1160,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::flyMode): {
                     // flyMode
-                    BOOST_LOG_OWL(info) << "flyMode";
+                    BOOST_LOG_OWL(trace_json) << "flyMode";
                     if (!json_o.contains("flyMode")) {
                         BOOST_LOG_OWL(warning) << "flyMode contains fail " << jsv;
                         self->send_back_json(
@@ -1210,7 +1210,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::joyCon): {
                     // joystick
-                    BOOST_LOG_OWL(info) << "JoyCon";
+                    BOOST_LOG_OWL(trace_json) << "JoyCon";
                     if (!json_o.contains("JoyCon")) {
                         BOOST_LOG_OWL(warning) << "JoyCon contains fail " << jsv;
                         self->send_back_json(
@@ -1242,7 +1242,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::joyConSimple): {
                     // joystick
-                    BOOST_LOG_OWL(info) << "JoyConSimple";
+                    BOOST_LOG_OWL(trace_json) << "JoyConSimple";
                     if (!json_o.contains("JoyConSimple")) {
                         BOOST_LOG_OWL(warning) << "JoyConSimple contains fail " << jsv;
                         self->send_back_json(
@@ -1274,7 +1274,7 @@ namespace OwlProcessJsonMessage {
                 }
                 case static_cast<int>(OwlCmdEnum::joyConGyro): {
                     // joystick
-                    BOOST_LOG_OWL(info) << "JoyConGyro";
+                    BOOST_LOG_OWL(trace_json) << "JoyConGyro";
                     if (!json_o.contains("JoyConGyro")) {
                         BOOST_LOG_OWL(warning) << "JoyConGyro contains fail " << jsv;
                         self->send_back_json(
