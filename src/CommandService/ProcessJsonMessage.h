@@ -420,7 +420,7 @@ namespace OwlProcessJsonMessage {
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
-                                        {"msg",       "calibrate"},
+                                        {"msg",       "emergencyStop"},
                                         // {"result",    true},
                                         {"result",    data->ok},
                                         {"openError", data->openError},
@@ -442,7 +442,7 @@ namespace OwlProcessJsonMessage {
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
-                                        {"msg",       "calibrate"},
+                                        {"msg",       "unlock"},
                                         // {"result",    true},
                                         {"result",    data->ok},
                                         {"openError", data->openError},
