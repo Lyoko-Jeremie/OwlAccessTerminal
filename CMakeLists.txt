@@ -318,7 +318,7 @@ add_executable(${ProjectMainName}
 
 
 if (EnableWebStaticModule)
-    target_link_libraries(${ProjectMainName} ${WebStaticModuleFiles})
+    target_sources(${ProjectMainName} PRIVATE ${WebStaticModuleFiles})
 endif (EnableWebStaticModule)
 
 target_link_libraries(${ProjectMainName} quickjspp)

@@ -33,9 +33,9 @@ namespace OwlEmbedWebServer {
             allowFileExtList = extList;
         }
 
-        mailbox_->receiveB2A = [this](OwlMailDefine::MailCmd2Web &&data) {
+        mailbox_->receiveB2A([this](OwlMailDefine::MailCmd2Web &&data) {
             receiveMail(std::move(data));
-        };
+        });
 
         boost::beast::error_code ec;
 
