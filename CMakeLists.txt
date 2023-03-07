@@ -61,11 +61,15 @@ endif (DEFAULT_CONFIG)
 #set(DEBUG_Mailbox ON)
 
 #set(DEBUG_log_MAP ON)
+set(DEBUG_log_sp_tag ON)
 
 if (DEBUG_BOOST_ASIO)
     add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
 endif (DEBUG_BOOST_ASIO)
 
+if (DEBUG_log_sp_tag)
+    add_definitions(-DDEBUG_log_sp_tag)
+endif (DEBUG_log_sp_tag)
 if (DEBUG_log_dtor)
     add_definitions(-DDEBUG_log_dtor)
 endif (DEBUG_log_dtor)

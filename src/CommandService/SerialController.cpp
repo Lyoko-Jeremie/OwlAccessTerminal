@@ -446,6 +446,15 @@ namespace OwlSerialController {
                 //     packageId = package_record_->setNewMail(data->repeat());
                 // }
 
+                BOOST_LOG_OWL(trace_sp_tag)
+                    << "SerialController AprilTag Write:"
+                    << "[x:" << PlaneP_x
+                    << ",y:" << PlaneP_y
+                    << ",xD:" << xDirectDeg
+                    << ",zD:" << zDirectDeg
+                    << ",xzD:" << xzDirectDeg
+                    << "]";
+
                 // send cmd to serial
                 // make send data
                 constexpr uint8_t packageSize = 17;

@@ -16,6 +16,7 @@
 namespace OwlLog {
 
     enum severity_level {
+        trace_sp_tag,
         trace_cmd_tag,
         trace_cmd_http,
         trace_cmd_sp_w,

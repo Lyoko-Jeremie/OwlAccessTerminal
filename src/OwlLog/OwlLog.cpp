@@ -24,6 +24,7 @@ namespace OwlLog {
 
     // https://stackoverflow.com/questions/17930553/in-boost-log-how-do-i-format-a-custom-severity-level-using-a-format-string
     const char *severity_level_str[severity_level::MAX] = {
+            "trace_sp_tag",
             "trace_cmd_tag",
             "trace_cmd_http",
             "trace_cmd_sp_w",
@@ -136,6 +137,9 @@ namespace OwlLog {
 
         core->get()->set_filter(
                 true
+                #ifndef DEBUG_log_sp_tag
+                && severity != severity_level::trace_sp_tag
+                #endif // DEBUG_log_sp_tag
                 #ifndef DEBUG_log_dtor
                 && severity != severity_level::trace_dtor
                 #endif // DEBUG_log_dtor
@@ -174,6 +178,7 @@ namespace OwlLog {
             << "\n   BUILD_DATETIME " << CodeVersion_BUILD_DATETIME
             << "\n ---------- OwlAccessTerminal  Copyright (C) 2023 ---------- ";
 
+        BOOST_LOG_OWL(trace_sp_tag) << "BOOST_LOG_OWL(trace_sp_tag)";
         BOOST_LOG_OWL(trace_cmd_tag) << "BOOST_LOG_OWL(trace_cmd_tag)";
         BOOST_LOG_OWL(trace_cmd_http) << "BOOST_LOG_OWL(trace_cmd_http)";
         BOOST_LOG_OWL(trace_cmd_sp_w) << "BOOST_LOG_OWL(trace_cmd_sp_w)";
