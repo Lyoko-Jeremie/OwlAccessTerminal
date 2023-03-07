@@ -47,18 +47,18 @@ namespace OwlMapCalc {
             BOOST_LOG_OWL(trace_map) << "MapCalc::init() qjw_ create ok";
             qjw_->init();
             BOOST_LOG_OWL(trace_map) << "MapCalc::init() qjw_->init() ok";
+            auto rc = loadCalcJsCodeFile(config_->config().js_map_calc_file);
             BOOST_LOG_OWL(trace_map)
                 << "MapCalc::init() loadCalcJsCodeFile "
-                <<
-                loadCalcJsCodeFile(config_->config().js_map_calc_file);
+                << rc;
+            auto rlm = loadMapCalcFunction(config_->config().js_map_calc_function_name);
             BOOST_LOG_OWL(trace_map)
                 << "MapCalc::init() loadMapCalcFunction "
-                <<
-                loadMapCalcFunction(config_->config().js_map_calc_function_name);
+                << rlm;
+            auto rt = testMapCalcFunction();
             BOOST_LOG_OWL(trace_map)
                 << "MapCalc::init() testMapCalcFunction "
-                <<
-                testMapCalcFunction();
+                << rt;
             BOOST_LOG_OWL(trace_map) << "MapCalc::init() ok";
         });
     }
