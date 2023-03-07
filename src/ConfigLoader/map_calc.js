@@ -1,4 +1,5 @@
 "use strict";
+console.log("JS map_calc VERSION : ", 20230307);
 const checkTagType = (t_) => {
     if (!t_) {
         return false;

@@ -1,3 +1,4 @@
+console.log("JS map_calc VERSION : ", 20230307);
 type TagType = {
     id: number,
     dec_marg: number,
