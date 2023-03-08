@@ -11,8 +11,10 @@
 #include "CommandService/CommandService.h"
 #include "CommandService/CmdServiceHttp.h"
 #include "CommandService/SerialController.h"
+#ifdef EnableWebStaticModule
 #include "WebControlService/CmdExecute.h"
 #include "WebControlService/EmbedWebServer/EmbedWebServer.h"
+#endif // EnableWebStaticModule
 #include "ImageService/ImageService.h"
 #include "ImageService/ImageServiceHttp.h"
 #include "ImageService/CameraReader.h"
