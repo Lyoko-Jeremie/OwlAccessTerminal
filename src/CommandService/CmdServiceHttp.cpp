@@ -655,9 +655,12 @@ namespace OwlCommandServiceHttp {
     void CmdServiceHttpConnect::process_tag_info() {
 
         {
+            BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect init CmdServiceHttpConnectCoImpl";
             auto c = boost::make_shared<CmdServiceHttpConnectCoImpl>(shared_from_this());
 
+            BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect init CmdServiceHttpConnectCoImpl process_tag_info()";
             c->process_tag_info();
+            BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect end CmdServiceHttpConnectCoImpl process_tag_info()";
         }
 
         return;
