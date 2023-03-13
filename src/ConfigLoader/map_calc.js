@@ -147,6 +147,9 @@ const findOuterSide = (list) => {
         pArray.push(p.x);
         pArray.push(p.y);
     }
+    if (pArray.length === 0) {
+        return [];
+    }
     const [cX, cY, r, ...pList] = MathExOpenCV.minEnclosingCircle(pArray);
     const pI = MathExOpenCV.circleBorderPoints(cX, cY, r, pList);
     if (pI.length > 3) {
@@ -209,9 +212,9 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
         // rb
         imgX, imgY,
         // U
-        centerImgPoint.x, centerImgPoint.y + 10000,
+        centerImgPoint.x, centerImgPoint.y + DistanceX + DistanceZ,
         // R
-        centerImgPoint.x + 10000, centerImgPoint.y,
+        centerImgPoint.x + DistanceX + DistanceZ, centerImgPoint.y,
     ], mInPla);
     // console.log("pImgInPla [] :\n", JSON.stringify([
     //     // center
@@ -246,11 +249,11 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
         // rt
         centerPlanPoint.x + offsetLen, centerPlanPoint.y + offsetLen,
         // U
-        centerPlanPoint.x, centerPlanPoint.y - SizeZ * 1000,
+        centerPlanPoint.x, centerPlanPoint.y - SizeZ * 100,
         // R
-        centerPlanPoint.x + SizeX * 1000, centerPlanPoint.y,
+        centerPlanPoint.x + SizeX * 100, centerPlanPoint.y,
         // RU
-        centerPlanPoint.x + SizeX * 1000, centerPlanPoint.y - SizeZ * 1000,
+        centerPlanPoint.x + SizeX * 100, centerPlanPoint.y - SizeZ * 100,
     ], mInImg);
     // console.log("pPlaInImg :\n", JSON.stringify(
     //     [
@@ -291,8 +294,8 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
     // pixel per cm
     // ????
     const scalePlaInImg = {
-        x: MathEx.pythagoreanDistance(pImgInPla[0 + 2 * 6], pImgInPla[1 + 2 * 6]) / 10000 / AlgorithmMultiScale,
-        y: MathEx.pythagoreanDistance(pImgInPla[0 + 2 * 5], pImgInPla[1 + 2 * 5]) / 10000 / AlgorithmMultiScale,
+        x: MathEx.pythagoreanDistance(pImgInPla[0 + 2 * 6], pImgInPla[1 + 2 * 6]) / (DistanceX + DistanceZ) / AlgorithmMultiScale,
+        y: MathEx.pythagoreanDistance(pImgInPla[0 + 2 * 5], pImgInPla[1 + 2 * 5]) / (DistanceX + DistanceZ) / AlgorithmMultiScale,
     };
     // console.log("scalePlaInImg :\n", [pPlaInImg[0 + 2 * 6], pPlaInImg[1 + 2 * 6]]);
     // console.log("scalePlaInImg :\n", [pPlaInImg[0 + 2 * 5], pPlaInImg[1 + 2 * 5]]);
@@ -303,8 +306,8 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
     // cm per pixel
     // ????
     const scaleImgInPla = {
-        x: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 6], pPlaInImg[1 + 2 * 6]) / (SizeX * 1000) * AlgorithmMultiScale,
-        y: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 5], pPlaInImg[1 + 2 * 5]) / (SizeZ * 1000) * AlgorithmMultiScale,
+        x: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 6], pPlaInImg[1 + 2 * 6]) / (SizeX * 100) * AlgorithmMultiScale,
+        y: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 5], pPlaInImg[1 + 2 * 5]) / (SizeZ * 100) * AlgorithmMultiScale,
     };
     // console.log("scaleImgInPla :\n", [pImgInPla[0 + 2 * 6], pImgInPla[1 + 2 * 6]]);
     // console.log("scaleImgInPla :\n", JSON.stringify(scaleImgInPla, undefined, 4));
@@ -427,6 +430,9 @@ function calc_map_position(tagInfo) {
             //  3 findOuterSide
             //     x convexHull x
             const side3 = findOuterSide(tagInfo.tagInfo.list);
+            if (side3.length !== 3) {
+                return { ok: false };
+            }
             const j = calcPlaneInfo([
                 calcTagCenterPosition(side3[0].id),
                 calcTagCenterPosition(side3[1].id),

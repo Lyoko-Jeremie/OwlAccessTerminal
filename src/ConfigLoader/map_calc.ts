@@ -455,9 +455,9 @@ const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number)
             // rb
             imgX, imgY,
             // U
-            centerImgPoint.x, centerImgPoint.y + 10000,
+            centerImgPoint.x, centerImgPoint.y + DistanceX + DistanceZ,
             // R
-            centerImgPoint.x + 10000, centerImgPoint.y,
+            centerImgPoint.x + DistanceX + DistanceZ, centerImgPoint.y,
         ],
         mInPla,
     );
@@ -495,11 +495,11 @@ const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number)
             // rt
             centerPlanPoint.x + offsetLen, centerPlanPoint.y + offsetLen,
             // U
-            centerPlanPoint.x, centerPlanPoint.y - SizeZ * 1000,
+            centerPlanPoint.x, centerPlanPoint.y - SizeZ * 100,
             // R
-            centerPlanPoint.x + SizeX * 1000, centerPlanPoint.y,
+            centerPlanPoint.x + SizeX * 100, centerPlanPoint.y,
             // RU
-            centerPlanPoint.x + SizeX * 1000, centerPlanPoint.y - SizeZ * 1000,
+            centerPlanPoint.x + SizeX * 100, centerPlanPoint.y - SizeZ * 100,
         ],
         mInImg,
     );
@@ -545,8 +545,8 @@ const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number)
     // pixel per cm
     // ????
     const scalePlaInImg = {
-        x: MathEx.pythagoreanDistance(pImgInPla[0 + 2 * 6], pImgInPla[1 + 2 * 6]) / 10000 / AlgorithmMultiScale,
-        y: MathEx.pythagoreanDistance(pImgInPla[0 + 2 * 5], pImgInPla[1 + 2 * 5]) / 10000 / AlgorithmMultiScale,
+        x: MathEx.pythagoreanDistance(pImgInPla[0 + 2 * 6], pImgInPla[1 + 2 * 6]) / (DistanceX + DistanceZ) / AlgorithmMultiScale,
+        y: MathEx.pythagoreanDistance(pImgInPla[0 + 2 * 5], pImgInPla[1 + 2 * 5]) / (DistanceX + DistanceZ) / AlgorithmMultiScale,
     };
     // console.log("scalePlaInImg :\n", [pPlaInImg[0 + 2 * 6], pPlaInImg[1 + 2 * 6]]);
     // console.log("scalePlaInImg :\n", [pPlaInImg[0 + 2 * 5], pPlaInImg[1 + 2 * 5]]);
@@ -557,8 +557,8 @@ const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number)
     // cm per pixel
     // ????
     const scaleImgInPla = {
-        x: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 6], pPlaInImg[1 + 2 * 6]) / (SizeX * 1000) * AlgorithmMultiScale,
-        y: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 5], pPlaInImg[1 + 2 * 5]) / (SizeZ * 1000) * AlgorithmMultiScale,
+        x: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 6], pPlaInImg[1 + 2 * 6]) / (SizeX * 100) * AlgorithmMultiScale,
+        y: MathEx.pythagoreanDistance(pPlaInImg[0 + 2 * 5], pPlaInImg[1 + 2 * 5]) / (SizeZ * 100) * AlgorithmMultiScale,
     };
     // console.log("scaleImgInPla :\n", [pImgInPla[0 + 2 * 6], pImgInPla[1 + 2 * 6]]);
     // console.log("scaleImgInPla :\n", JSON.stringify(scaleImgInPla, undefined, 4));
