@@ -660,6 +660,25 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
             return {ok: true, info: j};
         }
     } else if (tagInfo.tagInfo.list.length >= 3) {
+        //      way 2: calc by center tag
+        const j = calcPlaneInfo(
+            [
+                // LT
+                calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 0),
+                // LB
+                calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 3),
+                // RB
+                calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 2),
+            ], [
+                {x: tagInfo.tagInfo.list[0].cLTx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLTy)} as Point2,
+                {x: tagInfo.tagInfo.list[0].cLBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLBy)} as Point2,
+                {x: tagInfo.tagInfo.list[0].cRBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cRBy)} as Point2,
+            ],
+            tagInfo.imageX,
+            tagInfo.imageY
+        );
+        console.log("j:\n", JSON.stringify(j, undefined, 4));
+        return {ok: true, info: j};
         const l = tagInfo.tagInfo.list;
         if (checkIsAllInSameLine(l)) {
             // type : calc by max distance 2 tag direction
@@ -705,30 +724,116 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
                 console.log("j:\n", JSON.stringify(j, undefined, 4));
                 return {ok: true, info: j};
             }
-            // type : to find last triangle
-            //  3 findOuterSide
-            //     x convexHull x
-            const side3 = findOuterSide(tagInfo.tagInfo.list);
-            if (side3.length !== 3) {
-                return {ok: false};
-            }
-
-            const j = calcPlaneInfo(
-                [
-                    calcTagCenterPosition(side3[0].id),
-                    calcTagCenterPosition(side3[1].id),
-                    calcTagCenterPosition(side3[2].id),
-                ], [
-                    {x: side3[0].cY, y: y2y(tagInfo.imageY, side3[0].cY)} as Point2,
-                    {x: side3[1].cY, y: y2y(tagInfo.imageY, side3[1].cY)} as Point2,
-                    {x: side3[2].cY, y: y2y(tagInfo.imageY, side3[2].cY)} as Point2,
-                ],
-                tagInfo.imageX,
-                tagInfo.imageY
-            );
-            console.log("j:\n", JSON.stringify(j, undefined, 4));
-            return {ok: true, info: j};
+            // // type : to find last triangle
+            // //  3 findOuterSide
+            // //     x convexHull x
+            // const side3 = findOuterSide(tagInfo.tagInfo.list);
+            // if (side3.length !== 3) {
+            //     return {ok: false};
+            // }
+            //
+            // const j = calcPlaneInfo(
+            //     [
+            //         calcTagCenterPosition(side3[0].id),
+            //         calcTagCenterPosition(side3[1].id),
+            //         calcTagCenterPosition(side3[2].id),
+            //     ], [
+            //         {x: side3[0].cY, y: y2y(tagInfo.imageY, side3[0].cY)} as Point2,
+            //         {x: side3[1].cY, y: y2y(tagInfo.imageY, side3[1].cY)} as Point2,
+            //         {x: side3[2].cY, y: y2y(tagInfo.imageY, side3[2].cY)} as Point2,
+            //     ],
+            //     tagInfo.imageX,
+            //     tagInfo.imageY
+            // );
+            // console.log("j:\n", JSON.stringify(j, undefined, 4));
+            // return {ok: true, info: j};
         }
     }
     return {ok: false};
 }
+
+
+const testR = calc_map_position(
+    JSON.parse(`{
+    "imageX": 640,
+    "imageY": 480,
+    "tagInfo": {
+        "center": {
+            "id": 0,
+            "dec_marg": 103.12965393066406,
+            "ham": 0,
+            "cX": 300.47344074876787,
+            "cY": 159.54739680409008,
+            "cLTx": 310.0415649414063,
+            "cLTy": 191.97668457031247,
+            "cRTx": 332.9658508300783,
+            "cRTy": 149.8308715820313,
+            "cRBx": 290.83453369140625,
+            "cRBy": 126.87820434570318,
+            "cLBx": 267.7102050781249,
+            "cLBy": 169.34490966796872
+        },
+        "list": [
+            {
+                "id": 0,
+                "dec_marg": 103.12965393066406,
+                "ham": 0,
+                "cX": 300.47344074876787,
+                "cY": 159.54739680409008,
+                "cLTx": 310.0415649414063,
+                "cLTy": 191.97668457031247,
+                "cRTx": 332.9658508300783,
+                "cRTy": 149.8308715820313,
+                "cRBx": 290.83453369140625,
+                "cRBy": 126.87820434570318,
+                "cLBx": 267.7102050781249,
+                "cLBy": 169.34490966796872
+            },
+            {
+                "id": 1,
+                "dec_marg": 109.22723388671875,
+                "ham": 0,
+                "cX": 368.24851915605143,
+                "cY": 31.903432995226193,
+                "cLTx": 378.2727661132813,
+                "cLTy": 65.40186309814452,
+                "cRTx": 400.8331298828125,
+                "cRTy": 22.363168716430668,
+                "cRBx": 358.3687744140625,
+                "cRBy": -1.1121082305908074,
+                "cLBx": 336.38677978515625,
+                "cLBy": 41.232051849365234
+            },
+            {
+                "id": 20,
+                "dec_marg": 103.37060546875,
+                "ham": 0,
+                "cX": 169.93853583374698,
+                "cY": 89.31453153859457,
+                "cLTx": 180.92633056640625,
+                "cLTy": 122.7564697265625,
+                "cRTx": 203.4572143554687,
+                "cRTy": 79.63285064697264,
+                "cRBx": 159.0496368408203,
+                "cRBy": 56.173587799072266,
+                "cLBx": 136.8728637695313,
+                "cLBy": 98.86536407470705
+            }
+        ]
+    },
+    "airplaneState": {
+        "timestamp": 0,
+        "voltage": 0,
+        "high": 0,
+        "pitch": 0,
+        "roll": 0,
+        "yaw": 0,
+        "vx": 0,
+        "vy": 0,
+        "vz": 0
+    }
+}`)
+);
+
+console.log("test R :", testR);
+

@@ -388,6 +388,21 @@ function calc_map_position(tagInfo) {
         }
     }
     else if (tagInfo.tagInfo.list.length >= 3) {
+        //      way 2: calc by center tag
+        const j = calcPlaneInfo([
+            // LT
+            calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 0),
+            // LB
+            calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 3),
+            // RB
+            calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 2),
+        ], [
+            { x: tagInfo.tagInfo.list[0].cLTx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLTy) },
+            { x: tagInfo.tagInfo.list[0].cLBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLBy) },
+            { x: tagInfo.tagInfo.list[0].cRBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cRBy) },
+        ], tagInfo.imageX, tagInfo.imageY);
+        console.log("j:\n", JSON.stringify(j, undefined, 4));
+        return { ok: true, info: j };
         const l = tagInfo.tagInfo.list;
         if (checkIsAllInSameLine(l)) {
             // type : calc by max distance 2 tag direction
