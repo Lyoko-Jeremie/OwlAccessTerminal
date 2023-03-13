@@ -59,8 +59,8 @@ const SizeX = 10 * AlgorithmMultiScale;
 const SizeZ = 10 * AlgorithmMultiScale;
 const SizeXHalf = SizeX / 2;
 const SizeZHalf = SizeZ / 2;
-const OffsetX = 50;
-const OffsetZ = 50;
+const OffsetX = 50 * AlgorithmMultiScale;
+const OffsetZ = 50 * AlgorithmMultiScale;
 const calcTagPosition = (t) => {
     const row = Math.floor(t / MapX);
     const col = t - row * MapX;
