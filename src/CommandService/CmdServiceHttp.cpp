@@ -590,8 +590,8 @@ namespace OwlCommandServiceHttp {
                             BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl run() error";
                         }
 
-                        std::string what;
                         if (e) {
+                            std::string what;
                             // https://stackoverflow.com/questions/14232814/how-do-i-make-a-call-to-what-on-stdexception-ptr
                             try { std::rethrow_exception(std::move(e)); }
                             catch (const std::exception &e) {
@@ -613,20 +613,20 @@ namespace OwlCommandServiceHttp {
                                 what = boost::current_exception_diagnostic_information();
                             }
                             BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl::process_tag_info " << what;
+                            auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+                            response->version(parentPtr_->request_.version());
+                            response->keep_alive(false);
+                            response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+                            response->result(boost::beast::http::status::bad_request);
+                            response->set(boost::beast::http::field::content_type, "text/plain");
+                            boost::beast::ostream(response->body())
+                                    << "CmdServiceHttpConnectCoImpl::process_tag_info "
+                                    << " " << what
+                                    << "\r\n";
+                            response->content_length(response->body().size());
+                            parentPtr_->write_response(response);
                         }
 
-                        auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
-                        response->version(parentPtr_->request_.version());
-                        response->keep_alive(false);
-                        response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
-                        response->result(boost::beast::http::status::bad_request);
-                        response->set(boost::beast::http::field::content_type, "text/plain");
-                        boost::beast::ostream(response->body())
-                                << "CmdServiceHttpConnectCoImpl::process_tag_info "
-                                << " " << what
-                                << "\r\n";
-                        response->content_length(response->body().size());
-                        parentPtr_->write_response(response);
                     });
 
         }
