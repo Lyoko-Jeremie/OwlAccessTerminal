@@ -6,6 +6,8 @@
 #include "../MapCalc/MapCalcPlaneInfoType.h"
 #include <boost/exception/diagnostic_information.hpp>
 
+#include <boost/asio/co_spawn.hpp>
+
 namespace OwlCommandServiceHttp {
 
 #ifdef DEBUG_TAG_INFO
@@ -31,6 +33,27 @@ namespace OwlCommandServiceHttp {
             p->mailbox_map_->sendA2B(std::move(data));
         } else {
             BOOST_LOG_OWL(error) << "CmdServiceHttpConnect::sendMail() " << "(!p)";
+        }
+    }
+
+
+    OwlMailDefine::CmdSerialMailbox CmdServiceHttpConnect::getMailBoxSerial() {
+        auto p = getParentRef();
+        if (p) {
+            return p->mailbox_;
+        } else {
+            BOOST_LOG_OWL(error) << "CmdServiceHttpConnect::getMailBoxSerial() " << "(!p)";
+            return {};
+        }
+    }
+
+    OwlMailDefine::ServiceMapCalcMailbox CmdServiceHttpConnect::getMailBoxMap() {
+        auto p = getParentRef();
+        if (p) {
+            return p->mailbox_map_;
+        } else {
+            BOOST_LOG_OWL(error) << "CmdServiceHttpConnect::getMailBoxMap() " << "(!p)";
+            return {};
         }
     }
 
@@ -64,6 +87,529 @@ namespace OwlCommandServiceHttp {
         }
 
     }
+
+
+    using boost::asio::use_awaitable;
+#if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
+# define use_awaitable \
+  boost::asio::use_awaitable_t(__FILE__, __LINE__, __PRETTY_FUNCTION__)
+#endif
+
+    struct CmdServiceHttpConnectCoImpl : public boost::enable_shared_from_this<CmdServiceHttpConnectCoImpl> {
+        explicit CmdServiceHttpConnectCoImpl(boost::shared_ptr<CmdServiceHttpConnect> parentPtr)
+                : parentPtr_(parentPtr) {
+        }
+
+        boost::shared_ptr<OwlMailDefine::AprilTagCmd> aprilTagCmd{};
+        boost::shared_ptr<OwlMailDefine::Cmd2Serial> getASm{};
+        boost::shared_ptr<OwlMailDefine::Service2MapCalc> mc{};
+        boost::shared_ptr<OwlMailDefine::Cmd2Serial> m{};
+
+        boost::shared_ptr<CmdServiceHttpConnect> parentPtr_;
+
+        boost::system::error_code ec_{};
+
+        boost::asio::awaitable<bool> co_process_tag_info(boost::shared_ptr<CmdServiceHttpConnectCoImpl> self) {
+            boost::ignore_unused(self);
+
+            try {
+                auto executor = co_await boost::asio::this_coro::executor;
+
+//                boost::shared_ptr<OwlMailDefine::AprilTagCmd> aprilTagCmd{};
+                try {
+
+                    std::string jsonS = boost::beast::buffers_to_string(parentPtr_->request_.body().data());
+                    // resize json space
+                    parentPtr_->json_storage_ =
+                            std::make_unique<decltype(parentPtr_->json_storage_)::element_type>(
+                                    JSON_Package_Max_Size_TagInfo, 0);
+                    parentPtr_->json_storage_resource_ =
+                            std::make_unique<decltype(parentPtr_->json_storage_resource_)::element_type>
+                                    (parentPtr_->json_storage_->data(),
+                                     parentPtr_->json_storage_->size());
+
+
+                    // ================================ analysis tag from json request ================================
+
+                    boost::system::error_code ec;
+                    // auto jsv = boost::string_view{receive_buffer_.data(), bytes_transferred};
+                    boost::json::value json_v = boost::json::parse(
+                            jsonS,
+                            ec,
+                            &*parentPtr_->json_storage_resource_,
+                            parentPtr_->json_parse_options_
+                    );
+
+                    if (ec) {
+                        // ignore
+                        // std::cerr << ec.what() << "\n";
+                        BOOST_LOG_OWL(error) << "process_tag_info " << ec.what();
+                        parentPtr_->send_back_json({
+                                                           {"msg",    "error"},
+                                                           {"error",  "boost::json::parse failed : " + ec.what()},
+                                                           {"result", false},
+                                                   });
+                        co_return false;
+                    }
+
+                    auto json_o = json_v.as_object();
+                    if (!json_o.contains("imageX") || !json_o.at("imageX").is_int64()) {
+                        BOOST_LOG_OWL(warning) << "contains fail (imageCenterX)" << jsonS;
+                        parentPtr_->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(imageX) not find || !is_int64()"},
+                                        {"result", false},
+                                }
+                        );
+                        co_return false;
+                    }
+                    if (!json_o.contains("imageY") || !json_o.at("imageY").is_int64()) {
+                        BOOST_LOG_OWL(warning) << "contains fail (imageY)" << jsonS;
+                        parentPtr_->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(imageY) not find || !is_int64()"},
+                                        {"result", false},
+                                }
+                        );
+                        co_return false;
+                    }
+                    auto imageX = json_o.at("imageX").get_int64();
+                    auto imageY = json_o.at("imageY").get_int64();
+
+                    if (!json_o.contains("tagList") || !json_o.at("tagList").is_array()) {
+                        BOOST_LOG_OWL(warning) << "contains fail (tagList)" << jsonS;
+                        parentPtr_->send_back_json(
+                                boost::json::value{
+                                        {"msg",    "error"},
+                                        {"error",  "(tagList) not find || !is_array()"},
+                                        {"result", false},
+                                }
+                        );
+                        co_return false;
+                    }
+                    auto tl = json_o.at("tagList").as_array();
+
+//            if (tl.empty() && !json_o.contains("center")) {
+//                // ignore
+//                parentPtr_->send_back_json(
+//                        boost::json::value{
+//                                {"result", true},
+//                        }
+//                );
+//                co_return false;
+//            }
+
+                    boost::shared_ptr<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type> aprilTagInfoList{};
+                    if (!tl.empty()) {
+                        aprilTagInfoList =
+                                boost::make_shared<OwlMailDefine::AprilTagCmd::AprilTagListType::element_type>();
+                        aprilTagInfoList->reserve(tl.size());
+
+                        for (const auto &a: tl) {
+                            auto b = a.as_object();
+                            if (!(
+                                    b.contains("id") &&
+                                    b.contains("ham") &&
+                                    b.contains("dm") &&
+                                    b.contains("cX") &&
+                                    b.contains("cY") &&
+                                    b.contains("cLTx") &&
+                                    b.contains("cLTy") &&
+                                    b.contains("cRTx") &&
+                                    b.contains("cRTy") &&
+                                    b.contains("cRBx") &&
+                                    b.contains("cRBy") &&
+                                    b.contains("cLBx") &&
+                                    b.contains("cLBy")
+                            )) {
+                                BOOST_LOG_OWL(warning) << "invalid tagList items" << jsonS;
+                                parentPtr_->send_back_json(
+                                        boost::json::value{
+                                                {"msg",    "error"},
+                                                {"error",  "invalid tagList items"},
+                                                {"result", false},
+                                        }
+                                );
+                                co_return false;
+                            }
+
+                            aprilTagInfoList->emplace_back(
+                                    OwlMailDefine::AprilTagInfo{
+                                            .id=              static_cast<int>(b.at("id").get_int64()),
+                                            .hamming=         static_cast<int>(b.at("ham").get_int64()),
+                                            .decision_margin= static_cast<float>(b.at("dm").get_double()),
+                                            .centerX=         b.at("cX").get_double(),
+                                            .centerY=         b.at("cY").get_double(),
+                                            .cornerLTx=       b.at("cLTx").get_double(),
+                                            .cornerLTy=       b.at("cLTy").get_double(),
+                                            .cornerRTx=       b.at("cRTx").get_double(),
+                                            .cornerRTy=       b.at("cRTy").get_double(),
+                                            .cornerRBx=       b.at("cRBx").get_double(),
+                                            .cornerRBy=       b.at("cRBy").get_double(),
+                                            .cornerLBx=       b.at("cLBx").get_double(),
+                                            .cornerLBy=       b.at("cLBy").get_double(),
+                                    }
+                            );
+                        }
+                    }
+
+                    OwlMailDefine::AprilTagCmd::AprilTagCenterType aprilTagInfoCenter{};
+                    if (json_o.contains("centerTag")) {
+                        if (!json_o.at("centerTag").is_object()) {
+                            BOOST_LOG_OWL(warning) << "(!json_o.at(\"center\").is_object())" << jsonS;
+                            parentPtr_->send_back_json(
+                                    boost::json::value{
+                                            {"msg",    "error"},
+                                            {"error",  "(!json_o.at(\"center\").is_object())"},
+                                            {"result", false},
+                                    }
+                            );
+                            co_return false;
+                        }
+                        auto b = json_o.at("centerTag").as_object();
+                        if (!(
+                                b.contains("id") &&
+                                b.contains("ham") &&
+                                b.contains("dm") &&
+                                b.contains("cX") &&
+                                b.contains("cY") &&
+                                b.contains("cLTx") &&
+                                b.contains("cLTy") &&
+                                b.contains("cRTx") &&
+                                b.contains("cRTy") &&
+                                b.contains("cRBx") &&
+                                b.contains("cRBy") &&
+                                b.contains("cLBx") &&
+                                b.contains("cLBy")
+                        )) {
+                            BOOST_LOG_OWL(warning) << "invalid centerTag items" << jsonS;
+                            parentPtr_->send_back_json(
+                                    boost::json::value{
+                                            {"msg",    "error"},
+                                            {"error",  "invalid centerTag items"},
+                                            {"result", false},
+                                    }
+                            );
+                            co_return false;
+                        }
+                        aprilTagInfoCenter = boost::make_shared<OwlMailDefine::AprilTagCmd::AprilTagCenterType::element_type>(
+                                OwlMailDefine::AprilTagInfo{
+                                        .id=              static_cast<int>(b.at("id").get_int64()),
+                                        .hamming=         static_cast<int>(b.at("ham").get_int64()),
+                                        .decision_margin= static_cast<float>(b.at("dm").get_double()),
+                                        .centerX=         b.at("cX").get_double(),
+                                        .centerY=         b.at("cY").get_double(),
+                                        .cornerLTx=       b.at("cLTx").get_double(),
+                                        .cornerLTy=       b.at("cLTy").get_double(),
+                                        .cornerRTx=       b.at("cRTx").get_double(),
+                                        .cornerRTy=       b.at("cRTy").get_double(),
+                                        .cornerRBx=       b.at("cRBx").get_double(),
+                                        .cornerRBy=       b.at("cRBy").get_double(),
+                                        .cornerLBx=       b.at("cLBx").get_double(),
+                                        .cornerLBy=       b.at("cLBy").get_double(),
+                                }
+                        );
+                    }
+
+                    if constexpr (SHOW_DEBUG_TAG_INFO) {
+//                BOOST_LOG_OWL(trace) << jsonS;
+                        std::stringstream ss;
+                        ss << "DEBUG_TAG_INFO ";
+                        if (!aprilTagInfoCenter) {
+                            ss << " NO_CENTER";
+                        } else {
+                            ss << "\ncenter:"
+                               << " id:" << aprilTagInfoCenter->id
+                               << " x:" << aprilTagInfoCenter->centerX
+                               << " y:" << aprilTagInfoCenter->centerX
+                               << " [" << aprilTagInfoCenter->cornerLTx
+                               << " ," << aprilTagInfoCenter->cornerLTy
+                               << " ;" << aprilTagInfoCenter->cornerRTx
+                               << " ," << aprilTagInfoCenter->cornerRTy
+                               << " ;" << aprilTagInfoCenter->cornerRBx
+                               << " ," << aprilTagInfoCenter->cornerRBy
+                               << " ;" << aprilTagInfoCenter->cornerLBx
+                               << " ," << aprilTagInfoCenter->cornerLBy
+                               << " ]";
+                        }
+                        if (!aprilTagInfoList) {
+                            if (aprilTagInfoCenter) {
+                                ss << "\nNO_LIST";
+                            } else {
+                                ss << " NO_LIST";
+                            }
+                        } else {
+                            if (aprilTagInfoList->empty()) {
+                                ss << " EMPTY_LIST";
+                            } else {
+                                ss << "\naprilTagInfoList.size():" << aprilTagInfoList->size();
+                                for (size_t i = 0; i < aprilTagInfoList->size(); ++i) {
+                                    auto a = aprilTagInfoList->at(i);
+                                    ss << "\n\t"
+                                       << " id:" << a.id
+                                       << " x:" << a.centerX
+                                       << " y:" << a.centerX
+                                       << " [" << a.cornerLTx
+                                       << " ," << a.cornerLTy
+                                       << " ;" << a.cornerRTx
+                                       << " ," << a.cornerRTy
+                                       << " ;" << a.cornerRBx
+                                       << " ," << a.cornerRBy
+                                       << " ;" << a.cornerLBx
+                                       << " ," << a.cornerLBy
+                                       << " ]";
+                                }
+                            }
+                        }
+                        auto s = ss.str();
+                        BOOST_LOG_OWL(trace) << s;
+                    }
+
+                    if (!aprilTagInfoList && !aprilTagInfoCenter) {
+                        // ignore
+                        parentPtr_->send_back_json(
+                                boost::json::value{
+                                        {"result", true},
+                                }
+                        );
+                        co_return false;
+                    }
+
+
+
+
+                    // ================================ prepare aprilTagCmd ================================
+                    aprilTagCmd = boost::make_shared<OwlMailDefine::AprilTagCmd>();
+                    aprilTagCmd->aprilTagList = aprilTagInfoList;
+                    aprilTagCmd->aprilTagCenter = aprilTagInfoCenter;
+                    aprilTagCmd->imageX = imageX;
+                    aprilTagCmd->imageY = imageY;
+
+                } catch (const std::exception &e) {
+                    BOOST_LOG_OWL(error) << "co_process_tag_info json catch (const std::exception &e)" << e.what();
+                    co_return false;
+                }
+
+                // ================================ to get newestAirplaneState ================================
+                // get newestAirplaneState
+//                auto getASm = boost::make_shared<OwlMailDefine::Cmd2Serial>();
+                getASm = boost::make_shared<OwlMailDefine::Cmd2Serial>();
+                getASm->additionCmd = OwlMailDefine::AdditionCmd::getAirplaneState;
+                BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info to getASm";
+                boost::shared_ptr<OwlSerialController::AirplaneState> newestAirplaneState{};
+                {
+                    auto box = parentPtr_->getMailBoxSerial();
+                    if (box) {
+                        auto data = co_await asyncSendMail2B(
+                                box->shared_from_this(), getASm,
+                                boost::asio::bind_executor(
+                                        executor,
+                                        boost::asio::redirect_error(use_awaitable, ec_)));
+                        co_await boost::asio::dispatch(executor, use_awaitable);
+                        if (ec_) {
+                            BOOST_LOG_OWL(error) << "co_process_tag_info asyncSendMail2B MailBoxSerial error : "
+                                                 << ec_.what();
+                            co_return false;
+                        }
+
+                        if (!data->ok) {
+                            // ignore
+                            parentPtr_->send_back_json(
+                                    boost::json::value{
+                                            {"msg",       "getAirplaneState"},
+                                            {"result",    data->ok},
+                                            {"openError", data->openError},
+                                    }
+                            );
+                            co_return false;
+                        }
+                        if (!data->newestAirplaneState) {
+                            // TODO
+                        }
+                        newestAirplaneState = data->newestAirplaneState;
+                    } else {
+                        co_return false;
+                    }
+                }
+                // ================================ to calc map ================================
+//                auto mc = boost::make_shared<OwlMailDefine::Service2MapCalc>();
+                mc = boost::make_shared<OwlMailDefine::Service2MapCalc>();
+                mc->airplaneState = newestAirplaneState;
+                mc->tagInfo = aprilTagCmd->shared_from_this();
+                BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info to mc newestAirplaneState";
+                {
+                    auto box = parentPtr_->getMailBoxMap();
+                    if (box) {
+                        auto data = co_await asyncSendMail2B(
+                                box->shared_from_this(), mc,
+                                boost::asio::bind_executor(
+                                        executor,
+                                        boost::asio::redirect_error(use_awaitable, ec_)));
+                        co_await boost::asio::dispatch(executor, use_awaitable);
+                        if (ec_) {
+                            BOOST_LOG_OWL(error) << "co_process_tag_info asyncSendMail2B MailBoxMap error : "
+                                                 << ec_.what();
+                            co_return false;
+                        }
+
+                        if (!data->ok) {
+                            // ignore
+                            parentPtr_->send_back_json(
+                                    boost::json::value{
+                                            {"msg",       "MapCalc"},
+                                            {"result",    data->ok},
+                                            {"openError", false},
+                                    }
+                            );
+                            co_return false;
+                        }
+                        BOOST_ASSERT(aprilTagCmd);
+                        aprilTagCmd->mapCalcPlaneInfoType = data->info;
+                        BOOST_ASSERT(aprilTagCmd->aprilTagList);
+                        BOOST_ASSERT(aprilTagCmd->aprilTagCenter);
+
+                    } else {
+                        co_return false;
+                    }
+                }
+                // ================================ send tag to serial ================================
+//                auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
+                m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
+                m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;
+                m->aprilTagCmdPtr = aprilTagCmd;
+                BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info to m AprilTag";
+                {
+                    auto box = parentPtr_->getMailBoxSerial();
+                    if (box) {
+                        auto data = co_await asyncSendMail2B(
+                                box->shared_from_this(), m,
+                                boost::asio::bind_executor(
+                                        executor,
+                                        boost::asio::redirect_error(use_awaitable, ec_)));
+                        co_await boost::asio::dispatch(executor, use_awaitable);
+                        if (ec_) {
+                            BOOST_LOG_OWL(error) << "co_process_tag_info asyncSendMail2B MailBoxSerial error : "
+                                                 << ec_.what();
+                            co_return false;
+                        }
+
+                        if (!data->ok) {
+                            // ignore
+                            parentPtr_->send_back_json(
+                                    boost::json::value{
+                                            {"msg",       "getAirplaneState"},
+                                            {"result",    data->ok},
+                                            {"openError", data->openError},
+                                    }
+                            );
+                            co_return false;
+                        }
+
+                        // ================================ tag process end ================================
+                        parentPtr_->send_back_json(
+                                boost::json::value{
+                                        {"msg",       "AprilTag"},
+                                        {"result",    data->ok},
+                                        {"openError", data->openError},
+                                }
+                        );
+                        BOOST_LOG_OWL(trace_cmd_tag)
+                            << "CmdServiceHttpConnect::process_tag_info back m AprilTag send_back_json end";
+                    } else {
+                        co_return false;
+                    }
+                }
+                // ================================ ............ ================================
+                // ================================ ............ ================================
+                // ================================ ............ ================================
+                // ================================ ............ ================================
+                // ================================ ............ ================================
+
+
+            } catch (const std::exception &e) {
+                BOOST_LOG_OWL(error) << "co_process_tag_info catch (const std::exception &e)" << e.what();
+                throw;
+                co_return false;
+            }
+
+            boost::ignore_unused(self);
+            co_return true;
+        }
+
+        void process_tag_info() {
+            auto u = boost::urls::parse_uri_reference(parentPtr_->request_.target());
+            if (u.has_error()) {
+                auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+                response->version(parentPtr_->request_.version());
+                response->keep_alive(false);
+                response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+                response->result(boost::beast::http::status::bad_request);
+                response->set(boost::beast::http::field::content_type, "text/plain");
+                boost::beast::ostream(response->body())
+                        << "invalid post request"
+                        << " " << u.error()
+                        << " " << u.error().what()
+                        << "\r\n";
+                response->content_length(response->body().size());
+                parentPtr_->write_response(response);
+                return;
+            }
+
+            boost::asio::co_spawn(
+                    parentPtr_->ioc_,
+                    [this, self = shared_from_this()]() {
+                        return co_process_tag_info(self);
+                    },
+                    [this, self = shared_from_this()](std::exception_ptr e, bool r) {
+                        if (r) {
+                            BOOST_LOG_OWL(warning) << "CmdServiceHttpConnectCoImpl run() ok";
+                            return;
+                        } else {
+                            BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl run() error";
+                        }
+
+                        // https://stackoverflow.com/questions/14232814/how-do-i-make-a-call-to-what-on-stdexception-ptr
+                        std::string what;
+                        try { std::rethrow_exception(std::move(e)); }
+                        catch (const std::exception &e) {
+                            BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl co_spawn catch std::exception "
+                                                 << e.what();
+                            what = e.what();
+                        }
+                        catch (const std::string &e) {
+                            BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl co_spawn catch std::string " << e;
+                            what = e;
+                        }
+                        catch (const char *e) {
+                            BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl co_spawn catch char *e " << e;
+                            what = std::string{e};
+                        }
+                        catch (...) {
+                            BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl co_spawn catch (...)"
+                                                 << "\n" << boost::current_exception_diagnostic_information();
+                            what = boost::current_exception_diagnostic_information();
+                        }
+                        BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl::process_tag_info " << what;
+
+                        auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+                        response->version(parentPtr_->request_.version());
+                        response->keep_alive(false);
+                        response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+                        response->result(boost::beast::http::status::bad_request);
+                        response->set(boost::beast::http::field::content_type, "text/plain");
+                        boost::beast::ostream(response->body())
+                                << "CmdServiceHttpConnectCoImpl::process_tag_info "
+                                << " " << what
+                                << "\r\n";
+                        response->content_length(response->body().size());
+                        parentPtr_->write_response(response);
+                    });
+
+        }
+    };
+
 
     void CmdServiceHttpConnect::process_tag_info() {
 //        BOOST_LOG_OWL(trace_cmd_tag) << "process_tag_info";
@@ -771,4 +1317,5 @@ namespace OwlCommandServiceHttp {
             return;
         }
     }
+
 }

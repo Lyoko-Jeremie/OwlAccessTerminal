@@ -14,7 +14,7 @@
 namespace OwlMailDefine {
 
     struct MapCalc2Service;
-    struct Service2MapCalc {
+    struct Service2MapCalc : public boost::enable_shared_from_this<Service2MapCalc> {
 
         boost::shared_ptr<OwlMailDefine::AprilTagCmd> tagInfo;
         boost::shared_ptr<OwlSerialController::AirplaneState> airplaneState;

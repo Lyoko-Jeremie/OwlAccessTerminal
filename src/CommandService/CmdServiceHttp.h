@@ -26,6 +26,8 @@ namespace OwlCommandServiceHttp {
 
     class CmdServiceHttp;
 
+    struct CmdServiceHttpConnectCoImpl;
+
     class CmdServiceHttpConnect
             : public boost::enable_shared_from_this<CmdServiceHttpConnect>,
               public OwlProcessJsonMessage::ProcessJsonMessageSelfTypeInterface {
@@ -178,6 +180,11 @@ namespace OwlCommandServiceHttp {
 
         void send_back(std::string &&json_string);
 
+        friend struct CmdServiceHttpConnectCoImpl;
+
+        OwlMailDefine::CmdSerialMailbox getMailBoxSerial();
+
+        OwlMailDefine::ServiceMapCalcMailbox getMailBoxMap();
 
     private:
         // https://en.cppreference.com/w/cpp/language/friend
