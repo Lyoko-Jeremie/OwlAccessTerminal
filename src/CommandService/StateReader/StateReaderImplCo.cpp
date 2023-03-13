@@ -27,12 +27,13 @@ namespace OwlSerialController {
                 // },
                 boost::bind(&StateReaderImplCo::next_read, this, selfPtr),
                 [selfPtr](std::exception_ptr e, bool r) {
-                    if (r) {
-                        BOOST_LOG_OWL(warning) << "StateReaderImplCo run() ok";
+                    if (!e) {
+                        if (r) {
+                            BOOST_LOG_OWL(warning) << "StateReaderImplCo run() ok";
+                        } else {
+                            BOOST_LOG_OWL(error) << "StateReaderImplCo run() error";
+                        }
                     } else {
-                        BOOST_LOG_OWL(error) << "StateReaderImplCo run() error";
-                    }
-                    if (e) {
                         // https://stackoverflow.com/questions/14232814/how-do-i-make-a-call-to-what-on-stdexception-ptr
                         try { std::rethrow_exception(std::move(e)); }
                         catch (const std::exception &e) {

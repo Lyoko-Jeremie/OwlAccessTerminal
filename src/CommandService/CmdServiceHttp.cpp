@@ -112,6 +112,8 @@ namespace OwlCommandServiceHttp {
         boost::asio::awaitable<bool> co_process_tag_info(boost::shared_ptr<CmdServiceHttpConnectCoImpl> self) {
             boost::ignore_unused(self);
 
+            BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info start";
+
             try {
                 auto executor = co_await boost::asio::this_coro::executor;
 
@@ -129,6 +131,7 @@ namespace OwlCommandServiceHttp {
                                      parentPtr_->json_storage_->size());
 
 
+                    BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info do [analysis tag from json request]";
                     // ================================ analysis tag from json request ================================
 
                     boost::system::error_code ec;
@@ -369,6 +372,8 @@ namespace OwlCommandServiceHttp {
 
                     if (!aprilTagInfoList && !aprilTagInfoCenter) {
                         // ignore
+                        BOOST_LOG_OWL(trace_cmd_tag)
+                            << "co_process_tag_info (!aprilTagInfoList && !aprilTagInfoCenter)";
                         parentPtr_->send_back_json(
                                 boost::json::value{
                                         {"result", true},
@@ -378,8 +383,7 @@ namespace OwlCommandServiceHttp {
                     }
 
 
-
-
+                    BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info do [prepare aprilTagCmd]";
                     // ================================ prepare aprilTagCmd ================================
                     aprilTagCmd = boost::make_shared<OwlMailDefine::AprilTagCmd>();
                     aprilTagCmd->aprilTagList = aprilTagInfoList;
@@ -394,12 +398,13 @@ namespace OwlCommandServiceHttp {
                 BOOST_ASSERT(self);
                 BOOST_ASSERT(parentPtr_);
 
+                BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info do [to get newestAirplaneState]";
                 // ================================ to get newestAirplaneState ================================
                 // get newestAirplaneState
 //                auto getASm = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                 getASm = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                 getASm->additionCmd = OwlMailDefine::AdditionCmd::getAirplaneState;
-                BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info to getASm";
+                BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info to getASm";
                 boost::shared_ptr<OwlSerialController::AirplaneState> newestAirplaneState{};
                 {
                     auto box = parentPtr_->getMailBoxSerial();
@@ -413,6 +418,7 @@ namespace OwlCommandServiceHttp {
                         BOOST_ASSERT(self);
                         BOOST_ASSERT(parentPtr_);
                         co_await boost::asio::dispatch(executor, use_awaitable);
+                        BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info back getASm";
                         BOOST_ASSERT(data);
                         BOOST_ASSERT(self);
                         BOOST_ASSERT(parentPtr_);
@@ -423,6 +429,7 @@ namespace OwlCommandServiceHttp {
                         }
 
                         if (!data->ok) {
+                            BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info getAirplaneState (!data->ok)";
                             // ignore
                             parentPtr_->send_back_json(
                                     boost::json::value{
@@ -438,15 +445,17 @@ namespace OwlCommandServiceHttp {
                         }
                         newestAirplaneState = data->newestAirplaneState;
                     } else {
+                        BOOST_LOG_OWL(error) << "co_process_tag_info !parentPtr_->getMailBoxSerial()";
                         co_return false;
                     }
                 }
+                BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info do [to calc map]";
                 // ================================ to calc map ================================
 //                auto mc = boost::make_shared<OwlMailDefine::Service2MapCalc>();
                 mc = boost::make_shared<OwlMailDefine::Service2MapCalc>();
                 mc->airplaneState = newestAirplaneState;
                 mc->tagInfo = aprilTagCmd->shared_from_this();
-                BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info to mc newestAirplaneState";
+                BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info to mc newestAirplaneState";
                 {
                     auto box = parentPtr_->getMailBoxMap();
                     if (box) {
@@ -459,6 +468,7 @@ namespace OwlCommandServiceHttp {
                         BOOST_ASSERT(self);
                         BOOST_ASSERT(parentPtr_);
                         co_await boost::asio::dispatch(executor, use_awaitable);
+                        BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info back mc newestAirplaneState";
                         BOOST_ASSERT(data);
                         BOOST_ASSERT(self);
                         BOOST_ASSERT(parentPtr_);
@@ -469,6 +479,7 @@ namespace OwlCommandServiceHttp {
                         }
 
                         if (!data->ok) {
+                            BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info Service2MapCalc (!data->ok)";
                             // ignore
                             parentPtr_->send_back_json(
                                     boost::json::value{
@@ -485,15 +496,17 @@ namespace OwlCommandServiceHttp {
                         BOOST_ASSERT(aprilTagCmd->aprilTagCenter);
 
                     } else {
+                        BOOST_LOG_OWL(error) << "co_process_tag_info !parentPtr_->getMailBoxMap()";
                         co_return false;
                     }
                 }
+                BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info do [send tag to serial]";
                 // ================================ send tag to serial ================================
 //                auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                 m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                 m->additionCmd = OwlMailDefine::AdditionCmd::AprilTag;
                 m->aprilTagCmdPtr = aprilTagCmd;
-                BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnect::process_tag_info to m AprilTag";
+                BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info to m AprilTag";
                 {
                     auto box = parentPtr_->getMailBoxSerial();
                     if (box) {
@@ -502,10 +515,12 @@ namespace OwlCommandServiceHttp {
                                 boost::asio::bind_executor(
                                         executor,
                                         boost::asio::redirect_error(use_awaitable, ec_)));
+                        BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info back m AprilTag";
                         BOOST_ASSERT(data);
                         BOOST_ASSERT(self);
                         BOOST_ASSERT(parentPtr_);
                         co_await boost::asio::dispatch(executor, use_awaitable);
+                        BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info back m AprilTag dispatch";
                         BOOST_ASSERT(data);
                         BOOST_ASSERT(self);
                         BOOST_ASSERT(parentPtr_);
@@ -516,6 +531,7 @@ namespace OwlCommandServiceHttp {
                         }
 
                         if (!data->ok) {
+                            BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info AprilTag (!data->ok)";
                             // ignore
                             parentPtr_->send_back_json(
                                     boost::json::value{
@@ -527,6 +543,7 @@ namespace OwlCommandServiceHttp {
                             co_return false;
                         }
 
+                        BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info do [tag process end]";
                         // ================================ tag process end ================================
                         parentPtr_->send_back_json(
                                 boost::json::value{
@@ -535,9 +552,9 @@ namespace OwlCommandServiceHttp {
                                         {"openError", data->openError},
                                 }
                         );
-                        BOOST_LOG_OWL(trace_cmd_tag)
-                            << "CmdServiceHttpConnect::process_tag_info back m AprilTag send_back_json end";
+                        BOOST_LOG_OWL(trace_cmd_tag) << "co_process_tag_info back m AprilTag send_back_json end";
                     } else {
+                        BOOST_LOG_OWL(error) << "co_process_tag_info !parentPtr_->getMailBoxSerial()";
                         co_return false;
                     }
                 }
@@ -551,7 +568,7 @@ namespace OwlCommandServiceHttp {
             } catch (const std::exception &e) {
                 BOOST_LOG_OWL(error) << "co_process_tag_info catch (const std::exception &e)" << e.what();
                 throw;
-                co_return false;
+//                co_return false;
             }
 
             boost::ignore_unused(self);
@@ -583,14 +600,15 @@ namespace OwlCommandServiceHttp {
                         return co_process_tag_info(self);
                     },
                     [this, self = shared_from_this()](std::exception_ptr e, bool r) {
-                        if (r) {
-                            BOOST_LOG_OWL(warning) << "CmdServiceHttpConnectCoImpl run() ok";
-                            return;
-                        } else {
-                            BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl run() error";
-                        }
 
                         if (e) {
+                            if (r) {
+                                BOOST_LOG_OWL(warning) << "CmdServiceHttpConnectCoImpl run() ok";
+                                return;
+                            } else {
+                                BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl run() error";
+                            }
+                        } else {
                             std::string what;
                             // https://stackoverflow.com/questions/14232814/how-do-i-make-a-call-to-what-on-stdexception-ptr
                             try { std::rethrow_exception(std::move(e)); }
@@ -1105,6 +1123,7 @@ namespace OwlCommandServiceHttp {
             }
 
             if (request_.target().starts_with("/tagInfo")) {
+                BOOST_LOG_OWL(trace_cmd_tag) << "create_post_response request_.target().starts_with(/tagInfo)";
                 process_tag_info();
                 return;
             }
