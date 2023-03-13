@@ -5,6 +5,7 @@
 #include <boost/lexical_cast/try_lexical_convert.hpp>
 #include <regex>
 #include <utility>
+#include <boost/url.hpp>
 #include "../QueryPairsAnalyser/QueryPairsAnalyser.h"
 
 namespace OwlImageServiceHttp {
@@ -387,23 +388,45 @@ namespace OwlImageServiceHttp {
 
     void ImageServiceHttpConnect::create_get_response() {
 
-        if (request_.target() == "/1") {
+        auto u = boost::urls::parse_uri_reference(request_.target());
+
+        if (u.has_error()) {
+            auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
+            response->version(request_.version());
+            response->keep_alive(false);
+
+            response->set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+
+            response->result(boost::beast::http::status::bad_request);
+            response->set(boost::beast::http::field::content_type, "text/plain");
+            boost::beast::ostream(response->body()) << "urls decode fail\r\n";
+            response->content_length(response->body().size());
+            write_response(response);
+            return;
+        }
+
+        BOOST_LOG_OWL(trace) << "ok";
+        auto v = u.value();
+        BOOST_LOG_OWL(trace) << v.path();
+        BOOST_LOG_OWL(trace) << v.query();
+
+        if (v.path() == "/1") {
             create_get_response_image(1);
             return;
         }
-        if (request_.target() == "/2") {
+        if (v.path() == "/2") {
             create_get_response_image(2);
             return;
         }
-        if (request_.target() == "/3") {
+        if (v.path() == "/3") {
             create_get_response_image(3);
             return;
         }
-        if (request_.target() == "/down") {
+        if (v.path() == "/down") {
             create_get_response_image(config_->config().downCameraId.load());
             return;
         }
-        if (request_.target() == "/front") {
+        if (v.path() == "/front") {
             create_get_response_image(config_->config().frontCameraId.load());
             return;
         }
@@ -419,7 +442,7 @@ namespace OwlImageServiceHttp {
             create_get_response_time();
             return;
         }
-        if (request_.target().starts_with("/timeGet")) {
+        if (v.path().starts_with("/timeGet")) {
             create_get_response_time_now();
             return;
         }
@@ -483,6 +506,10 @@ namespace OwlImageServiceHttp {
 
         switch (request_.method()) {
             case boost::beast::http::verb::get:
+                create_get_response();
+                break;
+
+            case boost::beast::http::verb::post:
                 create_get_response();
                 break;
 
