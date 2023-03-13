@@ -14,7 +14,7 @@ type TagType = {
     cLBx: number,
     cLBy: number,
 };
-const checkTagType = (t_: TagType | {}): boolean => {
+const checkTagType = (t_: TagType | {}): t_ is TagType => {
     if (!t_) {
         return false;
     }
@@ -70,7 +70,7 @@ type TagInfoType = {
     },
     airplaneState: AirplaneStateType | {},
 };
-const checkTagInfoType = (t: TagInfoType): boolean => {
+const checkTagInfoType = (t: TagInfoType): t is TagInfoType => {
     return t
         && t.imageX !== 0
         && t.imageY !== 0
@@ -590,174 +590,200 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
     ) {
         return {ok: false};
     }
-    if (tagInfo.tagInfo.list.length < 2) {
-        // type : calc by tag side size
-        //      1
-        //      calcPlaneInfo
-        // console.log("calcTagCenterPosition :\n", JSON.stringify(calcTagCenterPosition(tagInfo.tagInfo.list[0].id), undefined, 4));
-        const j = calcPlaneInfo(
-            [
-                // LT
-                calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 0),
-                // LB
-                calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 3),
-                // RB
-                calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 2),
-            ], [
-                {x: tagInfo.tagInfo.list[0].cLTx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLTy)} as Point2,
-                {x: tagInfo.tagInfo.list[0].cLBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLBy)} as Point2,
-                {x: tagInfo.tagInfo.list[0].cRBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cRBy)} as Point2,
-            ],
-            tagInfo.imageX,
-            tagInfo.imageY
-        );
-        console.log("j:\n", JSON.stringify(j, undefined, 4));
-        return {ok: true, info: j};
-    } else if (tagInfo.tagInfo.list.length === 2) {
-        const l = tagInfo.tagInfo.list;
-        if (l[0].id === l[1].id) {
-            // type : calc by tag side size
-            const j = calcPlaneInfo(
-                [
-                    // LT
-                    calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 0),
-                    // LB
-                    calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 3),
-                    // RB
-                    calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 2),
-                ], [
-                    {x: tagInfo.tagInfo.list[0].cLTx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLTy)} as Point2,
-                    {x: tagInfo.tagInfo.list[0].cLBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLBy)} as Point2,
-                    {x: tagInfo.tagInfo.list[0].cRBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cRBy)} as Point2,
-                ],
-                tagInfo.imageX,
-                tagInfo.imageY
-            );
-            console.log("j:\n", JSON.stringify(j, undefined, 4));
-            return {ok: true, info: j};
-        } else {
-            // type : calc by 2 tag, and it's direction
-            // const relation = calcTagRelation(l[0].id, l[1].id);
-            // console.log("relation: ", relation);
-            //      way 2: calc by center tag
-            const j = calcPlaneInfo(
-                [
-                    // LT
-                    calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 0),
-                    // LB
-                    calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 3),
-                    // RB
-                    calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 2),
-                ], [
-                    {x: tagInfo.tagInfo.list[0].cLTx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLTy)} as Point2,
-                    {x: tagInfo.tagInfo.list[0].cLBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLBy)} as Point2,
-                    {x: tagInfo.tagInfo.list[0].cRBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cRBy)} as Point2,
-                ],
-                tagInfo.imageX,
-                tagInfo.imageY
-            );
-            console.log("j:\n", JSON.stringify(j, undefined, 4));
-            return {ok: true, info: j};
+    const calcByCenterTag = () => {
+        if (!checkTagType(tagInfo.tagInfo.center)) {
+            return {ok: false};
         }
-    } else if (tagInfo.tagInfo.list.length >= 3) {
-        //      way 2: calc by center tag
         const j = calcPlaneInfo(
             [
                 // LT
-                calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 0),
+                calcTagCornerPosition(tagInfo.tagInfo.center.id, 0),
                 // LB
-                calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 3),
+                calcTagCornerPosition(tagInfo.tagInfo.center.id, 3),
                 // RB
-                calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 2),
+                calcTagCornerPosition(tagInfo.tagInfo.center.id, 2),
             ], [
-                {x: tagInfo.tagInfo.list[0].cLTx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLTy)} as Point2,
-                {x: tagInfo.tagInfo.list[0].cLBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLBy)} as Point2,
-                {x: tagInfo.tagInfo.list[0].cRBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cRBy)} as Point2,
+                {x: tagInfo.tagInfo.center.cLTx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.center.cLTy)} as Point2,
+                {x: tagInfo.tagInfo.center.cLBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.center.cLBy)} as Point2,
+                {x: tagInfo.tagInfo.center.cRBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.center.cRBy)} as Point2,
             ],
             tagInfo.imageX,
             tagInfo.imageY
         );
         console.log("j:\n", JSON.stringify(j, undefined, 4));
         return {ok: true, info: j};
+    };
+    return calcByCenterTag();
 
 
-        // const l = tagInfo.tagInfo.list;
-        // if (checkIsAllInSameLine(l)) {
-        //     // type : calc by max distance 2 tag direction
-        //     // const relation = calcTagRelation(l[0].id, l[1].id);
-        //     // console.log("relation: ", relation);
-        //     //      way 2: calc by center tag
-        //     const j = calcPlaneInfo(
-        //         [
-        //             // LT
-        //             calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 0),
-        //             // LB
-        //             calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 3),
-        //             // RB
-        //             calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 2),
-        //         ], [
-        //             {x: tagInfo.tagInfo.list[0].cLTx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLTy)} as Point2,
-        //             {x: tagInfo.tagInfo.list[0].cLBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLBy)} as Point2,
-        //             {x: tagInfo.tagInfo.list[0].cRBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cRBy)} as Point2,
-        //         ],
-        //         tagInfo.imageX,
-        //         tagInfo.imageY
-        //     );
-        //     console.log("j:\n", JSON.stringify(j, undefined, 4));
-        //     return {ok: true, info: j};
-        // } else {
-        //     if (tagInfo.tagInfo.list.length === 3) {
-        //         // type : calc use 3 point
-        //         //      3
-        //         //      calcPlaneInfo
-        //         const j = calcPlaneInfo(
-        //             [
-        //                 calcTagCenterPosition(tagInfo.tagInfo.list[0].id),
-        //                 calcTagCenterPosition(tagInfo.tagInfo.list[1].id),
-        //                 calcTagCenterPosition(tagInfo.tagInfo.list[2].id),
-        //             ], [
-        //                 {x: tagInfo.tagInfo.list[0].cY, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cY)} as Point2,
-        //                 {x: tagInfo.tagInfo.list[1].cY, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[1].cY)} as Point2,
-        //                 {x: tagInfo.tagInfo.list[2].cY, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[2].cY)} as Point2,
-        //             ],
-        //             tagInfo.imageX,
-        //             tagInfo.imageY
-        //         );
-        //         console.log("j:\n", JSON.stringify(j, undefined, 4));
-        //         return {ok: true, info: j};
-        //     }
-        //     // type : to find last triangle
-        //     //  3 findOuterSide
-        //     //     x convexHull x
-        //     const side3 = findOuterSide(tagInfo.tagInfo.list);
-        //     if (side3.length !== 3) {
-        //         // // type : to find last triangle
-        //         // //  3 findOuterSide
-        //         // //     x convexHull x
-        //         // const side3 = findOuterSide(tagInfo.tagInfo.list);
-        //         // if (side3.length !== 3) {
-        //         //     return {ok: false};
-        //         // }
-        //         //
-        //         // const j = calcPlaneInfo(
-        //         //     [
-        //         //         calcTagCenterPosition(side3[0].id),
-        //         //         calcTagCenterPosition(side3[1].id),
-        //         //         calcTagCenterPosition(side3[2].id),
-        //         //     ], [
-        //         //         {x: side3[0].cY, y: y2y(tagInfo.imageY, side3[0].cY)} as Point2,
-        //         //         {x: side3[1].cY, y: y2y(tagInfo.imageY, side3[1].cY)} as Point2,
-        //         //         {x: side3[2].cY, y: y2y(tagInfo.imageY, side3[2].cY)} as Point2,
-        //         //     ],
-        //         //     tagInfo.imageX,
-        //         //     tagInfo.imageY
-        //         // );
-        //         // console.log("j:\n", JSON.stringify(j, undefined, 4));
-        //         // return {ok: true, info: j};
-        //     }
-        // }
-    }
-    return {ok: false};
+    // if (tagInfo.tagInfo.list.length < 2) {
+    //     // type : calc by tag side size
+    //     //      1
+    //     //      calcPlaneInfo
+    //     // console.log("calcTagCenterPosition :\n", JSON.stringify(calcTagCenterPosition(tagInfo.tagInfo.list[0].id), undefined, 4));
+    //     const j = calcPlaneInfo(
+    //         [
+    //             // LT
+    //             calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 0),
+    //             // LB
+    //             calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 3),
+    //             // RB
+    //             calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 2),
+    //         ], [
+    //             {x: tagInfo.tagInfo.list[0].cLTx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLTy)} as Point2,
+    //             {x: tagInfo.tagInfo.list[0].cLBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLBy)} as Point2,
+    //             {x: tagInfo.tagInfo.list[0].cRBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cRBy)} as Point2,
+    //         ],
+    //         tagInfo.imageX,
+    //         tagInfo.imageY
+    //     );
+    //     console.log("j:\n", JSON.stringify(j, undefined, 4));
+    //     return {ok: true, info: j};
+    // } else if (tagInfo.tagInfo.list.length === 2) {
+    //     const l = tagInfo.tagInfo.list;
+    //     if (l[0].id === l[1].id) {
+    //         // type : calc by tag side size
+    //         const j = calcPlaneInfo(
+    //             [
+    //                 // LT
+    //                 calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 0),
+    //                 // LB
+    //                 calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 3),
+    //                 // RB
+    //                 calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 2),
+    //             ], [
+    //                 {x: tagInfo.tagInfo.list[0].cLTx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLTy)} as Point2,
+    //                 {x: tagInfo.tagInfo.list[0].cLBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLBy)} as Point2,
+    //                 {x: tagInfo.tagInfo.list[0].cRBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cRBy)} as Point2,
+    //             ],
+    //             tagInfo.imageX,
+    //             tagInfo.imageY
+    //         );
+    //         console.log("j:\n", JSON.stringify(j, undefined, 4));
+    //         return {ok: true, info: j};
+    //     } else {
+    //         // type : calc by 2 tag, and it's direction
+    //         // const relation = calcTagRelation(l[0].id, l[1].id);
+    //         // console.log("relation: ", relation);
+    //         //      way 2: calc by center tag
+    //         const j = calcPlaneInfo(
+    //             [
+    //                 // LT
+    //                 calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 0),
+    //                 // LB
+    //                 calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 3),
+    //                 // RB
+    //                 calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 2),
+    //             ], [
+    //                 {x: tagInfo.tagInfo.list[0].cLTx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLTy)} as Point2,
+    //                 {x: tagInfo.tagInfo.list[0].cLBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLBy)} as Point2,
+    //                 {x: tagInfo.tagInfo.list[0].cRBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cRBy)} as Point2,
+    //             ],
+    //             tagInfo.imageX,
+    //             tagInfo.imageY
+    //         );
+    //         console.log("j:\n", JSON.stringify(j, undefined, 4));
+    //         return {ok: true, info: j};
+    //     }
+    // } else if (tagInfo.tagInfo.list.length >= 3) {
+    //     //      way 2: calc by center tag
+    //     const j = calcPlaneInfo(
+    //         [
+    //             // LT
+    //             calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 0),
+    //             // LB
+    //             calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 3),
+    //             // RB
+    //             calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 2),
+    //         ], [
+    //             {x: tagInfo.tagInfo.list[0].cLTx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLTy)} as Point2,
+    //             {x: tagInfo.tagInfo.list[0].cLBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLBy)} as Point2,
+    //             {x: tagInfo.tagInfo.list[0].cRBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cRBy)} as Point2,
+    //         ],
+    //         tagInfo.imageX,
+    //         tagInfo.imageY
+    //     );
+    //     console.log("j:\n", JSON.stringify(j, undefined, 4));
+    //     return {ok: true, info: j};
+    //
+    //
+    //     // const l = tagInfo.tagInfo.list;
+    //     // if (checkIsAllInSameLine(l)) {
+    //     //     // type : calc by max distance 2 tag direction
+    //     //     // const relation = calcTagRelation(l[0].id, l[1].id);
+    //     //     // console.log("relation: ", relation);
+    //     //     //      way 2: calc by center tag
+    //     //     const j = calcPlaneInfo(
+    //     //         [
+    //     //             // LT
+    //     //             calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 0),
+    //     //             // LB
+    //     //             calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 3),
+    //     //             // RB
+    //     //             calcTagCornerPosition(tagInfo.tagInfo.list[0].id, 2),
+    //     //         ], [
+    //     //             {x: tagInfo.tagInfo.list[0].cLTx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLTy)} as Point2,
+    //     //             {x: tagInfo.tagInfo.list[0].cLBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cLBy)} as Point2,
+    //     //             {x: tagInfo.tagInfo.list[0].cRBx, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cRBy)} as Point2,
+    //     //         ],
+    //     //         tagInfo.imageX,
+    //     //         tagInfo.imageY
+    //     //     );
+    //     //     console.log("j:\n", JSON.stringify(j, undefined, 4));
+    //     //     return {ok: true, info: j};
+    //     // } else {
+    //     //     if (tagInfo.tagInfo.list.length === 3) {
+    //     //         // type : calc use 3 point
+    //     //         //      3
+    //     //         //      calcPlaneInfo
+    //     //         const j = calcPlaneInfo(
+    //     //             [
+    //     //                 calcTagCenterPosition(tagInfo.tagInfo.list[0].id),
+    //     //                 calcTagCenterPosition(tagInfo.tagInfo.list[1].id),
+    //     //                 calcTagCenterPosition(tagInfo.tagInfo.list[2].id),
+    //     //             ], [
+    //     //                 {x: tagInfo.tagInfo.list[0].cY, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[0].cY)} as Point2,
+    //     //                 {x: tagInfo.tagInfo.list[1].cY, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[1].cY)} as Point2,
+    //     //                 {x: tagInfo.tagInfo.list[2].cY, y: y2y(tagInfo.imageY, tagInfo.tagInfo.list[2].cY)} as Point2,
+    //     //             ],
+    //     //             tagInfo.imageX,
+    //     //             tagInfo.imageY
+    //     //         );
+    //     //         console.log("j:\n", JSON.stringify(j, undefined, 4));
+    //     //         return {ok: true, info: j};
+    //     //     }
+    //     //     // type : to find last triangle
+    //     //     //  3 findOuterSide
+    //     //     //     x convexHull x
+    //     //     const side3 = findOuterSide(tagInfo.tagInfo.list);
+    //     //     if (side3.length !== 3) {
+    //     //         // // type : to find last triangle
+    //     //         // //  3 findOuterSide
+    //     //         // //     x convexHull x
+    //     //         // const side3 = findOuterSide(tagInfo.tagInfo.list);
+    //     //         // if (side3.length !== 3) {
+    //     //         //     return {ok: false};
+    //     //         // }
+    //     //         //
+    //     //         // const j = calcPlaneInfo(
+    //     //         //     [
+    //     //         //         calcTagCenterPosition(side3[0].id),
+    //     //         //         calcTagCenterPosition(side3[1].id),
+    //     //         //         calcTagCenterPosition(side3[2].id),
+    //     //         //     ], [
+    //     //         //         {x: side3[0].cY, y: y2y(tagInfo.imageY, side3[0].cY)} as Point2,
+    //     //         //         {x: side3[1].cY, y: y2y(tagInfo.imageY, side3[1].cY)} as Point2,
+    //     //         //         {x: side3[2].cY, y: y2y(tagInfo.imageY, side3[2].cY)} as Point2,
+    //     //         //     ],
+    //     //         //     tagInfo.imageX,
+    //     //         //     tagInfo.imageY
+    //     //         // );
+    //     //         // console.log("j:\n", JSON.stringify(j, undefined, 4));
+    //     //         // return {ok: true, info: j};
+    //     //     }
+    //     // }
+    // }
+    // return {ok: false};
 }
 
 
