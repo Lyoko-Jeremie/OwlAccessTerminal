@@ -230,6 +230,9 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
         if (pArray.size() % 2 != 0) {
             return {};
         }
+        if (pArray.empty()) {
+            return {};
+        }
         cv::Mat ps{pArray, true};
         ps = ps.reshape(2);
         cv::Point2f center;

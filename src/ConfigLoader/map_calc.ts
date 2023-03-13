@@ -322,6 +322,9 @@ const findOuterSide = (list: TagType[]): TagType[] => {
         pArray.push(p.x);
         pArray.push(p.y);
     }
+    if (pArray.length === 0) {
+        return [];
+    }
     const [cX, cY, r, ...pList] = MathExOpenCV.minEnclosingCircle(pArray);
     const pI = MathExOpenCV.circleBorderPoints(
         cX, cY, r,
@@ -706,6 +709,9 @@ function calc_map_position(tagInfo: TagInfoType): ResultOutputReturnType {
             //  3 findOuterSide
             //     x convexHull x
             const side3 = findOuterSide(tagInfo.tagInfo.list);
+            if (side3.length !== 3) {
+                return {ok: false};
+            }
 
             const j = calcPlaneInfo(
                 [
