@@ -247,7 +247,7 @@ endif ()
 string(TIMESTAMP currentSeconds "%s")
 message(STATUS "currentSeconds = ${currentSeconds}")
 
-string(TIMESTAMP BUILD_DATETIME "%Y-%m-%d/%H:%M:%S")
+string(TIMESTAMP BUILD_DATETIME "%Y-%m-%d %H:%M:%S")
 message(STATUS "BUILD_DATETIME = ${BUILD_DATETIME}")
 
 set(VERSION "const char* GIT_REV=\"git-[${GIT_REV}-${GIT_DIFF}]\";
