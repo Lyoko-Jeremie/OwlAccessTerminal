@@ -248,7 +248,7 @@ void installMathExOpenCVModule(qjs::Context &context, const std::string &moduleN
         }
         cv::Mat pX{cv::Size{static_cast<int>(pArray.size() / 2), 1}, CV_32FC1, cv::Scalar{0}};
         cv::Mat pY{cv::Size{static_cast<int>(pArray.size() / 2), 1}, CV_32FC1, cv::Scalar{0}};
-        for (int i = 0; i < pArray.size(); ++i) {
+        for (size_t i = 0; i < pArray.size(); ++i) {
             if (i % 2 == 0) {
                 pX.at<double>(std::floor(i / 2)) = pArray.at(i);
             } else {
