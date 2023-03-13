@@ -143,4 +143,55 @@ namespace OwlAsyncCallbackMailbox {
 
 } // OwlAsyncCallbackMailbox
 
+// https://www.boost.org/doc/libs/1_81_0/doc/html/boost_asio/example/cpp20/operations/callback_wrapper.cpp
+// use with :
+// ```
+//    auto rB2A = co_await asyncSendMail2B<A2B, B2A, ABMailbox>(
+//            box->shared_from_this(), m->shared_from_this(),
+//            boost::asio::bind_executor(
+//                    executor,
+//                    use_awaitable));
+// ```
+template<
+        typename MailboxType /*= boost::shared_ptr<OwlAsyncCallbackMailbox::AsyncCallbackMailbox<MailA2BType, MailB2AType>>*/,
+        typename MailA2BType = MailboxType::element_type::A2B_t::element_type,
+        typename MailB2AType = MailboxType::element_type::B2A_t::element_type,
+        boost::asio::completion_token_for<void(boost::shared_ptr<MailB2AType>)> CompletionToken
+>
+auto asyncSendMail2B(MailboxType box, boost::shared_ptr<MailA2BType> mail, CompletionToken &&token) {
+    auto init = [box, mail](boost::asio::completion_handler_for<void(boost::shared_ptr<MailB2AType>)> auto handler) mutable {
+
+        auto workPtr = boost::make_shared<decltype(boost::asio::make_work_guard(handler))>(
+                boost::asio::make_work_guard(handler)
+        );
+        auto handlerPtr = boost::make_shared<decltype(handler)>(std::move(handler));
+
+        mail->callbackRunner = [
+                handlerPtr,
+                workPtr,
+                mail
+        ](boost::shared_ptr<MailB2AType> m) {
+
+            auto alloc = boost::asio::get_associated_allocator(*handlerPtr, boost::asio::recycling_allocator<void>());
+
+            boost::asio::dispatch(
+                    workPtr->get_executor(),
+                    boost::asio::bind_allocator(
+                            alloc,
+                            [
+                                    handlerPtr,
+                                    m
+                            ]() {
+                                (*handlerPtr)(m);
+                            }));
+        };
+        box->sendA2B(mail->shared_from_this());
+    };
+
+    return boost::asio::async_initiate<CompletionToken, void(boost::shared_ptr<MailB2AType>)>(
+            init,
+            token);
+}
+
+
 #endif //OWLACCESSTERMINAL_ASYNCCALLBACKMAILBOX_H
