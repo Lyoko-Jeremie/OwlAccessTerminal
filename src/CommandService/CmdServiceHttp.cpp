@@ -590,28 +590,30 @@ namespace OwlCommandServiceHttp {
                             BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl run() error";
                         }
 
-                        // https://stackoverflow.com/questions/14232814/how-do-i-make-a-call-to-what-on-stdexception-ptr
                         std::string what;
-                        try { std::rethrow_exception(std::move(e)); }
-                        catch (const std::exception &e) {
-                            BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl co_spawn catch std::exception "
-                                                 << e.what();
-                            what = e.what();
+                        if (e) {
+                            // https://stackoverflow.com/questions/14232814/how-do-i-make-a-call-to-what-on-stdexception-ptr
+                            try { std::rethrow_exception(std::move(e)); }
+                            catch (const std::exception &e) {
+                                BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl co_spawn catch std::exception "
+                                                     << e.what();
+                                what = e.what();
+                            }
+                            catch (const std::string &e) {
+                                BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl co_spawn catch std::string " << e;
+                                what = e;
+                            }
+                            catch (const char *e) {
+                                BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl co_spawn catch char *e " << e;
+                                what = std::string{e};
+                            }
+                            catch (...) {
+                                BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl co_spawn catch (...)"
+                                                     << "\n" << boost::current_exception_diagnostic_information();
+                                what = boost::current_exception_diagnostic_information();
+                            }
+                            BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl::process_tag_info " << what;
                         }
-                        catch (const std::string &e) {
-                            BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl co_spawn catch std::string " << e;
-                            what = e;
-                        }
-                        catch (const char *e) {
-                            BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl co_spawn catch char *e " << e;
-                            what = std::string{e};
-                        }
-                        catch (...) {
-                            BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl co_spawn catch (...)"
-                                                 << "\n" << boost::current_exception_diagnostic_information();
-                            what = boost::current_exception_diagnostic_information();
-                        }
-                        BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl::process_tag_info " << what;
 
                         auto response = boost::make_shared<boost::beast::http::response<boost::beast::http::dynamic_body>>();
                         response->version(parentPtr_->request_.version());

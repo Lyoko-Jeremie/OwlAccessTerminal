@@ -32,16 +32,18 @@ namespace OwlSerialController {
                     } else {
                         BOOST_LOG_OWL(error) << "StateReaderImplCo run() error";
                     }
-                    // https://stackoverflow.com/questions/14232814/how-do-i-make-a-call-to-what-on-stdexception-ptr
-                    try { std::rethrow_exception(std::move(e)); }
-                    catch (const std::exception &e) {
-                        BOOST_LOG_OWL(error) << "co_spawn catch std::exception " << e.what();
-                    }
-                    catch (const std::string &e) { BOOST_LOG_OWL(error) << "co_spawn catch std::string " << e; }
-                    catch (const char *e) { BOOST_LOG_OWL(error) << "co_spawn catch char *e " << e; }
-                    catch (...) {
-                        BOOST_LOG_OWL(error) << "StateReaderImplCo co_spawn catch (...)"
-                                             << "\n" << boost::current_exception_diagnostic_information();
+                    if (e) {
+                        // https://stackoverflow.com/questions/14232814/how-do-i-make-a-call-to-what-on-stdexception-ptr
+                        try { std::rethrow_exception(std::move(e)); }
+                        catch (const std::exception &e) {
+                            BOOST_LOG_OWL(error) << "co_spawn catch std::exception " << e.what();
+                        }
+                        catch (const std::string &e) { BOOST_LOG_OWL(error) << "co_spawn catch std::string " << e; }
+                        catch (const char *e) { BOOST_LOG_OWL(error) << "co_spawn catch char *e " << e; }
+                        catch (...) {
+                            BOOST_LOG_OWL(error) << "StateReaderImplCo co_spawn catch (...)"
+                                                 << "\n" << boost::current_exception_diagnostic_information();
+                        }
                     }
                 });
     }
