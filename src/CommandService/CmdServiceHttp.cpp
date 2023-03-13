@@ -601,12 +601,13 @@ namespace OwlCommandServiceHttp {
                     },
                     [this, self = shared_from_this()](std::exception_ptr e, bool r) {
 
-                        if (e) {
+                        if (!e) {
                             if (r) {
-                                BOOST_LOG_OWL(warning) << "CmdServiceHttpConnectCoImpl run() ok";
+                                BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnectCoImpl run() ok";
                                 return;
                             } else {
-                                BOOST_LOG_OWL(error) << "CmdServiceHttpConnectCoImpl run() error";
+                                BOOST_LOG_OWL(trace_cmd_tag) << "CmdServiceHttpConnectCoImpl run() error";
+                                return;
                             }
                         } else {
                             std::string what;

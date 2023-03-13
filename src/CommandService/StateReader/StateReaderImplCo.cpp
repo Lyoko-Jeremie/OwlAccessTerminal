@@ -30,8 +30,10 @@ namespace OwlSerialController {
                     if (!e) {
                         if (r) {
                             BOOST_LOG_OWL(warning) << "StateReaderImplCo run() ok";
+                            return;
                         } else {
                             BOOST_LOG_OWL(error) << "StateReaderImplCo run() error";
+                            return;
                         }
                     } else {
                         // https://stackoverflow.com/questions/14232814/how-do-i-make-a-call-to-what-on-stdexception-ptr
