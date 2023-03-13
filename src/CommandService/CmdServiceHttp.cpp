@@ -391,6 +391,8 @@ namespace OwlCommandServiceHttp {
                     BOOST_LOG_OWL(error) << "co_process_tag_info json catch (const std::exception &e)" << e.what();
                     co_return false;
                 }
+                BOOST_ASSERT(self);
+                BOOST_ASSERT(parentPtr_);
 
                 // ================================ to get newestAirplaneState ================================
                 // get newestAirplaneState
@@ -407,7 +409,13 @@ namespace OwlCommandServiceHttp {
                                 boost::asio::bind_executor(
                                         executor,
                                         boost::asio::redirect_error(use_awaitable, ec_)));
+                        BOOST_ASSERT(data);
+                        BOOST_ASSERT(self);
+                        BOOST_ASSERT(parentPtr_);
                         co_await boost::asio::dispatch(executor, use_awaitable);
+                        BOOST_ASSERT(data);
+                        BOOST_ASSERT(self);
+                        BOOST_ASSERT(parentPtr_);
                         if (ec_) {
                             BOOST_LOG_OWL(error) << "co_process_tag_info asyncSendMail2B MailBoxSerial error : "
                                                  << ec_.what();
@@ -447,7 +455,13 @@ namespace OwlCommandServiceHttp {
                                 boost::asio::bind_executor(
                                         executor,
                                         boost::asio::redirect_error(use_awaitable, ec_)));
+                        BOOST_ASSERT(data);
+                        BOOST_ASSERT(self);
+                        BOOST_ASSERT(parentPtr_);
                         co_await boost::asio::dispatch(executor, use_awaitable);
+                        BOOST_ASSERT(data);
+                        BOOST_ASSERT(self);
+                        BOOST_ASSERT(parentPtr_);
                         if (ec_) {
                             BOOST_LOG_OWL(error) << "co_process_tag_info asyncSendMail2B MailBoxMap error : "
                                                  << ec_.what();
@@ -488,7 +502,13 @@ namespace OwlCommandServiceHttp {
                                 boost::asio::bind_executor(
                                         executor,
                                         boost::asio::redirect_error(use_awaitable, ec_)));
+                        BOOST_ASSERT(data);
+                        BOOST_ASSERT(self);
+                        BOOST_ASSERT(parentPtr_);
                         co_await boost::asio::dispatch(executor, use_awaitable);
+                        BOOST_ASSERT(data);
+                        BOOST_ASSERT(self);
+                        BOOST_ASSERT(parentPtr_);
                         if (ec_) {
                             BOOST_LOG_OWL(error) << "co_process_tag_info asyncSendMail2B MailBoxSerial error : "
                                                  << ec_.what();
