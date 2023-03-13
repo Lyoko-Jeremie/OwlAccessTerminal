@@ -96,6 +96,9 @@ const SizeZ = 10 * AlgorithmMultiScale;
 
 const SizeXHalf = SizeX / 2;
 const SizeZHalf = SizeZ / 2;
+
+const OffsetX = 50;
+const OffsetZ = 50;
 // ============ map info ============
 
 declare module MathEx {
@@ -232,7 +235,7 @@ declare module MathExOpenCV {
 const calcTagPosition = (t: number): { x: number, y: number } => {
     const row = Math.floor(t / MapX);
     const col = t - row * MapX;
-    return {x: col * DistanceX, y: row * DistanceZ};
+    return {x: col * DistanceX + OffsetX, y: row * DistanceZ + OffsetZ};
 };
 const calcTagCenterPosition = (t: number): { x: number, y: number } => {
     return calcTagPosition(t);
