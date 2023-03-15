@@ -407,8 +407,8 @@ namespace OwlImageServiceHttp {
 
 //        BOOST_LOG_OWL(trace) << "ok";
         auto v = u.value();
-//        BOOST_LOG_OWL(trace) << v.path();
-//        BOOST_LOG_OWL(trace) << v.query();
+//        BOOST_LOG_OWL(trace) << "v.path():[" << v.path() << "]";
+//        BOOST_LOG_OWL(trace) << "v.query():[" << v.query() << "]";
 
         if (v.path() == "/1") {
             create_get_response_image(1);
