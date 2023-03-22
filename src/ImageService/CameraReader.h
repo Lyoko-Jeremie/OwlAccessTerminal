@@ -8,12 +8,15 @@
 #include <tuple>
 #include <vector>
 #include <mutex>
+#include <chrono>
 #include <opencv2/opencv.hpp>
 #include "../OwlLog/OwlLog.h"
 #include "ImageServiceMail.h"
 #include "../ConfigLoader/ConfigLoader.h"
 
 namespace OwlCameraReader {
+
+    class CameraReaderGetImageCoImpl;
 
     struct CameraItem : public boost::enable_shared_from_this<CameraItem> {
         boost::asio::strand<boost::asio::io_context::executor_type> strand_;
@@ -22,6 +25,9 @@ namespace OwlCameraReader {
         OwlCameraConfig::VideoCaptureAPIs api;
         int w;
         int h;
+
+        // init as 0
+        std::chrono::steady_clock::time_point lastRead{};
 
         std::unique_ptr<cv::VideoCapture> vc;
 
@@ -64,6 +70,9 @@ namespace OwlCameraReader {
         std::mutex mtx_camera_item_list_;
         OwlMailDefine::ServiceCameraMailbox mailbox_tcp_protobuf_;
         OwlMailDefine::ServiceCameraMailbox mailbox_http_;
+
+        friend class CameraReaderGetImageCoImpl;
+
     public:
         void
         start();

@@ -1,6 +1,16 @@
 // jeremie
 
 #include "CameraReader.h"
+#include <boost/asio/co_spawn.hpp>
+#include <boost/exception_ptr.hpp>
+#include <boost/bind/bind.hpp>
+#include <utility>
+
+using boost::asio::use_awaitable;
+#if defined(BOOST_ASIO_ENABLE_HANDLER_TRACKING)
+# define use_awaitable \
+  boost::asio::use_awaitable_t(__FILE__, __LINE__, __PRETTY_FUNCTION__)
+#endif
 
 namespace OwlCameraReader {
 
@@ -31,12 +41,13 @@ namespace OwlCameraReader {
     CameraReader::CameraReader(boost::asio::io_context &ioc,
                                std::vector<OwlCameraConfig::CameraInfoTuple> camera_info_list,
                                OwlMailDefine::ServiceCameraMailbox &&mailbox_tcp_protobuf,
-                               OwlMailDefine::ServiceCameraMailbox &&mailbox_http) : ioc_(ioc),
-                                                                                     camera_info_list_(std::move(
-                                                                                             camera_info_list)),
-                                                                                     mailbox_tcp_protobuf_(
-                                                                                             mailbox_tcp_protobuf),
-                                                                                     mailbox_http_(mailbox_http) {
+                               OwlMailDefine::ServiceCameraMailbox &&mailbox_http)
+            : ioc_(ioc),
+              camera_info_list_(std::move(
+                      camera_info_list)),
+              mailbox_tcp_protobuf_(
+                      mailbox_tcp_protobuf),
+              mailbox_http_(mailbox_http) {
 
         mailbox_tcp_protobuf_->receiveA2B([this](OwlMailDefine::MailService2Camera &&data) {
             if (data->cmd == OwlMailDefine::ControlCameraCmd::reset) {
@@ -69,58 +80,232 @@ namespace OwlCameraReader {
         });
     }
 
-    void
-    CameraReader::getImage(OwlMailDefine::MailService2Camera &&data, OwlMailDefine::ServiceCameraMailbox &mailbox) {
-        boost::asio::dispatch(ioc_, [this, self = shared_from_this(), data, &mailbox]() {
-            // make sure all the call to self and to CameraItem run in self ioc
-            {
-                std::unique_lock ul{mtx_camera_item_list_};
-                for (auto &c: camera_item_list_) {
+    class CameraReaderGetImageCoImpl : public boost::enable_shared_from_this<CameraReaderGetImageCoImpl> {
+    public:
+        explicit CameraReaderGetImageCoImpl(boost::shared_ptr<CameraReader> parentPtr)
+                : parentPtr_(std::move(parentPtr)), sleepTimer(parentPtr_->ioc_) {}
+
+    private:
+        boost::shared_ptr<CameraReader> parentPtr_;
+
+        boost::system::error_code ec_{};
+
+        boost::asio::steady_timer sleepTimer;
+
+        boost::asio::awaitable<bool> co_get_image(
+                boost::shared_ptr<CameraReaderGetImageCoImpl> self,
+                OwlMailDefine::MailService2Camera &&data,
+                OwlMailDefine::ServiceCameraMailbox &mailbox
+        ) {
+            boost::ignore_unused(self);
+            boost::ignore_unused(parentPtr_);
+
+            BOOST_LOG_OWL(trace_cmd_tag) << "co_get_image start";
+
+            try {
+
+                // switch io_context
+                co_await boost::asio::dispatch(parentPtr_->ioc_, use_awaitable);
+                BOOST_ASSERT(self);
+                BOOST_ASSERT(parentPtr_);
+
+                // make sure all the call to self and to CameraItem run in self ioc
+                boost::shared_ptr<CameraItem> cc;
+                std::unique_lock ul{parentPtr_->mtx_camera_item_list_};
+                for (auto &c: parentPtr_->camera_item_list_) {
                     if (c->id == data->camera_id) {
-                        auto cc = c;
+                        cc = c;
                         // now we not need access `camera_item_list_` more
                         ul.unlock();
-                        boost::asio::dispatch(cc->strand_, [this, self = shared_from_this(), data, &mailbox, cc]() {
-                            OwlMailDefine::MailCamera2Service data_r = boost::make_shared<OwlMailDefine::Camera2Service>();
-                            data_r->runner = data->callbackRunner;
-                            data_r->camera_id = data->camera_id;
-                            if (!cc->isOpened()) {
+                        break;
+                    }
+                }
+                if (!cc) {
+
+                    // cannot find camera
+                    BOOST_LOG_OWL(warning) << "co_get_image cannot find camera: " << data->camera_id;
+                    OwlMailDefine::MailCamera2Service data_r = boost::make_shared<OwlMailDefine::Camera2Service>();
+                    data_r->runner = data->callbackRunner;
+                    data_r->camera_id = data->camera_id;
+                    data_r->ok = false;
+                    mailbox->sendB2A(std::move(data_r));
+                    co_return false;
+
+                } else {
+
+                    // switch io_context
+                    co_await boost::asio::dispatch(cc->strand_, use_awaitable);
+                    BOOST_ASSERT(self);
+                    BOOST_ASSERT(parentPtr_);
+
+                    OwlMailDefine::MailCamera2Service data_r = boost::make_shared<OwlMailDefine::Camera2Service>();
+                    data_r->runner = data->callbackRunner;
+                    data_r->camera_id = data->camera_id;
+                    if (!cc->isOpened()) {
+                        data_r->ok = false;
+                        BOOST_LOG_OWL(warning) << "co_get_image (!c->isOpened()) cannot open: "
+                                               << data->camera_id;
+                        mailbox->sendB2A(std::move(data_r));
+                        co_return false;
+                    } else {
+                        if ((cc->lastRead - std::chrono::steady_clock::now()) <
+                            std::chrono::milliseconds(600)) {
+                            cv::Mat img;
+                            // read the image
+                            if (!cc->vc->read(img)) {
+                                // `false` if no frames has been grabbed
                                 data_r->ok = false;
-                                BOOST_LOG_OWL(warning) << "getImage (!c->isOpened()) cannot open: "
-                                                       << data->camera_id;
+                                BOOST_LOG_OWL(warning)
+                                    << "co_get_image (!c->vc->read(img)) read frame fail: "
+                                    << data->camera_id;
                             } else {
-                                // read the image
+                                data_r->image = img;
+                                data_r->ok = true;
+                                if (img.empty()) {
+                                    data_r->ok = false;
+                                    BOOST_LOG_OWL(warning) << "co_get_image (img.empty()) read frame fail: "
+                                                           << data->camera_id;
+                                }
+                                // update lastRead
+                                cc->lastRead = std::chrono::steady_clock::now();
+                            }
+                            // send
+                            mailbox->sendB2A(std::move(data_r));
+                            co_return true;
+                        } else {
+                            // camera cache is outdated
+                            // now we need trigger a pre-read to clear buffer
+
+                            {
+                                // read the old image to clear buffer and trigger read new image from camera
                                 cv::Mat img;
                                 if (!cc->vc->read(img)) {
                                     // `false` if no frames has been grabbed
                                     data_r->ok = false;
-                                    BOOST_LOG_OWL(warning) << "getImage (!c->vc->read(img)) read frame fail: "
-                                                           << data->camera_id;
-                                } else {
-                                    data_r->image = img;
-                                    data_r->ok = true;
-                                    if (img.empty()) {
-                                        data_r->ok = false;
-                                        BOOST_LOG_OWL(warning) << "getImage (img.empty()) read frame fail: "
-                                                               << data->camera_id;
-                                    }
+                                    // we dont care it read ok or not when pre-read
                                 }
                             }
+
+                            // now , wait a moment
+                            sleepTimer.expires_from_now(std::chrono::milliseconds(60));
+                            co_await sleepTimer.async_wait(boost::asio::redirect_error(use_awaitable, ec_));
+                            BOOST_ASSERT(self);
+                            BOOST_ASSERT(parentPtr_);
+                            if (ec_) {
+                                if (ec_ == boost::asio::error::operation_aborted) {
+                                    // terminal
+                                    BOOST_LOG_OWL(warning) << "co_get_image sleepTimer operation_aborted";
+                                    co_return false;
+                                }
+                                // Timer expired. means it ok.
+                            }
+
+                            // switch io_context
+                            co_await boost::asio::dispatch(cc->strand_, use_awaitable);
+                            BOOST_ASSERT(self);
+                            BOOST_ASSERT(parentPtr_);
+
+                            cv::Mat img;
+                            // read the image
+                            if (!cc->vc->read(img)) {
+                                // `false` if no frames has been grabbed
+                                data_r->ok = false;
+                                BOOST_LOG_OWL(warning)
+                                    << "co_get_image (!c->vc->read(img)) read frame fail: "
+                                    << data->camera_id;
+                            } else {
+                                data_r->image = img;
+                                data_r->ok = true;
+                                if (img.empty()) {
+                                    data_r->ok = false;
+                                    BOOST_LOG_OWL(warning) << "co_get_image (img.empty()) read frame fail: "
+                                                           << data->camera_id;
+                                }
+                                // update lastRead
+                                cc->lastRead = std::chrono::steady_clock::now();
+                            }
                             mailbox->sendB2A(std::move(data_r));
-                        });
-                        return;
+                            co_return true;
+                        }
                     }
                 }
+
+
+                // ================================ ............ ================================
+                // ================================ ............ ================================
+                // ================================ ............ ================================
+                // ================================ ............ ================================
+                // ================================ ............ ================================
+
+
+                BOOST_ASSERT(self);
+                BOOST_ASSERT(parentPtr_);
+                boost::ignore_unused(self);
+                boost::ignore_unused(parentPtr_);
+                co_return true;
+
+            } catch (const std::exception &e) {
+                BOOST_LOG_OWL(error) << "co_get_image catch (const std::exception &e)" << e.what();
+                throw;
+//                co_return false;
             }
-            // cannot find camera
-            BOOST_LOG_OWL(warning) << "getImage cannot find camera: " << data->camera_id;
-            OwlMailDefine::MailCamera2Service data_r = boost::make_shared<OwlMailDefine::Camera2Service>();
-            data_r->runner = data->callbackRunner;
-            data_r->camera_id = data->camera_id;
-            data_r->ok = false;
-            mailbox->sendB2A(std::move(data_r));
-            return;
-        });
+
+            boost::ignore_unused(self);
+            boost::ignore_unused(parentPtr_);
+            co_return true;
+        }
+
+    public:
+        void getImage(OwlMailDefine::MailService2Camera &&data, OwlMailDefine::ServiceCameraMailbox &mailbox) {
+            boost::asio::co_spawn(
+                    parentPtr_->ioc_,
+                    [this, self = shared_from_this(), &data, &mailbox]() {
+                        return co_get_image(self, std::move(data), mailbox);
+                    },
+                    [this, self = shared_from_this()](std::exception_ptr e, bool r) {
+
+                        if (!e) {
+                            if (r) {
+                                BOOST_LOG_OWL(trace_cmd_tag) << "CameraReaderGetImageCoImpl run() ok";
+                                return;
+                            } else {
+                                BOOST_LOG_OWL(trace_cmd_tag) << "CameraReaderGetImageCoImpl run() error";
+                                return;
+                            }
+                        } else {
+                            std::string what;
+                            // https://stackoverflow.com/questions/14232814/how-do-i-make-a-call-to-what-on-stdexception-ptr
+                            try { std::rethrow_exception(std::move(e)); }
+                            catch (const std::exception &e) {
+                                BOOST_LOG_OWL(error) << "CameraReaderGetImageCoImpl co_spawn catch std::exception "
+                                                     << e.what();
+                                what = e.what();
+                            }
+                            catch (const std::string &e) {
+                                BOOST_LOG_OWL(error) << "CameraReaderGetImageCoImpl co_spawn catch std::string " << e;
+                                what = e;
+                            }
+                            catch (const char *e) {
+                                BOOST_LOG_OWL(error) << "CameraReaderGetImageCoImpl co_spawn catch char *e " << e;
+                                what = std::string{e};
+                            }
+                            catch (...) {
+                                BOOST_LOG_OWL(error) << "CameraReaderGetImageCoImpl co_spawn catch (...)"
+                                                     << "\n" << boost::current_exception_diagnostic_information();
+                                what = boost::current_exception_diagnostic_information();
+                            }
+                            BOOST_LOG_OWL(error) << "CameraReaderGetImageCoImpl what " << what;
+
+                        }
+
+                    });
+        }
+
+    };
+
+    void
+    CameraReader::getImage(OwlMailDefine::MailService2Camera &&data, OwlMailDefine::ServiceCameraMailbox &mailbox) {
+        boost::make_shared<CameraReaderGetImageCoImpl>(shared_from_this())->getImage(std::move(data), mailbox);
     }
 
     void
