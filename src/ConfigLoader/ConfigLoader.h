@@ -117,6 +117,16 @@ namespace OwlConfigLoader {
         std::atomic_int downCameraId{1};
         std::atomic_int frontCameraId{2};
 
+        int camera_read_max_ms = 600;
+        int camera_read_retry_ms = 30;
+        int camera_read_retry_times = 2;
+
+        void fix_camera_read_() {
+            camera_read_max_ms = camera_read_max_ms > 0 ? camera_read_max_ms : 600;
+            camera_read_retry_ms = camera_read_retry_ms > 0 ? camera_read_retry_ms : 30;
+            camera_read_retry_times = camera_read_retry_times > 0 ? camera_read_retry_times : 2;
+        }
+
         std::string cmd_bash_path = "/bin/bash";
 
         std::string js_map_calc_file = "map_calc.js";

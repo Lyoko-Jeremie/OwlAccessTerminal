@@ -192,6 +192,12 @@ namespace OwlConfigLoader {
         config.camera_2_w = get(root, "camera_2_w", config.camera_2_w);
         config.camera_2_h = get(root, "camera_2_h", config.camera_2_h);
 
+        config.camera_read_max_ms = get(root, "camera_read_max_ms", config.camera_read_max_ms);
+        config.camera_read_retry_ms = get(root, "camera_read_retry_ms", config.camera_read_retry_ms);
+        config.camera_read_retry_times = get(root, "camera_read_retry_times", config.camera_read_retry_times);
+
+        config.fix_camera_read_();
+
         getAtomic(root, "downCameraId", config.downCameraId);
         getAtomic(root, "frontCameraId", config.frontCameraId);
 
@@ -250,6 +256,9 @@ namespace OwlConfigLoader {
             << "\n" << "camera_2_VideoCaptureAPI " << config.camera_2_VideoCaptureAPI
             << "\n" << "camera_2_w " << config.camera_2_w
             << "\n" << "camera_2_h " << config.camera_2_h
+            << "\n" << "camera_read_max_ms " << config.camera_read_max_ms
+            << "\n" << "camera_read_retry_ms " << config.camera_read_retry_ms
+            << "\n" << "camera_read_retry_times " << config.camera_read_retry_times
             << "\n" << "downCameraId " << config.downCameraId.load()
             << "\n" << "frontCameraId " << config.frontCameraId.load()
             << "\n" << "cmd_bash_path " << config.cmd_bash_path
