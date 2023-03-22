@@ -91,6 +91,8 @@ namespace OwlCameraReader {
         boost::system::error_code ec_{};
 
         boost::asio::steady_timer sleepTimer;
+        cv::Mat img;
+        cv::Mat imgGC;
 
         boost::asio::awaitable<bool> co_get_image(
                 boost::shared_ptr<CameraReaderGetImageCoImpl> self,
@@ -100,7 +102,7 @@ namespace OwlCameraReader {
             boost::ignore_unused(self);
             boost::ignore_unused(parentPtr_);
 
-            BOOST_LOG_OWL(trace_cmd_tag) << "co_get_image start";
+            BOOST_LOG_OWL(trace) << "co_get_image start";
 
             try {
 
@@ -148,9 +150,11 @@ namespace OwlCameraReader {
                         mailbox->sendB2A(std::move(data_r));
                         co_return false;
                     } else {
-                        if ((cc->lastRead - std::chrono::steady_clock::now()) <
-                            std::chrono::milliseconds(600)) {
-                            cv::Mat img;
+//                        BOOST_LOG_OWL(trace) << "co_get_image duration " <<
+//                                             std::chrono::duration_cast<std::chrono::milliseconds>(
+//                                                     std::chrono::steady_clock::now() - cc->lastRead).count();
+                        if ((std::chrono::steady_clock::now() - cc->lastRead) <
+                            std::chrono::milliseconds(parentPtr_->config_->config().camera_read_max_ms)) {
                             // read the image
                             if (!cc->vc->read(img)) {
                                 // `false` if no frames has been grabbed
@@ -173,31 +177,36 @@ namespace OwlCameraReader {
                             mailbox->sendB2A(std::move(data_r));
                             co_return true;
                         } else {
+                            BOOST_LOG_OWL(trace) << "co_get_image camera cache is outdated";
                             // camera cache is outdated
                             // now we need trigger a pre-read to clear buffer
 
-                            {
-                                // read the old image to clear buffer and trigger read new image from camera
-                                cv::Mat img;
-                                if (!cc->vc->read(img)) {
-                                    // `false` if no frames has been grabbed
-                                    data_r->ok = false;
-                                    // we dont care it read ok or not when pre-read
+                            auto camera_read_retry_times = parentPtr_->config_->config().camera_read_retry_times;
+                            auto camera_read_retry_ms = parentPtr_->config_->config().camera_read_retry_ms;
+                            for (int i = 0; i < camera_read_retry_times; ++i) {
+                                {
+                                    // read the old image to clear buffer and trigger read new image from camera
+                                    if (!cc->vc->read(imgGC)) {
+                                        // `false` if no frames has been grabbed
+                                        data_r->ok = false;
+                                        // we dont care it read ok or not when pre-read
+                                    }
+                                    imgGC.release();
                                 }
-                            }
 
-                            // now , wait a moment
-                            sleepTimer.expires_from_now(std::chrono::milliseconds(60));
-                            co_await sleepTimer.async_wait(boost::asio::redirect_error(use_awaitable, ec_));
-                            BOOST_ASSERT(self);
-                            BOOST_ASSERT(parentPtr_);
-                            if (ec_) {
-                                if (ec_ == boost::asio::error::operation_aborted) {
-                                    // terminal
-                                    BOOST_LOG_OWL(warning) << "co_get_image sleepTimer operation_aborted";
-                                    co_return false;
+                                // now , wait a moment
+                                sleepTimer.expires_from_now(std::chrono::milliseconds(camera_read_retry_ms));
+                                co_await sleepTimer.async_wait(boost::asio::redirect_error(use_awaitable, ec_));
+                                BOOST_ASSERT(self);
+                                BOOST_ASSERT(parentPtr_);
+                                if (ec_) {
+                                    if (ec_ == boost::asio::error::operation_aborted) {
+                                        // terminal
+                                        BOOST_LOG_OWL(warning) << "co_get_image sleepTimer operation_aborted";
+                                        co_return false;
+                                    }
+                                    // Timer expired. means it ok.
                                 }
-                                // Timer expired. means it ok.
                             }
 
                             // switch io_context
@@ -205,7 +214,6 @@ namespace OwlCameraReader {
                             BOOST_ASSERT(self);
                             BOOST_ASSERT(parentPtr_);
 
-                            cv::Mat img;
                             // read the image
                             if (!cc->vc->read(img)) {
                                 // `false` if no frames has been grabbed
@@ -266,10 +274,10 @@ namespace OwlCameraReader {
 
                         if (!e) {
                             if (r) {
-                                BOOST_LOG_OWL(trace_cmd_tag) << "CameraReaderGetImageCoImpl run() ok";
+                                BOOST_LOG_OWL(trace) << "CameraReaderGetImageCoImpl run() ok";
                                 return;
                             } else {
-                                BOOST_LOG_OWL(trace_cmd_tag) << "CameraReaderGetImageCoImpl run() error";
+                                BOOST_LOG_OWL(trace) << "CameraReaderGetImageCoImpl run() error";
                                 return;
                             }
                         } else {
