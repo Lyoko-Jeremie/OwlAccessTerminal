@@ -318,7 +318,9 @@ add_executable(${ProjectMainName}
         src/MapCalc/MapCalcPlaneInfoType.h
         src/MapCalc/MapCalcPlaneInfoType.cpp
         src/VERSION/ProgramVersion.h
-        src/MemoryBoost.h)
+        src/MemoryBoost.h
+        src/MultiCast/MultiCast.cpp
+        src/MultiCast/MultiCast.h src/MultiCast/ControlMulticastMail.h)
 
 
 if (EnableWebStaticModule)
