@@ -52,6 +52,7 @@ namespace OwlCameraReader {
     public:
         CameraReader(
                 boost::asio::io_context &ioc,
+                boost::shared_ptr<OwlConfigLoader::ConfigLoader> config,
                 std::vector<OwlCameraConfig::CameraInfoTuple> camera_info_list,
                 OwlMailDefine::ServiceCameraMailbox &&mailbox_tcp_protobuf,
                 OwlMailDefine::ServiceCameraMailbox &&mailbox_http
@@ -65,6 +66,7 @@ namespace OwlCameraReader {
 
     private:
         boost::asio::io_context &ioc_;
+        boost::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
         std::vector<OwlCameraConfig::CameraInfoTuple> camera_info_list_;
         std::vector<boost::shared_ptr<CameraItem>> camera_item_list_;
         std::mutex mtx_camera_item_list_;

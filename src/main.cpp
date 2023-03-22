@@ -298,6 +298,7 @@ int main(int argc, const char *argv[]) {
     imageServiceHttp->start();
     auto cameraReader = boost::make_shared<OwlCameraReader::CameraReader>(
             ioc_cameraReader,
+            config->shared_from_this(),
             std::vector<OwlCameraConfig::CameraInfoTuple>{
                     {1, config->config().camera_addr_1, config->config().camera_1_VideoCaptureAPI,
                             config->config().camera_1_w, config->config().camera_1_h},

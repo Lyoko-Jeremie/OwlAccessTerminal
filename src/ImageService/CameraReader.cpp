@@ -39,14 +39,14 @@ namespace OwlCameraReader {
 
 
     CameraReader::CameraReader(boost::asio::io_context &ioc,
+                               boost::shared_ptr<OwlConfigLoader::ConfigLoader> config,
                                std::vector<OwlCameraConfig::CameraInfoTuple> camera_info_list,
                                OwlMailDefine::ServiceCameraMailbox &&mailbox_tcp_protobuf,
                                OwlMailDefine::ServiceCameraMailbox &&mailbox_http)
             : ioc_(ioc),
-              camera_info_list_(std::move(
-                      camera_info_list)),
-              mailbox_tcp_protobuf_(
-                      mailbox_tcp_protobuf),
+              config_(std::move(config)),
+              camera_info_list_(std::move(camera_info_list)),
+              mailbox_tcp_protobuf_(mailbox_tcp_protobuf),
               mailbox_http_(mailbox_http) {
 
         mailbox_tcp_protobuf_->receiveA2B([this](OwlMailDefine::MailService2Camera &&data) {
