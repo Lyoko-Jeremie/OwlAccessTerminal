@@ -70,7 +70,7 @@ namespace OwlMultiCast {
             return;
         }
         // now we receive a Query package, so we need response it
-        BOOST_LOG_OWL(trace) << "MultiCast do_receive_json() we receive a Query package come from: \n"
+        BOOST_LOG_OWL(trace) << "MultiCast do_receive_json() we receive a Query package come from: "
                              << "receiver_endpoint_ "
                              << receiver_endpoint_.address() << ":" << receiver_endpoint_.port();
 
