@@ -1,6 +1,7 @@
 // jeremie
 
 #include "MultiCast.h"
+#include <string_view>
 
 namespace OwlMultiCast {
 
@@ -11,6 +12,12 @@ namespace OwlMultiCast {
                 boost::asio::buffer(receive_data_), receiver_endpoint_,
                 [this, sef = shared_from_this()](boost::system::error_code ec, std::size_t length) {
                     if (!ec) {
+                        if (length > UDP_Package_Max_Size) {
+                            // bad length, ignore it
+                            BOOST_LOG_OWL(error) << "MultiCast do_receive() bad length : " << length;
+                            do_receive();
+                            return;
+                        }
                         do_receive_json(length);
                         return;
                     }
@@ -23,7 +30,7 @@ namespace OwlMultiCast {
     }
 
     void MultiCast::do_receive_json(std::size_t length) {
-        auto data = std::string{receive_data_.data(), receive_data_.data() + length};
+        auto data = std::string_view{receive_data_.data(), receive_data_.data() + length};
         BOOST_LOG_OWL(trace_multicast) << "MultiCast do_receive_json() data"
                                        << " receiver_endpoint_ "
                                        << receiver_endpoint_.address() << ":" << receiver_endpoint_.port()
@@ -32,7 +39,8 @@ namespace OwlMultiCast {
         boost::json::value json_v = boost::json::parse(
                 data,
                 ecc,
-                &*json_storage_resource_,
+//                &*json_storage_resource_,
+                {},
                 json_parse_options_
         );
         if (ecc) {
@@ -60,8 +68,8 @@ namespace OwlMultiCast {
         }
         // now we receive a Query package, so we need response it
         BOOST_LOG_OWL(trace) << "MultiCast do_receive_json() we receive a Query package come from: \n"
-                                       << "receiver_endpoint_ "
-                                       << receiver_endpoint_.address() << ":" << receiver_endpoint_.port();
+                             << "receiver_endpoint_ "
+                             << receiver_endpoint_.address() << ":" << receiver_endpoint_.port();
 
         // TODO response_message_
         response_message_ = R"({"MultiCast","Response"})";
