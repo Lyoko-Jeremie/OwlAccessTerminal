@@ -24,6 +24,7 @@ namespace OwlLog {
         trace_map,
         trace_dtor,
         trace_json,
+        trace_multicast,
         trace,
         debug_sp_w,
         debug,

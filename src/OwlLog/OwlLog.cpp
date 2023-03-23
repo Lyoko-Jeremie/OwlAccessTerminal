@@ -32,6 +32,7 @@ namespace OwlLog {
             "trace_map",
             "trace_dtor",
             "trace_json",
+            "trace_multicast",
             "trace",
             "debug_sp_w",
             "debug",
@@ -161,6 +162,9 @@ namespace OwlLog {
                 #ifndef DEBUG_log_JSON
                 && severity != severity_level::trace_json
                 #endif // DEBUG_log_JSON
+                #ifndef DEBUG_log_multicast
+                && severity != severity_level::trace_multicast
+                #endif // DEBUG_log_multicast
                 #ifndef DEBUG_log_SerialPortRead
                 && severity != severity_level::trace_cmd_sp_r
 #endif // DEBUG_log_SerialPortRead
@@ -186,6 +190,7 @@ namespace OwlLog {
         BOOST_LOG_OWL(trace_map) << "BOOST_LOG_OWL(trace_map)";
         BOOST_LOG_OWL(trace_dtor) << "BOOST_LOG_OWL(trace_dtor)";
         BOOST_LOG_OWL(trace_json) << "BOOST_LOG_OWL(trace_json)";
+        BOOST_LOG_OWL(trace_multicast) << "BOOST_LOG_OWL(trace_multicast)";
         BOOST_LOG_OWL(trace) << "BOOST_LOG_OWL(trace)";
         BOOST_LOG_OWL(debug) << "BOOST_LOG_OWL(debug)";
         BOOST_LOG_OWL(debug_sp_w) << "BOOST_LOG_OWL(debug_sp_w)";

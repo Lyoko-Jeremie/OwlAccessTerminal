@@ -14,6 +14,10 @@
 
 namespace OwlMultiCast {
 
+    enum {
+        UDP_Package_Max_Size = (1024 * 1024 * 6)
+    }; // 6M
+
     class MultiCast : public boost::enable_shared_from_this<MultiCast> {
     public:
         MultiCast(
@@ -46,7 +50,12 @@ namespace OwlMultiCast {
             json_parse_options_.allow_trailing_commas = true;
             json_parse_options_.max_depth = 5;
 
-            static_send_message_ = R"({"MultiCast":"MultiCast"})";
+            // notice all client i am here
+            static_send_message_ = R"({"MultiCast":"Notice"})";
+
+            BOOST_LOG_OWL(trace_multicast) << "MultiCast start";
+            do_receive();
+            do_send();
         }
 
     private:
@@ -70,7 +79,7 @@ namespace OwlMultiCast {
 
         // where the package come
         boost::asio::ip::udp::endpoint receiver_endpoint_;
-        std::array<char, 1024 * 64 * 10> receive_data_{};
+        std::array<char, UDP_Package_Max_Size> receive_data_{};
 
 
         boost::json::parse_options json_parse_options_;
@@ -94,34 +103,43 @@ namespace OwlMultiCast {
             }
         }
 
+        // ======================================================================================================
+
         void do_receive_json(std::size_t length) {
+            auto data = std::string{receive_data_.data(), receive_data_.data() + length};
+            BOOST_LOG_OWL(trace_multicast) << "MultiCast do_receive_json() data"
+                                           << "receiver_endpoint_ "
+                                           << receiver_endpoint_.address() << ":" << receiver_endpoint_.port()
+                                           << " " << data;
             boost::system::error_code ecc;
             boost::json::value json_v = boost::json::parse(
-                    std::string{receive_data_.data(), receive_data_.data() + length},
+                    data,
                     ecc,
                     {},
                     json_parse_options_
             );
             if (ecc) {
-                BOOST_LOG_OWL(warning) << "MultiCast do_receive() invalid package";
+                BOOST_LOG_OWL(warning) << "MultiCast do_receive_json() invalid package";
                 do_receive();
                 return;
             }
 
-            BOOST_LOG_OWL(info) << "receiver_endpoint_ "
-                                << receiver_endpoint_.address() << ":" << receiver_endpoint_.port()
-                                << " " << boost::json::serialize(json_v);
+            BOOST_LOG_OWL(trace_multicast) << "MultiCast do_receive_json() "
+                                           << "receiver_endpoint_ "
+                                           << receiver_endpoint_.address() << ":" << receiver_endpoint_.port()
+                                           << " " << boost::json::serialize(json_v);
 
             auto multiCastFlag = get(json_v.as_object(), "MultiCast", std::string{});
-            if (multiCastFlag != "multiCastFlag") {
-                // err
-                BOOST_LOG_OWL(warning) << "MultiCast do_receive_json() (multiCastFlag != multiCastFlag)";
+            if (multiCastFlag != "Query") {
+                // ignore it
+                BOOST_LOG_OWL(trace_multicast) << "MultiCast do_receive_json() (multiCastFlag != Query) , ignore";
                 do_response();
                 return;
             }
+            // now we receive a Query package, so we need response it
 
             // TODO response_message_
-            response_message_ = R"({"MultiCast","MultiCast"})";
+            response_message_ = R"({"MultiCast","Response"})";
             do_response();
         }
 
@@ -134,7 +152,7 @@ namespace OwlMultiCast {
                             return;
                         }
                         if (ec == boost::asio::error::operation_aborted) {
-                            BOOST_LOG_OWL(info) << "MultiCast do_receive() ec operation_aborted";
+                            BOOST_LOG_OWL(trace_multicast) << "MultiCast do_receive() ec operation_aborted";
                             return;
                         }
                         BOOST_LOG_OWL(error) << "MultiCast do_receive() ec " << ec.what();
@@ -143,19 +161,43 @@ namespace OwlMultiCast {
 
         void do_response() {
 
+            BOOST_LOG_OWL(trace_multicast) << "MultiCast do_response() "
+                                           << "receiver_endpoint_ "
+                                           << receiver_endpoint_.address() << ":" << receiver_endpoint_.port()
+                                           << " " << response_message_;
+
             sender_socket_.async_send_to(
                     boost::asio::buffer(response_message_), receiver_endpoint_,
                     [this](boost::system::error_code ec, std::size_t /*length*/) {
-                        do_receive();
+                        if (ec == boost::asio::error::operation_aborted) {
+                            BOOST_LOG_OWL(trace_multicast) << "MultiCast do_response() ec operation_aborted";
+                            return;
+                        }
+                        if (!ec) {
+                            do_receive();
+                            return;
+                        }
+                        BOOST_LOG_OWL(error) << "MultiCast do_response() ec " << ec.what();
                     });
         }
+
+        // ======================================================================================================
 
         void do_send() {
 
             sender_socket_.async_send_to(
                     boost::asio::buffer(static_send_message_), sender_endpoint_,
                     [this](boost::system::error_code ec, std::size_t /*length*/) {
-                        do_timeout();
+                        if (ec == boost::asio::error::operation_aborted) {
+                            BOOST_LOG_OWL(trace_multicast) << "MultiCast do_send() ec operation_aborted";
+                            return;
+                        }
+                        if (!ec) {
+                            BOOST_LOG_OWL(trace_multicast) << "MultiCast do_send() wait to send next";
+                            do_timeout();
+                            return;
+                        }
+                        BOOST_LOG_OWL(error) << "MultiCast do_send() ec operation_aborted";
                     });
         }
 
@@ -164,9 +206,10 @@ namespace OwlMultiCast {
             timer_.async_wait(
                     [this](boost::system::error_code ec) {
                         if (ec == boost::asio::error::operation_aborted) {
-                            BOOST_LOG_OWL(info) << "MultiCast do_timeout() ec operation_aborted";
+                            BOOST_LOG_OWL(trace_multicast) << "MultiCast do_timeout() ec operation_aborted";
                             return;
                         }
+                        BOOST_LOG_OWL(trace_multicast) << "MultiCast do_timeout() to send next";
                         do_send();
                     });
         }
