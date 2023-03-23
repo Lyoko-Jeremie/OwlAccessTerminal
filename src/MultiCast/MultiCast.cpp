@@ -25,7 +25,10 @@ namespace OwlMultiCast {
                         BOOST_LOG_OWL(trace_multicast) << "MultiCast do_receive() ec operation_aborted";
                         return;
                     }
-                    BOOST_LOG_OWL(error) << "MultiCast do_receive() ec " << ec.what();
+                    if (ec) {
+                        BOOST_LOG_OWL(error) << "MultiCast do_receive() ec " << ec;
+                        return;
+                    }
                 });
     }
 
@@ -86,15 +89,18 @@ namespace OwlMultiCast {
         sender_socket_.async_send_to(
                 boost::asio::buffer(response_message_), receiver_endpoint_,
                 [this, sef = shared_from_this()](boost::system::error_code ec, std::size_t /*length*/) {
-                    if (ec == boost::asio::error::operation_aborted) {
-                        BOOST_LOG_OWL(trace_multicast) << "MultiCast do_response() ec operation_aborted";
-                        return;
-                    }
                     if (!ec) {
                         do_receive();
                         return;
                     }
-                    BOOST_LOG_OWL(error) << "MultiCast do_response() ec " << ec.what();
+                    if (ec == boost::asio::error::operation_aborted) {
+                        BOOST_LOG_OWL(trace_multicast) << "MultiCast do_response() ec operation_aborted";
+                        return;
+                    }
+                    if (ec) {
+                        BOOST_LOG_OWL(error) << "MultiCast do_response() ec " << ec;
+                        return;
+                    }
                 });
     }
 
@@ -104,19 +110,23 @@ namespace OwlMultiCast {
 
     void MultiCast::do_send() {
 
+        timer_.cancel();
         sender_socket_.async_send_to(
                 boost::asio::buffer(static_send_message_), sender_endpoint_,
                 [this, sef = shared_from_this()](boost::system::error_code ec, std::size_t /*length*/) {
-                    if (ec == boost::asio::error::operation_aborted) {
-                        BOOST_LOG_OWL(trace_multicast) << "MultiCast do_send() ec operation_aborted";
-                        return;
-                    }
                     if (!ec) {
                         BOOST_LOG_OWL(trace_multicast) << "MultiCast do_send() wait to send next";
                         do_timeout();
                         return;
                     }
-                    BOOST_LOG_OWL(error) << "MultiCast do_send() ec operation_aborted";
+                    if (ec == boost::asio::error::operation_aborted) {
+                        BOOST_LOG_OWL(trace_multicast) << "MultiCast do_send() ec operation_aborted";
+                        return;
+                    }
+                    if (ec) {
+                        BOOST_LOG_OWL(error) << "MultiCast do_send() ec " << ec;
+                        return;
+                    }
                 });
     }
 
@@ -124,12 +134,19 @@ namespace OwlMultiCast {
         timer_.expires_after(std::chrono::seconds(multicast_interval_));
         timer_.async_wait(
                 [this, sef = shared_from_this()](boost::system::error_code ec) {
+                    timer_.cancel();
+                    if (!ec) {
+                        BOOST_LOG_OWL(trace_multicast) << "MultiCast do_timeout() to send next";
+                        do_send();
+                    }
                     if (ec == boost::asio::error::operation_aborted) {
                         BOOST_LOG_OWL(trace_multicast) << "MultiCast do_timeout() ec operation_aborted";
                         return;
                     }
-                    BOOST_LOG_OWL(trace_multicast) << "MultiCast do_timeout() to send next";
-                    do_send();
+                    if (ec) {
+                        BOOST_LOG_OWL(error) << "MultiCast do_timeout() ec " << ec;
+                        return;
+                    }
                 });
     }
 
