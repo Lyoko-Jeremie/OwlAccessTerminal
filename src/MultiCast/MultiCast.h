@@ -15,8 +15,9 @@
 namespace OwlMultiCast {
 
     enum {
-        UDP_Package_Max_Size = (1024 * 1024 * 6)
-    }; // 6M
+        UDP_Package_Max_Size = (1024 * 1024 * 6), // 6M
+        JSON_Package_Max_Size = (1024 * 1024 * 6), // 6M
+    };
 
     class MultiCast : public boost::enable_shared_from_this<MultiCast> {
     public:
@@ -29,7 +30,10 @@ namespace OwlMultiCast {
             mailbox_(mailbox),
             timer_(ioc_),
             sender_socket_(ioc_),
-            listen_socket_(ioc_) {
+            listen_socket_(ioc_),
+            json_storage_(std::make_unique<decltype(json_storage_)::element_type>(JSON_Package_Max_Size, 0)),
+            json_storage_resource_(std::make_unique<decltype(json_storage_resource_)::element_type>
+                                           (json_storage_->data(), json_storage_->size())) {
 
             // multicast_port_
             // listen_address_
@@ -53,6 +57,9 @@ namespace OwlMultiCast {
             // notice all client i am here
             static_send_message_ = R"({"MultiCast":"Notice"})";
 
+        }
+
+        void start() {
             BOOST_LOG_OWL(trace_multicast) << "MultiCast start";
             do_receive();
             do_send();
@@ -83,9 +90,13 @@ namespace OwlMultiCast {
 
 
         boost::json::parse_options json_parse_options_;
+        std::unique_ptr<std::vector<unsigned char>> json_storage_;
+        std::unique_ptr<boost::json::static_resource> json_storage_resource_;
 
         std::string static_send_message_;
         std::string response_message_;
+
+
     public:
 
     private:
@@ -115,7 +126,7 @@ namespace OwlMultiCast {
             boost::json::value json_v = boost::json::parse(
                     data,
                     ecc,
-                    {},
+                    &*json_storage_resource_,
                     json_parse_options_
             );
             if (ecc) {
@@ -146,7 +157,7 @@ namespace OwlMultiCast {
         void do_receive() {
             listen_socket_.async_receive_from(
                     boost::asio::buffer(receive_data_), receiver_endpoint_,
-                    [this](boost::system::error_code ec, std::size_t length) {
+                    [this, sef = shared_from_this()](boost::system::error_code ec, std::size_t length) {
                         if (!ec) {
                             do_receive_json(length);
                             return;
@@ -168,7 +179,7 @@ namespace OwlMultiCast {
 
             sender_socket_.async_send_to(
                     boost::asio::buffer(response_message_), receiver_endpoint_,
-                    [this](boost::system::error_code ec, std::size_t /*length*/) {
+                    [this, sef = shared_from_this()](boost::system::error_code ec, std::size_t /*length*/) {
                         if (ec == boost::asio::error::operation_aborted) {
                             BOOST_LOG_OWL(trace_multicast) << "MultiCast do_response() ec operation_aborted";
                             return;
@@ -187,7 +198,7 @@ namespace OwlMultiCast {
 
             sender_socket_.async_send_to(
                     boost::asio::buffer(static_send_message_), sender_endpoint_,
-                    [this](boost::system::error_code ec, std::size_t /*length*/) {
+                    [this, sef = shared_from_this()](boost::system::error_code ec, std::size_t /*length*/) {
                         if (ec == boost::asio::error::operation_aborted) {
                             BOOST_LOG_OWL(trace_multicast) << "MultiCast do_send() ec operation_aborted";
                             return;
@@ -204,7 +215,7 @@ namespace OwlMultiCast {
         void do_timeout() {
             timer_.expires_after(std::chrono::seconds(1));
             timer_.async_wait(
-                    [this](boost::system::error_code ec) {
+                    [this, sef = shared_from_this()](boost::system::error_code ec) {
                         if (ec == boost::asio::error::operation_aborted) {
                             BOOST_LOG_OWL(trace_multicast) << "MultiCast do_timeout() ec operation_aborted";
                             return;
