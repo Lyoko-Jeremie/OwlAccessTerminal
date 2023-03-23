@@ -371,6 +371,7 @@ int main(int argc, const char *argv[]) {
                 ioc_time.stop();
                 ioc_imageWeb.stop();
                 ioc_cameraReader.stop();
+                ioc_multicast.stop();
 #ifdef EnableWebStaticModule
                 ioc_web_static.stop();
 #endif // EnableWebStaticModule
