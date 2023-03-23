@@ -62,6 +62,7 @@ endif (DEFAULT_CONFIG)
 
 #set(DEBUG_log_MAP ON)
 set(DEBUG_log_sp_tag ON)
+#set(DEBUG_log_multicast ON)
 
 if (DEBUG_BOOST_ASIO)
     add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)

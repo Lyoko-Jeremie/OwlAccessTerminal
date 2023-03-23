@@ -25,7 +25,7 @@ namespace OwlMultiCast {
     void MultiCast::do_receive_json(std::size_t length) {
         auto data = std::string{receive_data_.data(), receive_data_.data() + length};
         BOOST_LOG_OWL(trace_multicast) << "MultiCast do_receive_json() data"
-                                       << "receiver_endpoint_ "
+                                       << " receiver_endpoint_ "
                                        << receiver_endpoint_.address() << ":" << receiver_endpoint_.port()
                                        << " " << data;
         boost::system::error_code ecc;
@@ -59,6 +59,9 @@ namespace OwlMultiCast {
             return;
         }
         // now we receive a Query package, so we need response it
+        BOOST_LOG_OWL(trace) << "MultiCast do_receive_json() we receive a Query package come from: \n"
+                                       << "receiver_endpoint_ "
+                                       << receiver_endpoint_.address() << ":" << receiver_endpoint_.port();
 
         // TODO response_message_
         response_message_ = R"({"MultiCast","Response"})";
@@ -110,7 +113,7 @@ namespace OwlMultiCast {
     }
 
     void MultiCast::do_timeout() {
-        timer_.expires_after(std::chrono::seconds(1));
+        timer_.expires_after(std::chrono::seconds(multicast_interval_));
         timer_.async_wait(
                 [this, sef = shared_from_this()](boost::system::error_code ec) {
                     if (ec == boost::asio::error::operation_aborted) {

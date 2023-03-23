@@ -70,6 +70,7 @@ namespace OwlMultiCast {
         boost::shared_ptr<OwlConfigLoader::ConfigLoader> config_;
         OwlMailDefine::ControlMulticastMailbox mailbox_;
 
+        int multicast_interval_ = 15;
         boost::asio::steady_timer timer_;
 
         boost::asio::ip::address multicast_address_{boost::asio::ip::make_address("239.255.0.1")};
