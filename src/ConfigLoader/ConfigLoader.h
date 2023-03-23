@@ -121,6 +121,11 @@ namespace OwlConfigLoader {
         int camera_read_retry_ms = 30;
         int camera_read_retry_times = 2;
 
+        std::string multicast_address = "239.255.0.1";
+        int multicast_port = 30003;
+        std::string listen_address = "0.0.0.0";
+        int multicast_interval_seconds = 15;
+
         void fix_camera_read_() {
             camera_read_max_ms = camera_read_max_ms > 0 ? camera_read_max_ms : 600;
             camera_read_retry_ms = camera_read_retry_ms > 0 ? camera_read_retry_ms : 30;

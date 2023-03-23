@@ -196,6 +196,11 @@ namespace OwlConfigLoader {
         config.camera_read_retry_ms = get(root, "camera_read_retry_ms", config.camera_read_retry_ms);
         config.camera_read_retry_times = get(root, "camera_read_retry_times", config.camera_read_retry_times);
 
+        config.multicast_address = get(root, "multicast_address", config.multicast_address);
+        config.multicast_port = get(root, "multicast_port", config.multicast_port);
+        config.listen_address = get(root, "listen_address", config.listen_address);
+        config.multicast_interval_seconds = get(root, "multicast_interval_seconds", config.multicast_interval_seconds);
+
         config.fix_camera_read_();
 
         getAtomic(root, "downCameraId", config.downCameraId);
@@ -261,6 +266,10 @@ namespace OwlConfigLoader {
             << "\n" << "camera_read_retry_times " << config.camera_read_retry_times
             << "\n" << "downCameraId " << config.downCameraId.load()
             << "\n" << "frontCameraId " << config.frontCameraId.load()
+            << "\n" << "multicast_address " << config.multicast_address
+            << "\n" << "multicast_port " << config.multicast_port
+            << "\n" << "listen_address " << config.listen_address
+            << "\n" << "multicast_interval_seconds " << config.multicast_interval_seconds
             << "\n" << "cmd_bash_path " << config.cmd_bash_path
             << "\n" << "js_map_calc_file " << config.js_map_calc_file
             << "\n" << "js_map_calc_function_name " << config.js_map_calc_function_name

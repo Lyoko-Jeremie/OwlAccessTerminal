@@ -35,9 +35,11 @@ namespace OwlMultiCast {
             json_storage_resource_(std::make_unique<decltype(json_storage_resource_)::element_type>
                                            (json_storage_->data(), json_storage_->size())) {
 
-            // multicast_port_
-            // listen_address_
-            // multicast_address_
+            const auto &c = config_->config();
+            multicast_address_.from_string(c.multicast_address);
+            multicast_port_ = c.multicast_port;
+            listen_address_.from_string(c.listen_address);
+            multicast_interval_ = c.multicast_interval_seconds;
 
             sender_endpoint_ = decltype(sender_endpoint_){multicast_address_, multicast_port_};
             sender_socket_.open(sender_endpoint_.protocol());
