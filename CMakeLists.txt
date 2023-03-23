@@ -56,6 +56,9 @@ if (DEFAULT_CONFIG)
     # ===================== ^^^^^^ config segment ^^^^^^ =================================
 endif (DEFAULT_CONFIG)
 
+
+# ============================================================================================
+
 #set(DEBUG_BOOST_ASIO ON)
 #set(DEBUG_IF_CHECK_POINT ON)
 #set(DEBUG_Mailbox ON)
@@ -63,6 +66,10 @@ endif (DEFAULT_CONFIG)
 #set(DEBUG_log_MAP ON)
 set(DEBUG_log_sp_tag ON)
 #set(DEBUG_log_multicast ON)
+
+
+# ============================================================================================
+
 
 if (DEBUG_BOOST_ASIO)
     add_definitions(-DBOOST_ASIO_ENABLE_HANDLER_TRACKING)
@@ -128,6 +135,9 @@ endif (StateReaderImpl_UseNormal)
 add_definitions(-DBOOST_ENABLE_ASSERT_HANDLER)  #
 
 
+# ============================================================================================
+
+
 add_subdirectory(src/ExternLib/quickjspp/quickjs)
 add_library(quickjspp INTERFACE)
 target_link_libraries(quickjspp INTERFACE quickjs ${CMAKE_REQUIRED_LIBRARIES})
@@ -138,8 +148,15 @@ set_target_properties(quickjspp PROPERTIES PUBLIC_HEADER quickjspp.hpp)
 target_compile_options(quickjspp INTERFACE -Wno-unused-variable)
 
 
+# ============================================================================================
+
+
 message(STATUS "PROTOBUFF_INCLUDE_DIRS: ${PROTOBUFF_INCLUDE_DIRS}")
 message(STATUS "PROTOBUFF_LIBS: ${PROTOBUFF_LIBS}")
+
+
+# ============================================================================================
+
 
 option(USE_DYNAMIC_BOOST "Config USE_DYNAMIC_BOOST")
 
@@ -177,11 +194,19 @@ set(Boost_USE_MULTITHREADED ON)
 #find_package(Boost REQUIRED COMPONENTS  REQUIRED)
 find_package(Boost 1.81.0 REQUIRED COMPONENTS system filesystem program_options json log log_setup url ${BOOST_THEAD_MODULE} REQUIRED)
 
+
+# ============================================================================================
+
+
 if (OpenCV_WORLD)
     find_package(OpenCV REQUIRED world)
 else (OpenCV_WORLD)
     find_package(OpenCV REQUIRED core imgcodecs aruco)
 endif (OpenCV_WORLD)
+
+
+# ============================================================================================
+
 
 if (EnableWebStaticModule)
     add_definitions(-DEnableWebStaticModule=1)
@@ -197,6 +222,10 @@ if (EnableWebStaticModule)
             src/WebControlService/WebCmdMail.h
             )
 endif (EnableWebStaticModule)
+
+
+# ============================================================================================
+
 
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
@@ -214,6 +243,9 @@ message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARIES}")
 message(STATUS "Boost_VERSION: ${Boost_VERSION}")
 
 message(STATUS "CMAKE_THREAD_LIBS_INIT: ${CMAKE_THREAD_LIBS_INIT}")
+
+
+# ============================================================================================
 
 
 # https://www.mattkeeter.com/blog/2018-01-06-versioning/
@@ -266,6 +298,10 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/VERSION/CodeVersion.h.in
         ${CMAKE_CURRENT_SOURCE_DIR}/src/VERSION/CodeVersion.h)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+
+# ============================================================================================
+
 
 add_executable(${ProjectMainName}
         src/VERSION/CodeVersion.h
@@ -324,7 +360,11 @@ add_executable(${ProjectMainName}
         src/VERSION/ProgramVersion.h
         src/MemoryBoost.h
         src/MultiCast/MultiCast.cpp
-        src/MultiCast/MultiCast.h src/MultiCast/ControlMulticastMail.h)
+        src/MultiCast/MultiCast.h
+        src/MultiCast/ControlMulticastMail.h)
+
+
+# ============================================================================================
 
 
 if (EnableWebStaticModule)
