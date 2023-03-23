@@ -11,10 +11,12 @@
 #include "CommandService/CommandService.h"
 #include "CommandService/CmdServiceHttp.h"
 #include "CommandService/SerialController.h"
+
 #ifdef EnableWebStaticModule
 #include "WebControlService/CmdExecute.h"
 #include "WebControlService/EmbedWebServer/EmbedWebServer.h"
 #endif // EnableWebStaticModule
+
 #include "ImageService/ImageService.h"
 #include "ImageService/ImageServiceHttp.h"
 #include "ImageService/CameraReader.h"
@@ -22,6 +24,8 @@
 #include "TimeService/TimeService.h"
 #include "MapCalc/MapCalcMail.h"
 #include "MapCalc/MapCalc.h"
+#include "MultiCast/ControlMulticastMail.h"
+#include "MultiCast/MultiCast.h"
 
 #include "ImageService/protobuf_test.h"
 
@@ -198,7 +202,7 @@ int main(int argc, const char *argv[]) {
                   ", Boost " << BOOST_LIB_VERSION <<
                   ", ProtoBuf " << GOOGLE_PROTOBUF_VERSION <<
                   ", OpenCV " << CV_VERSION
-                  ", BUILD_DATETIME " << CodeVersion_BUILD_DATETIME
+                                 ", BUILD_DATETIME " << CodeVersion_BUILD_DATETIME
                   << std::endl;
         return 0;
     }
@@ -310,6 +314,17 @@ int main(int argc, const char *argv[]) {
     );
     cameraReader->start();
 
+    boost::asio::io_context ioc_multicast;
+    auto mailbox_control_multicast = boost::make_shared<OwlMailDefine::ControlMulticastMailbox::element_type>(
+            ioc_imageWeb, ioc_multicast, "mailbox_control_multicast"
+    );
+    auto multiCastServer = boost::make_shared<OwlMultiCast::MultiCast>(
+            ioc_multicast,
+            config->shared_from_this(),
+            mailbox_control_multicast->shared_from_this()
+    );
+    multiCastServer->start();
+
 
 #ifdef EnableWebStaticModule
     boost::asio::io_context ioc_web_static;
@@ -378,6 +393,7 @@ int main(int argc, const char *argv[]) {
     tg.create_thread(ThreadCallee{ioc_imageWeb, tg, "ioc_imageWeb"});
     tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 1"});
     tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 2"});
+    tg.create_thread(ThreadCallee{ioc_multicast, tg, "ioc_multicast"});
 #ifdef EnableWebStaticModule
     tg.create_thread(ThreadCallee{ioc_web_static, tg, "ioc_web_static"});
 #endif // EnableWebStaticModule
