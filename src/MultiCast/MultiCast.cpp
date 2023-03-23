@@ -47,7 +47,7 @@ namespace OwlMultiCast {
                 json_parse_options_
         );
         if (ecc) {
-            BOOST_LOG_OWL(warning) << "MultiCast do_receive_json() invalid package";
+            BOOST_LOG_OWL(warning) << "MultiCast do_receive_json() invalid package " << ecc;
             do_receive();
             return;
         }
@@ -75,7 +75,7 @@ namespace OwlMultiCast {
                              << receiver_endpoint_.address() << ":" << receiver_endpoint_.port();
 
         // TODO response_message_
-        response_message_ = R"({"MultiCast","Response"})";
+        response_message_ = R"({"MultiCast":"Response"})";
         do_response();
     }
 
