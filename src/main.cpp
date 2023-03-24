@@ -201,8 +201,8 @@ int main(int argc, const char *argv[]) {
                   ", CodeVersion_GIT_BRANCH " << CodeVersion_GIT_BRANCH <<
                   ", Boost " << BOOST_LIB_VERSION <<
                   ", ProtoBuf " << GOOGLE_PROTOBUF_VERSION <<
-                  ", OpenCV " << CV_VERSION
-                                 ", BUILD_DATETIME " << CodeVersion_BUILD_DATETIME
+                  ", OpenCV " << CV_VERSION <<
+                  ", BUILD_DATETIME " << CodeVersion_BUILD_DATETIME
                   << std::endl;
         return 0;
     }
