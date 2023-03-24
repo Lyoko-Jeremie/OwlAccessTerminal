@@ -43,6 +43,7 @@ namespace OwlMultiCast {
 
             sender_endpoint_ = decltype(sender_endpoint_){multicast_address_, multicast_port_};
             sender_socket_.open(sender_endpoint_.protocol());
+            sender_socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true));
 
             listen_endpoint_ = decltype(listen_endpoint_){listen_address_, multicast_port_};
             listen_socket_.open(listen_endpoint_.protocol());
