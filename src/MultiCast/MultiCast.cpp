@@ -61,7 +61,7 @@ namespace OwlMultiCast {
         if (multiCastFlag != "Query") {
             if (multiCastFlag == "Notice") {
                 // simple ignore Notice package, it many come from self or neighbor
-                do_response();
+                do_receive();
                 return;
             }
             // ignore it
