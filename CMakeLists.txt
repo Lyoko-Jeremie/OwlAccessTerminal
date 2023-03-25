@@ -65,7 +65,8 @@ endif (DEFAULT_CONFIG)
 
 #set(DEBUG_log_MAP ON)
 set(DEBUG_log_sp_tag ON)
-#set(DEBUG_log_multicast ON)
+set(DEBUG_log_multicast ON)
+set(DEBUG_log_JSON ON)
 
 
 # ============================================================================================
@@ -163,7 +164,7 @@ option(USE_DYNAMIC_BOOST "Config USE_DYNAMIC_BOOST")
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "enable -O1 when debug to resolve 'string table overflow at offset' 'too big' error on mingw")
     # -O1 to resolve "string table overflow at offset" error on mingw
-    add_definitions(-Wall -Wextra -O1 -g)
+    add_compile_options(-Wall -Wextra -O1 -g)
 endif ()
 
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
