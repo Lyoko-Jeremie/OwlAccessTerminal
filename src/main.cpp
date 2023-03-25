@@ -323,7 +323,9 @@ int main(int argc, const char *argv[]) {
             config->shared_from_this(),
             mailbox_control_multicast->shared_from_this()
     );
-    multiCastServer->start();
+    if (!config->config().disable_multicast) {
+        multiCastServer->start();
+    }
 
 
 #ifdef EnableWebStaticModule

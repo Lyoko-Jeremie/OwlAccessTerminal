@@ -132,6 +132,8 @@ namespace OwlConfigLoader {
             camera_read_retry_times = camera_read_retry_times > 0 ? camera_read_retry_times : 2;
         }
 
+        int disable_multicast = 0;
+
         std::string cmd_bash_path = "/bin/bash";
 
         std::string js_map_calc_file = "map_calc.js";

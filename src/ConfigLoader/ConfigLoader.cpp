@@ -211,6 +211,8 @@ namespace OwlConfigLoader {
         config.js_map_calc_file = get(root, "js_map_calc_file", config.js_map_calc_file);
         config.js_map_calc_function_name = get(root, "js_map_calc_function_name", config.js_map_calc_function_name);
 
+        config.disable_multicast = get(root, "disable_multicast", config.disable_multicast);
+
 #ifdef EnableWebStaticModule
         if (root.contains("embedWebServer")) {
             auto embedWebServer = getObj(root, "embedWebServer");
@@ -271,6 +273,7 @@ namespace OwlConfigLoader {
             << "\n" << "listen_address " << config.listen_address
             << "\n" << "multicast_interval_seconds " << config.multicast_interval_seconds
             << "\n" << "cmd_bash_path " << config.cmd_bash_path
+            << "\n" << "disable_multicast " << config.disable_multicast
             << "\n" << "js_map_calc_file " << config.js_map_calc_file
             << "\n" << "js_map_calc_function_name " << config.js_map_calc_function_name
             #ifdef EnableWebStaticModule
