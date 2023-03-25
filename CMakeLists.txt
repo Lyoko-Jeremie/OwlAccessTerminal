@@ -65,8 +65,7 @@ endif (DEFAULT_CONFIG)
 
 #set(DEBUG_log_MAP ON)
 set(DEBUG_log_sp_tag ON)
-set(DEBUG_log_multicast ON)
-set(DEBUG_log_JSON ON)
+#set(DEBUG_log_multicast ON)
 
 
 # ============================================================================================
