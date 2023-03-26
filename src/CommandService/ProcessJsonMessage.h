@@ -45,11 +45,15 @@ namespace OwlProcessJsonMessage {
             SelfPtrType self,
             boost::json::object &joyConGyro,
             int cmdId,
-            int packageId
+            int packageId,
+            int clientId
     ) {
         try {
             auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
             m->additionCmd = OwlMailDefine::AdditionCmd::JoyConGyro;
+            m->cmdId = cmdId;
+            m->packageId = packageId;
+            m->clientId = clientId;
             m->joyConGyroPtr = boost::make_shared<OwlMailDefine::JoyConGyro>();
             bool good = true;
             m->joyConGyroPtr->x = getFromJsonObject<int16_t>(joyConGyro, "x", good);
@@ -70,13 +74,14 @@ namespace OwlProcessJsonMessage {
                 );
                 return;
             }
-            m->callbackRunner = [self, cmdId, packageId](
+            m->callbackRunner = [self, cmdId, packageId, clientId](
                     OwlMailDefine::MailSerial2Cmd data
             ) {
                 self->send_back_json(
                         boost::json::value{
                                 {"cmdId",     cmdId},
                                 {"packageId", packageId},
+                                {"clientId",  clientId},
                                 {"msg",       "keep"},
                                 // {"result",    true},
                                 {"result",    data->ok},
@@ -116,11 +121,15 @@ namespace OwlProcessJsonMessage {
             SelfPtrType self,
             boost::json::object &joyConSimple,
             int cmdId,
-            int packageId
+            int packageId,
+            int clientId
     ) {
         try {
             auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
             m->additionCmd = OwlMailDefine::AdditionCmd::JoyConSimple;
+            m->cmdId = cmdId;
+            m->packageId = packageId;
+            m->clientId = clientId;
             m->joyConPtr = boost::make_shared<OwlMailDefine::JoyCon>();
             bool good = true;
             m->joyConPtr->leftRockerX = getFromJsonObject<int16_t>(joyConSimple, "leftRockerX", good);
@@ -144,13 +153,14 @@ namespace OwlProcessJsonMessage {
                 );
                 return;
             }
-            m->callbackRunner = [self, cmdId, packageId](
+            m->callbackRunner = [self, cmdId, packageId, clientId](
                     OwlMailDefine::MailSerial2Cmd data
             ) {
                 self->send_back_json(
                         boost::json::value{
                                 {"cmdId",     cmdId},
                                 {"packageId", packageId},
+                                {"clientId",  clientId},
                                 {"msg",       "keep"},
                                 // {"result",    true},
                                 {"result",    data->ok},
@@ -190,11 +200,15 @@ namespace OwlProcessJsonMessage {
             SelfPtrType self,
             boost::json::object &joyCon,
             int cmdId,
-            int packageId
+            int packageId,
+            int clientId
     ) {
         try {
             auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
             m->additionCmd = OwlMailDefine::AdditionCmd::JoyCon;
+            m->cmdId = cmdId;
+            m->packageId = packageId;
+            m->clientId = clientId;
             m->joyConPtr = boost::make_shared<OwlMailDefine::JoyCon>();
             bool good = true;
             m->joyConPtr->leftRockerX = getFromJsonObject<int16_t>(joyCon, "leftRockerX", good);
@@ -226,13 +240,14 @@ namespace OwlProcessJsonMessage {
                 );
                 return;
             }
-            m->callbackRunner = [self, cmdId, packageId](
+            m->callbackRunner = [self, cmdId, packageId, clientId](
                     OwlMailDefine::MailSerial2Cmd data
             ) {
                 self->send_back_json(
                         boost::json::value{
                                 {"cmdId",     cmdId},
                                 {"packageId", packageId},
+                                {"clientId",  clientId},
                                 {"msg",       "keep"},
                                 // {"result",    true},
                                 {"result",    data->ok},
@@ -373,6 +388,11 @@ namespace OwlProcessJsonMessage {
                 );
                 return;
             }
+            bool goodClientId = true;
+            auto clientId = getFromJsonObject<int32_t>(json_o, "clientId", goodClientId);
+            if (!goodClientId) {
+                clientId = 0;
+            }
             switch (cmdId) {
                 case static_cast<int>(OwlCmdEnum::ping):
                     // ping-pong
@@ -381,6 +401,7 @@ namespace OwlProcessJsonMessage {
                             boost::json::value{
                                     {"cmdId",     cmdId},
                                     {"packageId", packageId},
+                                    {"clientId",  clientId},
                                     {"msg",       "pong"},
                                     {"result",    true},
                             }
@@ -391,13 +412,17 @@ namespace OwlProcessJsonMessage {
                     BOOST_LOG_OWL(trace_json) << "calibrate";
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::calibrate;
-                    m->callbackRunner = [self, cmdId, packageId](
+                    m->cmdId = cmdId;
+                    m->packageId = packageId;
+                    m->clientId = clientId;
+                    m->callbackRunner = [self, cmdId, packageId, clientId](
                             const OwlMailDefine::MailSerial2Cmd &data
                     ) {
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "calibrate"},
                                         // {"result",    true},
                                         {"result",    data->ok},
@@ -413,13 +438,17 @@ namespace OwlProcessJsonMessage {
                     BOOST_LOG_OWL(trace_json) << "emergencyStop";
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::emergencyStop;
-                    m->callbackRunner = [self, cmdId, packageId](
+                    m->cmdId = cmdId;
+                    m->packageId = packageId;
+                    m->clientId = clientId;
+                    m->callbackRunner = [self, cmdId, packageId, clientId](
                             const OwlMailDefine::MailSerial2Cmd &data
                     ) {
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "emergencyStop"},
                                         // {"result",    true},
                                         {"result",    data->ok},
@@ -435,13 +464,17 @@ namespace OwlProcessJsonMessage {
                     BOOST_LOG_OWL(trace_json) << "unlock";
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::unlock;
-                    m->callbackRunner = [self, cmdId, packageId](
+                    m->cmdId = cmdId;
+                    m->packageId = packageId;
+                    m->clientId = clientId;
+                    m->callbackRunner = [self, cmdId, packageId, clientId](
                             const OwlMailDefine::MailSerial2Cmd &data
                     ) {
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "unlock"},
                                         // {"result",    true},
                                         {"result",    data->ok},
@@ -457,13 +490,17 @@ namespace OwlProcessJsonMessage {
                     BOOST_LOG_OWL(trace_json) << "break";
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::stop;
-                    m->callbackRunner = [self, cmdId, packageId](
+                    m->cmdId = cmdId;
+                    m->packageId = packageId;
+                    m->clientId = clientId;
+                    m->callbackRunner = [self, cmdId, packageId, clientId](
                             const OwlMailDefine::MailSerial2Cmd &data
                     ) {
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "break"},
                                         // {"result",    true},
                                         {"result",    data->ok},
@@ -483,6 +520,7 @@ namespace OwlProcessJsonMessage {
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "error"},
                                         {"error",     "takeoff (distance) not find"},
                                         {"result",    false},
@@ -518,15 +556,19 @@ namespace OwlProcessJsonMessage {
                     }
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::takeoff;
+                    m->cmdId = cmdId;
+                    m->packageId = packageId;
+                    m->clientId = clientId;
                     m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                     m->moveCmdPtr->y = int16_t(moveStepDistance);
-                    m->callbackRunner = [self, cmdId, packageId](
+                    m->callbackRunner = [self, cmdId, packageId, clientId](
                             const OwlMailDefine::MailSerial2Cmd &data
                     ) {
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "takeoff"},
                                         // {"result",    true},
                                         {"result",    data->ok},
@@ -542,14 +584,18 @@ namespace OwlProcessJsonMessage {
                     BOOST_LOG_OWL(trace_json) << "land";
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::land;
+                    m->cmdId = cmdId;
+                    m->packageId = packageId;
+                    m->clientId = clientId;
                     m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
-                    m->callbackRunner = [self, cmdId, packageId](
+                    m->callbackRunner = [self, cmdId, packageId, clientId](
                             const OwlMailDefine::MailSerial2Cmd &data
                     ) {
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "land"},
                                         // {"result",    true},
                                         {"result",    data->ok},
@@ -570,6 +616,7 @@ namespace OwlProcessJsonMessage {
                                     boost::json::value{
                                             {"cmdId",     cmdId},
                                             {"packageId", packageId},
+                                            {"clientId",  clientId},
                                             {"msg",       "error"},
                                             {"error",     "move step (forward||distance) not find"},
                                             {"result",    false},
@@ -608,15 +655,19 @@ namespace OwlProcessJsonMessage {
                                 BOOST_LOG_OWL(trace_json) << "move up " << moveStepDistance;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
+                                m->cmdId = cmdId;
+                                m->packageId = packageId;
+                                m->clientId = clientId;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->y = int16_t(moveStepDistance);
-                                m->callbackRunner = [self, cmdId, packageId](
+                                m->callbackRunner = [self, cmdId, packageId, clientId](
                                         const OwlMailDefine::MailSerial2Cmd &data
                                 ) {
                                     self->send_back_json(
                                             boost::json::value{
                                                     {"cmdId",     cmdId},
                                                     {"packageId", packageId},
+                                                    {"clientId",  clientId},
                                                     {"msg",       "up"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
@@ -632,15 +683,19 @@ namespace OwlProcessJsonMessage {
                                 BOOST_LOG_OWL(trace_json) << "move down " << moveStepDistance;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
+                                m->cmdId = cmdId;
+                                m->packageId = packageId;
+                                m->clientId = clientId;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->y = int16_t(-moveStepDistance);
-                                m->callbackRunner = [self, cmdId, packageId](
+                                m->callbackRunner = [self, cmdId, packageId, clientId](
                                         const OwlMailDefine::MailSerial2Cmd &data
                                 ) {
                                     self->send_back_json(
                                             boost::json::value{
                                                     {"cmdId",     cmdId},
                                                     {"packageId", packageId},
+                                                    {"clientId",  clientId},
                                                     {"msg",       "down"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
@@ -656,15 +711,19 @@ namespace OwlProcessJsonMessage {
                                 BOOST_LOG_OWL(trace_json) << "move left " << moveStepDistance;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
+                                m->cmdId = cmdId;
+                                m->packageId = packageId;
+                                m->clientId = clientId;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->z = int16_t(-moveStepDistance);
-                                m->callbackRunner = [self, cmdId, packageId](
+                                m->callbackRunner = [self, cmdId, packageId, clientId](
                                         const OwlMailDefine::MailSerial2Cmd &data
                                 ) {
                                     self->send_back_json(
                                             boost::json::value{
                                                     {"cmdId",     cmdId},
                                                     {"packageId", packageId},
+                                                    {"clientId",  clientId},
                                                     {"msg",       "left"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
@@ -680,15 +739,19 @@ namespace OwlProcessJsonMessage {
                                 BOOST_LOG_OWL(trace_json) << "move right " << moveStepDistance;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
+                                m->cmdId = cmdId;
+                                m->packageId = packageId;
+                                m->clientId = clientId;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->z = int16_t(moveStepDistance);
-                                m->callbackRunner = [self, cmdId, packageId](
+                                m->callbackRunner = [self, cmdId, packageId, clientId](
                                         const OwlMailDefine::MailSerial2Cmd &data
                                 ) {
                                     self->send_back_json(
                                             boost::json::value{
                                                     {"cmdId",     cmdId},
                                                     {"packageId", packageId},
+                                                    {"clientId",  clientId},
                                                     {"msg",       "right"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
@@ -704,15 +767,19 @@ namespace OwlProcessJsonMessage {
                                 BOOST_LOG_OWL(trace_json) << "move forward " << moveStepDistance;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
+                                m->cmdId = cmdId;
+                                m->packageId = packageId;
+                                m->clientId = clientId;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->x = int16_t(moveStepDistance);
-                                m->callbackRunner = [self, cmdId, packageId](
+                                m->callbackRunner = [self, cmdId, packageId, clientId](
                                         const OwlMailDefine::MailSerial2Cmd &data
                                 ) {
                                     self->send_back_json(
                                             boost::json::value{
                                                     {"cmdId",     cmdId},
                                                     {"packageId", packageId},
+                                                    {"clientId",  clientId},
                                                     {"msg",       "forward"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
@@ -728,15 +795,19 @@ namespace OwlProcessJsonMessage {
                                 BOOST_LOG_OWL(trace_json) << "move back " << moveStepDistance;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::move;
+                                m->cmdId = cmdId;
+                                m->packageId = packageId;
+                                m->clientId = clientId;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->x = int16_t(-moveStepDistance);
-                                m->callbackRunner = [self, cmdId, packageId](
+                                m->callbackRunner = [self, cmdId, packageId, clientId](
                                         const OwlMailDefine::MailSerial2Cmd &data
                                 ) {
                                     self->send_back_json(
                                             boost::json::value{
                                                     {"cmdId",     cmdId},
                                                     {"packageId", packageId},
+                                                    {"clientId",  clientId},
                                                     {"msg",       "back"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
@@ -754,6 +825,7 @@ namespace OwlProcessJsonMessage {
                                         boost::json::value{
                                                 {"cmdId",     cmdId},
                                                 {"packageId", packageId},
+                                                {"clientId",  clientId},
                                                 {"msg",       "move ignore"},
                                                 {"result",    false},
                                         }
@@ -772,6 +844,7 @@ namespace OwlProcessJsonMessage {
                                     boost::json::value{
                                             {"cmdId",     cmdId},
                                             {"packageId", packageId},
+                                            {"clientId",  clientId},
                                             {"msg",       "error"},
                                             {"error",     "rotate (rotate||rote) not find"},
                                             {"result",    false},
@@ -810,15 +883,19 @@ namespace OwlProcessJsonMessage {
                                 BOOST_LOG_OWL(trace_json) << "rotate cw " << rote;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::rotate;
+                                m->cmdId = cmdId;
+                                m->packageId = packageId;
+                                m->clientId = clientId;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->cw = int16_t(rote);
-                                m->callbackRunner = [self, cmdId, packageId](
+                                m->callbackRunner = [self, cmdId, packageId, clientId](
                                         const OwlMailDefine::MailSerial2Cmd &data
                                 ) {
                                     self->send_back_json(
                                             boost::json::value{
                                                     {"cmdId",     cmdId},
                                                     {"packageId", packageId},
+                                                    {"clientId",  clientId},
                                                     {"msg",       "rotate cw"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
@@ -834,15 +911,19 @@ namespace OwlProcessJsonMessage {
                                 BOOST_LOG_OWL(trace_json) << "rotate ccw " << rote;
                                 auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                                 m->additionCmd = OwlMailDefine::AdditionCmd::rotate;
+                                m->cmdId = cmdId;
+                                m->packageId = packageId;
+                                m->clientId = clientId;
                                 m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                                 m->moveCmdPtr->cw = int16_t(-rote);
-                                m->callbackRunner = [self, cmdId, packageId](
+                                m->callbackRunner = [self, cmdId, packageId, clientId](
                                         OwlMailDefine::MailSerial2Cmd data
                                 ) {
                                     self->send_back_json(
                                             boost::json::value{
                                                     {"cmdId",     cmdId},
                                                     {"packageId", packageId},
+                                                    {"clientId",  clientId},
                                                     {"msg",       "rotate ccw"},
                                                     // {"result",    true},
                                                     {"result",    data->ok},
@@ -860,6 +941,7 @@ namespace OwlProcessJsonMessage {
                                         boost::json::value{
                                                 {"cmdId",     cmdId},
                                                 {"packageId", packageId},
+                                                {"clientId",  clientId},
                                                 {"msg",       "rotate ignore"},
                                                 {"result",    false},
                                         }
@@ -873,13 +955,17 @@ namespace OwlProcessJsonMessage {
                     BOOST_LOG_OWL(trace_json) << "keep";
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::keep;
-                    m->callbackRunner = [self, cmdId, packageId](
+                    m->cmdId = cmdId;
+                    m->packageId = packageId;
+                    m->clientId = clientId;
+                    m->callbackRunner = [self, cmdId, packageId, clientId](
                             OwlMailDefine::MailSerial2Cmd data
                     ) {
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "keep"},
                                         // {"result",    true},
                                         {"result",    data->ok},
@@ -899,6 +985,7 @@ namespace OwlProcessJsonMessage {
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "error"},
                                         {"error",     "gotoPosition (x||y||h) not find"},
                                         {"result",    false},
@@ -945,17 +1032,21 @@ namespace OwlProcessJsonMessage {
                     }
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::gotoPosition;
+                    m->cmdId = cmdId;
+                    m->packageId = packageId;
+                    m->clientId = clientId;
                     m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                     m->moveCmdPtr->x = static_cast<int16_t>(y);
                     m->moveCmdPtr->z = static_cast<int16_t>(x);
                     m->moveCmdPtr->y = static_cast<int16_t>(h);
-                    m->callbackRunner = [self, cmdId, packageId](
+                    m->callbackRunner = [self, cmdId, packageId, clientId](
                             OwlMailDefine::MailSerial2Cmd data
                     ) {
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "keep"},
                                         // {"result",    true},
                                         {"result",    data->ok},
@@ -976,6 +1067,7 @@ namespace OwlProcessJsonMessage {
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "error"},
                                         {"error",     "led (ledMode||x||y||h) not find"},
                                         {"result",    false},
@@ -1014,18 +1106,22 @@ namespace OwlProcessJsonMessage {
                     }
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::led;
+                    m->cmdId = cmdId;
+                    m->packageId = packageId;
+                    m->clientId = clientId;
                     m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                     m->moveCmdPtr->x = static_cast<int16_t>(b);
                     m->moveCmdPtr->y = static_cast<int16_t>(g);
                     m->moveCmdPtr->z = static_cast<int16_t>(r);
                     m->moveCmdPtr->cw = static_cast<int16_t>(ledMode);
-                    m->callbackRunner = [self, cmdId, packageId](
+                    m->callbackRunner = [self, cmdId, packageId, clientId](
                             OwlMailDefine::MailSerial2Cmd data
                     ) {
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "keep"},
                                         // {"result",    true},
                                         {"result",    data->ok},
@@ -1045,6 +1141,7 @@ namespace OwlProcessJsonMessage {
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "error"},
                                         {"error",     "high (high) not find"},
                                         {"result",    false},
@@ -1078,15 +1175,19 @@ namespace OwlProcessJsonMessage {
                     }
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::high;
+                    m->cmdId = cmdId;
+                    m->packageId = packageId;
+                    m->clientId = clientId;
                     m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                     m->moveCmdPtr->y = static_cast<int16_t>(high);
-                    m->callbackRunner = [self, cmdId, packageId](
+                    m->callbackRunner = [self, cmdId, packageId, clientId](
                             OwlMailDefine::MailSerial2Cmd data
                     ) {
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "keep"},
                                         // {"result",    true},
                                         {"result",    data->ok},
@@ -1106,6 +1207,7 @@ namespace OwlProcessJsonMessage {
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "error"},
                                         {"error",     "speed (speed) not find"},
                                         {"result",    false},
@@ -1139,15 +1241,19 @@ namespace OwlProcessJsonMessage {
                     }
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::speed;
+                    m->cmdId = cmdId;
+                    m->packageId = packageId;
+                    m->clientId = clientId;
                     m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                     m->moveCmdPtr->x = static_cast<int16_t>(speed);
-                    m->callbackRunner = [self, cmdId, packageId](
+                    m->callbackRunner = [self, cmdId, packageId, clientId](
                             OwlMailDefine::MailSerial2Cmd data
                     ) {
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "keep"},
                                         // {"result",    true},
                                         {"result",    data->ok},
@@ -1167,6 +1273,7 @@ namespace OwlProcessJsonMessage {
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "error"},
                                         {"error",     "flyMode (flyMode) not find"},
                                         {"result",    false},
@@ -1189,15 +1296,19 @@ namespace OwlProcessJsonMessage {
                     }
                     auto m = boost::make_shared<OwlMailDefine::Cmd2Serial>();
                     m->additionCmd = OwlMailDefine::AdditionCmd::flyMode;
+                    m->cmdId = cmdId;
+                    m->packageId = packageId;
+                    m->clientId = clientId;
                     m->moveCmdPtr = boost::make_shared<OwlMailDefine::MoveCmd>();
                     m->moveCmdPtr->x = static_cast<int16_t>(flyMode);
-                    m->callbackRunner = [self, cmdId, packageId](
+                    m->callbackRunner = [self, cmdId, packageId, clientId](
                             OwlMailDefine::MailSerial2Cmd data
                     ) {
                         self->send_back_json(
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "keep"},
                                         // {"result",    true},
                                         {"result",    data->ok},
@@ -1217,6 +1328,7 @@ namespace OwlProcessJsonMessage {
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "error"},
                                         {"error",     "JoyCon (JoyCon) not find"},
                                         {"result",    false},
@@ -1237,7 +1349,7 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
-                    analysisJoyCon(self, joyConObj.as_object(), cmdId, packageId);
+                    analysisJoyCon(self, joyConObj.as_object(), cmdId, packageId, clientId);
                     break;
                 }
                 case static_cast<int>(OwlCmdEnum::joyConSimple): {
@@ -1249,6 +1361,7 @@ namespace OwlProcessJsonMessage {
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "error"},
                                         {"error",     "JoyConSimple (JoyConSimple) not find"},
                                         {"result",    false},
@@ -1269,7 +1382,7 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
-                    analysisJoyConSimple(self, joyConSimpleObj.as_object(), cmdId, packageId);
+                    analysisJoyConSimple(self, joyConSimpleObj.as_object(), cmdId, packageId, clientId);
                     break;
                 }
                 case static_cast<int>(OwlCmdEnum::joyConGyro): {
@@ -1281,6 +1394,7 @@ namespace OwlProcessJsonMessage {
                                 boost::json::value{
                                         {"cmdId",     cmdId},
                                         {"packageId", packageId},
+                                        {"clientId",  clientId},
                                         {"msg",       "error"},
                                         {"error",     "JoyConGyro (JoyConGyro) not find"},
                                         {"result",    false},
@@ -1301,7 +1415,7 @@ namespace OwlProcessJsonMessage {
                         );
                         return;
                     }
-                    analysisJoyConGyro(self, joyConGyroObj.as_object(), cmdId, packageId);
+                    analysisJoyConGyro(self, joyConGyroObj.as_object(), cmdId, packageId, clientId);
                     break;
                 }
                 default:
@@ -1311,6 +1425,7 @@ namespace OwlProcessJsonMessage {
                             boost::json::value{
                                     {"cmdId",     cmdId},
                                     {"packageId", packageId},
+                                    {"clientId",  clientId},
                                     {"msg",       "ignore"},
                                     {"result",    false},
                             }

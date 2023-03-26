@@ -151,10 +151,30 @@ namespace OwlMailDefine {
 
     struct Serial2Cmd;
 
+    struct CmdPackageIdentify {
+        int32_t cmdId;
+        int32_t packageId;
+        int32_t clientId;
+
+        CmdPackageIdentify() = default;
+
+        CmdPackageIdentify(
+                int32_t cmdId_,
+                int32_t packageId_,
+                int32_t clientId_
+        ) : cmdId(cmdId_), packageId(packageId_), clientId(clientId_) {}
+
+    };
+
     struct Cmd2Serial : public boost::enable_shared_from_this<Cmd2Serial> {
 
         // AdditionCmd
         AdditionCmd additionCmd = AdditionCmd::ignore;
+
+        // static_cast<int>(OwlCmdEnum::ping)
+        int32_t cmdId;
+        int32_t packageId;
+        int32_t clientId;
 
         boost::shared_ptr<MoveCmd> moveCmdPtr;
         boost::shared_ptr<AprilTagCmd> aprilTagCmdPtr;
@@ -176,13 +196,13 @@ namespace OwlMailDefine {
 
         ~Cmd2Serial() {
             BOOST_LOG_OWL(trace_dtor) << "Cmd2Serial::~Cmd2Serial() "
-                                 << static_cast<std::underlying_type_t<AdditionCmd>>(additionCmd);
+                                      << static_cast<std::underlying_type_t<AdditionCmd>>(additionCmd);
             if (auto n = OwlMailDefine::AdditionCmdNameLookupTable.find(additionCmd);
                     n != OwlMailDefine::AdditionCmdNameLookupTable.end()) {
                 if (additionCmd != OwlMailDefine::AdditionCmd::ping) {
                     BOOST_LOG_OWL(trace_dtor) << "Cmd2Serial::~Cmd2Serial() "
-                                         << static_cast<std::underlying_type_t<AdditionCmd>>(additionCmd)
-                                         << " additionCmd : " << n->second;
+                                              << static_cast<std::underlying_type_t<AdditionCmd>>(additionCmd)
+                                              << " additionCmd : " << n->second;
                 }
             } else {
                 BOOST_LOG_OWL(warning) << "Cmd2Serial::~Cmd2Serial() unknown additionCmd : "

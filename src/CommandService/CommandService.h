@@ -91,7 +91,8 @@ namespace OwlCommandService {
                 SelfPtrType self,
                 boost::json::object &joyCon,
                 int cmdId,
-                int packageId
+                int packageId,
+                int32_t clientId
         );
 
         template<typename SelfType, typename SelfPtrType>
@@ -99,7 +100,8 @@ namespace OwlCommandService {
                 SelfPtrType self,
                 boost::json::object &joyCon,
                 int cmdId,
-                int packageId
+                int packageId,
+                int32_t clientId
         );
 
         template<typename SelfType, typename SelfPtrType>
@@ -107,7 +109,8 @@ namespace OwlCommandService {
                 SelfPtrType self,
                 boost::json::object &joyCon,
                 int cmdId,
-                int packageId
+                int packageId,
+                int32_t clientId
         );
 
         void send_back_json(const boost::json::value &json_value) override;
@@ -117,8 +120,40 @@ namespace OwlCommandService {
             data->runner(data);
         }
 
-        void sendMail(OwlMailDefine::MailCmd2Serial &&data) override {
+        // clientId-CmdPackageIdentify
+        std::map<size_t, OwlMailDefine::CmdPackageIdentify> cmdPackageIdentify;
+
+        void sendMail(OwlMailDefine::MailCmd2Serial &&data) {
             // send cmd to serial
+            if (data->clientId > 0) {
+                auto it = cmdPackageIdentify.find(data->clientId);
+                if (it == cmdPackageIdentify.end()) {
+                    cmdPackageIdentify.try_emplace(
+                            data->clientId,
+                            data->packageId,
+                            data->cmdId,
+                            data->clientId
+                    );
+                    // a new package with new client, go it
+                    mailbox_->sendA2B(std::move(data));
+                    return;
+                } else {
+                    auto a = it->second;
+                    if (a.packageId == data->packageId &&
+                        a.cmdId == data->cmdId &&
+                        a.clientId == data->clientId) {
+                        // a old package, ignore it
+                        return;
+                    } else {
+                        a.packageId = data->packageId;
+                        a.cmdId = data->cmdId;
+                        // a new package, go it
+                        mailbox_->sendA2B(std::move(data));
+                        return;
+                    }
+                }
+                return;
+            }
             mailbox_->sendA2B(std::move(data));
         }
 
