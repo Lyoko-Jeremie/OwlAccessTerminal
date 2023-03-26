@@ -14,6 +14,8 @@
 #include <boost/assert.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include "CmdSerialMail.h"
+#include "../VERSION/ProgramVersion.h"
+#include "../VERSION/CodeVersion.h"
 
 namespace OwlProcessJsonMessage {
 
@@ -404,6 +406,9 @@ namespace OwlProcessJsonMessage {
                                     {"clientId",  clientId},
                                     {"msg",       "pong"},
                                     {"result",    true},
+                                    {"Version",   ProgramVersion},
+                                    {"GitRev",    CodeVersion_GIT_REV},
+                                    {"BuildTime", CodeVersion_BUILD_DATETIME},
                             }
                     );
                     break;
