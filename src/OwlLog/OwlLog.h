@@ -22,6 +22,7 @@ namespace OwlLog {
         trace_cmd_sp_w,
         trace_cmd_sp_r,
         trace_map,
+        trace_camera_reader,
         trace_dtor,
         trace_json,
         trace_multicast,
