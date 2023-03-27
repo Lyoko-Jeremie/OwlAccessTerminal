@@ -55,15 +55,15 @@ namespace OwlQueryPairsAnalyser {
                     }
                 }
 
-                BOOST_LOG_OWL(info) << "query:" << query;
-                BOOST_LOG_OWL(info) << "queryList:";
-                for (const auto &a: queryList) {
-                    BOOST_LOG_OWL(info) << "\t" << a;
-                }
-                BOOST_LOG_OWL(info) << "queryPairs:";
-                for (const auto &a: queryPairs) {
-                    BOOST_LOG_OWL(info) << "\t" << a.first << " = " << a.second;
-                }
+//                BOOST_LOG_OWL(info) << "query:" << query;
+//                BOOST_LOG_OWL(info) << "queryList:";
+//                for (const auto &a: queryList) {
+//                    BOOST_LOG_OWL(info) << "\t" << a;
+//                }
+//                BOOST_LOG_OWL(info) << "queryPairs:";
+//                for (const auto &a: queryPairs) {
+//                    BOOST_LOG_OWL(info) << "\t" << a.first << " = " << a.second;
+//                }
 
             }
         }
