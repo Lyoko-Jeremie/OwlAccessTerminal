@@ -2,6 +2,7 @@
 
 #include "OwlLog.h"
 #include <boost/assert.hpp>
+#include <boost/stacktrace.hpp>
 
 namespace boost {
     void assertion_failed(char const *expr, char const *function, char const *file, long line) {
@@ -9,7 +10,8 @@ namespace boost {
             << "assertion_failed : [" << expr << "]"
             << " on function [" << function << "]"
             << " on file [" << file << "]"
-            << " at line [" << line << "]";
+            << " at line [" << line << "]"
+            << " stacktrace:\n" << boost::stacktrace::stacktrace();
         std::abort();
     }
 
@@ -19,7 +21,8 @@ namespace boost {
             << " msg [" << msg << "]"
             << " on function [" << function << "]"
             << " on file [" << file << "]"
-            << " at line [" << line << "]";
+            << " at line [" << line << "]"
+            << " stacktrace:\n" << boost::stacktrace::stacktrace();
         std::abort();
     }
 }
