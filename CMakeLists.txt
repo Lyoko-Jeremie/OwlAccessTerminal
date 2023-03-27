@@ -135,6 +135,12 @@ else (StateReaderImpl_UseNormal) # StateReaderImpl_UseCo
     add_definitions(-DUseStateReaderImplCo)
 endif (StateReaderImpl_UseNormal)
 
+if (CameraReaderGetImageImpl_UseNormal)
+    add_definitions(-DUseCameraReaderGetImageImpl)
+else (CameraReaderGetImageImpl_UseNormal) # CameraReaderGetImageImpl_UseCo
+    add_definitions(-DUseCameraReaderGetImageCoImpl)
+endif (CameraReaderGetImageImpl_UseNormal)
+
 # https://www.boost.org/doc/libs/1_81_0/libs/assert/doc/html/assert.html
 add_definitions(-DBOOST_ENABLE_ASSERT_HANDLER)  #
 
