@@ -41,18 +41,6 @@ namespace OwlMultiCast {
             listen_address_.from_string(c.listen_address);
             multicast_interval_ = c.multicast_interval_seconds;
 
-            sender_endpoint_ = decltype(sender_endpoint_){multicast_address_, multicast_port_};
-            sender_socket_.open(sender_endpoint_.protocol());
-            sender_socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-
-            listen_endpoint_ = decltype(listen_endpoint_){listen_address_, multicast_port_};
-            listen_socket_.open(listen_endpoint_.protocol());
-            listen_socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-            listen_socket_.bind(listen_endpoint_);
-
-            // Join the multicast group.
-            listen_socket_.set_option(boost::asio::ip::multicast::join_group(multicast_address_));
-
             json_parse_options_.allow_comments = true;
             json_parse_options_.allow_trailing_commas = true;
             json_parse_options_.max_depth = 5;
@@ -62,10 +50,52 @@ namespace OwlMultiCast {
 
         }
 
-        void start() {
-            BOOST_LOG_OWL(trace_multicast) << "MultiCast start";
+        [[nodiscard]] bool start() {
+            BOOST_LOG_OWL(trace_multicast) << "MultiCast start config";
+
+            boost::system::error_code ec;
+
+            sender_endpoint_ = decltype(sender_endpoint_){multicast_address_, multicast_port_};
+            sender_socket_.open(sender_endpoint_.protocol(), ec);
+            if (ec) {
+                BOOST_LOG_OWL(error) << "MultiCast start sender_socket_.open ec " << ec;
+                return false;
+            }
+            sender_socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true), ec);
+            if (ec) {
+                BOOST_LOG_OWL(error) << "MultiCast start sender_socket_.set_option ec " << ec;
+                return false;
+            }
+
+            listen_endpoint_ = decltype(listen_endpoint_){listen_address_, multicast_port_};
+            listen_socket_.open(listen_endpoint_.protocol(), ec);
+            if (ec) {
+                BOOST_LOG_OWL(error) << "MultiCast start listen_socket_.open ec " << ec;
+                return false;
+            }
+            listen_socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true), ec);
+            if (ec) {
+                BOOST_LOG_OWL(error) << "MultiCast start listen_socket_.listen_socket_ ec " << ec;
+                return false;
+            }
+            listen_socket_.bind(listen_endpoint_, ec);
+            if (ec) {
+                BOOST_LOG_OWL(error) << "MultiCast start listen_socket_.bind ec " << ec;
+                return false;
+            }
+
+            // Join the multicast group.
+            listen_socket_.set_option(boost::asio::ip::multicast::join_group(multicast_address_), ec);
+            if (ec) {
+                BOOST_LOG_OWL(error) << "MultiCast start listen_socket_.set_option ec " << ec;
+                return false;
+            }
+
+            BOOST_LOG_OWL(trace_multicast) << "MultiCast start run";
             do_receive();
             do_send();
+
+            return true;
         }
 
     private:

@@ -324,7 +324,10 @@ int main(int argc, const char *argv[]) {
             mailbox_control_multicast->shared_from_this()
     );
     if (!config->config().disable_multicast) {
-        multiCastServer->start();
+        if (!multiCastServer->start()) {
+            BOOST_LOG_OWL(error) << "multiCastServer start failed.";
+            return -2;
+        }
     }
 
 
