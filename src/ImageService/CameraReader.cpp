@@ -102,7 +102,7 @@ namespace OwlCameraReader {
             boost::ignore_unused(self);
             boost::ignore_unused(parentPtr_);
 
-            BOOST_LOG_OWL(trace) << "co_get_image start";
+            BOOST_LOG_OWL(trace_camera_reader) << "co_get_image start";
 
             try {
 
@@ -150,7 +150,7 @@ namespace OwlCameraReader {
                         mailbox->sendB2A(std::move(data_r));
                         co_return false;
                     } else {
-//                        BOOST_LOG_OWL(trace) << "co_get_image duration " <<
+//                        BOOST_LOG_OWL(trace_camera_reader) << "co_get_image duration " <<
 //                                             std::chrono::duration_cast<std::chrono::milliseconds>(
 //                                                     std::chrono::steady_clock::now() - cc->lastRead).count();
                         if ((std::chrono::steady_clock::now() - cc->lastRead) <
@@ -182,7 +182,7 @@ namespace OwlCameraReader {
                             mailbox->sendB2A(std::move(data_r));
                             co_return true;
                         } else {
-                            BOOST_LOG_OWL(trace) << "co_get_image camera cache is outdated";
+                            BOOST_LOG_OWL(trace_camera_reader) << "co_get_image camera cache is outdated";
                             // camera cache is outdated
                             // now we need trigger a pre-read to clear buffer
 
@@ -279,10 +279,10 @@ namespace OwlCameraReader {
 
                         if (!e) {
                             if (r) {
-                                BOOST_LOG_OWL(trace) << "CameraReaderGetImageCoImpl run() ok";
+                                BOOST_LOG_OWL(trace_camera_reader) << "CameraReaderGetImageCoImpl run() ok";
                                 return;
                             } else {
-                                BOOST_LOG_OWL(trace) << "CameraReaderGetImageCoImpl run() error";
+                                BOOST_LOG_OWL(trace_camera_reader) << "CameraReaderGetImageCoImpl run() error";
                                 return;
                             }
                         } else {
