@@ -326,7 +326,7 @@ int main(int argc, const char *argv[]) {
     if (!config->config().disable_multicast) {
         if (!multiCastServer->start()) {
             BOOST_LOG_OWL(error) << "multiCastServer start failed.";
-            return -2;
+//            return -2;
         }
     }
 

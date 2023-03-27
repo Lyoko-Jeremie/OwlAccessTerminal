@@ -63,7 +63,7 @@ namespace OwlMultiCast {
             }
             sender_socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true), ec);
             if (ec) {
-                BOOST_LOG_OWL(error) << "MultiCast start sender_socket_.set_option ec " << ec;
+                BOOST_LOG_OWL(error) << "MultiCast start sender_socket_.set_option reuse_address ec " << ec;
                 return false;
             }
 
@@ -75,7 +75,7 @@ namespace OwlMultiCast {
             }
             listen_socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true), ec);
             if (ec) {
-                BOOST_LOG_OWL(error) << "MultiCast start listen_socket_.listen_socket_ ec " << ec;
+                BOOST_LOG_OWL(error) << "MultiCast start listen_socket_.set_option reuse_address ec " << ec;
                 return false;
             }
             listen_socket_.bind(listen_endpoint_, ec);
@@ -87,7 +87,7 @@ namespace OwlMultiCast {
             // Join the multicast group.
             listen_socket_.set_option(boost::asio::ip::multicast::join_group(multicast_address_), ec);
             if (ec) {
-                BOOST_LOG_OWL(error) << "MultiCast start listen_socket_.set_option ec " << ec;
+                BOOST_LOG_OWL(error) << "MultiCast start listen_socket_.set_option join_group ec " << ec;
                 return false;
             }
 
