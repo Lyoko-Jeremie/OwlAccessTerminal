@@ -143,6 +143,7 @@ namespace OwlCameraReader {
                     mailbox->sendB2A(std::move(data_r));
                     co_return false;
 
+                    // ================================ ............ ================================
                 } else {
                     BOOST_ASSERT(cc);
                     BOOST_ASSERT(data);
@@ -172,6 +173,8 @@ namespace OwlCameraReader {
                                                << data->camera_id;
                         mailbox->sendB2A(std::move(data_r));
                         co_return false;
+
+                        // ================================ ............ ================================
                     } else {
                         BOOST_ASSERT(cc);
                         BOOST_ASSERT(data);
@@ -212,6 +215,8 @@ namespace OwlCameraReader {
                             // send
                             mailbox->sendB2A(std::move(data_r));
                             co_return true;
+
+                            // ================================ ............ ================================
                         } else {
                             BOOST_ASSERT(cc);
                             BOOST_ASSERT(cc->vc);
@@ -259,6 +264,8 @@ namespace OwlCameraReader {
                                 }
                             }
 
+                            // ================================ ............ ================================
+
                             // switch io_context
                             co_await boost::asio::dispatch(cc->strand_, use_awaitable);
                             BOOST_ASSERT(cc);
@@ -293,6 +300,8 @@ namespace OwlCameraReader {
                             }
                             mailbox->sendB2A(std::move(data_r));
                             co_return true;
+
+                            // ================================ ............ ================================
                         }
                     }
                 }
@@ -369,6 +378,28 @@ namespace OwlCameraReader {
                         }
 
                     });
+        }
+
+    };
+
+
+    class CameraReaderGetImageImpl : public boost::enable_shared_from_this<CameraReaderGetImageImpl> {
+    public:
+        explicit CameraReaderGetImageImpl(boost::shared_ptr<CameraReader> parentPtr)
+                : parentPtr_(std::move(parentPtr)), sleepTimer(parentPtr_->ioc_) {}
+
+    private:
+        boost::shared_ptr<CameraReader> parentPtr_;
+
+        boost::system::error_code ec_{};
+
+        boost::asio::steady_timer sleepTimer;
+        cv::Mat img;
+        cv::Mat imgGC;
+
+    public:
+        void getImage(OwlMailDefine::MailService2Camera &&data, OwlMailDefine::ServiceCameraMailbox &mailbox) {
+
         }
 
     };

@@ -74,6 +74,7 @@ namespace OwlCameraReader {
         OwlMailDefine::ServiceCameraMailbox mailbox_http_;
 
         friend class CameraReaderGetImageCoImpl;
+        friend class CameraReaderGetImageImpl;
 
     public:
         void
