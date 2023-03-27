@@ -9,6 +9,8 @@
 #include <vector>
 #include <mutex>
 #include <chrono>
+#include <atomic>
+#include <mutex>
 #include <opencv2/opencv.hpp>
 #include "../OwlLog/OwlLog.h"
 #include "ImageServiceMail.h"
@@ -27,21 +29,31 @@ namespace OwlCameraReader {
         int h;
 
         // init as 0
-        std::chrono::steady_clock::time_point lastRead{};
+        std::atomic<std::chrono::steady_clock::time_point> lastRead{};
 
+    private:
+        std::mutex mtx_vc;
         std::unique_ptr<cv::VideoCapture> vc;
+    public:
+
+        bool read(cv::Mat &image) {
+            std::lock_guard g{mtx_vc};
+            return vc->read(image);
+        }
 
         explicit CameraItem(
                 boost::asio::strand<boost::asio::io_context::executor_type> strand,
                 OwlCameraConfig::CameraInfoTuple config
         );
 
-        bool isOpened() const {
+        bool isOpened() {
+            std::lock_guard g{mtx_vc};
             return vc && vc->isOpened();
         }
 
         void close() {
-            if (isOpened()) {
+            std::lock_guard g{mtx_vc};
+            if (vc && vc->isOpened()) {
                 vc->release();
             }
         }
@@ -74,6 +86,7 @@ namespace OwlCameraReader {
         OwlMailDefine::ServiceCameraMailbox mailbox_http_;
 
         friend class CameraReaderGetImageCoImpl;
+
         friend class CameraReaderGetImageImpl;
 
     public:
