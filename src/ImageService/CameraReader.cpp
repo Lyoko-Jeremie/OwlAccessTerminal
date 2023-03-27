@@ -191,8 +191,22 @@ namespace OwlCameraReader {
                         BOOST_ASSERT(mailbox_);
                         BOOST_ASSERT(self);
                         BOOST_ASSERT(parentPtr_);
-                        if ((std::chrono::steady_clock::now() - cc->lastRead.load()) >
-                            std::chrono::milliseconds(parentPtr_->config_->config().camera_read_max_ms)
+
+                        BOOST_LOG_OWL(trace_camera_reader)
+                            << " read_camera() "
+                            << ((std::chrono::duration_cast<std::chrono::milliseconds>(
+                                    std::chrono::steady_clock::now() - cc->lastRead.load()).count()
+                                 < std::chrono::milliseconds(parentPtr_->config_->config().camera_read_max_ms).count())
+                                || (data_->dont_retry))
+                            << " dont_retry " << data_->dont_retry
+                            << " time " << (std::chrono::duration_cast<std::chrono::milliseconds>(
+                                    std::chrono::steady_clock::now() - cc->lastRead.load())).count()
+                            << " limit "
+                            << std::chrono::milliseconds(parentPtr_->config_->config().camera_read_max_ms).count();
+
+                        if (((std::chrono::duration_cast<std::chrono::milliseconds>(
+                                std::chrono::steady_clock::now() - cc->lastRead.load())).count() <
+                             std::chrono::milliseconds(parentPtr_->config_->config().camera_read_max_ms).count())
                             || (data_->dont_retry)) {
                             if (data_->dont_retry) {
                                 // we dont need re-read
@@ -512,17 +526,18 @@ namespace OwlCameraReader {
             BOOST_LOG_OWL(trace_camera_reader)
                 << " read_camera() "
                 << ((std::chrono::duration_cast<std::chrono::milliseconds>(
-                        std::chrono::steady_clock::now() - cc->lastRead.load())
-                     > std::chrono::milliseconds(parentPtr_->config_->config().camera_read_max_ms))
+                        std::chrono::steady_clock::now() - cc->lastRead.load()).count()
+                     < std::chrono::milliseconds(parentPtr_->config_->config().camera_read_max_ms).count())
                     || (data_->dont_retry))
+                << " dont_retry " << data_->dont_retry
                 << " time " << (std::chrono::duration_cast<std::chrono::milliseconds>(
                         std::chrono::steady_clock::now() - cc->lastRead.load())).count()
                 << " limit "
                 << std::chrono::milliseconds(parentPtr_->config_->config().camera_read_max_ms).count();
 
             if ((std::chrono::duration_cast<std::chrono::milliseconds>(
-                    std::chrono::steady_clock::now() - cc->lastRead.load())
-                 < std::chrono::milliseconds(parentPtr_->config_->config().camera_read_max_ms))
+                    std::chrono::steady_clock::now() - cc->lastRead.load()).count()
+                 < std::chrono::milliseconds(parentPtr_->config_->config().camera_read_max_ms).count())
                 || (data_->dont_retry)) {
                 if (data_->dont_retry) {
                     // we dont need re-read
