@@ -279,6 +279,7 @@ namespace OwlCommandServiceHttp {
         void sendMail(OwlMailDefine::MailCmd2Serial &&data) {
             // send cmd to serial
             if (data->clientId > 0) {
+                // TODO filter joystick
                 auto it = cmdPackageIdentify.find(data->clientId);
                 if (it == cmdPackageIdentify.end()) {
                     cmdPackageIdentify.try_emplace(
