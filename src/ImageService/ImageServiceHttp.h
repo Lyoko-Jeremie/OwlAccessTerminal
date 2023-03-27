@@ -88,7 +88,7 @@ namespace OwlImageServiceHttp {
 
         void internal_server_error(const std::string &r);
 
-        void create_get_response_image(int camera_id);
+        void create_get_response_image(int camera_id, bool dont_retry);
 
         void create_get_response_set_camera_image_size();
 

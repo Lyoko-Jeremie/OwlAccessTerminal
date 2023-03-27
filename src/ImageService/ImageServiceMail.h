@@ -22,6 +22,7 @@ namespace OwlMailDefine {
     struct Camera2Service;
     struct Service2Camera {
         int camera_id;
+        bool dont_retry;
 
         // Serial2Cmd.runner = Cmd2Serial.callbackRunner
         std::function<void(boost::shared_ptr<Camera2Service>)> callbackRunner;

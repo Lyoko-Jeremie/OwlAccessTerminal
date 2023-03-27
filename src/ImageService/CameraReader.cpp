@@ -154,7 +154,12 @@ namespace OwlCameraReader {
 //                                             std::chrono::duration_cast<std::chrono::milliseconds>(
 //                                                     std::chrono::steady_clock::now() - cc->lastRead).count();
                         if ((std::chrono::steady_clock::now() - cc->lastRead) <
-                            std::chrono::milliseconds(parentPtr_->config_->config().camera_read_max_ms)) {
+                            std::chrono::milliseconds(parentPtr_->config_->config().camera_read_max_ms)
+                            || (data->dont_retry)) {
+                            if (data->dont_retry) {
+                                // we dont need re-read
+                                // example use android, or tag
+                            }
                             // read the image
                             if (!cc->vc->read(img)) {
                                 // `false` if no frames has been grabbed

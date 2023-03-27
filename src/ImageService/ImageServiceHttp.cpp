@@ -9,7 +9,7 @@
 #include "../QueryPairsAnalyser/QueryPairsAnalyser.h"
 
 namespace OwlImageServiceHttp {
-    void ImageServiceHttpConnect::create_get_response_image(int camera_id) {
+    void ImageServiceHttpConnect::create_get_response_image(int camera_id, bool dont_retry) {
 
         auto p = parents_.lock();
         if (!p) {
@@ -20,6 +20,7 @@ namespace OwlImageServiceHttp {
 
         OwlMailDefine::MailService2Camera cmd_data = boost::make_shared<OwlMailDefine::Service2Camera>();
         cmd_data->camera_id = camera_id;
+        cmd_data->dont_retry = dont_retry;
 
         cmd_data->callbackRunner = [this, self = shared_from_this()](
                 const OwlMailDefine::MailCamera2Service &camera_data
@@ -410,24 +411,31 @@ namespace OwlImageServiceHttp {
 //        BOOST_LOG_OWL(trace) << "v.path():[" << v.path() << "]";
 //        BOOST_LOG_OWL(trace) << "v.query():[" << v.query() << "]";
 
+        auto params = v.params();
+        auto dont_retry = false;
+        if (params.contains("android") || params.contains("tag")) {
+//            BOOST_LOG_OWL(trace) << "dont_retry mode";
+            dont_retry = true;
+        }
+
         if (v.path() == "/1") {
-            create_get_response_image(1);
+            create_get_response_image(1, dont_retry);
             return;
         }
         if (v.path() == "/2") {
-            create_get_response_image(2);
+            create_get_response_image(2, dont_retry);
             return;
         }
         if (v.path() == "/3") {
-            create_get_response_image(3);
+            create_get_response_image(3, dont_retry);
             return;
         }
         if (v.path() == "/down") {
-            create_get_response_image(config_->config().downCameraId.load());
+            create_get_response_image(config_->config().downCameraId.load(), dont_retry);
             return;
         }
         if (v.path() == "/front") {
-            create_get_response_image(config_->config().frontCameraId.load());
+            create_get_response_image(config_->config().frontCameraId.load(), dont_retry);
             return;
         }
         if (request_.target().starts_with("/set_camera_image_size?")) {
