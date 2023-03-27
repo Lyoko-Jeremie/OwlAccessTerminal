@@ -18,11 +18,11 @@
 #include <cstdlib>       // std::abort
 #include <exception>     // std::set_terminate
 #include <iostream>      // std::cerr
-#include <boost/stacktrace.hpp>
+//#include <boost/stacktrace.hpp>
 
 void my_terminate_handler() {
     try {
-        std::cerr << "stacktrace : \n" << boost::stacktrace::stacktrace();
+//        std::cerr << "stacktrace : \n" << boost::stacktrace::stacktrace();
     } catch (...) {}
     std::abort();
 }
@@ -97,7 +97,7 @@ namespace OwlLog {
 
     void init_logging() {
 
-        std::set_terminate(&my_terminate_handler);
+//        std::set_terminate(&my_terminate_handler);
 
         // https://stackoverflow.com/questions/15853981/boost-log-2-0-empty-severity-level-in-logs
         boost::log::register_simple_formatter_factory<severity_level, char>("Severity");
