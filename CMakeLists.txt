@@ -388,3 +388,18 @@ if (WIN32)
     target_link_libraries(${ProjectMainName} wsock32 ws2_32 crypt32)
 else (WIN32)
 endif (WIN32)
+
+# ============================================================================================
+
+## https://www.boost.org/doc/libs/1_81_0/doc/html/stacktrace/configuration_and_build.html
+#if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+#    if (WIN32)
+#        add_definitions(-DBOOST_STACKTRACE_USE_WINDBG)
+#        target_link_libraries(${ProjectMainName} ole32 dbgeng boost_stacktrace_windbg)
+##        add_definitions(-DBOOST_STACKTRACE_USE_WINDBG_CACHED)
+##        target_link_libraries(${ProjectMainName} ole32 dbgeng boost_stacktrace_windbg_cached)
+#    else (WIN32)
+#        add_definitions(-DBOOST_STACKTRACE_USE_BACKTRACE)
+#        target_link_libraries(${ProjectMainName} libdl libbacktrace)
+#    endif (WIN32)
+#endif ()

@@ -8,6 +8,9 @@ namespace OwlMultiCast {
     // ======================================================================================================
 
     void MultiCast::do_receive() {
+
+//        boost::shared_ptr<OwlMultiCast::MultiCast> a;
+//        a->start();
         listen_socket_.async_receive_from(
                 boost::asio::buffer(receive_data_), receiver_endpoint_,
                 [this, sef = shared_from_this()](boost::system::error_code ec, std::size_t length) {
