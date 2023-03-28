@@ -213,7 +213,6 @@ namespace OwlCameraReader {
                                 // example use android, or tag
                             }
                             BOOST_ASSERT(cc);
-                            BOOST_ASSERT(cc->isOpened());
                             BOOST_ASSERT(data_);
                             BOOST_ASSERT(mailbox_);
                             BOOST_ASSERT(self);
@@ -223,7 +222,7 @@ namespace OwlCameraReader {
                                 // `false` if no frames has been grabbed
                                 data_r->ok = false;
                                 BOOST_LOG_OWL(warning)
-                                    << "co_get_image (!c->vc->read(img)) read frame fail: "
+                                    << "co_get_image (!cc->read(img)) read frame fail: "
                                     << data_->camera_id;
                                 mailbox_->sendB2A(std::move(data_r));
                                 co_return false;
@@ -245,7 +244,6 @@ namespace OwlCameraReader {
                             // ================================ ............ ================================
                         } else {
                             BOOST_ASSERT(cc);
-                            BOOST_ASSERT(cc->isOpened());
                             BOOST_ASSERT(data_);
                             BOOST_ASSERT(mailbox_);
                             BOOST_ASSERT(self);
@@ -259,7 +257,6 @@ namespace OwlCameraReader {
                             for (int i = 0; i < camera_read_retry_times; ++i) {
                                 {
                                     BOOST_ASSERT(cc);
-                                    BOOST_ASSERT(cc->isOpened());
                                     BOOST_ASSERT(data_);
                                     BOOST_ASSERT(mailbox_);
                                     BOOST_ASSERT(self);
@@ -276,7 +273,6 @@ namespace OwlCameraReader {
                                 sleepTimer.expires_from_now(std::chrono::milliseconds(camera_read_retry_ms));
                                 co_await sleepTimer.async_wait(boost::asio::redirect_error(use_awaitable, ec_));
                                 BOOST_ASSERT(cc);
-                                BOOST_ASSERT(cc->isOpened());
                                 BOOST_ASSERT(data_);
                                 BOOST_ASSERT(mailbox_);
                                 BOOST_ASSERT(self);
@@ -296,7 +292,6 @@ namespace OwlCameraReader {
                             // switch io_context
                             co_await boost::asio::dispatch(ioc_st_, use_awaitable);
                             BOOST_ASSERT(cc);
-                            BOOST_ASSERT(cc->isOpened());
                             BOOST_ASSERT(data_);
                             BOOST_ASSERT(mailbox_);
                             BOOST_ASSERT(self);
@@ -307,7 +302,7 @@ namespace OwlCameraReader {
                                 // `false` if no frames has been grabbed
                                 data_r->ok = false;
                                 BOOST_LOG_OWL(warning)
-                                    << "co_get_image (!c->vc->read(img)) read frame fail: "
+                                    << "co_get_image (!cc->read(img)) read frame fail: "
                                     << data_->camera_id;
                                 mailbox_->sendB2A(std::move(data_r));
                                 co_return false;
@@ -553,7 +548,6 @@ namespace OwlCameraReader {
 
         void direct_read() {
             BOOST_ASSERT(cc);
-            BOOST_ASSERT(cc->isOpened());
             BOOST_ASSERT(data_);
             BOOST_ASSERT(mailbox_);
             BOOST_ASSERT(parentPtr_);
@@ -565,7 +559,7 @@ namespace OwlCameraReader {
                 // `false` if no frames has been grabbed
                 data_r->ok = false;
                 BOOST_LOG_OWL(warning)
-                    << "CameraReaderGetImageImpl direct_read (!c->vc->read(img)) read frame fail: "
+                    << "CameraReaderGetImageImpl direct_read (!cc->read(img)) read frame fail: "
                     << data_->camera_id;
                 mailbox_->sendB2A(std::move(data_r));
                 return;
@@ -586,7 +580,6 @@ namespace OwlCameraReader {
 
         void read_with_retry() {
             BOOST_ASSERT(cc);
-            BOOST_ASSERT(cc->isOpened());
             BOOST_ASSERT(data_);
             BOOST_ASSERT(mailbox_);
             BOOST_ASSERT(parentPtr_);
@@ -600,7 +593,6 @@ namespace OwlCameraReader {
             if (read_retry_times > 0) {
                 sleepTimer.cancel();
                 BOOST_ASSERT(cc);
-                BOOST_ASSERT(cc->isOpened());
                 BOOST_ASSERT(data_);
                 BOOST_ASSERT(mailbox_);
                 BOOST_ASSERT(parentPtr_);

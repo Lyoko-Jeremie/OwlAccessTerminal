@@ -38,7 +38,7 @@ namespace OwlCameraReader {
 
         bool read(cv::Mat &image) {
             std::lock_guard g{mtx_vc};
-            return vc->read(image);
+            return vc && vc->isOpened() && vc->read(image);
         }
 
         explicit CameraItem(
