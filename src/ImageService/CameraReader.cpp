@@ -633,7 +633,7 @@ namespace OwlCameraReader {
         BOOST_ASSERT(shared_from_this());
 #ifdef UseCameraReaderGetImageCoImpl
         boost::make_shared<CameraReaderGetImageCoImpl>(shared_from_this(), std::move(data), mailbox)->getImage();
-#elif // UseCameraReaderGetImageImpl
+#else // UseCameraReaderGetImageImpl
         boost::make_shared<CameraReaderGetImageImpl>(shared_from_this(), std::move(data), mailbox)->getImage();
 #endif
     }
