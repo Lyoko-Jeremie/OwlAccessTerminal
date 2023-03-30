@@ -55,7 +55,7 @@ namespace OwlCameraReader {
                 resetCamera(std::move(data), mailbox_tcp_protobuf_);
                 return;
             }
-//                BOOST_LOG_OWL(info) << "CameraReader mailbox_tcp_protobuf_->receiveA2B " << data->camera_id;
+            BOOST_LOG_OWL(trace_camera_reader) << "CameraReader mailbox_tcp_protobuf_->receiveA2B " << data->camera_id;
             getImage(std::move(data), mailbox_tcp_protobuf_);
         });
         mailbox_http_->receiveA2B([this](OwlMailDefine::MailService2Camera &&data) {
@@ -63,7 +63,7 @@ namespace OwlCameraReader {
                 resetCamera(std::move(data), mailbox_http_);
                 return;
             }
-//                BOOST_LOG_OWL(info) << "CameraReader mailbox_http_->receiveA2B " << data->camera_id;
+            BOOST_LOG_OWL(trace_camera_reader) << "CameraReader mailbox_http_->receiveA2B " << data->camera_id;
             getImage(std::move(data), mailbox_http_);
         });
     }
@@ -89,7 +89,9 @@ namespace OwlCameraReader {
                 OwlMailDefine::ServiceCameraMailbox &mailbox
         ) : parentPtr_(std::move(parentPtr)),
             data_(data),
-            mailbox_(mailbox) {}
+            mailbox_(mailbox) {
+            BOOST_LOG_OWL(trace_camera_reader) << "CameraReaderGetImageCoImpl ctor";
+        }
 
     private:
         boost::shared_ptr<CameraReader> parentPtr_;
@@ -135,9 +137,11 @@ namespace OwlCameraReader {
                         }
                     }
                 }
+                BOOST_LOG_OWL(trace_camera_reader) << "co_get_image cc " << cc;
                 sleepTimer = boost::make_shared<boost::asio::steady_timer>(cc->strand_);
                 co_await boost::asio::dispatch(cc->strand_, use_awaitable);
                 if (!cc) {
+                    BOOST_LOG_OWL(trace_camera_reader) << "co_get_image (!cc) ";
 
                     BOOST_ASSERT(data_);
                     BOOST_ASSERT(mailbox_);
@@ -172,6 +176,7 @@ namespace OwlCameraReader {
                     data_r->runner = data_->callbackRunner;
                     data_r->camera_id = data_->camera_id;
                     if (!cc->isOpened()) {
+                        BOOST_LOG_OWL(trace_camera_reader) << "co_get_image cc (!cc->isOpened()) ";
                         BOOST_ASSERT(cc);
                         BOOST_ASSERT(data_);
                         BOOST_ASSERT(mailbox_);
@@ -211,6 +216,7 @@ namespace OwlCameraReader {
                                 // we dont need re-read
                                 // example use android, or tag
                             }
+                            BOOST_LOG_OWL(trace_camera_reader) << "co_get_image not need retry ";
                             BOOST_ASSERT(cc);
                             BOOST_ASSERT(data_);
                             BOOST_ASSERT(mailbox_);
@@ -270,6 +276,7 @@ namespace OwlCameraReader {
                                 }
 
                                 // now , wait a moment
+                                BOOST_LOG_OWL(trace_camera_reader) << "co_get_image retry wait a moment ";
                                 sleepTimer->expires_from_now(std::chrono::milliseconds(camera_read_retry_ms));
                                 co_await sleepTimer->async_wait(boost::asio::redirect_error(use_awaitable, ec_));
                                 sleepTimer->cancel();
@@ -286,6 +293,8 @@ namespace OwlCameraReader {
                                         co_return false;
                                     }
                                     // Timer expired. means it ok.
+                                    BOOST_LOG_OWL(trace_camera_reader)
+                                        << "co_get_image retry Timer expired. means it ok. ";
                                 }
                             }
 
@@ -301,6 +310,7 @@ namespace OwlCameraReader {
 
                             // read the image
                             if (!cc->read(img)) {
+                                BOOST_LOG_OWL(trace_camera_reader) << "co_get_image retry last (!cc->read(img)) ";
                                 // `false` if no frames has been grabbed
                                 data_r->ok = false;
                                 BOOST_LOG_OWL(warning)
@@ -309,6 +319,7 @@ namespace OwlCameraReader {
                                 mailbox_->sendB2A(std::move(data_r));
                                 co_return false;
                             } else {
+                                BOOST_LOG_OWL(trace_camera_reader) << "co_get_image retry last ok ";
                                 BOOST_ASSERT(cc);
                                 BOOST_ASSERT(data_);
                                 BOOST_ASSERT(mailbox_);
@@ -324,6 +335,7 @@ namespace OwlCameraReader {
                                 // update lastRead
                                 cc->lastRead = std::chrono::steady_clock::now();
                             }
+                            BOOST_LOG_OWL(trace_camera_reader) << "co_get_image retry all ok ";
                             mailbox_->sendB2A(std::move(data_r));
                             co_return true;
 
@@ -634,9 +646,11 @@ namespace OwlCameraReader {
             OwlMailDefine::ServiceCameraMailbox &mailbox) {
         BOOST_ASSERT(shared_from_this());
 #ifdef UseCameraReaderGetImageCoImpl
+        BOOST_LOG_OWL(trace_camera_reader) << "CameraReader::getImage UseCameraReaderGetImageCoImpl ";
         boost::make_shared<CameraReaderGetImageCoImpl>(shared_from_this(), std::move(data), mailbox)->getImage(ioc_);
 #else // UseCameraReaderGetImageImpl
-//        boost::make_shared<CameraReaderGetImageImpl>(shared_from_this(), std::move(data), mailbox)->getImage();
+        BOOST_LOG_OWL(trace_camera_reader) << "CameraReader::getImage UseCameraReaderGetImageImpl ";
+        //        boost::make_shared<CameraReaderGetImageImpl>(shared_from_this(), std::move(data), mailbox)->getImage();
 #endif
     }
 
