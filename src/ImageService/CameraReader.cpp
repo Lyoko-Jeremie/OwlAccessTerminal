@@ -32,6 +32,8 @@ namespace OwlCameraReader {
                                 << std::visit(OwlConfigLoader::helperCameraAddr2String, path);
             vc->set(cv::VideoCaptureProperties::CAP_PROP_FRAME_WIDTH, w);
             vc->set(cv::VideoCaptureProperties::CAP_PROP_FRAME_HEIGHT, h);
+            // https://forum.opencv.org/t/videocapture-get-returns-old-frame-after-long-periods-of-time-using-3-cameras/4896/4
+            vc->set(cv::VideoCaptureProperties::CAP_PROP_BUFFERSIZE, 1);
         } else {
             BOOST_LOG_OWL(error) << "CameraItem open error : id " << id << " path "
                                  << std::visit(OwlConfigLoader::helperCameraAddr2String, path);
@@ -258,45 +260,50 @@ namespace OwlCameraReader {
                             // camera cache is outdated
                             // now we need trigger a pre-read to clear buffer
 
-                            auto camera_read_retry_times = parentPtr_->config_->config().camera_read_retry_times;
-                            auto camera_read_retry_ms = parentPtr_->config_->config().camera_read_retry_ms;
-                            for (int i = 0; i < camera_read_retry_times; ++i) {
-                                {
-                                    BOOST_ASSERT(cc);
-                                    BOOST_ASSERT(data_);
-                                    BOOST_ASSERT(mailbox_);
-                                    BOOST_ASSERT(self);
-                                    BOOST_ASSERT(parentPtr_);
-                                    BOOST_ASSERT(sleepTimer);
-                                    // read the old image to clear buffer and trigger read new image from camera
-                                    if (!cc->read(imgGC)) {
-                                        // `false` if no frames has been grabbed
-                                        // we dont care it read ok or not when pre-read
-                                    }
-                                }
+                            // clear buffer
+                            // https://stackoverflow.com/questions/50150893/videocapture-read-returns-past-image
+                            // https://stackoverflow.com/questions/57716962/difference-between-video-capture-read-and-grab
+                            cc->grab();
 
-                                // now , wait a moment
-                                BOOST_LOG_OWL(trace_camera_reader) << "co_get_image retry wait a moment ";
-                                sleepTimer->expires_from_now(std::chrono::milliseconds(camera_read_retry_ms));
-                                co_await sleepTimer->async_wait(boost::asio::redirect_error(use_awaitable, ec_));
-                                sleepTimer->cancel();
-                                BOOST_ASSERT(cc);
-                                BOOST_ASSERT(data_);
-                                BOOST_ASSERT(mailbox_);
-                                BOOST_ASSERT(self);
-                                BOOST_ASSERT(parentPtr_);
-                                BOOST_ASSERT(sleepTimer);
-                                if (ec_) {
-                                    if (ec_ == boost::asio::error::operation_aborted) {
-                                        // terminal
-                                        BOOST_LOG_OWL(warning) << "co_get_image sleepTimer operation_aborted";
-                                        co_return false;
-                                    }
-                                    // Timer expired. means it ok.
-                                    BOOST_LOG_OWL(trace_camera_reader)
-                                        << "co_get_image retry Timer expired. means it ok. ";
-                                }
-                            }
+//                            auto camera_read_retry_times = parentPtr_->config_->config().camera_read_retry_times;
+//                            auto camera_read_retry_ms = parentPtr_->config_->config().camera_read_retry_ms;
+//                            for (int i = 0; i < camera_read_retry_times; ++i) {
+//                                {
+//                                    BOOST_ASSERT(cc);
+//                                    BOOST_ASSERT(data_);
+//                                    BOOST_ASSERT(mailbox_);
+//                                    BOOST_ASSERT(self);
+//                                    BOOST_ASSERT(parentPtr_);
+//                                    BOOST_ASSERT(sleepTimer);
+//                                    // read the old image to clear buffer and trigger read new image from camera
+//                                    if (!cc->read(imgGC)) {
+//                                        // `false` if no frames has been grabbed
+//                                        // we dont care it read ok or not when pre-read
+//                                    }
+//                                }
+//
+//                                // now , wait a moment
+//                                BOOST_LOG_OWL(trace_camera_reader) << "co_get_image retry wait a moment ";
+//                                sleepTimer->expires_from_now(std::chrono::milliseconds(camera_read_retry_ms));
+//                                co_await sleepTimer->async_wait(boost::asio::redirect_error(use_awaitable, ec_));
+//                                sleepTimer->cancel();
+//                                BOOST_ASSERT(cc);
+//                                BOOST_ASSERT(data_);
+//                                BOOST_ASSERT(mailbox_);
+//                                BOOST_ASSERT(self);
+//                                BOOST_ASSERT(parentPtr_);
+//                                BOOST_ASSERT(sleepTimer);
+//                                if (ec_) {
+//                                    if (ec_ == boost::asio::error::operation_aborted) {
+//                                        // terminal
+//                                        BOOST_LOG_OWL(warning) << "co_get_image sleepTimer operation_aborted";
+//                                        co_return false;
+//                                    }
+//                                    // Timer expired. means it ok.
+//                                    BOOST_LOG_OWL(trace_camera_reader)
+//                                        << "co_get_image retry Timer expired. means it ok. ";
+//                                }
+//                            }
 
                             // ================================ ............ ================================
 

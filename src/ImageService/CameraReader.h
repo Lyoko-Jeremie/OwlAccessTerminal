@@ -36,6 +36,11 @@ namespace OwlCameraReader {
         std::unique_ptr<cv::VideoCapture> vc;
     public:
 
+
+        bool grab() {
+            return vc && vc->isOpened() && vc->grab();
+        }
+
         bool read(cv::Mat &image) {
 //            std::lock_guard g{mtx_vc};
             return vc && vc->isOpened() && vc->read(image);
