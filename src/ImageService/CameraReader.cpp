@@ -162,12 +162,12 @@ namespace OwlCameraReader {
                     BOOST_ASSERT(parentPtr_);
 
                     // switch io_context
-                    co_await boost::asio::dispatch(ioc_st_, use_awaitable);
-                    BOOST_ASSERT(cc);
-                    BOOST_ASSERT(data_);
-                    BOOST_ASSERT(mailbox_);
-                    BOOST_ASSERT(self);
-                    BOOST_ASSERT(parentPtr_);
+//                    co_await boost::asio::dispatch(ioc_st_, use_awaitable);
+//                    BOOST_ASSERT(cc);
+//                    BOOST_ASSERT(data_);
+//                    BOOST_ASSERT(mailbox_);
+//                    BOOST_ASSERT(self);
+//                    BOOST_ASSERT(parentPtr_);
 
                     OwlMailDefine::MailCamera2Service data_r = boost::make_shared<OwlMailDefine::Camera2Service>();
                     data_r->runner = data_->callbackRunner;
@@ -269,28 +269,28 @@ namespace OwlCameraReader {
                                     }
                                 }
 
-                                // now , wait a moment
-                                sleepTimer.expires_from_now(std::chrono::milliseconds(camera_read_retry_ms));
-                                co_await sleepTimer.async_wait(boost::asio::redirect_error(use_awaitable, ec_));
-                                BOOST_ASSERT(cc);
-                                BOOST_ASSERT(data_);
-                                BOOST_ASSERT(mailbox_);
-                                BOOST_ASSERT(self);
-                                BOOST_ASSERT(parentPtr_);
-                                if (ec_) {
-                                    if (ec_ == boost::asio::error::operation_aborted) {
-                                        // terminal
-                                        BOOST_LOG_OWL(warning) << "co_get_image sleepTimer operation_aborted";
-                                        co_return false;
-                                    }
-                                    // Timer expired. means it ok.
-                                }
+//                                // now , wait a moment
+//                                sleepTimer.expires_from_now(std::chrono::milliseconds(camera_read_retry_ms));
+//                                co_await sleepTimer.async_wait(boost::asio::redirect_error(use_awaitable, ec_));
+//                                BOOST_ASSERT(cc);
+//                                BOOST_ASSERT(data_);
+//                                BOOST_ASSERT(mailbox_);
+//                                BOOST_ASSERT(self);
+//                                BOOST_ASSERT(parentPtr_);
+//                                if (ec_) {
+//                                    if (ec_ == boost::asio::error::operation_aborted) {
+//                                        // terminal
+//                                        BOOST_LOG_OWL(warning) << "co_get_image sleepTimer operation_aborted";
+//                                        co_return false;
+//                                    }
+//                                    // Timer expired. means it ok.
+//                                }
                             }
 
                             // ================================ ............ ================================
 
-                            // switch io_context
-                            co_await boost::asio::dispatch(ioc_st_, use_awaitable);
+//                            // switch io_context
+//                            co_await boost::asio::dispatch(ioc_st_, use_awaitable);
                             BOOST_ASSERT(cc);
                             BOOST_ASSERT(data_);
                             BOOST_ASSERT(mailbox_);
