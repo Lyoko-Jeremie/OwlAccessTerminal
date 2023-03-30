@@ -24,7 +24,7 @@ namespace OwlCameraReader {
                                                                       h(std::get<4>(config)) {
         vc = std::make_unique<cv::VideoCapture>();
 
-        std::lock_guard g{mtx_vc};
+//        std::lock_guard g{mtx_vc};
         if (std::visit([this]<typename T>(T &a) {
             return vc->open(a, api);
         }, path)) {
