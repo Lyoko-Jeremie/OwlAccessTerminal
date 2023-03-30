@@ -32,12 +32,12 @@ namespace OwlCameraReader {
         std::atomic<std::chrono::steady_clock::time_point> lastRead{};
 
     private:
-        std::mutex mtx_vc;
+//        std::mutex mtx_vc;
         std::unique_ptr<cv::VideoCapture> vc;
     public:
 
         bool read(cv::Mat &image) {
-            std::lock_guard g{mtx_vc};
+//            std::lock_guard g{mtx_vc};
             return vc && vc->isOpened() && vc->read(image);
         }
 
