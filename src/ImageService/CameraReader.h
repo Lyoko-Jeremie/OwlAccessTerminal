@@ -47,12 +47,12 @@ namespace OwlCameraReader {
         );
 
         bool isOpened() {
-            std::lock_guard g{mtx_vc};
+//            std::lock_guard g{mtx_vc};
             return vc && vc->isOpened();
         }
 
         void close() {
-            std::lock_guard g{mtx_vc};
+//            std::lock_guard g{mtx_vc};
             if (vc && vc->isOpened()) {
                 vc->release();
             }

@@ -88,21 +88,18 @@ namespace OwlCameraReader {
                 OwlMailDefine::MailService2Camera &&data,
                 OwlMailDefine::ServiceCameraMailbox &mailbox
         ) : parentPtr_(std::move(parentPtr)),
-            ioc_st_(boost::asio::make_strand(parentPtr_->ioc_)),
             data_(data),
-            mailbox_(mailbox),
-            sleepTimer(ioc_st_) {}
+            mailbox_(mailbox) {}
 
     private:
         boost::shared_ptr<CameraReader> parentPtr_;
-        boost::asio::strand<boost::asio::io_context::executor_type> ioc_st_;
 
         OwlMailDefine::MailService2Camera data_;
         OwlMailDefine::ServiceCameraMailbox &mailbox_;
 
         boost::system::error_code ec_{};
 
-        boost::asio::steady_timer sleepTimer;
+        boost::shared_ptr<boost::asio::steady_timer> sleepTimer;
         cv::Mat img;
         cv::Mat imgGC;
 
@@ -121,7 +118,7 @@ namespace OwlCameraReader {
             try {
 
                 // switch io_context
-                co_await boost::asio::dispatch(ioc_st_, use_awaitable);
+//                co_await boost::asio::dispatch(ioc_st_, use_awaitable);
                 BOOST_ASSERT(data_);
                 BOOST_ASSERT(mailbox_);
                 BOOST_ASSERT(self);
@@ -138,6 +135,8 @@ namespace OwlCameraReader {
                         }
                     }
                 }
+                sleepTimer = boost::make_shared<boost::asio::steady_timer>(cc->strand_);
+                co_await boost::asio::dispatch(cc->strand_, use_awaitable);
                 if (!cc) {
 
                     BOOST_ASSERT(data_);
@@ -248,6 +247,7 @@ namespace OwlCameraReader {
                             BOOST_ASSERT(mailbox_);
                             BOOST_ASSERT(self);
                             BOOST_ASSERT(parentPtr_);
+                            BOOST_ASSERT(sleepTimer);
                             BOOST_LOG_OWL(trace_camera_reader) << "co_get_image camera cache is outdated";
                             // camera cache is outdated
                             // now we need trigger a pre-read to clear buffer
@@ -261,30 +261,32 @@ namespace OwlCameraReader {
                                     BOOST_ASSERT(mailbox_);
                                     BOOST_ASSERT(self);
                                     BOOST_ASSERT(parentPtr_);
+                                    BOOST_ASSERT(sleepTimer);
                                     // read the old image to clear buffer and trigger read new image from camera
                                     if (!cc->read(imgGC)) {
                                         // `false` if no frames has been grabbed
-                                        data_r->ok = false;
                                         // we dont care it read ok or not when pre-read
                                     }
                                 }
 
-//                                // now , wait a moment
-//                                sleepTimer.expires_from_now(std::chrono::milliseconds(camera_read_retry_ms));
-//                                co_await sleepTimer.async_wait(boost::asio::redirect_error(use_awaitable, ec_));
-//                                BOOST_ASSERT(cc);
-//                                BOOST_ASSERT(data_);
-//                                BOOST_ASSERT(mailbox_);
-//                                BOOST_ASSERT(self);
-//                                BOOST_ASSERT(parentPtr_);
-//                                if (ec_) {
-//                                    if (ec_ == boost::asio::error::operation_aborted) {
-//                                        // terminal
-//                                        BOOST_LOG_OWL(warning) << "co_get_image sleepTimer operation_aborted";
-//                                        co_return false;
-//                                    }
-//                                    // Timer expired. means it ok.
-//                                }
+                                // now , wait a moment
+                                sleepTimer->expires_from_now(std::chrono::milliseconds(camera_read_retry_ms));
+                                co_await sleepTimer->async_wait(boost::asio::redirect_error(use_awaitable, ec_));
+                                sleepTimer->cancel();
+                                BOOST_ASSERT(cc);
+                                BOOST_ASSERT(data_);
+                                BOOST_ASSERT(mailbox_);
+                                BOOST_ASSERT(self);
+                                BOOST_ASSERT(parentPtr_);
+                                BOOST_ASSERT(sleepTimer);
+                                if (ec_) {
+                                    if (ec_ == boost::asio::error::operation_aborted) {
+                                        // terminal
+                                        BOOST_LOG_OWL(warning) << "co_get_image sleepTimer operation_aborted";
+                                        co_return false;
+                                    }
+                                    // Timer expired. means it ok.
+                                }
                             }
 
                             // ================================ ............ ================================
@@ -357,11 +359,11 @@ namespace OwlCameraReader {
         }
 
     public:
-        void getImage() {
+        void getImage(boost::asio::io_context &ioc) {
             BOOST_ASSERT(shared_from_this());
             BOOST_ASSERT(parentPtr_);
             boost::asio::co_spawn(
-                    ioc_st_,
+                    ioc,
                     [this, self = shared_from_this()]() {
                         return co_get_image(self);
                     },
@@ -632,9 +634,9 @@ namespace OwlCameraReader {
             OwlMailDefine::ServiceCameraMailbox &mailbox) {
         BOOST_ASSERT(shared_from_this());
 #ifdef UseCameraReaderGetImageCoImpl
-        boost::make_shared<CameraReaderGetImageCoImpl>(shared_from_this(), std::move(data), mailbox)->getImage();
+        boost::make_shared<CameraReaderGetImageCoImpl>(shared_from_this(), std::move(data), mailbox)->getImage(ioc_);
 #else // UseCameraReaderGetImageImpl
-        boost::make_shared<CameraReaderGetImageImpl>(shared_from_this(), std::move(data), mailbox)->getImage();
+//        boost::make_shared<CameraReaderGetImageImpl>(shared_from_this(), std::move(data), mailbox)->getImage();
 #endif
     }
 
