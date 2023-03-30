@@ -645,13 +645,15 @@ namespace OwlCameraReader {
             OwlMailDefine::MailService2Camera &&data,
             OwlMailDefine::ServiceCameraMailbox &mailbox) {
         BOOST_ASSERT(shared_from_this());
-#ifdef UseCameraReaderGetImageCoImpl
         BOOST_LOG_OWL(trace_camera_reader) << "CameraReader::getImage UseCameraReaderGetImageCoImpl ";
         boost::make_shared<CameraReaderGetImageCoImpl>(shared_from_this(), std::move(data), mailbox)->getImage(ioc_);
-#else // UseCameraReaderGetImageImpl
-        BOOST_LOG_OWL(trace_camera_reader) << "CameraReader::getImage UseCameraReaderGetImageImpl ";
-        //        boost::make_shared<CameraReaderGetImageImpl>(shared_from_this(), std::move(data), mailbox)->getImage();
-#endif
+//#ifdef UseCameraReaderGetImageCoImpl
+//        BOOST_LOG_OWL(trace_camera_reader) << "CameraReader::getImage UseCameraReaderGetImageCoImpl ";
+//        boost::make_shared<CameraReaderGetImageCoImpl>(shared_from_this(), std::move(data), mailbox)->getImage(ioc_);
+//#else // UseCameraReaderGetImageImpl
+//        BOOST_LOG_OWL(trace_camera_reader) << "CameraReader::getImage UseCameraReaderGetImageImpl ";
+//        //        boost::make_shared<CameraReaderGetImageImpl>(shared_from_this(), std::move(data), mailbox)->getImage();
+//#endif
     }
 
     void
