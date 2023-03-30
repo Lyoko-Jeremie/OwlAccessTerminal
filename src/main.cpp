@@ -398,7 +398,7 @@ int main(int argc, const char *argv[]) {
     tg.create_thread(ThreadCallee{ioc_time, tg, "ioc_time"});
     tg.create_thread(ThreadCallee{ioc_imageWeb, tg, "ioc_imageWeb"});
     tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 1"});
-//    tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 2"});
+    tg.create_thread(ThreadCallee{ioc_cameraReader, tg, "ioc_cameraReader 2"});
     tg.create_thread(ThreadCallee{ioc_multicast, tg, "ioc_multicast"});
 #ifdef EnableWebStaticModule
     tg.create_thread(ThreadCallee{ioc_web_static, tg, "ioc_web_static"});

@@ -103,7 +103,7 @@ namespace OwlCameraReader {
 
         boost::system::error_code ec_{};
 
-        boost::shared_ptr<boost::asio::steady_timer> sleepTimer;
+//        boost::shared_ptr<boost::asio::steady_timer> sleepTimer;
         cv::Mat img;
         cv::Mat imgGC;
 
@@ -140,7 +140,7 @@ namespace OwlCameraReader {
                     }
                 }
                 BOOST_LOG_OWL(trace_camera_reader) << "co_get_image cc " << cc;
-                sleepTimer = boost::make_shared<boost::asio::steady_timer>(cc->strand_);
+//                sleepTimer = boost::make_shared<boost::asio::steady_timer>(cc->strand_);
                 co_await boost::asio::dispatch(cc->strand_, use_awaitable);
                 if (!cc) {
                     BOOST_LOG_OWL(trace_camera_reader) << "co_get_image (!cc) ";
@@ -255,7 +255,7 @@ namespace OwlCameraReader {
                             BOOST_ASSERT(mailbox_);
                             BOOST_ASSERT(self);
                             BOOST_ASSERT(parentPtr_);
-                            BOOST_ASSERT(sleepTimer);
+//                            BOOST_ASSERT(sleepTimer);
                             BOOST_LOG_OWL(trace_camera_reader) << "co_get_image camera cache is outdated";
                             // camera cache is outdated
                             // now we need trigger a pre-read to clear buffer
