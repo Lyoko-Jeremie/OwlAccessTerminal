@@ -406,7 +406,8 @@ namespace OwlProcessJsonMessage {
                                     {"clientId",  clientId},
                                     {"msg",       "pong"},
                                     {"result",    true},
-                                    {"Version",   ProgramVersion},
+                                    {"Version",   std::string{ProgramVersion} + "//" +
+                                                  std::string{CodeVersion_GIT_TAG}},
                                     {"GitRev",    CodeVersion_GIT_REV},
                                     {"BuildTime", CodeVersion_BUILD_DATETIME},
                             }
