@@ -5,6 +5,7 @@
 #include <boost/lexical_cast/try_lexical_convert.hpp>
 #include <regex>
 #include <utility>
+#include <chrono>
 #include <boost/url.hpp>
 #include "../QueryPairsAnalyser/QueryPairsAnalyser.h"
 
@@ -18,11 +19,14 @@ namespace OwlImageServiceHttp {
             return;
         }
 
+        auto t1 = boost::make_shared<std::chrono::high_resolution_clock::time_point>(
+                std::chrono::high_resolution_clock::now()
+        );
         OwlMailDefine::MailService2Camera cmd_data = boost::make_shared<OwlMailDefine::Service2Camera>();
         cmd_data->camera_id = camera_id;
         cmd_data->dont_retry = dont_retry;
 
-        cmd_data->callbackRunner = [this, self = shared_from_this()](
+        cmd_data->callbackRunner = [this, self = shared_from_this(), t1](
                 const OwlMailDefine::MailCamera2Service &camera_data
         ) {
             auto p = parents_.lock();
@@ -44,7 +48,7 @@ namespace OwlImageServiceHttp {
 
             OwlMailDefine::MailService2Time time_data = boost::make_shared<OwlMailDefine::Service2Time>();
             time_data->cmd = OwlMailDefine::TimeServiceCmd::getSyncClock;
-            time_data->callbackRunner = [this, self = shared_from_this(), camera_data](
+            time_data->callbackRunner = [this, self = shared_from_this(), camera_data, t1](
                     const OwlMailDefine::MailTime2Service &time_data_r
             ) {
                 std::string time_string;
@@ -61,7 +65,7 @@ namespace OwlImageServiceHttp {
 
                 // try to run immediately if now on the same strand, or run it later
                 boost::asio::dispatch(socket_.get_executor(), [
-                        this, self = shared_from_this(), camera_data, time_string
+                        this, self = shared_from_this(), camera_data, time_string, t1
                 ]() {
 
 //              cv::Mat img{6, 6, CV_8UC3, cv::Scalar{0, 0, 0}};
@@ -99,9 +103,13 @@ namespace OwlImageServiceHttp {
                     boost::beast::http::async_write(
                             socket_,
                             *response,
-                            [self, response, imageBuffer](boost::beast::error_code ec, std::size_t) {
+                            [self, response, imageBuffer, t1](boost::beast::error_code ec, std::size_t) {
                                 self->socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
                                 self->deadline_.cancel();
+                                auto t2 = std::chrono::high_resolution_clock::now();
+                                BOOST_LOG_OWL(trace_camera_reader)
+                                    << "ImageServiceHttpConnect::create_get_response_image t2-t1 "
+                                    << std::chrono::duration_cast<std::chrono::microseconds>(t2 - *t1).count();
                             });
 
                     return;
