@@ -40,6 +40,9 @@ namespace OwlMapCalc {
                                         {"y", info->ScaleXY.y},
                                 }
                 },
+                {
+                 "timestamp",       info->timestamp
+                },
         };
         return o;
     }

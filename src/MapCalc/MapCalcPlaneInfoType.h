@@ -37,6 +37,14 @@ namespace OwlMapCalc {
         // planeDistance[cm(SizeXY base size)]/imgPixel[1px]
         // scaleImgInPla
         Vec2 ScaleXY;
+
+
+        int64_t timestamp{0};
+
+        void initTimestamp() {
+            timestamp = std::chrono::time_point_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now()).time_since_epoch().count();
+        }
     };
 
     extern boost::json::object MapCalcPlaneInfoType2JsonObject(const boost::shared_ptr<MapCalcPlaneInfoType> &info);

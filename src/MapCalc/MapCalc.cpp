@@ -228,6 +228,7 @@ namespace OwlMapCalc {
                     rData->ScaleXY.y = n["y"].as<double>();
                     BOOST_LOG_OWL(trace_map) << "read ScaleXY ok";
                 }
+                rData->initTimestamp();
                 BOOST_LOG_OWL(trace_map)
                     << "MapCalc calc_ rData ok :"
                     << boost::json::serialize(MapCalcPlaneInfoType2JsonObject(rData));
