@@ -21,8 +21,8 @@ const checkTagType = (t_: TagType | {}): t_ is TagType => {
     const t = t_ as TagType;
     return t
         && t.id !== undefined
-        && t.dec_marg !== undefined
-        && t.ham !== undefined
+        // && t.dec_marg !== undefined
+        // && t.ham !== undefined
         && t.cX !== undefined
         && t.cY !== undefined
         && t.cLTx !== undefined

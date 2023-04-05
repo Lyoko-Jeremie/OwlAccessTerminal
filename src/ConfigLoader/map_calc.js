@@ -7,8 +7,8 @@ const checkTagType = (t_) => {
     const t = t_;
     return t
         && t.id !== undefined
-        && t.dec_marg !== undefined
-        && t.ham !== undefined
+        // && t.dec_marg !== undefined
+        // && t.ham !== undefined
         && t.cX !== undefined
         && t.cY !== undefined
         && t.cLTx !== undefined
