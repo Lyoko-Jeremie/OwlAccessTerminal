@@ -1,5 +1,5 @@
 "use strict";
-console.log("JS map_calc VERSION : ", 20230314);
+console.log("JS map_calc VERSION : ", 202304060237);
 const checkTagType = (t_) => {
     if (!t_) {
         return false;
@@ -187,6 +187,8 @@ const calcK = (v) => {
     return v.y / v.x;
 };
 const calcPlaneInfo = (pla, img, imgX, imgY) => {
+    // pla Y向上X向右
+    // img Y向上X向右
     const info = {};
     if (pla.length !== 3 || img.length !== 3) {
         throw Error("calcPlaneInfo3 (pla.length !== 3 || img.length !== 3)");
@@ -200,6 +202,7 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
     // 图片中心像素点xy
     const centerImgPoint = { x: imgX / 2, y: imgY / 2, };
     info.ImageP = centerImgPoint;
+    //图像各点在平面上的位置
     const pImgInPla = MathExOpenCV.transform([
         // center
         centerImgPoint.x, centerImgPoint.y,
@@ -229,7 +232,7 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
     //     imgX, imgY,
     // ], undefined, 4));
     // console.log("pImgInPla :\n", JSON.stringify(pImgInPla, undefined, 4));
-    // 图像中心点对应的平面上的点的坐标
+    // 图像中心点在平面上的坐标
     const centerPlanPoint = { x: pImgInPla[0], y: pImgInPla[1] };
     info.PlaneP = {
         x: centerPlanPoint.x / AlgorithmMultiScale,
@@ -237,6 +240,7 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
     };
     // console.log("centerPlanPoint :\n", JSON.stringify(centerPlanPoint, undefined, 4));
     const offsetLen = 10000 * AlgorithmMultiScale;
+    // 平面上的点在图像上的位置
     const pPlaInImg = MathExOpenCV.transform([
         // r
         centerPlanPoint.x + offsetLen, centerPlanPoint.y,
@@ -248,12 +252,12 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
         centerPlanPoint.x, centerPlanPoint.y - offsetLen,
         // rt
         centerPlanPoint.x + offsetLen, centerPlanPoint.y + offsetLen,
-        // U
-        centerPlanPoint.x, centerPlanPoint.y - SizeZ * 1000,
-        // R
+        // 5 U
+        centerPlanPoint.x, centerPlanPoint.y + SizeZ * 1000,
+        // 6 R
         centerPlanPoint.x + SizeX * 1000, centerPlanPoint.y,
-        // RU
-        centerPlanPoint.x + SizeX * 1000, centerPlanPoint.y - SizeZ * 1000,
+        // 7 RU
+        centerPlanPoint.x + SizeX * 1000, centerPlanPoint.y + SizeZ * 1000,
     ], mInImg);
     // console.log("pPlaInImg :\n", JSON.stringify(
     //     [
@@ -269,21 +273,21 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
     //         centerPlanPoint.x + 100, centerPlanPoint.y + 100,
     //     ], undefined, 4));
     // console.log("pPlaInImg :\n", JSON.stringify(pPlaInImg, undefined, 4));
-    // 开始计算平面的右(x)向量相对于图像的旋转角度(从x轴正方向逆时针0~360)
+    // 开始计算平面的右(x)向量在图像上的旋转角度(从x轴正方向逆时针0~360)
     const imgR = {
         x: pPlaInImg[0 + 2 * 6],
         y: pPlaInImg[1 + 2 * 6],
     };
     // console.log("imgR :\n", JSON.stringify(imgR, undefined, 4));
     info.xDirectDeg = MathEx.atan2Deg(imgR.y, imgR.x);
-    // 开始计算平面的上(z)向量相对于图像的旋转角度(从x轴正方向逆时针0~360)
+    // 开始计算平面的上(z)向量在图像上的旋转角度(从x轴正方向逆时针0~360)
     const imgU = {
         x: pPlaInImg[0 + 2 * 5],
         y: pPlaInImg[1 + 2 * 5],
     };
     // console.log("imgU :\n", JSON.stringify(imgU, undefined, 4));
     info.zDirectDeg = MathEx.atan2Deg(imgU.y, imgU.x);
-    // 开始计算平面的上(xz)向量(45deg)相对于图像的旋转角度(从x轴正方向逆时针0~360)
+    // 开始计算平面的上(xz)向量(45deg)在图像上的旋转角度(从x轴正方向逆时针0~360)
     const imgRU = {
         x: pPlaInImg[0 + 2 * 7],
         y: pPlaInImg[1 + 2 * 7],
