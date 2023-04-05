@@ -204,13 +204,13 @@ const calcPlaneInfo = (pla, img, imgX, imgY) => {
         // center
         centerImgPoint.x, centerImgPoint.y,
         // lt
-        0, 0,
-        // rt
-        imgX, 0,
-        // lb
         0, imgY,
-        // rb
+        // rt
         imgX, imgY,
+        // lb
+        0, 0,
+        // rb
+        imgX, 0,
         // U
         centerImgPoint.x, centerImgPoint.y + 10000,
         // R
