@@ -1,5 +1,5 @@
 "use strict";
-console.log("JS map_calc VERSION : ", 202304060237);
+console.log("JS map_calc VERSION : ", "20230406_base_AprilTag");
 const checkTagType = (t_) => {
     if (!t_) {
         return false;
@@ -54,9 +54,9 @@ const DistanceX = 50 * AlgorithmMultiScale;
 // cm * AlgorithmMultiScale
 const DistanceZ = 50 * AlgorithmMultiScale;
 // cm * AlgorithmMultiScale
-const SizeX = 10 * AlgorithmMultiScale;
+const SizeX = 17 * AlgorithmMultiScale;
 // cm * AlgorithmMultiScale
-const SizeZ = 10 * AlgorithmMultiScale;
+const SizeZ = 17 * AlgorithmMultiScale;
 const SizeXHalf = SizeX / 2;
 const SizeZHalf = SizeZ / 2;
 const OffsetX = 50 * AlgorithmMultiScale;
@@ -71,26 +71,27 @@ const calcTagCenterPosition = (t) => {
 };
 const calcTagCornerPosition = (t, corner) => {
     const center = calcTagCenterPosition(t);
+    // AprilTag
     switch (corner) {
         case 0:
             // LT
             center.x -= SizeXHalf;
-            center.y += SizeZHalf;
+            center.y -= SizeZHalf;
             break;
         case 1:
             // RT
             center.x += SizeXHalf;
-            center.y += SizeZHalf;
+            center.y -= SizeZHalf;
             break;
         case 2:
             // RB
             center.x += SizeXHalf;
-            center.y -= SizeZHalf;
+            center.y += SizeZHalf;
             break;
         case 3:
             // LB
             center.x -= SizeXHalf;
-            center.y -= SizeZHalf;
+            center.y += SizeZHalf;
             break;
     }
     return center;
