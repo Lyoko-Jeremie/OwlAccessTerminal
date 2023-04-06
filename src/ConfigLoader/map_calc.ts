@@ -500,11 +500,11 @@ const calcPlaneInfo = (pla: Point2[], img: Point2[], imgX: number, imgY: number)
             // rt
             centerPlanPoint.x + offsetLen, centerPlanPoint.y + offsetLen,
             // 5 U
-            centerPlanPoint.x, centerPlanPoint.y + SizeZ * 1000,
+            centerPlanPoint.x, centerPlanPoint.y - SizeZ * 1000,
             // 6 R
             centerPlanPoint.x + SizeX * 1000, centerPlanPoint.y,
             // 7 RU
-            centerPlanPoint.x + SizeX * 1000, centerPlanPoint.y + SizeZ * 1000,
+            centerPlanPoint.x + SizeX * 1000, centerPlanPoint.y - SizeZ * 1000,
         ],
         mInImg,
     );
