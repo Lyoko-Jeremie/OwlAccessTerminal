@@ -243,6 +243,16 @@ const calcTagCenterPosition = (t: number): { x: number, y: number } => {
 const calcTagCornerPosition = (t: number, corner: 0 | 1 | 2 | 3): { x: number, y: number } => {
     const center = calcTagCenterPosition(t);
     // AprilTag
+    //
+    //  +Y
+    //   |
+    //  LB ----- RB
+    //   |       |
+    //   |       |
+    //   |       |
+    //  LT ----- RT ------- +X
+    // (0,0)
+    //
     switch (corner) {
         case 0:
             // LT
