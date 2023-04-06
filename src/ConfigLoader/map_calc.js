@@ -599,5 +599,56 @@ const testR = calc_map_position(JSON.parse(`{
         "vz": 0
     }
 }`));
-console.log("test R :", testR);
+const testR2 = calc_map_position(JSON.parse(`
+{
+    "imageX": 800,
+    "imageY": 600,
+    "tagInfo": {
+        "center": {
+            "id": 0,
+            "dec_marg": 0,
+            "ham": 0,
+            "cX": 400,
+            "cY": 300,
+            "cLTx": 400,
+            "cLTy": -200,
+            "cRTx": 900,
+            "cRTy": 300,
+            "cRBx": 400,
+            "cRBy": 800,
+            "cLBx": -100,
+            "cLBy": 300
+        },
+        "list": [
+            {
+                "id": 0,
+                "dec_marg": 0,
+                "ham": 0,
+                "cX": 400,
+                "cY": 300,
+                "cLTx": 400,
+                "cLTy": -200,
+                "cRTx": 900,
+                "cRTy": 300,
+                "cRBx": 400,
+                "cRBy": 800,
+                "cLBx": -100,
+                "cLBy": 300
+            }
+        ]
+    },
+    "airplaneState": {
+        "timestamp": 283854880,
+        "voltage": 0,
+        "high": 50,
+        "pitch": 0,
+        "roll": 0,
+        "yaw": 0,
+        "vx": 0,
+        "vy": 0,
+        "vz": 0
+    }
+}`));
+console.log("test R :", JSON.stringify(testR, undefined, 2));
+console.log("test R 2 :", JSON.stringify(testR2, undefined, 2));
 //# sourceMappingURL=map_calc.js.map
