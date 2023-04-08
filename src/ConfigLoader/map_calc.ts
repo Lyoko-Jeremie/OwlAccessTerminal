@@ -242,14 +242,29 @@ const calcTagCenterPosition = (t: number): { x: number, y: number } => {
 };
 const calcTagCornerPosition = (t: number, corner: 0 | 1 | 2 | 3): { x: number, y: number } => {
     const center = calcTagCenterPosition(t);
+    // OpenCV
+    //
+    //  +Y
+    //   |
+    //  RB ----- LB
+    //   |     | |
+    //   |     v |
+    //   |  <-   |
+    //  RT ----- LT ------- +X
+    // (0,0)
+    //
+    // =================================================================
+    //
+    // =================================================================
+    //
     // AprilTag
     //
     //  +Y
     //   |
     //  LB ----- RB
-    //   |       |
-    //   |       |
-    //   |       |
+    //   | |     |
+    //   | v     |
+    //   |   ->  |
     //  LT ----- RT ------- +X
     // (0,0)
     //
